@@ -83,6 +83,7 @@ export const PERMISSION_CODES = {
   FOLLOWUP_CARRIERS_RETURNED_VIEW: 'followup:carriers:returned:view',
   FOLLOWUP_CARRIERS_LATE_MANAGE: 'followup:carriers:late:manage',
   FOLLOWUP_CARRIERS_DELIVERY_MANAGE: 'followup:carriers:delivery:manage',
+  FOLLOWUP_CARRIERS_EDIT_MANAGE: 'followup:carriers:edit:manage',
   FOLLOWUP_NET_AMOUNT_READ: 'followup:net-amount:read',
   CUSTOMERS_READ: 'customers:read',
   CUSTOMERS_UPDATE: 'customers:update',

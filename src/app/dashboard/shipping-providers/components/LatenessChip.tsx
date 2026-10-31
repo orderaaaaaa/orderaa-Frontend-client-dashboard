@@ -75,7 +75,7 @@ export function LatenessChip({ model }: { model: LatenessChipModel }) {
         <span className="whitespace-nowrap">{model.text}</span>
       </span>
       {model.daysLateText && (
-        <span className="whitespace-nowrap text-xs text-destructive">{model.daysLateText}</span>
+        <span className="whitespace-nowrap text-sm text-destructive">{model.daysLateText}</span>
       )}
     </span>
   );

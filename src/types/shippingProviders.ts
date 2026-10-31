@@ -4,6 +4,7 @@ import type {
 } from '@/types/shippingCompanies';
 import type { FollowupClosure, FollowupWorkState } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
+import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 
 /** Mirrors the backend shipping-provider DTOs (T16). */
 
@@ -93,6 +94,11 @@ export interface ShipmentRowBase {
   availableTo: string | null;
   customer: ShipmentCustomer;
   closure: FollowupClosure | null;
+  governorateOption: string | null;
+  cityOption: string | null;
+  area: string | null;
+  address: string | null;
+  returnShippingCost: number | null;
 }
 
 export interface InProcessShipment extends ShipmentRowBase {
@@ -128,6 +134,7 @@ export interface CarrierHeader {
   shippingCompanyId: number;
   name: string;
   phone: string | null;
+  carrierSupportsUpdate: boolean;
 }
 
 export interface InProcessSummary {
@@ -198,4 +205,29 @@ export interface DeliveryWindowResponse {
   orderId: number;
   availableFrom: string | null;
   availableTo: string | null;
+}
+
+export interface ShipmentAddressBody {
+  governorate?: string;
+  city?: string;
+  governorateOption?: string;
+  cityOption?: string;
+  area?: string;
+  address?: string;
+}
+
+export interface ShipmentPriceBody {
+  totalCost: number;
+}
+
+export interface ShipmentReturnCostBody {
+  returnShippingCost: number;
+}
+
+export interface ShipmentCustomerPhoneBody {
+  phoneNumber: string;
+}
+
+export interface ShipmentCustomerPhoneResponse extends CarrierSendBearingResponse {
+  customerId: number;
 }

@@ -1,20 +1,22 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { CircleAlert, Flag, History, Info, PhoneCall, Send, type LucideIcon } from 'lucide-react';
 import { OrderChangeBatchItem } from '@/components/OrderDetails/ChangeHistory/OrderChangeBatchItem';
-import { OrderChangeHistorySkeleton } from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryStates';
 import BaseModal from '@/components/ui/base-modal';
+import { EmptyState } from '@/components/ui/state-panels';
+import { Button } from '@/components/ui/button';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { usePermissionCheck } from '@/hooks/usePermissions';
-import type { FollowupActionEvent } from '@/lib/api/followup';
+import type { FollowupActionEvent, FollowupActionEventSource } from '@/lib/api/followup';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useOrderChangeHistory } from '@/services/orderChangeHistory';
 import { useFollowupActionEventsQuery } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import type { OrderChangeBatch } from '@/types/orderChangeHistory';
 import { getApiErrorStatus } from '@/utils/apiError';
-import { formatDateTime } from '@/utils/format';
+import { formatDate, formatDateTime } from '@/utils/format';
 import { getTimeAgo } from '@/utils/timeAgo';
 import {
   ACTION_EVENT_NAME_LABELS,
@@ -25,10 +27,18 @@ import {
   ACTION_LOG_HISTORY_FORBIDDEN_NOTICE,
   ACTION_LOG_SYSTEM_ACTOR,
   ACTION_LOG_TITLE,
+  FOLLOWUP_NOTES_RETRY_LABEL,
+  FOLLOWUP_TODAY_LABEL,
 } from './followupNotesConstants';
 import { NOTE_BODY_CLASS } from './NoteCard';
 
 const FORBIDDEN_STATUS = 403;
+
+const SOURCE_ICONS: Record<FollowupActionEventSource, LucideIcon> = {
+  ORDER_EVENT: PhoneCall,
+  LATE_MARK: Flag,
+  CARRIER_SEND_AUDIT: Send,
+};
 
 const historyNoticeOf = (
   canReadHistory: boolean,
@@ -44,33 +54,116 @@ type ActionLogEntry =
   | { key: string; at: string; isHistory: true; batch: OrderChangeBatch }
   | { key: string; at: string; isHistory: false; event: FollowupActionEvent };
 
+interface DayGroup {
+  key: string;
+  at: string;
+  entries: ActionLogEntry[];
+}
+
+const dayKeyOf = (value: string | Date): string => {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+};
+
+const groupByDay = (entries: ActionLogEntry[]): DayGroup[] =>
+  entries.reduce<DayGroup[]>((groups, entry) => {
+    const key = dayKeyOf(entry.at);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) {
+      last.entries.push(entry);
+    } else {
+      groups.push({ key, at: entry.at, entries: [entry] });
+    }
+    return groups;
+  }, []);
+
 function ActionEventRow({ event }: { event: FollowupActionEvent }) {
   const nameLabel = ACTION_EVENT_NAME_LABELS[event.name] ?? event.name;
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-          <span className="break-words text-sm font-bold text-foreground">
-            {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
-          </span>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-            {nameLabel}
-          </span>
-          <span className="text-xs text-muted-foreground">{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
-        </div>
-        <span className="text-xs text-muted-foreground">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-xs">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <span className="break-words text-sm font-semibold text-foreground">
+          {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
+        </span>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">{nameLabel}</span>
+        <span>{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
+        <span className="ms-auto whitespace-nowrap">
           {formatDateTime(event.createdAt)} ({getTimeAgo(event.createdAt)})
         </span>
       </div>
-      {event.note && (
-        <p className={NOTE_BODY_CLASS}>{event.note}</p>
-      )}
+      {event.note && <p className={NOTE_BODY_CLASS}>{event.note}</p>}
     </div>
   );
 }
 
-function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canReadHistory: boolean }) {
+function TimelineItem({ icon: Icon, isLast, children }: { icon: LucideIcon; isLast: boolean; children: ReactNode }) {
+  return (
+    <li className="flex gap-3">
+      <div className="flex shrink-0 flex-col items-center">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+          <Icon className="size-4 text-muted-foreground" />
+        </span>
+        {!isLast && <span aria-hidden="true" className="w-px flex-1 bg-border" />}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col pb-4">{children}</div>
+    </li>
+  );
+}
+
+function ActionLogSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 animate-pulse" aria-hidden="true">
+      {[0, 1, 2].map((index) => (
+        <div key={index} className="flex gap-3">
+          <span className="size-9 shrink-0 rounded-md bg-muted" />
+          <div className="flex flex-1 flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-xs">
+            <span className="h-3 w-1/3 rounded bg-muted" />
+            <span className="h-4 w-4/5 rounded bg-muted" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ActionLogEmpty() {
+  return (
+    <EmptyState
+      icon={
+        <span className="flex size-12 items-center justify-center rounded-xl bg-muted">
+          <History className="size-5 text-muted-foreground" />
+        </span>
+      }
+      title={ACTION_LOG_EMPTY}
+      className="py-8"
+    />
+  );
+}
+
+function ActionLogError({ isRetrying, onRetry }: { isRetrying: boolean; onRetry: () => void }) {
+  return (
+    <div role="alert" className="flex flex-col items-center gap-3 py-8 text-center">
+      <span className="flex size-12 items-center justify-center rounded-xl bg-destructive/10">
+        <CircleAlert className="size-5 text-destructive" />
+      </span>
+      <p className="text-sm font-medium text-foreground">{ACTION_LOG_EVENTS_ERROR}</p>
+      <Button type="button" variant="outline" size="sm" loading={isRetrying} onClick={onRetry}>
+        {FOLLOWUP_NOTES_RETRY_LABEL}
+      </Button>
+    </div>
+  );
+}
+
+function ActionLogContent({
+  orderId,
+  canReadHistory,
+  orderCode,
+}: {
+  orderId: number;
+  canReadHistory: boolean;
+  orderCode?: string;
+}) {
   const { getStatusLabel } = useStatusLabel();
   const historyQuery = useOrderChangeHistory(orderId, canReadHistory);
   const eventsQuery = useFollowupActionEventsQuery(orderId, true);
@@ -127,38 +220,67 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
     });
   }, [batches, eventsQuery.data]);
 
+  const dayGroups = useMemo(() => groupByDay(entries), [entries]);
+
   if (eventsQuery.isError) {
-    return <p className="py-6 text-center text-sm text-red-600">{ACTION_LOG_EVENTS_ERROR}</p>;
+    return <ActionLogError isRetrying={eventsQuery.isFetching} onRetry={() => void eventsQuery.refetch()} />;
   }
 
+  const displayedCode = orderCode ?? orderQuery.data?.code;
   const isHistoryPending =
     canReadHistory && (historyQuery.isLoading || (historyQuery.hasNextPage && !isHistoryError));
   const isLoading = eventsQuery.isLoading || orderQuery.isLoading || isHistoryPending;
+  const todayKey = dayKeyOf(new Date());
 
   return (
-    <div className="flex flex-col gap-3" dir="rtl">
+    <div className="flex flex-col gap-4" dir="rtl">
+      {displayedCode && (
+        <p dir="ltr" className="font-mono text-sm font-semibold text-muted-foreground">
+          {displayedCode}
+        </p>
+      )}
       {historyNotice && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{historyNotice}</p>
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200"
+        >
+          <Info className="mt-0.5 size-4 shrink-0" />
+          <p>{historyNotice}</p>
+        </div>
       )}
 
       {isLoading ? (
-        <OrderChangeHistorySkeleton />
+        <ActionLogSkeleton />
       ) : entries.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">{ACTION_LOG_EMPTY}</p>
+        <ActionLogEmpty />
       ) : (
-        <div className="flex flex-col gap-3">
-          {entries.map((entry) =>
-            entry.isHistory ? (
-              <OrderChangeBatchItem
-                key={entry.key}
-                batch={entry.batch}
-                getStatusLabel={getStatusLabel}
-                lineProductNames={lineProductNames}
-              />
-            ) : (
-              <ActionEventRow key={entry.key} event={entry.event} />
-            )
-          )}
+        <div className="flex flex-col gap-5">
+          {dayGroups.map((group) => (
+            <section key={group.key} className="flex flex-col gap-2">
+              <h3 className="text-xs font-semibold text-muted-foreground">
+                {group.key === todayKey ? FOLLOWUP_TODAY_LABEL : formatDate(group.at)}
+              </h3>
+              <ol className="flex flex-col">
+                {group.entries.map((entry, index) => (
+                  <TimelineItem
+                    key={entry.key}
+                    icon={entry.isHistory ? History : SOURCE_ICONS[entry.event.source]}
+                    isLast={index === group.entries.length - 1}
+                  >
+                    {entry.isHistory ? (
+                      <OrderChangeBatchItem
+                        batch={entry.batch}
+                        getStatusLabel={getStatusLabel}
+                        lineProductNames={lineProductNames}
+                      />
+                    ) : (
+                      <ActionEventRow event={entry.event} />
+                    )}
+                  </TimelineItem>
+                ))}
+              </ol>
+            </section>
+          ))}
         </div>
       )}
     </div>
@@ -167,10 +289,11 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
 
 interface OrderActionLogModalProps {
   orderId: number;
+  orderCode?: string;
   onClose: () => void;
 }
 
-export function OrderActionLogModal({ orderId, onClose }: OrderActionLogModalProps) {
+export function OrderActionLogModal({ orderId, orderCode, onClose }: OrderActionLogModalProps) {
   const { hasPermission } = usePermissionCheck();
   const canReadHistory = hasPermission(PERMISSIONS.ORDERS_HISTORY_READ);
 
@@ -182,7 +305,7 @@ export function OrderActionLogModal({ orderId, onClose }: OrderActionLogModalPro
       showFooter={false}
       maxWidth="md:max-w-2xl"
     >
-      <ActionLogContent orderId={orderId} canReadHistory={canReadHistory} />
+      <ActionLogContent orderId={orderId} canReadHistory={canReadHistory} orderCode={orderCode} />
     </BaseModal>
   );
 }

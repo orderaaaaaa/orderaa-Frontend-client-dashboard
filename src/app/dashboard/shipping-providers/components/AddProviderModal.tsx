@@ -54,7 +54,7 @@ export function AddProviderModal({ isOpen, onClose }: AddProviderModalProps) {
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold text-gray-700">النوع</span>
+          <span className="text-sm font-semibold text-foreground">النوع</span>
           <div className="flex gap-2">
             {TYPES.map((option) => (
               <Button

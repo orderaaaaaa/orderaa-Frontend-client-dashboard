@@ -48,7 +48,7 @@ export function LateMarkModal({ shippingCompanyId, orderId, lateness, onClose }:
     >
       <div className="space-y-5">
         <div className="flex flex-col gap-2">
-          <span className="font-bold text-[#1F1F1F]">الحالة</span>
+          <span className="font-bold text-foreground">الحالة</span>
           <div className="flex flex-wrap gap-2">
             {LATE_MARK_OPTIONS.map((option) => (
               <Button

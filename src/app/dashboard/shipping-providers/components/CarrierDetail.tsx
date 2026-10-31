@@ -35,25 +35,25 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
   const finished = carrier.deliveredCount + carrier.returnedCount;
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
-      <div className="flex items-start justify-between gap-4 px-4 sm:px-6 py-4 border-b border-gray-100">
+    <div className="border border-border rounded-xl bg-card overflow-hidden">
+      <div className="flex items-start justify-between gap-4 px-4 sm:px-6 py-4 border-b border-border">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-lg font-bold text-gray-900">{carrier.name}</h3>
+            <h3 className="text-lg font-bold text-foreground">{carrier.name}</h3>
             {carrier.type && (
               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
                 {carrier.type === 'DELEGATE' ? 'مندوب' : 'شركة شحن'}
               </span>
             )}
             {carrier.phone && (
-              <span className="text-sm text-gray-500">{carrier.phone}</span>
+              <span className="text-sm text-muted-foreground">{carrier.phone}</span>
             )}
           </div>
 
           <div className="flex flex-wrap gap-6">
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-gray-500">شحنات جارية</span>
-              <span className="text-sm font-bold text-gray-900">
+              <span className="text-xs text-muted-foreground">شحنات جارية</span>
+              <span className="text-sm font-bold text-foreground">
                 {carrier.inTransitCount}
               </span>
             </div>
@@ -78,13 +78,13 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
           variant="ghost"
           size="icon-sm"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-700 shrink-0"
+          className="text-muted-foreground hover:text-foreground shrink-0"
         >
           <LiaTimesSolid className="w-4 h-4" />
         </Button>
       </div>
 
-      <div className="flex gap-2 px-4 sm:px-6 py-3 border-b border-gray-100">
+      <div className="flex gap-2 px-4 sm:px-6 py-3 border-b border-border">
         {TABS.map((t) => (
           <Button
             key={t.value}
@@ -103,30 +103,30 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
         {loadingLocations ? (
           <PageLoading size="sm" className="py-6 min-h-0" />
         ) : locations.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-6">
+          <p className="text-sm text-muted-foreground text-center py-6">
             لا توجد طلبات منتهية في هذه الفترة
           </p>
         ) : (
           <table className="w-full text-sm" dir="rtl">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-right py-2 px-3 font-semibold text-gray-700">
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-right py-2 px-3 font-semibold text-foreground">
                   {tab === 'governorates' ? 'المحافظة' : 'المنطقة'}
                 </th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-700">تم التسليم</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-700">مرتجع</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-700">نسبة التسليم</th>
-                <th className="text-right py-2 px-3 font-semibold text-gray-700">نسبة الاسترجاع</th>
+                <th className="text-right py-2 px-3 font-semibold text-foreground">تم التسليم</th>
+                <th className="text-right py-2 px-3 font-semibold text-foreground">مرتجع</th>
+                <th className="text-right py-2 px-3 font-semibold text-foreground">نسبة التسليم</th>
+                <th className="text-right py-2 px-3 font-semibold text-foreground">نسبة الاسترجاع</th>
               </tr>
             </thead>
             <tbody>
               {locations.map((row) => (
-                <tr key={row.location ?? 'unknown'} className="border-b border-gray-100">
-                  <td className="py-2 px-3 font-medium text-gray-900">
+                <tr key={row.location ?? 'unknown'} className="border-b border-border">
+                  <td className="py-2 px-3 font-medium text-foreground">
                     {row.location ?? 'غير محدد'}
                   </td>
-                  <td className="py-2 px-3 text-gray-600">{row.deliveredCount}</td>
-                  <td className="py-2 px-3 text-gray-600">{row.returnedCount}</td>
+                  <td className="py-2 px-3 text-foreground-secondary">{row.deliveredCount}</td>
+                  <td className="py-2 px-3 text-foreground-secondary">{row.returnedCount}</td>
                   <td className={clsx('py-2 px-3 font-semibold text-green-600')}>
                     {row.deliveryRate === null ? '—' : `${row.deliveryRate}%`}
                   </td>

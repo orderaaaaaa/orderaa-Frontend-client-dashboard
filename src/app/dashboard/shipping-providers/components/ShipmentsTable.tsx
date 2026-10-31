@@ -108,8 +108,8 @@ export function PhoneCell({ phones }: { phones: string[] }) {
   if (first === undefined) return <span>—</span>;
 
   return (
-    <div className="flex items-center gap-1">
-      <span dir="ltr" className="font-mono whitespace-nowrap">
+    <div className="flex items-center gap-1 whitespace-nowrap max-sm:gap-3">
+      <span dir="ltr" className="shrink-0 font-mono whitespace-nowrap">
         {first}
       </span>
       <CopyButton value={first} label={t('inProcess.table.copyPhone')} successMessage="تم نسخ الرقم" />
@@ -119,6 +119,7 @@ export function PhoneCell({ phones }: { phones: string[] }) {
             type="button"
             variant="ghost"
             size="xs"
+            className={'relative z-10 max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}
             aria-label={t('inProcess.table.morePhones', { n: phones.length })}
             onClick={() => setIsListOpen(true)}
           >
@@ -150,7 +151,7 @@ export function PhoneCell({ phones }: { phones: string[] }) {
 
 export function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex min-w-max flex-col items-start gap-1">
       <span className="font-medium">{name ?? '—'}</span>
       <PhoneCell phones={phones} />
     </div>
@@ -216,7 +217,7 @@ export function CourierCell({ name, phone }: { name: string | null; phone: strin
 
   return (
     <div className="flex flex-col">
-      <span className="whitespace-nowrap">{name ?? '—'}</span>
+      <span className="break-words">{name ?? '—'}</span>
       {phone && (
         <span dir="ltr" className={cn(SECONDARY_TEXT_CLASS, 'font-mono whitespace-nowrap')}>
           {phone}
@@ -255,14 +256,16 @@ export function InProcessRowActions({
   row,
   shippingCompanyId,
   carrier,
+  carrierSupportsUpdate,
   onOpenNotes,
   onOpenActionLog,
 }: {
   row: InProcessShipment;
   shippingCompanyId: number;
   carrier: InProcessCarrier;
+  carrierSupportsUpdate?: boolean;
   onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
 }) {
   const { t } = useI18n();
   const locked = isLockedRow(row);
@@ -290,13 +293,23 @@ export function InProcessRowActions({
       availableFrom={row.availableFrom}
       availableTo={row.availableTo}
       rowLocked={locked}
+      editRow={row}
+      carrierSupportsUpdate={carrierSupportsUpdate}
       onOpenNotes={() => onOpenNotes(row.id)}
-      onOpenActionLog={() => onOpenActionLog(row.id)}
+      onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
     />
   );
 }
 
-export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
+export function ReturnedRowActions({
+  row,
+  onOpenNotes,
+  onOpenActionLog,
+}: {
+  row: ReturnedShipment;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <ShipmentRowActions
@@ -306,6 +319,8 @@ export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
         status={row.status}
         closure={row.closure}
         sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
+        onOpenNotes={() => onOpenNotes(row.id)}
+        onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
       />
     </div>
   );
@@ -314,14 +329,16 @@ export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
 export interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
   shippingCompanyId: number;
+  carrierSupportsUpdate?: boolean;
   onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
   selection?: ShipmentSelection;
 }
 
 export function InProcessShipmentsTable({
   shipments,
   shippingCompanyId,
+  carrierSupportsUpdate,
   onOpenNotes,
   onOpenActionLog,
   selection,
@@ -357,7 +374,7 @@ export function InProcessShipmentsTable({
               {t('inProcess.table.columns.code')}
             </div>
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'min-w-40')}>
+          <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.customer')}
           </th>
           <th scope="col" className={HEAD_CLASS}>
@@ -372,7 +389,7 @@ export function InProcessShipmentsTable({
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.window')}
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'min-w-32')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'max-w-40')}>
             {t('inProcess.table.columns.address')}
           </th>
           <th scope="col" className={HEAD_CLASS}>
@@ -411,7 +428,7 @@ export function InProcessShipmentsTable({
                   <CodeCell code={row.code} />
                 </div>
               </td>
-              <td className={cn(CELL_CLASS, 'min-w-40')}>
+              <td className={CELL_CLASS}>
                 <CustomerCell name={row.customer.name} phones={row.customer.phones} />
               </td>
               <td className={CELL_CLASS}>
@@ -425,10 +442,10 @@ export function InProcessShipmentsTable({
                 />
               </td>
               <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
-              <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>
+              <td className={cn(CELL_CLASS, 'max-w-40 whitespace-normal')}>
                 {deliveryWindowTextOf(row.availableFrom, row.availableTo)}
               </td>
-              <td className={cn(CELL_CLASS, 'min-w-32')}>
+              <td className={cn(CELL_CLASS, 'max-w-40')}>
                 <div className="flex flex-col items-start gap-0.5">
                   <span className="font-medium">{row.governorate ?? '—'}</span>
                   <span className={SECONDARY_TEXT_CLASS}>{row.city ?? '—'}</span>
@@ -450,6 +467,7 @@ export function InProcessShipmentsTable({
                   row={row}
                   shippingCompanyId={shippingCompanyId}
                   carrier={carrier}
+                  carrierSupportsUpdate={carrierSupportsUpdate}
                   onOpenNotes={onOpenNotes}
                   onOpenActionLog={onOpenActionLog}
                 />
@@ -464,9 +482,11 @@ export function InProcessShipmentsTable({
 
 export interface ReturnedShipmentsTableProps {
   shipments: ReturnedShipment[];
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
 
-export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProps) {
+export function ReturnedShipmentsTable({ shipments, onOpenNotes, onOpenActionLog }: ReturnedShipmentsTableProps) {
   const { t } = useI18n();
 
   return (
@@ -477,7 +497,7 @@ export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProp
           <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
             {t('inProcess.table.columns.code')}
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'min-w-40')}>
+          <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.customer')}
           </th>
           <th scope="col" className={HEAD_CLASS}>
@@ -486,7 +506,7 @@ export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProp
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.takenAt')}
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'min-w-32')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'max-w-40')}>
             {t('inProcess.table.columns.address')}
           </th>
           <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
@@ -503,14 +523,14 @@ export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProp
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 whitespace-nowrap')}>
               <CodeCell code={row.code} />
             </td>
-            <td className={cn(CELL_CLASS, 'min-w-40')}>
+            <td className={CELL_CLASS}>
               <CustomerCell name={row.customer.name} phones={row.customer.phones} />
             </td>
             <td className={CELL_CLASS}>
               <StatusCell status={row.status} closure={row.closure} />
             </td>
             <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
-            <td className={cn(CELL_CLASS, 'min-w-32')}>
+            <td className={cn(CELL_CLASS, 'max-w-40')}>
               <div className="flex flex-col items-start gap-0.5">
                 <span className="font-medium">{row.governorate ?? '—'}</span>
                 <span className={SECONDARY_TEXT_CLASS}>{row.city ?? '—'}</span>
@@ -520,7 +540,7 @@ export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProp
               {moneyTextOf(row.totalCost)}
             </td>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
-              <ReturnedRowActions row={row} />
+              <ReturnedRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
             </td>
           </tr>
         ))}

@@ -19,8 +19,8 @@ export function RateBadge({ label, rate, part, total, tone }: RateBadgeProps) {
   if (rate === null) {
     return (
       <div className="flex flex-col gap-0.5">
-        <span className="text-xs text-gray-500">{label}</span>
-        <span className="text-sm font-semibold text-gray-400">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className="text-sm font-semibold text-muted-foreground">
           لا توجد طلبات منتهية بعد
         </span>
       </div>
@@ -29,7 +29,7 @@ export function RateBadge({ label, rate, part, total, tone }: RateBadgeProps) {
 
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
       <span
         className={clsx(
           'text-sm font-bold',
@@ -37,7 +37,7 @@ export function RateBadge({ label, rate, part, total, tone }: RateBadgeProps) {
         )}
       >
         {rate}%{' '}
-        <span className="text-xs font-medium text-gray-500">
+        <span className="text-xs font-medium text-muted-foreground">
           ({part}/{total})
         </span>
       </span>

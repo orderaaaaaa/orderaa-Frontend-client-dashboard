@@ -4,16 +4,20 @@ import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Ban,
+  BadgeDollarSign,
   CalendarX,
   Clock,
   Flag,
   History,
+  MapPin,
   MessageSquareText,
   PackageCheck,
   PackageSearch,
+  Phone,
   RotateCcw,
   Send,
   Truck,
+  Undo2,
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
@@ -46,16 +50,17 @@ import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '
 import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import type { OrderStatus } from '@/types/orders';
-import type { LatenessInfo, SendAgainBlockedReason } from '@/types/shippingProviders';
-import type { ShippingImplementation } from '@/types/shippingCompanies';
+import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
+import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { LatenessChip, latenessChipOf } from './LatenessChip';
 import { LateMarkModal } from './LateMarkModal';
+import { OrderEditModal, type OrderEditKind } from './OrderEditModals';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 import { useSendAgainAction } from './SendAgainAction';
 
-type ActionGroupId = 'follow' | 'delivery' | 'closure' | 'final';
+type ActionGroupId = 'follow' | 'delivery' | 'orderEdit' | 'closure' | 'final';
 
 type ConfirmKind = 'close' | 'reopen';
 
@@ -82,6 +87,8 @@ export interface PartialDeliveryAccess {
   pending: boolean;
 }
 
+const ADDRESS_LOCATIONS_REASON = 'تحتاج صلاحية عرض المحافظات والمدن';
+
 const PARTIAL_DELIVERY_STATUS_KEYS = ['RETURNED_DELIVERED', 'DELIVERED'] as const;
 
 const PARTIAL_DELIVERY_CODES: PermissionCode[] = [
@@ -101,6 +108,7 @@ export const closureReasonOf = (closure: FollowupClosure): string | null =>
 const ACTION_GROUPS: { id: ActionGroupId; titleKey: TranslationKey }[] = [
   { id: 'follow', titleKey: 'inProcess.sheet.group.follow' },
   { id: 'delivery', titleKey: 'inProcess.sheet.group.edit' },
+  { id: 'orderEdit', titleKey: 'inProcess.sheet.group.orderEdit' },
   { id: 'closure', titleKey: 'inProcess.sheet.group.closure' },
   { id: 'final', titleKey: 'inProcess.sheet.group.final' },
 ];
@@ -121,6 +129,8 @@ export interface ShipmentRowActionsProps {
   onOpenNotes?: () => void;
   onOpenActionLog?: () => void;
   sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
+  editRow?: ShipmentRowBase;
+  carrierSupportsUpdate?: boolean;
 }
 
 export function ShipmentRowActions({
@@ -139,6 +149,8 @@ export function ShipmentRowActions({
   onOpenNotes,
   onOpenActionLog,
   sendAgain,
+  editRow,
+  carrierSupportsUpdate,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -153,6 +165,7 @@ export function ShipmentRowActions({
   const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
   const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
   const [isWindowOpen, setIsWindowOpen] = useState(false);
+  const [editKind, setEditKind] = useState<OrderEditKind | null>(null);
   const queryClient = useQueryClient();
   const closeMutation = useCloseClosure();
   const undoMutation = useUndoClosure();
@@ -185,6 +198,7 @@ export function ShipmentRowActions({
     closure,
   });
 
+  const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);
   const actions: RowAction[] = [
     ...(onOpenNotes
       ? [
@@ -262,6 +276,60 @@ export function ShipmentRowActions({
               partialDelivery.blockedReason ??
               (partialDelivery.pending ? t('inProcess.reason.loadingCarrier') : undefined),
             onSelect: () => setIsPartialOpen(true),
+          },
+        ]
+      : []),
+    ...(editRow !== undefined
+      ? [
+          {
+            id: 'editAddress',
+            labelKey: 'inProcess.action.address' as const,
+            descriptionKey: 'inProcess.sheet.desc.address' as const,
+            icon: MapPin,
+            group: 'orderEdit' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_CARRIERS_EDIT_MANAGE],
+            disabled: rowLocked || !canReadLocations,
+            disabledReason: rowLockedReason ?? (canReadLocations ? undefined : ADDRESS_LOCATIONS_REASON),
+            onSelect: () => setEditKind('address'),
+          },
+          {
+            id: 'editPrice',
+            labelKey: 'inProcess.action.price' as const,
+            descriptionKey: 'inProcess.sheet.desc.price' as const,
+            icon: BadgeDollarSign,
+            group: 'orderEdit' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_CARRIERS_EDIT_MANAGE],
+            disabled: rowLocked || carrierSupportsUpdate === false,
+            disabledReason:
+              rowLockedReason ?? (carrierSupportsUpdate === false ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined),
+            onSelect: () => setEditKind('price'),
+          },
+          {
+            id: 'editReturnCost',
+            labelKey: 'inProcess.action.returnCost' as const,
+            descriptionKey: 'inProcess.sheet.desc.returnCost' as const,
+            icon: Undo2,
+            group: 'orderEdit' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_CARRIERS_EDIT_MANAGE],
+            disabled: rowLocked || carrierSupportsUpdate === false,
+            disabledReason:
+              rowLockedReason ?? (carrierSupportsUpdate === false ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined),
+            onSelect: () => setEditKind('returnCost'),
+          },
+          {
+            id: 'editPhone',
+            labelKey: 'inProcess.action.addPhone' as const,
+            descriptionKey: 'inProcess.sheet.desc.addPhone' as const,
+            icon: Phone,
+            group: 'orderEdit' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_CARRIERS_EDIT_MANAGE],
+            disabled: rowLocked,
+            disabledReason: rowLockedReason,
+            onSelect: () => setEditKind('phone'),
           },
         ]
       : []),
@@ -404,7 +472,7 @@ export function ShipmentRowActions({
         type="button"
         variant="ghost"
         className={cn(
-          'h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'h-auto min-h-12 w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:h-auto sm:py-2.5',
           action.destructive && 'hover:bg-destructive/10',
         )}
         disabled={isDisabled}
@@ -421,13 +489,13 @@ export function ShipmentRowActions({
         >
           <Icon className={cn('size-4', action.destructive ? 'text-destructive' : 'text-muted-foreground')} />
         </span>
-        <span className="flex min-w-0 flex-col items-start gap-0.5 text-start">
+        <span className="flex min-w-0 flex-col items-start gap-1 text-start">
           <span className={cn('font-medium', action.destructive ? 'text-destructive' : 'text-foreground')}>
             {t(action.labelKey)}
           </span>
           <span className="text-xs whitespace-normal text-muted-foreground">{t(action.descriptionKey)}</span>
           {showReason && (
-            <span id={reasonId} className="text-xs whitespace-normal text-muted-foreground">
+            <span id={reasonId} className="mt-0.5 text-xs whitespace-normal text-muted-foreground">
               {reason}
             </span>
           )}
@@ -568,6 +636,16 @@ export function ShipmentRowActions({
           availableFrom={availableFrom ?? null}
           availableTo={availableTo ?? null}
           onClose={() => setIsWindowOpen(false)}
+        />
+      )}
+      {editKind !== null && editRow !== undefined && shippingCompanyId !== undefined && (
+        <OrderEditModal
+          kind={editKind}
+          orderId={orderId}
+          shippingCompanyId={shippingCompanyId}
+          row={editRow}
+          carrierSupportsUpdate={carrierSupportsUpdate}
+          onClose={() => setEditKind(null)}
         />
       )}
       {isPartialOpen && orderQuery.data && (

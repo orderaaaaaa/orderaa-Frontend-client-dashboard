@@ -27,6 +27,7 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { SummaryStatCard, SummaryStatCardSkeleton } from '@/components/ui/summary-stat-card';
+import { useHasOverflowEnd } from '@/hooks/useHasOverflowEnd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { BulkCloseResultItem } from '@/lib/api/followup';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
@@ -162,6 +163,11 @@ interface ViewSwitchProps {
   counts: ShipmentTabCounts;
 }
 
+interface ActionLogTarget {
+  orderId: number;
+  orderCode: string;
+}
+
 interface ListProps {
   shippingCompanyId: number;
   page: number;
@@ -177,7 +183,7 @@ interface InProcessListProps extends ListProps {
   onClearAll: () => void;
   controls: ReactNode;
   onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
 
 interface ListHeaderProps {
@@ -194,7 +200,7 @@ function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProp
 
   return (
     <div className="flex flex-col gap-2">
-      <Button asChild variant="ghost" size="sm" className="w-fit">
+      <Button asChild variant="ghost" size="sm" className="w-fit max-sm:h-10">
         <Link href="/dashboard/shipping-providers">
           <ChevronRight aria-hidden="true" />
           رجوع إلى جهات الشحن
@@ -305,6 +311,8 @@ function ViewTabs({
 }
 
 function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const hasOverflowEnd = useHasOverflowEnd(scrollRef);
   return (
     <div className="relative">
       {busy && (
@@ -316,6 +324,7 @@ function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }
         </div>
       )}
       <div
+        ref={scrollRef}
         aria-busy={busy}
         className={cn(
           'md:max-h-[calc(100dvh-16rem)] md:overflow-auto md:rounded-xl md:border md:bg-card',
@@ -324,6 +333,12 @@ function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }
       >
         {children}
       </div>
+      {hasOverflowEnd && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 end-0 z-10 w-12 rounded-xl bg-linear-to-l from-card to-transparent"
+        />
+      )}
     </div>
   );
 }
@@ -595,7 +610,7 @@ function InProcessControls({
                 aria-checked={isActive}
                 variant={isActive ? 'default' : 'ghost'}
                 size="sm"
-                className="rounded-full px-4 text-xs"
+                className="rounded-full px-4 text-xs max-sm:h-10"
                 disabled={searchActive}
                 onClick={() => onPatch({ workState: option.value, page: '' })}
               >
@@ -818,6 +833,7 @@ function InProcessList({
                   <InProcessShipmentsTable
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
+                    carrierSupportsUpdate={data?.carrier.carrierSupportsUpdate}
                     onOpenNotes={onOpenNotes}
                     onOpenActionLog={onOpenActionLog}
                     selection={selection}
@@ -829,6 +845,7 @@ function InProcessList({
                   <InProcessShipmentCards
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
+                    carrierSupportsUpdate={data?.carrier.carrierSupportsUpdate}
                     onOpenNotes={onOpenNotes}
                     onOpenActionLog={onOpenActionLog}
                     selection={selection}
@@ -893,6 +910,11 @@ function InProcessList({
   );
 }
 
+interface ReturnedListProps extends ListProps {
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
+}
+
 function ReturnedList({
   shippingCompanyId,
   page,
@@ -900,7 +922,9 @@ function ReturnedList({
   onPageChange,
   onPageSizeChange,
   viewSwitch,
-}: ListProps) {
+  onOpenNotes,
+  onOpenActionLog,
+}: ReturnedListProps) {
   const { t } = useI18n();
   const { shippingCompanies } = useShippingCompanies();
   const {
@@ -969,10 +993,22 @@ function ReturnedList({
           <>
             <ResultsFrame busy={isFetching}>
               <div className="hidden md:block">
-                {data && <ReturnedShipmentsTable shipments={shipments} />}
+                {data && (
+                  <ReturnedShipmentsTable
+                    shipments={shipments}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                  />
+                )}
               </div>
               <div className="md:hidden">
-                {data && <ReturnedShipmentCards shipments={shipments} />}
+                {data && (
+                  <ReturnedShipmentCards
+                    shipments={shipments}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                  />
+                )}
               </div>
             </ResultsFrame>
             <ListPagination
@@ -1086,7 +1122,8 @@ export function InProcessShipmentsContent({
 
   const isInProcess = view === 'in-process';
   const [notesOrderId, setNotesOrderId] = useState<number | null>(null);
-  const [actionLogOrderId, setActionLogOrderId] = useState<number | null>(null);
+  const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
+  const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
 
   const activeCount = [status, governorate, city, from, to, appliedSearch].filter(Boolean).length;
   const searchActive = appliedSearch !== '';
@@ -1175,7 +1212,7 @@ export function InProcessShipmentsContent({
               />
             }
             onOpenNotes={setNotesOrderId}
-            onOpenActionLog={setActionLogOrderId}
+            onOpenActionLog={openActionLog}
           />
         ) : (
           <ReturnedList
@@ -1185,14 +1222,20 @@ export function InProcessShipmentsContent({
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             viewSwitch={viewSwitch}
+            onOpenNotes={setNotesOrderId}
+            onOpenActionLog={openActionLog}
           />
         )}
       </div>
       {notesOrderId !== null && (
         <FollowupNotesModal orderId={notesOrderId} onClose={() => setNotesOrderId(null)} />
       )}
-      {actionLogOrderId !== null && (
-        <OrderActionLogModal orderId={actionLogOrderId} onClose={() => setActionLogOrderId(null)} />
+      {actionLog !== null && (
+        <OrderActionLogModal
+          orderId={actionLog.orderId}
+          orderCode={actionLog.orderCode}
+          onClose={() => setActionLog(null)}
+        />
       )}
     </div>
   );

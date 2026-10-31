@@ -9,6 +9,7 @@ import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import {
   markFollowupCancelled,
   markFollowupClosed,
@@ -17,7 +18,8 @@ import {
   undoFollowupClosure,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
-import type { SuccessResponse } from '@/types/carrierSends';
+import type { CarrierSendBearingResponse, SuccessResponse } from '@/types/carrierSends';
+import type { Order } from '@/types/orders';
 import type {
   CarrierStats,
   DeliveryWindowBody,
@@ -31,7 +33,12 @@ import type {
   ReturnedFilters,
   ReturnedShipmentsPage,
   ShippingProvider,
+  ShipmentAddressBody,
   ShipmentCounts,
+  ShipmentCustomerPhoneBody,
+  ShipmentCustomerPhoneResponse,
+  ShipmentPriceBody,
+  ShipmentReturnCostBody,
   ShippingProviderType,
   StatsRange,
 } from '@/types/shippingProviders';
@@ -185,6 +192,102 @@ export const useSetDeliveryWindow = (shippingCompanyId: number | undefined) =>
       return data;
     },
     { success: 'تم حفظ وقت التوصيل', error: 'تعذر حفظ وقت التوصيل' },
+  );
+
+type ShipmentEditResponse = Order & CarrierSendBearingResponse;
+
+interface ShipmentEditOptions {
+  isInlineError?: (err: unknown) => boolean;
+  extraQueryKeys?: string[];
+}
+
+const useShipmentEditMutation = <TVariables, TResult extends CarrierSendBearingResponse>(
+  mutationFn: (variables: TVariables) => Promise<TResult>,
+  messages: { success: string; error: string },
+  { isInlineError = () => false, extraQueryKeys = [] }: ShipmentEditOptions = {},
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => {
+      await invalidateAndWait(queryClient, [
+        [KEY],
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+        [QUERY_KEYS.CARRIER_SENDS],
+        ...extraQueryKeys.map((key) => [key]),
+      ]);
+      if (carrierSendNeedsAttention(data.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      }
+      toast.success(messages.success);
+    },
+    onError: (err: unknown) => {
+      if (isInlineError(err)) return;
+      toast.error(getApiErrorMessage(err, messages.error));
+    },
+  });
+};
+
+export const CUSTOMER_PHONE_TAKEN_CODE = 'PHONE_NUMBER_ALREADY_EXISTS';
+export const CUSTOMER_PHONE_INVALID_CODE = 'SHIPPING_PROVIDER_CUSTOMER_PHONE_INVALID';
+
+export const customerPhoneErrorCodeOf = (error: unknown): string | null => {
+  const code = (error as { response?: { data?: { code?: string } } } | null)?.response?.data?.code;
+  return code === CUSTOMER_PHONE_TAKEN_CODE || code === CUSTOMER_PHONE_INVALID_CODE ? code : null;
+};
+
+export const useUpdateShipmentAddress = (shippingCompanyId: number | undefined) =>
+  useShipmentEditMutation(
+    async ({ orderId, body }: { orderId: number; body: ShipmentAddressBody }) => {
+      const { data } = await http.patch<ShipmentEditResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/address`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم تحديث العنوان', error: 'تعذر تحديث العنوان' },
+  );
+
+export const useUpdateShipmentPrice = (shippingCompanyId: number | undefined) =>
+  useShipmentEditMutation(
+    async ({ orderId, body }: { orderId: number; body: ShipmentPriceBody }) => {
+      const { data } = await http.patch<ShipmentEditResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/price`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم تحديث السعر', error: 'تعذر تحديث السعر' },
+  );
+
+export const useUpdateShipmentReturnCost = (shippingCompanyId: number | undefined) =>
+  useShipmentEditMutation(
+    async ({ orderId, body }: { orderId: number; body: ShipmentReturnCostBody }) => {
+      const { data } = await http.patch<ShipmentEditResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/return-cost`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم تحديث تكلفة المرتجع', error: 'تعذر تحديث تكلفة المرتجع' },
+  );
+
+export const useAddShipmentCustomerPhone = (shippingCompanyId: number | undefined) =>
+  useShipmentEditMutation(
+    async ({ orderId, body }: { orderId: number; body: ShipmentCustomerPhoneBody }) => {
+      const { data } = await http.post<ShipmentCustomerPhoneResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/customer-phones`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تمت إضافة رقم الهاتف', error: 'تعذر إضافة رقم الهاتف' },
+    {
+      isInlineError: (err) => customerPhoneErrorCodeOf(err) !== null,
+      extraQueryKeys: [QUERY_KEYS.CUSTOMER_ORDERS, QUERY_KEYS.DELAYED_ORDERS, 'customer', 'customers'],
+    },
   );
 
 export const useCloseClosure = () =>

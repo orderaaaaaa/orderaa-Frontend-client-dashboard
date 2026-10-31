@@ -4,7 +4,6 @@ import { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
 import { useSetDeliveryWindow } from '@/services/shippingProviders';
 
 interface DeliveryWindowModalProps {
@@ -18,7 +17,7 @@ interface DeliveryWindowModalProps {
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => {
   const period = hour < 12 ? 'am' : 'pm';
   const key = `${hour % 12 || 12} ${period}`;
-  return { key, label: formatDisplayTime(key) };
+  return { key, label: `${hour % 12 || 12}:00 ${hour < 12 ? 'ص' : 'م'}` };
 });
 
 export function DeliveryWindowModal({
@@ -59,7 +58,7 @@ export function DeliveryWindowModal({
       <div className="space-y-5">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-2">
-            <span className="font-bold text-[#1F1F1F]">من</span>
+            <span className="font-bold text-foreground">من</span>
             <SearchableSelect
               id="delivery-window-from"
               aria-label="من"
@@ -72,7 +71,7 @@ export function DeliveryWindowModal({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <span className="font-bold text-[#1F1F1F]">إلى</span>
+            <span className="font-bold text-foreground">إلى</span>
             <SearchableSelect
               id="delivery-window-to"
               aria-label="إلى"
@@ -87,7 +86,7 @@ export function DeliveryWindowModal({
         </div>
 
         {isPartial && (
-          <p className="text-sm text-red-600">حدد وقت البداية والنهاية معاً، أو امسح الوقت</p>
+          <p className="text-sm text-destructive">حدد وقت البداية والنهاية معاً، أو امسح الوقت</p>
         )}
 
         <div className="flex justify-start">
@@ -95,7 +94,7 @@ export function DeliveryWindowModal({
             type="button"
             variant="ghost"
             size="sm"
-            className="text-xs text-gray-500"
+            className="text-sm text-muted-foreground hover:text-foreground max-sm:h-10"
             disabled={from === '' && to === ''}
             onClick={() => {
               setFrom('');

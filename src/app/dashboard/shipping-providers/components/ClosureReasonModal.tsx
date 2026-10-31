@@ -80,12 +80,12 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
       confirmText={copy.confirmText}
       confirmDisabled={isConfirmDisabled}
       isLoading={mutation.isPending}
-      confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      confirmButtonClassName="px-8 py-2 bg-destructive dark:bg-destructive/60 rounded-[28px] font-bold text-white hover:bg-destructive/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
-            {copy.listLabel} <span className="text-red-600">*</span>
+          <label className="font-bold text-foreground">
+            {copy.listLabel} <span className="text-destructive">*</span>
           </label>
 
           {isLoading ? (
@@ -93,7 +93,7 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : isError ? (
-            <div className="flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
+            <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
               <p>لا توجد أسباب متاحة</p>
               <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
                 أضف الأسباب من إعدادات المتجر
@@ -110,8 +110,8 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
                   className={clsx(
                     'p-3 rounded-lg cursor-pointer border transition-all text-sm text-right',
                     selectedReasonId === reason.id
-                      ? 'border-primary bg-[#F6F2FC] text-primary font-semibold'
-                      : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF] text-[#1F1F1F]',
+                      ? 'border-primary bg-primary/5 text-primary font-semibold'
+                      : 'border-border hover:border-primary/40 hover:bg-primary/10 text-foreground',
                   )}
                   onClick={() => {
                     setSelectedReasonId(reason.id);
@@ -136,12 +136,12 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
             placeholder="أو اكتب السبب"
             maxLength={255}
             disabled={mutation.isPending}
-            inputClassName="bg-white"
+            inputClassName="bg-card"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="closureNotes" className="font-bold text-[#1F1F1F]">ملاحظات (اختياري)</label>
+          <label htmlFor="closureNotes" className="font-bold text-foreground">ملاحظات (اختياري)</label>
           <Textarea
             name="closureNotes"
             value={notes}

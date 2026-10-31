@@ -42,6 +42,7 @@ function CardField({ label, children }: { label: string; children: ReactNode }) 
 export function InProcessShipmentCards({
   shipments,
   shippingCompanyId,
+  carrierSupportsUpdate,
   onOpenNotes,
   onOpenActionLog,
   selection,
@@ -69,6 +70,7 @@ export function InProcessShipmentCards({
               row={row}
               shippingCompanyId={shippingCompanyId}
               carrier={carrier}
+              carrierSupportsUpdate={carrierSupportsUpdate}
               onOpenNotes={onOpenNotes}
               onOpenActionLog={onOpenActionLog}
             />
@@ -103,7 +105,7 @@ export function InProcessShipmentCards({
   );
 }
 
-export function ReturnedShipmentCards({ shipments }: ReturnedShipmentCardsProps) {
+export function ReturnedShipmentCards({ shipments, onOpenNotes, onOpenActionLog }: ReturnedShipmentCardsProps) {
   const { t } = useI18n();
 
   return (
@@ -112,7 +114,7 @@ export function ReturnedShipmentCards({ shipments }: ReturnedShipmentCardsProps)
         <li key={row.id} className={CARD_CLASS}>
           <div className="flex items-start justify-between gap-3">
             <CodeCell code={row.code} />
-            <ReturnedRowActions row={row} />
+            <ReturnedRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />

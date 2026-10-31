@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import clsx from 'clsx';
+import { MessageSquareText } from 'lucide-react';
 import { LiaAngleDownSolid } from 'react-icons/lia';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useAddFollowupNoteMutation } from '@/services/followup';
+import { EmptyState } from '@/components/ui/state-panels';
 import type {
   FollowupCarrierContact,
   FollowupCarrierText,
@@ -23,9 +22,6 @@ import {
   FOLLOWUP_CARRIER_TEXTS_LABEL,
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
-  FOLLOWUP_NOTE_ADD_LABEL,
-  FOLLOWUP_NOTE_ADD_PLACEHOLDER,
-  FOLLOWUP_NOTE_MAX_LENGTH,
   FOLLOWUP_NOTE_NO_WRITER,
   FOLLOWUP_NOTE_PARTY_LABELS,
   FOLLOWUP_NOTE_PARTY_ORDER,
@@ -146,56 +142,6 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
   );
 }
 
-function AddFollowupNoteForm({ orderId }: { orderId: number }) {
-  const [party, setParty] = useState<FollowupNotePartyValue>('CUSTOMER');
-  const [body, setBody] = useState('');
-  const addMutation = useAddFollowupNoteMutation();
-  const trimmedBody = body.trim();
-
-  const submit = () => {
-    addMutation.mutate({ orderId, party, body: trimmedBody }, { onSuccess: () => setBody('') });
-  };
-
-  return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-3">
-      <div className="flex flex-wrap gap-1.5">
-        {FOLLOWUP_NOTE_PARTY_ORDER.map((value) => (
-          <Button
-            key={value}
-            type="button"
-            size="sm"
-            variant={party === value ? 'default' : 'outline'}
-            aria-pressed={party === value}
-            className="h-7 px-3 text-xs"
-            onClick={() => setParty(value)}
-          >
-            {FOLLOWUP_NOTE_PARTY_LABELS[value]}
-          </Button>
-        ))}
-      </div>
-      <Textarea
-        name={`followup-note-add-${orderId}`}
-        value={body}
-        placeholder={FOLLOWUP_NOTE_ADD_PLACEHOLDER}
-        maxLength={FOLLOWUP_NOTE_MAX_LENGTH}
-        rows={2}
-        onChange={(e) => setBody(e.target.value)}
-      />
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          size="sm"
-          loading={addMutation.isPending}
-          disabled={trimmedBody.length === 0 || addMutation.isPending}
-          onClick={submit}
-        >
-          {FOLLOWUP_NOTE_ADD_LABEL}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 interface FollowupNoteDayCardProps {
   orderId: number;
   day: FollowupNoteDay;
@@ -227,25 +173,33 @@ export function FollowupNoteDayCard({ orderId, day, canManage }: FollowupNoteDay
 
       {isOpen && (
         <div className="flex flex-col gap-4 border-t border-border p-3">
-          {!hasContent && <p className="text-sm text-muted-foreground text-center">{FOLLOWUP_NOTES_EMPTY_DAY}</p>}
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {FOLLOWUP_NOTE_PARTY_ORDER.map((party) => (
-              <PartySection
-                key={party}
-                party={party}
-                notes={day.notes.filter((note) => note.party === party)}
-                orderId={orderId}
-                canManage={canManage}
-                carrierTexts={day.carrier.texts}
-                carrierContacts={day.carrier.contacts}
-              />
-            ))}
-          </div>
+          {hasContent ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {FOLLOWUP_NOTE_PARTY_ORDER.map((party) => (
+                <PartySection
+                  key={party}
+                  party={party}
+                  notes={day.notes.filter((note) => note.party === party)}
+                  orderId={orderId}
+                  canManage={canManage}
+                  carrierTexts={day.carrier.texts}
+                  carrierContacts={day.carrier.contacts}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={
+                <span className="flex size-12 items-center justify-center rounded-xl bg-muted">
+                  <MessageSquareText className="size-5 text-muted-foreground" />
+                </span>
+              }
+              title={FOLLOWUP_NOTES_EMPTY_DAY}
+              className="py-6"
+            />
+          )}
 
           {day.legacyNotes.length > 0 && <LegacyNoteList legacyNotes={day.legacyNotes} />}
-
-          {day.canAddNotes && canManage && <AddFollowupNoteForm orderId={orderId} />}
         </div>
       )}
     </div>

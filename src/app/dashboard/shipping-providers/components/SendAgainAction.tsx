@@ -57,7 +57,7 @@ function SendAgainReasonModal({
       isLoading={mutation.isPending}
     >
       <div className="space-y-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-foreground-secondary">
           يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
         </p>
         <label htmlFor="sendAgainReason" className="font-bold text-foreground">

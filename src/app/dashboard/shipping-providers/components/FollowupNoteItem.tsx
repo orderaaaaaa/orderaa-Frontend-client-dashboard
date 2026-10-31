@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
@@ -93,10 +94,11 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-1.5 text-xs"
+                className="h-10 px-2 text-sm sm:h-8"
                 disabled={isBusy}
                 onClick={startEdit}
               >
+                <Pencil aria-hidden="true" />
                 {FOLLOWUP_NOTE_EDIT_LABEL}
               </Button>
             )}
@@ -105,10 +107,11 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-1.5 text-xs text-destructive"
+                className="h-10 px-2 text-sm text-destructive sm:h-8"
                 disabled={isBusy}
                 onClick={() => setIsConfirmingDelete(true)}
               >
+                <Trash2 aria-hidden="true" />
                 {FOLLOWUP_NOTE_DELETE_LABEL}
               </Button>
             )}

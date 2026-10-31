@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { LiaCheckSolid, LiaClockSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,8 +31,38 @@ import {
   SHIPPING_COMPANY_REQUIRED_MESSAGE,
 } from '@/types/shippingCompanies';
 import type { ShippingSwitchMissingField } from '@/types/carrierSends';
-import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
+import { merchantSettingsApi } from '@/app/dashboard/store-settings/api/storeApi';
 import clsx from 'clsx';
+
+export type EditShippingSection = 'company' | 'location' | 'address' | 'returnCost' | 'deliveryWindow';
+
+const ALL_SHIPPING_SECTIONS: readonly EditShippingSection[] = [
+  'company',
+  'location',
+  'address',
+  'returnCost',
+  'deliveryWindow',
+];
+
+const SECTION_FIELDS: Record<EditShippingSection, readonly (keyof ShippingData)[]> = {
+  company: ['shippingCompanyId', 'shippingCompanyName', 'oldShipmentCancelledByHand'],
+  location: ['governorate', 'city', 'governorateOption', 'cityOption', 'externalGovernorate'],
+  address: ['address'],
+  returnCost: ['returnShippingCost'],
+  deliveryWindow: ['availableFrom', 'availableTo'],
+};
+
+const pickEnabledFields = (
+  data: ShippingData,
+  enabled: ReadonlySet<EditShippingSection>
+): ShippingData => {
+  const allowedKeys = ALL_SHIPPING_SECTIONS.filter((section) => enabled.has(section)).flatMap(
+    (section) => SECTION_FIELDS[section]
+  );
+  return Object.fromEntries(
+    Object.entries(data).filter(([key]) => (allowedKeys as readonly string[]).includes(key))
+  ) as ShippingData;
+};
 
 interface EditShippingModalProps {
   isOpen: boolean;
@@ -43,6 +74,8 @@ interface EditShippingModalProps {
   customerHasPhone: boolean;
   carrierSupportsUpdate?: boolean;
   oldIntegrationShipment?: { shippingId: string; carrierName: string } | null;
+  sections?: readonly EditShippingSection[];
+  title?: string;
 }
 
 export interface ShippingData {
@@ -59,6 +92,8 @@ export interface ShippingData {
   availableTo?: string;
   oldShipmentCancelledByHand?: boolean;
 }
+
+const RETURN_SHIPPING_COST_NEGATIVE_MESSAGE = 'يجب أن تكون القيمة صفر أو أكثر';
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
 const PERIODS = [
@@ -91,7 +126,7 @@ function InlineTimePicker({
   return (
     <div className="flex-1 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-700">{label}</span>
+        <span className="text-sm font-semibold text-foreground">{label}</span>
         {hour && period && (
           <span className="text-sm font-bold text-primary">
             {hour}:00 {period.toUpperCase()}
@@ -109,7 +144,7 @@ function InlineTimePicker({
                 'h-8 rounded-md text-sm font-medium transition-all',
                 hour === h
                   ? 'bg-primary text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >
               {h}
@@ -126,7 +161,7 @@ function InlineTimePicker({
                 'h-8 px-3 rounded-md text-xs font-semibold transition-all',
                 period === p.value
                   ? 'bg-primary text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >
               {p.label}
@@ -148,8 +183,16 @@ export default function EditShippingModal({
   customerHasPhone,
   carrierSupportsUpdate,
   oldIntegrationShipment,
+  sections = ALL_SHIPPING_SECTIONS,
+  title = 'تعديل بيانات الشحن',
 }: EditShippingModalProps) {
   const [formData, setFormData] = useState<ShippingData>(initialData);
+  const enabledSections = new Set(sections);
+  const companyEnabled = enabledSections.has('company');
+  const locationEnabled = enabledSections.has('location');
+  const addressEnabled = enabledSections.has('address');
+  const returnCostEnabled = enabledSections.has('returnCost');
+  const deliveryWindowEnabled = enabledSections.has('deliveryWindow');
 
   const [isSaving, setIsSaving] = useState(false);
   const [oldCancelledByHand, setOldCancelledByHand] = useState(false);
@@ -163,24 +206,31 @@ export default function EditShippingModal({
   const [endHour, setEndHour] = useState<number | null>(initialToParsed.hour);
   const [endPeriod, setEndPeriod] = useState<string | null>(initialToParsed.period);
 
-  const { settings } = useMerchantSettings();
+  const isAllSections = sections.length === ALL_SHIPPING_SECTIONS.length;
+  const canReadMerchantSettings = useHasPermission(PERMISSION_CODES.MERCHANT_SETTINGS_READ);
+  const settingsQuery = useQuery({
+    queryKey: ['merchantSettings'],
+    queryFn: merchantSettingsApi.getSettings,
+    enabled: returnCostEnabled && (isAllSections || canReadMerchantSettings),
+  });
+  const defaultReturnShippingCost = settingsQuery.data?.defaultReturnShippingCost;
   const { t } = useI18n();
   const switchMissingFieldLabels: Record<ShippingSwitchMissingField, string> = {
     governorate: t('canonical.shipping.governorateLabel'),
     city: t('canonical.shipping.cityLabel'),
     phone: t('canonical.shipping.phoneLabel'),
   };
-  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
+  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen && (companyEnabled || locationEnabled));
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
 
   const selectedShippingCompanyId = formData.shippingCompanyId ?? null;
   const selectedGovernorateOption = formData.governorateOption || undefined;
   const governoratesQuery = useLocationOptionGovernorates(
-    isOpen ? selectedShippingCompanyId : null,
+    isOpen && locationEnabled ? selectedShippingCompanyId : null,
     orderId
   );
   const citiesQuery = useLocationOptionCities(
-    isOpen ? selectedShippingCompanyId : null,
+    isOpen && locationEnabled ? selectedShippingCompanyId : null,
     selectedGovernorateOption,
     orderId
   );
@@ -239,17 +289,32 @@ export default function EditShippingModal({
       endPeriod !== initialToParsed.period;
 
     return (
-      (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null) ||
-      (formData.governorateOption ?? null) !== (initialData.governorateOption ?? null) ||
-      (formData.cityOption ?? null) !== (initialData.cityOption ?? null) ||
-      formData.address !== initialData.address ||
-      (formData.returnShippingCost ?? null) !== (initialData.returnShippingCost ?? null) ||
-      timeChanged
+      (companyEnabled && (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null)) ||
+      (locationEnabled &&
+        ((formData.governorateOption ?? null) !== (initialData.governorateOption ?? null) ||
+          (formData.cityOption ?? null) !== (initialData.cityOption ?? null))) ||
+      (addressEnabled && formData.address !== initialData.address) ||
+      (returnCostEnabled && (formData.returnShippingCost ?? null) !== (initialData.returnShippingCost ?? null)) ||
+      (deliveryWindowEnabled && timeChanged)
     );
-  }, [formData, initialData, startHour, startPeriod, endHour, endPeriod, initialFromParsed, initialToParsed]);
+  }, [
+    formData,
+    initialData,
+    startHour,
+    startPeriod,
+    endHour,
+    endPeriod,
+    initialFromParsed,
+    initialToParsed,
+    companyEnabled,
+    locationEnabled,
+    addressEnabled,
+    returnCostEnabled,
+    deliveryWindowEnabled,
+  ]);
 
   const companyChanged =
-    (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null);
+    companyEnabled && (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null);
   const isSwitch = companyChanged && formData.shippingCompanyId != null;
   const attestedShipment = isSwitch ? (oldIntegrationShipment ?? null) : null;
   const costLocked = carrierSupportsUpdate === false;
@@ -269,9 +334,9 @@ export default function EditShippingModal({
       const defaultCost =
         initialData.returnShippingCost != null
           ? initialData.returnShippingCost
-          : costLocked
+          : costLocked || !returnCostEnabled
             ? undefined
-            : settings?.defaultReturnShippingCost ?? undefined;
+            : defaultReturnShippingCost ?? undefined;
 
       setFormData({ ...initialData, returnShippingCost: defaultCost });
       setReturnShippingCostError('');
@@ -285,12 +350,12 @@ export default function EditShippingModal({
       setEndPeriod(toParsed.period);
     }
     wasOpenRef.current = isOpen;
-  }, [isOpen, initialData, settings?.defaultReturnShippingCost, costLocked]);
+  }, [isOpen, initialData, defaultReturnShippingCost, costLocked, returnCostEnabled]);
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
 
-    if (requireCompany && formData.shippingCompanyId == null) {
+    if (companyEnabled && requireCompany && formData.shippingCompanyId == null) {
       setShippingCompanyError(SHIPPING_COMPANY_REQUIRED_MESSAGE);
       return;
     }
@@ -298,8 +363,15 @@ export default function EditShippingModal({
 
     if (attestationMissing) return;
 
-    if (!costLocked && (formData.returnShippingCost === undefined || formData.returnShippingCost === null)) {
+    if (
+      returnCostEnabled &&
+      !costLocked &&
+      (formData.returnShippingCost === undefined || formData.returnShippingCost === null)
+    ) {
       setReturnShippingCostError('هذا الحقل مطلوب');
+      return;
+    } else if (returnCostEnabled && formData.returnShippingCost !== undefined && formData.returnShippingCost < 0) {
+      setReturnShippingCostError(RETURN_SHIPPING_COST_NEGATIVE_MESSAGE);
       return;
     } else {
       setReturnShippingCostError('');
@@ -311,19 +383,23 @@ export default function EditShippingModal({
     if (attestedShipment) {
       dataToSave.oldShipmentCancelledByHand = oldCancelledByHand;
     }
-    if (costLocked) {
+    if (returnCostEnabled && costLocked) {
       dataToSave.returnShippingCost = initialData.returnShippingCost;
     }
-    if (startHour && startPeriod) {
+    if (deliveryWindowEnabled && startHour && startPeriod) {
       dataToSave.availableFrom = `${startHour} ${startPeriod}`;
     }
-    if (endHour && endPeriod) {
+    if (deliveryWindowEnabled && endHour && endPeriod) {
       dataToSave.availableTo = `${endHour} ${endPeriod}`;
     }
 
     setIsSaving(true);
     try {
-      await onSave(dataToSave);
+      await onSave(
+        isAllSections
+          ? dataToSave
+          : pickEnabledFields(dataToSave, enabledSections)
+      );
       onClose();
     } catch {
     } finally {
@@ -365,7 +441,7 @@ export default function EditShippingModal({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title="تعديل بيانات الشحن"
+      title={title}
       onConfirm={handleSave}
       confirmText={isSaving ? 'جاري الحفظ...' : 'حفظ'}
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
@@ -373,9 +449,11 @@ export default function EditShippingModal({
       confirmDisabled={!hasChanges || switchMissingFields.length > 0 || attestationMissing}
     >
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {(companyEnabled || locationEnabled) && (
+        <div className={clsx('grid grid-cols-1 gap-6', companyEnabled ? 'md:grid-cols-3' : 'md:grid-cols-2')}>
+        {companyEnabled && (
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">الشركة</label>
+            <label className="font-bold text-foreground">الشركة</label>
             <SearchableSelect
               value={selectedShippingCompanyId !== null ? String(selectedShippingCompanyId) : ''}
               displayValue={shippingCompanyDisplay}
@@ -387,17 +465,17 @@ export default function EditShippingModal({
               searchPlaceholder="بحث عن شركة..."
               emptyMessage="لا توجد شركات متاحة"
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
+              triggerClassName="w-full border-input rounded-lg h-12"
               searchThreshold={5}
               loading={loadingShippingCompanies}
             />
             {switchMissingFields.length > 0 && (
-              <p className="text-xs text-red-600">
+              <p className="text-sm text-destructive">
                 لا يمكن تغيير شركة الشحن قبل إدخال: {switchMissingFields.map((field) => switchMissingFieldLabels[field]).join('، ')}
               </p>
             )}
             {attestedShipment && (
-              <label className="flex items-start gap-2 text-sm text-gray-800">
+              <label className="flex items-start gap-2 text-sm text-foreground">
                 <Checkbox
                   checked={oldCancelledByHand}
                   onCheckedChange={(checked) => setOldCancelledByHand(checked === true)}
@@ -409,14 +487,16 @@ export default function EditShippingModal({
               </label>
             )}
             {attestationMissing && (
-              <p className="text-xs text-red-600">
+              <p className="text-sm text-destructive">
                 أكّد إلغاء الشحنة القديمة يدوياً لدى شركة الشحن السابقة لحفظ تغيير الشركة
               </p>
             )}
           </div>
+        )}
 
+          {locationEnabled && (<>
           <div className="flex flex-col gap-2">
-            <label htmlFor="edit-shipping-governorate" className="font-bold text-[#1F1F1F]">{t('canonical.shipping.governorateLabel')}</label>
+            <label htmlFor="edit-shipping-governorate" className="font-bold text-foreground">{t('canonical.shipping.governorateLabel')}</label>
             <SearchableSelect
               id="edit-shipping-governorate"
               aria-label={t('canonical.shipping.governorateLabel')}
@@ -436,7 +516,7 @@ export default function EditShippingModal({
                     : 'لا توجد محافظات متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
+              triggerClassName="w-full border-input rounded-lg h-12"
               loading={loadingGovernorates}
               disabled={selectedShippingCompanyId === null || noGovernorateList || governoratesQuery.isError}
               searchThreshold={5}
@@ -455,14 +535,14 @@ export default function EditShippingModal({
               />
             )}
             {storedGovernorateText && !formData.governorateOption && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 المحفوظ حاليا: {storedGovernorateText}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="edit-shipping-city" className="font-bold text-[#1F1F1F]">{t('canonical.shipping.cityLabel')}</label>
+            <label htmlFor="edit-shipping-city" className="font-bold text-foreground">{t('canonical.shipping.cityLabel')}</label>
             <SearchableSelect
               id="edit-shipping-city"
               aria-label={t('canonical.shipping.cityLabel')}
@@ -486,39 +566,44 @@ export default function EditShippingModal({
                     : t('canonical.shipping.cityEmpty')
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
+              triggerClassName="w-full border-input rounded-lg h-12"
               loading={loadingCities}
               disabled={selectedShippingCompanyId === null || !selectedGovernorateOption}
               searchThreshold={5}
             />
             {citiesQuery.isError && (
-              <p className="text-xs text-red-500">
+              <p className="text-sm text-destructive">
                 {locationOptionsErrorTextOf(citiesQuery.error, t('canonical.shipping.cityLoadError'))}
               </p>
             )}
             {storedCityText && !formData.cityOption && (
-              <p className="text-xs text-gray-500">المحفوظ حاليا: {storedCityText}</p>
+              <p className="text-xs text-muted-foreground">المحفوظ حاليا: {storedCityText}</p>
             )}
           </div>
+          </>)}
         </div>
+        )}
 
+        {addressEnabled && (
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">العنوان بالتفصيل</label>
+          <label className="font-bold text-foreground">العنوان بالتفصيل</label>
           <textarea
             value={formData.address || ''}
             onChange={(e) =>
               setFormData({ ...formData, address: e.target.value })
             }
-            className="w-full border border-[#CED4DA] rounded-lg p-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full border border-input rounded-lg p-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="أدخل العنوان بالتفصيل..."
           />
         </div>
+        )}
 
+        {returnCostEnabled && (
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span></label>
+          <label className="font-bold text-foreground">{isAllSections ? 'مبلغ الإلغاء في حالة عدم الاستلام' : 'تكلفة المرتجع'} <span className="text-destructive">*</span></label>
           <Input
             type="number"
-            className='bg-white'
+            className='bg-card'
             value={formData.returnShippingCost ?? ''}
             onChange={(e) => {
               setReturnShippingCostError('');
@@ -527,22 +612,24 @@ export default function EditShippingModal({
                 returnShippingCost: e.target.value ? Number(e.target.value) : undefined,
               });
             }}
-            placeholder="أدخل مبلغ الإلغاء..."
+            placeholder={isAllSections ? 'أدخل مبلغ الإلغاء...' : 'أدخل تكلفة المرتجع...'}
             min={0}
             disabled={costLocked}
             error={returnShippingCostError}
           />
           {costLocked && (
-            <p className="text-xs text-red-600">{CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE}</p>
+            <p className="text-sm text-destructive">{CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE}</p>
           )}
         </div>
+        )}
 
+        {deliveryWindowEnabled && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <LiaClockSolid className="w-5 h-5 text-primary" />
-            <label className="font-bold text-[#1F1F1F]">وقت التوصيل</label>
+            <label className="font-bold text-foreground">وقت التوصيل</label>
           </div>
-          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-4">
+          <div className="bg-muted/50 rounded-xl border border-border p-4 space-y-4">
             <div className="flex flex-col md:flex-row gap-6">
               <InlineTimePicker
                 label="من"
@@ -552,7 +639,7 @@ export default function EditShippingModal({
                 onPeriodChange={(p) => { setStartPeriod(p); }}
               />
               <div className="hidden md:flex items-center pt-6">
-                <div className="w-px h-full bg-gray-200" />
+                <div className="w-px h-full bg-border" />
               </div>
               <InlineTimePicker
                 label="إلى"
@@ -572,6 +659,7 @@ export default function EditShippingModal({
             )}
           </div>
         </div>
+        )}
       </div>
     </BaseModal>
   );

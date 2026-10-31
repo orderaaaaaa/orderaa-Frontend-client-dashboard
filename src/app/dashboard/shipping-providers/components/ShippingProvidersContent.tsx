@@ -99,10 +99,10 @@ export function ShippingProvidersContent() {
       <div className="sm:px-8 py-4 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">
               مناديب الشحن وشركات الشحن
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               نسب التسليم والاسترجاع تُحسب من الطلبات المنتهية فقط، والشحنات
               الجارية تُعرض كعدد مستقل
             </p>
@@ -149,7 +149,7 @@ export function ShippingProvidersContent() {
             className="w-40"
           />
 
-          <label className="flex items-center gap-2 text-xs text-gray-600 pb-2">
+          <label className="flex items-center gap-2 text-xs text-foreground-secondary pb-2">
             <input
               type="checkbox"
               checked={showInactive}
@@ -162,7 +162,7 @@ export function ShippingProvidersContent() {
         {isLoading ? (
           <PageLoading message="جاري تحميل جهات الشحن..." />
         ) : visible.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-10">
+          <p className="text-sm text-muted-foreground text-center py-10">
             لا توجد جهات شحن — أضف مندوبًا أو شركة شحن للبدء
           </p>
         ) : (
@@ -184,7 +184,7 @@ export function ShippingProvidersContent() {
                     'h-full border rounded-xl p-4 flex flex-col gap-3 bg-card transition-colors cursor-pointer',
                     selectedId === carrier.shippingCompanyId
                       ? 'border-primary'
-                      : 'border-gray-200 hover:border-primary/40',
+                      : 'border-border hover:border-primary/40',
                     !carrier.isActive && 'opacity-60',
                   )}
                   onClick={() =>
@@ -214,7 +214,7 @@ export function ShippingProvidersContent() {
                         </p>
                       </div>
                       {!carrier.isActive && (
-                        <span className="shrink-0 text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                        <span className="shrink-0 text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                           غير نشط
                         </span>
                       )}
@@ -230,7 +230,7 @@ export function ShippingProvidersContent() {
                     <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
                       <div className="flex min-w-0 flex-col gap-0.5">
                         <span className="text-xs text-muted-foreground">صافي الشحنات الحالية</span>
-                        <span className="truncate text-lg font-bold text-foreground">
+                        <span className="min-w-0 break-words text-lg font-bold text-foreground">
                           {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
                         </span>
                       </div>
@@ -258,12 +258,13 @@ export function ShippingProvidersContent() {
                     </div>
                   </div>
 
-                  <div className="mt-auto flex flex-col gap-2">
+                  <div className="mt-auto flex items-center justify-between gap-2">
                     {isProvider && (
                       <Button
                         type="button"
-                        variant="ghost"
-                        className="self-start h-10 sm:h-10 px-3 text-xs text-muted-foreground hover:text-destructive"
+                        variant="outline"
+                        size="sm"
+                        className="h-10 px-3 text-xs text-muted-foreground hover:text-destructive sm:h-8"
                         disabled={!providersReady}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -281,7 +282,7 @@ export function ShippingProvidersContent() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="rounded-full text-xs"
+                      className="ms-auto rounded-full text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
                         goToInProcess(carrier);
@@ -314,7 +315,7 @@ export function ShippingProvidersContent() {
         isLoading={isUpdatingProvider}
         maxWidth="md:max-w-md"
       >
-        <p className="text-sm text-gray-800 py-2">
+        <p className="text-sm text-foreground py-2">
           {pendingRetire?.isActive
             ? `هل تريد إعادة تفعيل «${pendingRetire.carrier.name}»؟`
             : `هل تريد إيقاف «${pendingRetire?.carrier.name}»؟ يمكنك إعادة تفعيلها لاحقاً.`}

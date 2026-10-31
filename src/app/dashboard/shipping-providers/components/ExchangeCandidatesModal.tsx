@@ -34,10 +34,10 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
 
         {candidatesQuery.isLoading ? (
           <div className="flex items-center justify-center py-6">
-            <LiaSpinnerSolid className="size-5 animate-spin text-gray-400" />
+            <LiaSpinnerSolid className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : candidatesQuery.isError ? (
-          <p className="text-sm text-red-600">تعذر تحميل الطلبات</p>
+          <p className="text-sm text-destructive">تعذر تحميل الطلبات</p>
         ) : candidates.length === 0 ? (
           <p className="text-sm text-muted-foreground">لا توجد طلبات مكتملة لهذا العميل</p>
         ) : (
@@ -46,9 +46,9 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
               {candidates.map((candidate) => (
                 <div
                   key={candidate.id}
-                  className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-[#ECECEC]"
+                  className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-border"
                 >
-                  <span className="text-sm font-medium text-[#1F1F1F]">{candidate.code}</span>
+                  <span className="text-sm font-medium text-foreground">{candidate.code}</span>
                   <span className="text-xs text-muted-foreground">{ORDER_STATUS_ARABIC_LABELS[candidate.status]}</span>
                   <span className="text-xs text-muted-foreground">{formatNumber(candidate.totalCost, 2)} جنيه</span>
                   <span className="text-xs text-muted-foreground">{formatDateTime(candidate.createdAt)}</span>

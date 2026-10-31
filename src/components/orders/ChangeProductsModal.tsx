@@ -3,10 +3,12 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { PackageSearch } from 'lucide-react';
 import { LiaMinusSolid, LiaPlusSolid, LiaSpinnerSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { EmptyState } from '@/components/ui/state-panels';
 import ProductSelectionModal, {
   type SelectableProduct,
   type VariantOption,
@@ -79,6 +81,14 @@ const mergeLines = (
 
 const isLineComplete = (line: ChangeProductsLine): boolean =>
   line.variantOptions.every((option) => line.variants.some((v) => v.name === option.attribute));
+
+const missingAttributesOf = (line: ChangeProductsLine): string[] =>
+  line.variantOptions
+    .filter((option) => !line.variants.some((v) => v.name === option.attribute))
+    .map((option) => option.attribute);
+
+const incompleteVariantMessageOf = (missing: string[]): string =>
+  missing.length > 1 ? `اختر المتغيرات الناقصة: ${missing.join('، ')}` : `اختر ${missing[0]} لإكمال المنتج`;
 
 const currentProductsFromOrder = (order: Order): CurrentProductRow[] =>
   order.order_products.map((orderProduct, index) => {
@@ -244,10 +254,10 @@ export default function ChangeProductsModal({
         <div className="flex flex-col gap-6" dir="rtl">
           {orderQuery.isLoading ? (
             <div className="flex items-center justify-center py-6">
-              <LiaSpinnerSolid className="size-5 animate-spin text-gray-400" />
+              <LiaSpinnerSolid className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : orderQuery.isError ? (
-            <p className="text-sm text-red-600">تعذر تحميل تفاصيل الطلب</p>
+            <p className="text-sm text-destructive">تعذر تحميل تفاصيل الطلب</p>
           ) : (
             <>
               {currentProducts.length > 0 && (
@@ -277,7 +287,7 @@ export default function ChangeProductsModal({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-1.5"
+                    className="gap-1.5 max-sm:h-10"
                     onClick={() => setIsPickerOpen(true)}
                     disabled={isPending}
                   >
@@ -286,7 +296,15 @@ export default function ChangeProductsModal({
                   </Button>
                 </div>
                 {lines.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">لم يتم اختيار منتجات</p>
+                  <EmptyState
+                    icon={
+                      <span className="flex size-12 items-center justify-center rounded-xl bg-muted">
+                        <PackageSearch className="size-5 text-muted-foreground" />
+                      </span>
+                    }
+                    title="لم يتم اختيار منتجات"
+                    className="py-6"
+                  />
                 ) : (
                   <div className="flex flex-col gap-2">
                     {lines.map((line) => (
@@ -303,6 +321,7 @@ export default function ChangeProductsModal({
                               type="button"
                               variant="outline"
                               size="icon-sm"
+                              className="max-sm:size-10"
                               aria-label="تقليل الكمية"
                               onClick={() => handleChangeQuantity(line.key, line.quantity - 1)}
                               disabled={isPending || line.quantity <= 1}
@@ -314,6 +333,7 @@ export default function ChangeProductsModal({
                               type="button"
                               variant="outline"
                               size="icon-sm"
+                              className="max-sm:size-10"
                               aria-label="زيادة الكمية"
                               onClick={() => handleChangeQuantity(line.key, line.quantity + 1)}
                               disabled={isPending}
@@ -366,7 +386,7 @@ export default function ChangeProductsModal({
                         )}
 
                         {!isLineComplete(line) && (
-                          <p className="text-xs text-destructive">اختر المتغير لإكمال المنتج</p>
+                          <p className="text-sm text-destructive">{incompleteVariantMessageOf(missingAttributesOf(line))}</p>
                         )}
                       </div>
                     ))}
@@ -388,7 +408,7 @@ export default function ChangeProductsModal({
                   error={isTotalCostInvalid ? 'أدخل مبلغًا صحيحًا بين 0 و 9,999,999' : undefined}
                   disabled={isPending}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   المبلغ يشمل الشحن. اتركه فارغًا لاستخدام سعر المنتجات مع الشحن كما هو.
                 </p>
               </div>

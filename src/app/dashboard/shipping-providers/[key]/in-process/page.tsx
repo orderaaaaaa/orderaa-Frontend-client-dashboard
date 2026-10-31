@@ -23,7 +23,7 @@ function InProcessShipmentsPage() {
     return (
       <div className="w-full max-w-full overflow-x-hidden">
         <div className="sm:px-8 py-10 flex flex-col items-center gap-3 text-center">
-          <p className="text-sm text-gray-500">جهة الشحن غير موجودة</p>
+          <p className="text-sm text-muted-foreground">جهة الشحن غير موجودة</p>
           <Link
             href="/dashboard/shipping-providers"
             className="text-xs text-primary hover:underline"
