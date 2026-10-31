@@ -147,7 +147,8 @@ export function OrderActionsFooter({
               variant="ghost"
               onClick={handleActionsToggle}
               disabled={isBusy}
-              className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
+              aria-label="إجراءات أخرى"
+              className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 min-w-10 min-h-10 hover:bg-transparent"
             >
               <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
                 <LiaEllipsisHSolid className="w-5 h-5" />
@@ -155,11 +156,12 @@ export function OrderActionsFooter({
               <span className="text-sm font-medium">اخري</span>
             </Button>
 
-            <div className="absolute bottom-full mb-4 left-30">
+            <div className="fixed inset-x-4 bottom-[6.25rem]">
               <ActionsDropdown
                 isOpen={actionsDropdown.isOpen}
                 orderStatus={orderStatus}
                 lastEventStatus={lastEventStatus}
+                className="max-h-[60vh] max-w-full overflow-y-auto"
                 onActionClick={(label, action) => {
                   actionsDropdown.close();
                   onActionClick(label, action);
