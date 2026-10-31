@@ -10,7 +10,7 @@ function ConfirmationSection({
 }: ConfirmationSectionProps) {
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <ToggleField
           label="يحتاج إلى تأكيد"
           description="إذا كان مفعلاً سيتم إنشاء الطلب بحالة 'طلب جديد'، وإلا سيكون 'مؤكد'"

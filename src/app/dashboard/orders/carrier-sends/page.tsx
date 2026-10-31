@@ -17,7 +17,7 @@ import { formatDateTime } from '@/utils/format';
 
 function CarrierSendRow({ row }: { row: CarrierSendView }) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4">
+    <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-card p-4">
       <div className="flex flex-col gap-1">
         <Link
           href={`/dashboard/orders/${row.orderId}`}

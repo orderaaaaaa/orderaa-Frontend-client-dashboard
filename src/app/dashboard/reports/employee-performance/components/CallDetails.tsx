@@ -5,7 +5,7 @@ import Table from '../../components/Table';
 function CallDetails() {
   return (
     <>
-      <div className="p-6 bg-white rounded-2xl shadow-xl mt-10 items-stretch">
+      <div className="p-6 bg-card rounded-2xl shadow-xl mt-10 items-stretch">
         <h2 className="text-xl font-bold mb-5 text-right border-b-2 pb-4">
           تفاصيل المكالمات لكل موظف{' '}
         </h2>

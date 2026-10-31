@@ -48,12 +48,12 @@ export const LimitSelector = ({
       </div>
 
       {isLimitOpen && (
-        <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-50">
+        <div className="absolute bottom-full mb-2 w-full bg-card rounded-lg shadow-md overflow-hidden z-50">
           {LIMIT_OPTIONS.map((option) => (
             <div
               key={option}
               onClick={() => handleSelectLimit(option)}
-              className="text-primary text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
+              className="text-primary text-center py-1 cursor-pointer hover:bg-primary/10"
             >
               {option}
             </div>

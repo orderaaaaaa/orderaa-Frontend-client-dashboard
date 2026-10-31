@@ -179,7 +179,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
 
           <div className="bg-blue-50 rounded-xl flex items-center p-6">
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
+              <div className="flex items-center justify-center w-16 h-16 bg-card border border-[#2489E1] shadow-sm rounded-lg">
                 <LiaTruckSolid className="w-8 h-8 text-[#001A72]" />
               </div>
               <div className="flex flex-col items-start gap-1">
@@ -216,7 +216,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-4 pt-0 border-t border-gray-200">
-                  <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+                  <div className="aspect-video bg-black rounded-lg flex items-center justify-center">
                     <div className="text-center text-white">
                       <LiaPlaySolid className="w-16 h-16 mx-auto mb-2 opacity-50" />
                       <p className="text-sm opacity-75">
@@ -339,7 +339,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                     ? 'submit-disabled-reason'
                     : undefined
                 }
-                className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
+                className="flex-1 bg-primary hover:bg-brand-hover h-12 text-lg"
               >
                 {isSaving ? 'جاري الحفظ...' : isEditing ? 'تحديث الربط' : 'تفعيل الربط'}
               </Button>

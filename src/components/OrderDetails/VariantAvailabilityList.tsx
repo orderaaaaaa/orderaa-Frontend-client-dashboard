@@ -52,8 +52,8 @@ export function VariantAvailabilityList({
   if (variants.length === 0 && !availableWarehouseNotSet) return null;
 
   return (
-    <div className="rounded-2xl border border-[#ECECEC] bg-white p-3" dir={dir}>
-      <p className="mb-2 text-sm font-bold text-[#1F1F1F]">
+    <div className="rounded-2xl border border-border bg-card p-3" dir={dir}>
+      <p className="mb-2 text-sm font-bold text-foreground">
         {t('orderDetails.variants.title')}
       </p>
       <div className="flex flex-wrap gap-2">

@@ -49,7 +49,7 @@ const LeadsList: React.FC<LeadsListProps> = ({
           return (
             <div
               key={lead.id}
-              className="bg-white rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row gap-4 sm:gap-0"
+              className="bg-card rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row gap-4 sm:gap-0"
             >
               {/* Right: Content */}
               <div className="flex-1 flex flex-col gap-3">

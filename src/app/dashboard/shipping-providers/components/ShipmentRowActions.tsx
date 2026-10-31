@@ -531,7 +531,7 @@ export function ShipmentRowActions({
               className={cn(
                 'mt-0.5 text-xs whitespace-normal',
                 action.reasonTone === 'warning'
-                  ? 'flex items-center gap-1.5 font-medium text-amber-900 dark:text-amber-200'
+                  ? 'flex items-center gap-1.5 font-medium text-amber-900'
                   : 'text-muted-foreground',
               )}
             >

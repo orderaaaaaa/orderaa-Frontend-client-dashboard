@@ -147,7 +147,7 @@ export default function PickupsPage() {
                 selectedId === pickup.id
                   ? 'border-primary'
                   : 'border-gray-200 hover:border-primary/40'
-              } ${pickup.reviewedAt ? 'bg-green-50/40' : 'bg-white'}`}
+              } ${pickup.reviewedAt ? 'bg-green-50/40' : 'bg-card'}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">

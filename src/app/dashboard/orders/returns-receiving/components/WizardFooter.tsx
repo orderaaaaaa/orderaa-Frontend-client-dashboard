@@ -38,7 +38,7 @@ export function WizardFooter({
 
   return (
     <>
-      <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 bg-white border rounded-lg border-gray-200 pt-3 px-4 sm:px-6 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] flex flex-col items-center justify-center gap-1 mt-auto">
+      <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 bg-card border rounded-lg border-gray-200 pt-3 px-4 sm:px-6 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] flex flex-col items-center justify-center gap-1 mt-auto">
         <Button
           type="button"
           size="lg"

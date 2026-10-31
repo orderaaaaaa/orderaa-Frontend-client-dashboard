@@ -175,7 +175,7 @@ export function FailedPushList({
           {rows.map((row) => (
             <div
               key={row.id}
-              className="rounded-lg border border-gray-200 bg-white p-3 space-y-1"
+              className="rounded-lg border border-gray-200 bg-card p-3 space-y-1"
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm text-gray-900">
@@ -241,7 +241,7 @@ export function UnlinkedVariantList({
           {rows.map((row) => (
             <div
               key={row.variantId}
-              className="rounded-lg border border-gray-200 bg-white p-3 space-y-1"
+              className="rounded-lg border border-gray-200 bg-card p-3 space-y-1"
             >
               <div className="text-sm text-gray-900">
                 {row.productName} — {row.variantLabel}
@@ -314,7 +314,7 @@ export function PolicyLogList({
           {rows.map((row) => (
             <div
               key={row.id}
-              className="rounded-lg border border-gray-200 bg-white p-3 space-y-1"
+              className="rounded-lg border border-gray-200 bg-card p-3 space-y-1"
             >
               <div className="text-sm text-gray-900">
                 {row.productName} — {row.variantLabel}

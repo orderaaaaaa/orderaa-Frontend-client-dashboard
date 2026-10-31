@@ -93,7 +93,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
           <div
             key={stat.label}
             className={clsx(
-              'flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-xl p-3 sm:p-4',
+              'flex flex-col items-center gap-2 bg-card border border-gray-100 rounded-xl p-3 sm:p-4',
               idx === stats.length - 1 && stats.length % 2 !== 0 && 'col-span-2 sm:col-span-1 max-w-[50%] sm:max-w-none mx-auto sm:mx-0',
             )}
           >

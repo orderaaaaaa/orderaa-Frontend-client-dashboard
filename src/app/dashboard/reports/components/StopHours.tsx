@@ -5,8 +5,8 @@ import { stopHoursData } from '../constants/StopHoursConst';
 
 function StopHours() {
   return (
-    <div className="w-full p-6 bg-white mt-10 rounded-2xl shadow-xl py-10">
-      <h1 className="text-xl font-semibold text-[#292D32]">ساعات التوقف</h1>
+    <div className="w-full p-6 bg-card mt-10 rounded-2xl shadow-xl py-10">
+      <h1 className="text-xl font-semibold text-foreground">ساعات التوقف</h1>
 
       <div className="!w-full flex items-center justify-between max-md:flex-col-reverse max-md:gap-10 mt-10 px-8">
         {/* Left side - progress list */}
@@ -14,10 +14,10 @@ function StopHours() {
           {stopHoursData.map(({ id, value, from, to, total }) => (
             <div key={id} className="flex flex-col gap-3">
               <div className="flex gap-4 items-center">
-                <p className="font-medium text-[#292D32]">{from}</p>
+                <p className="font-medium text-foreground">{from}</p>
                 <ArrowLeft className="w-4" />
-                <p className="font-medium text-[#292D32]">{to}</p>
-                <p className="text-[#292D32] text-[13px]">{total}</p>
+                <p className="font-medium text-foreground">{to}</p>
+                <p className="text-foreground text-[13px]">{total}</p>
               </div>
               <div className="relative flex items-center justify-center w-1 h-1 flex-shrink-0">
                 <svg className="w-16 h-16 absolute top-[-45px] left-[-410px] max-sm:left-[-265px] transform -rotate-90">
@@ -46,17 +46,17 @@ function StopHours() {
                   />
                 </svg>
                 <div className="relative right-[235px] top-[-15px] sm:absolute sm:left-[-525px] sm:top-[-30px]   inset-0 flex flex-col items-center gap-[3px] justify-center">
-                  <span className="text-[#292D32] font-semibold !text-[10px] leading-none">
+                  <span className="text-foreground font-semibold !text-[10px] leading-none">
                     {total.split(' ').slice(0, 2)}
                   </span>
-                  <span className="text-[#292D32] flex justify-center items-center font-semibold !text-[10px] leading-none">
+                  <span className="text-foreground flex justify-center items-center font-semibold !text-[10px] leading-none">
                     {total.split(' ').slice(2, 3)}
                   </span>
                 </div>
               </div>
               <Progress
                 value={value}
-                className="!w-full !max-w-[420px] bg-[#5D24E129]/80 !rounded-md"
+                className="!w-full !max-w-[420px] bg-primary/[0.13] !rounded-md"
               />
             </div>
           ))}
@@ -65,7 +65,7 @@ function StopHours() {
         {/* Right side - circular info */}
         <div className="flex flex-col items-center lg:relative lg:left-30 lg:bottom-4 ">
           <div>
-            <h3 className="mb-5 font-medium text-[#292D32] w-[300px] text-center">
+            <h3 className="mb-5 font-medium text-foreground w-[300px] text-center">
               اول محاولة التواصل بعد الطلب
             </h3>
           </div>

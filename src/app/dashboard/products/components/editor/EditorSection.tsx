@@ -27,7 +27,7 @@ export function EditorSection({
     <section
       id={id}
       aria-labelledby={headingId}
-      className="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm"
+      className="scroll-mt-24 rounded-xl border border-gray-200 bg-card p-4 sm:p-6 shadow-sm"
     >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

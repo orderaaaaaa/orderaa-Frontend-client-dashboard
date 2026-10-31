@@ -23,7 +23,7 @@ export default function OrdersStatusChart(): JSX.Element {
   let startAngle = 0;
 
   return (
-    <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
+    <div className="w-full max-w-3xl p-6 bg-card rounded-2xl shadow-xl">
       <h2 className="font-bold text-lg mb-2 border-b border-gray-200 pb-2">
         توزيع حالات الطلبات{' '}
       </h2>

@@ -122,7 +122,7 @@ export default function EditSupplierModal({
               id="edit-supplier-nickname"
               register={register}
               placeholder="المورد الذهبي"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               error={errors.nickname?.message}
             />
           </div>
@@ -136,7 +136,7 @@ export default function EditSupplierModal({
               id="edit-supplier-officialName"
               register={register}
               placeholder="احمد محمد"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               error={errors.officialName?.message}
             />
           </div>
@@ -152,7 +152,7 @@ export default function EditSupplierModal({
               inputMode="tel"
               register={register}
               placeholder="01200345678"
-              inputClassName="bg-white [direction:ltr] text-left"
+              inputClassName="bg-background [direction:ltr] text-left"
               error={errors.phone?.message}
             />
           </div>
@@ -167,7 +167,7 @@ export default function EditSupplierModal({
               type="email"
               register={register}
               placeholder="ahmed@gmail.com"
-              inputClassName="bg-white [direction:ltr] text-left"
+              inputClassName="bg-background [direction:ltr] text-left"
               error={errors.email?.message}
             />
           </div>

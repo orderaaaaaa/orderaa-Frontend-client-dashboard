@@ -22,7 +22,7 @@ import { ACCESS_LEVEL_OPTIONS } from '@/app/dashboard/employees/constants/employ
 import { EmployeeFormFieldsProps } from '../types/employee.types';
 import { Label } from './Label';
 
-const INPUT_CLASS = '!h-[46px] !px-4 !border-black/16 text-right';
+const INPUT_CLASS = '!h-[46px] !px-4 !border-neutral-300 text-right';
 const DIRTY_VALID = { shouldValidate: true, shouldDirty: true } as const;
 
 export default function EmployeeFormFields({

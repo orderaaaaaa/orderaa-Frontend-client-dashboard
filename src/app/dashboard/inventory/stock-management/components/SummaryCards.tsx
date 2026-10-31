@@ -34,7 +34,7 @@ export function SummaryCards({ items }: SummaryCardsProps) {
         return (
           <div
             key={card.key}
-            className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
+            className="flex items-center gap-4 rounded-xl border border-gray-100 bg-card p-4 shadow-sm"
           >
             <div className={`rounded-lg p-2.5 ${card.bgColor}`}>
               <Icon className={`size-6 ${card.color}`} />

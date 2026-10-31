@@ -168,7 +168,7 @@ const FileUpload = () => {
 
   return (
     <div className="bg-gray-50 px-4 sm:px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
+      <div className="w-full min-w-0 bg-card border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
         <div className="flex gap-3 sm:gap-4 items-start">
           {/* Icon Container */}
           <div className="flex-shrink-0 max-sm:p-2 p-4 bg-[#CCCCCC99] rounded-lg">
@@ -198,7 +198,7 @@ const FileUpload = () => {
               htmlFor={inputId}
               className={`block max-w-[923px] border-2 mx-auto border-dashed rounded-2xl py-12 sm:py-20 px-4 mb-6 transition-all cursor-pointer focus-within:ring-2 focus-within:ring-primary/40 ${isDragging
                 ? 'border-purple-400 bg-purple-50'
-                : 'border-gray-300 hover:border-gray-400 bg-white'
+                : 'border-gray-300 hover:border-gray-400 bg-card'
                 } ${isProcessing ? 'pointer-events-none opacity-60' : ''}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -262,7 +262,7 @@ const FileUpload = () => {
                 type="button"
                 onClick={handleUpload}
                 disabled={isProcessing || !uploadedFile}
-                className="flex cursor-pointer justify-center max-sm:text-base w-full sm:w-auto sm:min-w-[240px] max-w-md min-h-10 sm:h-[46px] text-lg items-center gap-2 px-6 font-normal rounded-full bg-primary text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a1db5]"
+                className="flex cursor-pointer justify-center max-sm:text-base w-full sm:w-auto sm:min-w-[240px] max-w-md min-h-10 sm:h-[46px] text-lg items-center gap-2 px-6 font-normal rounded-full bg-primary text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-hover"
               >
                 {isProcessing ? (
                   <>
@@ -280,7 +280,7 @@ const FileUpload = () => {
                 <button
                   type="button"
                   onClick={handleClearFile}
-                  className="flex min-h-10 items-center font-bold text-[15px] cursor-pointer gap-2 border-2 px-5 text-[#5D24E199] border-[#5D24E199] rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all"
+                  className="flex min-h-10 items-center font-bold text-[15px] cursor-pointer gap-2 border-2 px-5 text-[#5D24E199] border-primary/60 rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all"
                 >
                   <X className="w-5 h-5 " />
                   إلغاء

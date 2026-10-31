@@ -97,13 +97,13 @@ function ProductsTableMobile({
       <div className="relative">
         {/* Loading Overlay */}
         {isRefetching && (
-          <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex justify-center rounded-lg min-h-[200px]">
+          <div className="absolute inset-0 bg-card/70 backdrop-blur-sm z-20 flex justify-center rounded-lg min-h-[200px]">
             <LoadingAnimation />
           </div>
         )}
 
         {products.length === 0 ? (
-          <div className="rounded-xl border bg-white">{emptyContent}</div>
+          <div className="rounded-xl border bg-card">{emptyContent}</div>
         ) : (
           <ul
             className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${
@@ -118,7 +118,7 @@ function ProductsTableMobile({
                   {...(showCheckboxes
                     ? { onClick: () => toggleSelect(product.id) }
                     : {})}
-                  className={`min-w-0 border rounded-xl p-4 bg-white shadow-sm ${
+                  className={`min-w-0 border rounded-xl p-4 bg-card shadow-sm ${
                     showCheckboxes ? 'cursor-pointer' : ''
                   } ${isSelected ? 'ring-2 ring-primary/30 border-primary/30' : ''}`}
                 >

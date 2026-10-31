@@ -228,7 +228,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
                       ${
                         selectedOption === option.id && topUpMutation.isPending
                           ? 'border-purple-500 bg-purple-50 shadow-md'
-                          : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm'
+                          : 'border-gray-200 bg-card hover:border-purple-300 hover:shadow-sm'
                       }
                       disabled:opacity-60 disabled:cursor-not-allowed
                       cursor-pointer

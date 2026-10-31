@@ -192,7 +192,7 @@ export default function PaymentModal({
               placeholder="0.00"
               register={register}
               error={errors.amount?.message}
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               step="0.01"
               min="0"
             />

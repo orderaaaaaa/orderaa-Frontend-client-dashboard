@@ -31,7 +31,7 @@ export function NoticeBadge({ count, onClick }: NoticeBadgeProps) {
       aria-label={t('orderNotices.badge.ariaLabel', { count: formatNumber(count) })}
     >
       <Bell className="w-6 h-6 text-red-600 cursor-pointer" style={{ strokeWidth: 1.5 }} />
-      <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
+      <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-card text-red-600 rounded-full flex items-center justify-center">
         {formatNumber(count)}
       </span>
     </Button>

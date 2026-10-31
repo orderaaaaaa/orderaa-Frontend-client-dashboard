@@ -383,11 +383,11 @@ const EditIntegrationModal = ({
             </div>
 
             {isAutomaticWebhook ? (
-              <p className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
+              <p className="text-sm text-gray-600 bg-card border border-gray-100 rounded-lg p-3">
                 {AUTOMATIC_WEBHOOK_NOTE}
               </p>
             ) : hasGeneratedToken && !tokenOverride ? (
-              <p className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
+              <p className="text-sm text-gray-600 bg-card border border-gray-100 rounded-lg p-3">
                 الرابط لا يُعرض بعد إغلاق النافذة. أعد توليد الرابط للحصول على رابط جديد.
               </p>
             ) : (

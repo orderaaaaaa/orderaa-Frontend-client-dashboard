@@ -26,7 +26,7 @@ export function PackagingNotesSection({
   className = '',
 }: PackagingNotesSectionProps) {
   const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
+    "flex gap-2 bg-card shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-foreground";
 
   return (
     <div className={`flex flex-col gap-2 mt-6 ${className}`}>
@@ -36,7 +36,7 @@ export function PackagingNotesSection({
           <Button
             variant="ghost"
             onClick={onAddClick}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-primary rounded-lg hover:bg-purple-50 transition-colors font-bold"
+            className="flex items-center gap-2 px-4 py-2 bg-card text-primary rounded-lg hover:bg-purple-50 transition-colors font-bold"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة ملاحظة

@@ -64,7 +64,7 @@ export default function FilterPanel({
             updateFilters({ ...filters, shipmentCode: e.target.value })
           }
           placeholder="كود الشحنة"
-          className="max-w-62 px-3 py-2 rounded border  border-gray-300 bg-white"
+          className="max-w-62 px-3 py-2 rounded border  border-gray-300 bg-background"
         />
       </div>
       {/* {"اسم العميل"} */}
@@ -76,7 +76,7 @@ export default function FilterPanel({
             updateFilters({ ...filters, customerName: e.target.value })
           }
           placeholder="اسم العميل"
-          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
+          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-background"
         />
       </div>
       {/* {"رقم الهاتف"} */}
@@ -86,7 +86,7 @@ export default function FilterPanel({
           value={filters.phone}
           onChange={(e) => updateFilters({ ...filters, phone: e.target.value })}
           placeholder="رقم الهاتف"
-          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
+          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-background"
         />
       </div>
       {/* {"تاريخ التنفيز"} */}
@@ -108,7 +108,7 @@ export default function FilterPanel({
           value={filters.phone}
           onChange={(e) => updateFilters({ ...filters, phone: e.target.value })}
           placeholder="اسم الموظف"
-          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
+          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-background"
         />
       </div>
       {/* {"المنتج"} */}
@@ -152,7 +152,7 @@ export default function FilterPanel({
             updateFilters({ ...filters, address: e.target.value })
           }
           placeholder="العنوان"
-          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
+          className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-background"
         />
       </div>
       {/* الاحدث*/}

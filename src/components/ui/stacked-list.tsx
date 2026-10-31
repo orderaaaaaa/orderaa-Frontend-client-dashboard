@@ -17,7 +17,7 @@ export function StackedList({ children, className, label }: StackedListProps) {
   return (
     <ul
       aria-label={label}
-      className={cn('sm:hidden divide-y rounded-md border bg-white', className)}
+      className={cn('sm:hidden divide-y rounded-md border bg-card', className)}
     >
       {children}
     </ul>

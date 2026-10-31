@@ -54,7 +54,7 @@ function ClientInformation({
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">معلومات العميل</h1>
         <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8">
           <div data-field-error="name">
@@ -69,7 +69,7 @@ function ClientInformation({
               type="text"
               placeholder="أدخل الاسم الكامل للعميل"
               className="max-w-[502px]"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               error={errors?.name}
@@ -86,7 +86,7 @@ function ClientInformation({
                   variant="ghost"
                   size="sm"
                   onClick={handleAddPhone}
-                  className="flex min-h-10 items-center gap-1 text-primary hover:text-[#4B1BC4] hover:bg-purple-50 px-2 py-1 h-auto"
+                  className="flex min-h-10 items-center gap-1 text-primary hover:text-primary hover:bg-purple-50 px-2 py-1 h-auto"
                 >
                   <LiaPlusSolid className="w-4 h-4" />
                   <span className="text-sm font-medium">إضافة رقم</span>
@@ -106,7 +106,7 @@ function ClientInformation({
                     aria-label={index === 0 ? undefined : `رقم الهاتف ${index + 1}`}
                     placeholder="01xxxxxxxxx"
                     className="max-w-[502px] flex-1"
-                    inputClassName="bg-white"
+                    inputClassName="bg-background"
                     value={phone}
                     onChange={(e) => handlePhoneChange(index, e.target.value)}
                     error={
@@ -140,7 +140,7 @@ function ClientInformation({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsModalOpen(true)}
-                    className="text-primary hover:text-[#4B1BC4] hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold me-auto"
+                    className="text-primary hover:text-primary hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold me-auto"
                   >
                     عرض الطلبات
                   </Button>
@@ -160,7 +160,7 @@ function ClientInformation({
               id="manual-customer-address"
               name="address"
               placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
-              className="max-w-[1158px] h-[162px] bg-white"
+              className="max-w-[1158px] h-[162px] bg-card"
               value={address}
               onChange={(e) => onAddressChange(e.target.value)}
               error={errors?.address}
@@ -176,7 +176,7 @@ function ClientInformation({
               id="manual-customer-notes"
               name="notes"
               placeholder="ملاحظات إضافية (اختياري)"
-              className="max-w-[1158px] h-[162px] bg-white mb-10"
+              className="max-w-[1158px] h-[162px] bg-card mb-10"
               value={notes}
               onChange={(e) => onNotesChange(e.target.value)}
               error={errors?.notes}

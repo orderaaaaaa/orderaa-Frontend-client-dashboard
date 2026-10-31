@@ -142,7 +142,7 @@ export default function OrderCard({
   return (
     <div
       onClick={disableNavigation ? handleToggleClick : undefined}
-      className={`relative w-full h-full max-w-full overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
+      className={`relative w-full h-full max-w-full overflow-hidden bg-card shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
         ? ''
         : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
         }`}
@@ -166,9 +166,9 @@ export default function OrderCard({
         {code && code !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-start gap-2 max-w-full">
             <CopyableCode value={code} label="نسخ كود الطلب" className="min-w-0 max-w-full">
-              <span className="text-base font-medium text-black break-words min-w-0">{code}</span>
+              <span className="text-base font-medium text-foreground break-words min-w-0">{code}</span>
             </CopyableCode>
-            <span className="text-base font-normal text-black flex-shrink-0">الكود :</span>
+            <span className="text-base font-normal text-foreground flex-shrink-0">الكود :</span>
             <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
           </div>
         )}
@@ -177,11 +177,11 @@ export default function OrderCard({
         {!hideCustomerInfo && name && name !== 'غير محدد' && (
           <div className="flex flex-row items-center justify-between w-full">
             <div className="flex flex-row-reverse items-start gap-2 min-w-0">
-              <span className="text-base font-medium text-black break-words min-w-0">{name}</span>
+              <span className="text-base font-medium text-foreground break-words min-w-0">{name}</span>
 
               <User
                 className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
               />
             </div>
 
@@ -199,7 +199,7 @@ export default function OrderCard({
                 >
                   <TriangleAlert
                     className="w-6 h-6 text-red-600 cursor-pointer"
-                    style={{ strokeWidth: 1.5 }}
+                    style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
                   />
                   <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
                     {repeatCount}
@@ -219,7 +219,7 @@ export default function OrderCard({
                       e.stopPropagation();
                       setIsNotesModalOpen(true);
                     }}
-                    className="flex items-center gap-1 p-1 px-3 h-auto bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm hover:bg-[#f0d4d4] transition-colors"
+                    className="flex items-center gap-1 p-1 px-3 h-auto bg-red-50 border-2 border-red-200 rounded-sm hover:bg-red-100 transition-colors"
                   >
                     <MdBlock size={18} className="text-[#dc0201]" />
                     <span className="text-[#dc0201] text-xs">محظور</span>
@@ -239,12 +239,12 @@ export default function OrderCard({
                 key={index}
                 className="flex flex-row-reverse items-start gap-2 max-w-full"
               >
-                <span className="text-base font-medium text-black break-words min-w-0" dir="ltr">
+                <span className="text-base font-medium text-foreground break-words min-w-0" dir="ltr">
                   {phone}
                 </span>
                 <Phone
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                  style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                  style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
                 />
               </div>
             ))}
@@ -252,14 +252,14 @@ export default function OrderCard({
         {/* Location */}
         {(government || city) && (
           <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-            <span className="text-base font-medium text-black break-words min-w-0">
+            <span className="text-base font-medium text-foreground break-words min-w-0">
               {[government, city]
                 .filter((v) => v && v !== 'غير محدد')
                 .join(' - ')}
             </span>
             <MapPin
               className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-              style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
             />
           </div>
         )}
@@ -267,10 +267,10 @@ export default function OrderCard({
         {/* Address */}
         {!hideCustomerInfo && (
           <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-            <span className="text-base font-medium text-black break-words min-w-0">{address}</span>
+            <span className="text-base font-medium text-foreground break-words min-w-0">{address}</span>
             <MapPinHouse
               className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-              style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
             />
           </div>
         )}
@@ -280,9 +280,9 @@ export default function OrderCard({
               <div key={index} className="flex items-start gap-2 max-w-full">
                 <Package
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                  style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                  style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
                 />
-                <span className="text-base font-medium text-black break-words min-w-0">
+                <span className="text-base font-medium text-foreground break-words min-w-0">
                   {pv.productName}
                   {/* Intentional: compact card shows attribute VALUE only (e.g. "XL"), not "name: value", to save horizontal space. Detail/PDF views show the full "name: value" form. */}
                   {pv.attributes.length > 0 && ` - ${pv.attributes.map((a) => a.value).join(' ')}`}
@@ -298,9 +298,9 @@ export default function OrderCard({
                   <div key={index} className="flex items-start gap-2 max-w-full">
                     <Package
                       className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                      style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                      style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
                     />
-                    <span className="text-base font-medium text-black break-words min-w-0">
+                    <span className="text-base font-medium text-foreground break-words min-w-0">
                       {item}
                     </span>
                   </div>
@@ -310,9 +310,9 @@ export default function OrderCard({
                 <div className="flex items-start gap-2 max-w-full">
                   <Package
                     className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                    style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                    style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
                   />
-                  <span className="text-base font-medium text-black break-words min-w-0">
+                  <span className="text-base font-medium text-foreground break-words min-w-0">
                     {items[0]}
                   </span>
                 </div>
@@ -324,12 +324,12 @@ export default function OrderCard({
               <div className="flex items-start gap-2 max-w-full">
                 <CiBarcode
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                  style={{ color: 'rgba(0,0,0,0.5)' }}
+                  style={{ color: 'var(--muted-foreground)' }}
                 />
                 <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                  <span className="text-sm font-semibold text-black">SKU:</span>
+                  <span className="text-sm font-semibold text-foreground">SKU:</span>
                   {productVariants.filter((pv) => pv.sku).map((pv, index) => (
-                    <span key={index} className="text-sm font-medium text-black">
+                    <span key={index} className="text-sm font-medium text-foreground">
                       <CopyableCode value={pv.sku} label="نسخ كود المنتج" className="min-w-0 max-w-full">
                         {pv.sku}
                       </CopyableCode>
@@ -342,12 +342,12 @@ export default function OrderCard({
             <div className="flex items-start gap-2 max-w-full">
               <CiBarcode
                 className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                style={{ color: 'rgba(0,0,0,0.5)' }}
+                style={{ color: 'var(--muted-foreground)' }}
               />
               <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                <span className="text-sm font-semibold text-black">SKU:</span>
+                <span className="text-sm font-semibold text-foreground">SKU:</span>
                 {itemSkus.filter(Boolean).map((sku, index) => (
-                  <span key={index} className="text-sm font-medium text-black">
+                  <span key={index} className="text-sm font-medium text-foreground">
                     <CopyableCode value={sku} label="نسخ كود المنتج" className="min-w-0 max-w-full">
                       {sku}
                     </CopyableCode>
@@ -367,7 +367,7 @@ export default function OrderCard({
               height={18}
               className="opacity-50"
             />
-            <span className="text-base font-medium text-black">
+            <span className="text-base font-medium text-foreground">
               {price} جنيه
             </span>
             {/* T8. Absence is the common case and the card is already dense,
@@ -409,7 +409,7 @@ export default function OrderCard({
           <div className="flex flex-row items-center gap-2 max-w-full flex-wrap">
             <Truck className="opacity-30 flex-shrink-0" height={18} />
             <CopyableCode value={shippingId} label="نسخ كود الشحن" className="min-w-0 max-w-full">
-              <span className="text-base font-medium text-black break-words min-w-0">
+              <span className="text-base font-medium text-foreground break-words min-w-0">
                 {shippingId}
               </span>
             </CopyableCode>
@@ -526,10 +526,10 @@ export default function OrderCard({
           {customerNotes && (Array.isArray(customerNotes) ? customerNotes.length > 0 : customerNotes.trim().length > 0) ? (
             Array.isArray(customerNotes) ? (
               customerNotes.map((note, index) => (
-                <p key={index} className="text-base text-[#1F1F1F] whitespace-pre-wrap">{note}</p>
+                <p key={index} className="text-base text-foreground whitespace-pre-wrap">{note}</p>
               ))
             ) : (
-              <p className="text-base text-[#1F1F1F] whitespace-pre-wrap">{customerNotes}</p>
+              <p className="text-base text-foreground whitespace-pre-wrap">{customerNotes}</p>
             )
           ) : (
             <div className="flex flex-col items-center justify-center py-8 gap-3">

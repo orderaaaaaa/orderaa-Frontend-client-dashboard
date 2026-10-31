@@ -71,7 +71,7 @@ export function EmployeeSearchFilter({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="flex relative items-center mt-6 sm:mt-12 md:w-1/2 bg-white border border-gray-200 rounded-full shadow-sm ps-4 pe-1 py-1">
+      <div className="flex relative items-center mt-6 sm:mt-12 md:w-1/2 bg-card border border-gray-200 rounded-full shadow-sm ps-4 pe-1 py-1">
         {/* أيقونة البحث على اليسار */}
         <div className="flex-shrink-0">
           <Search className="text-gray-400" size={20} aria-hidden />
@@ -109,14 +109,14 @@ export function EmployeeSearchFilter({
               onClick={() => setShowFilterDropdown(false)}
             />
 
-            <div className="absolute inset-x-0 sm:inset-x-auto sm:end-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
+            <div className="absolute inset-x-0 sm:inset-x-auto sm:end-0 top-full mt-2 bg-card border border-gray-200 rounded-lg shadow-lg z-20 max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3  items-center justify-between">
+              <div className="sticky top-0 bg-card border-b border-gray-200 px-4 py-3  items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearAllFilters}
-                    className="text-sm bg-primary hover:bg-[#6b33ee] p-2 rounded-lg font-semibold text-white cursor-pointer flex items-center gap-1"
+                    className="text-sm bg-primary hover:bg-brand-hover p-2 rounded-lg font-semibold text-white cursor-pointer flex items-center gap-1"
                   >
                     <X size={16} />
                     مسح الكل

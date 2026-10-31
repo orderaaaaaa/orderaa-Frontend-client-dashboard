@@ -26,7 +26,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
       : 'إنشاء ربط جديد';
 
   return (
-    <div className="relative bg-white rounded-2xl p-5 sm:p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col min-h-0 sm:min-h-[400px]">
+    <div className="relative bg-card rounded-2xl p-5 sm:p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col min-h-0 sm:min-h-[400px]">
       {isConnected && canInteract && (
         <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
           <LiaCheckCircleSolid className="w-3 h-3" />
@@ -60,8 +60,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
           'w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto',
           canInteract
             ? isConnected
-              ? 'bg-gray-600 hover:bg-gray-700'
-              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+              ? 'bg-gray-500 hover:brightness-90'
+              : 'bg-primary hover:bg-brand-hover active:bg-[#3D17A0]'
             : 'bg-gray-400 cursor-not-allowed'
         )}
       >

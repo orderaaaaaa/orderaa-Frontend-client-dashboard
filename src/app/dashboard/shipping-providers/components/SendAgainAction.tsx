@@ -69,13 +69,13 @@ function SendAgainReasonModal({
           <div className="flex flex-col items-start gap-2">
             <Badge
               variant="outline"
-              className="rounded-full border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-amber-900 dark:text-amber-200"
+              className="rounded-full border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-amber-900"
             >
               {t('inProcess.sendAgain.resendBadge')}
             </Badge>
-            <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200 [&>svg]:text-current">
+            <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-900 [&>svg]:text-current">
               <Info className="size-4" />
-              <AlertDescription className="text-amber-900 dark:text-amber-200">
+              <AlertDescription className="text-amber-900">
                 {t('inProcess.sendAgain.resendNotSupported')}
               </AlertDescription>
             </Alert>

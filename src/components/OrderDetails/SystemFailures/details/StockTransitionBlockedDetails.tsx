@@ -40,7 +40,7 @@ export function StockTransitionBlockedDetails({
   return (
     <div className="flex flex-col gap-3">
       {sameStatus && (
-        <p className="text-sm font-medium text-[#1F1F1F]">
+        <p className="text-sm font-medium text-foreground">
           {t('orderDetails.stockTransition.sameStatus', {
             status: getStatusLabel(details.fromStatus),
           })}

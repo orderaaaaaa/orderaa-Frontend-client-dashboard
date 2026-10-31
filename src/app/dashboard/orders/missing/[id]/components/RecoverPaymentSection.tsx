@@ -65,7 +65,7 @@ function RecoverPaymentSection({
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">الدفع</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -83,7 +83,7 @@ function RecoverPaymentSection({
               }}
               options={paymentMethodOptions}
               placeholder="اختر طريقة الدفع"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentMethod ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentMethod ? 'border-red-500' : 'border-gray-300'}`}
               loading={isLoading}
               searchThreshold={5}
             />
@@ -108,7 +108,7 @@ function RecoverPaymentSection({
               }}
               options={PAYMENT_STATUS_OPTIONS.map((s) => ORDER_PAYMENT_STATUS_LABELS[s])}
               placeholder="اختر حالة الدفع"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentStatus ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentStatus ? 'border-red-500' : 'border-gray-300'}`}
               searchThreshold={5}
             />
             {errors?.paymentStatus && (
@@ -127,7 +127,7 @@ function RecoverPaymentSection({
               type="number"
               placeholder="0.00"
               className="w-full"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               value={prepaidAmount}
               disabled={isCashOnDelivery}
               onChange={(e) => onPrepaidAmountChange(e.target.value)}

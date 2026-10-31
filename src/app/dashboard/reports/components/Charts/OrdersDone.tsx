@@ -20,7 +20,7 @@ export default function OrdersAttempted(): JSX.Element {
   }, []);
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
+    <div className="w-full max-w-3xl bg-card rounded-3xl shadow-xl p-8">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">
@@ -93,7 +93,7 @@ export default function OrdersAttempted(): JSX.Element {
                 <span className="text-gray-400 w-8 text-sm text-right">
                   {bar.total}
                 </span>
-                <div className="relative flex-1 h-2 rounded-full bg-[#EAE6F6] overflow-hidden">
+                <div className="relative flex-1 h-2 rounded-full bg-primary/10 overflow-hidden">
                   <div
                     className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-primary to-[#B39DFF] transition-all duration-500"
                     style={{ width: `${value}%` }}

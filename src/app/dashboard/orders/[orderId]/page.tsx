@@ -136,7 +136,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               variant="default"
               size="lg"
               onClick={() => window.history.back()}
-              className="rounded-lg hover:bg-[#4a1db5]"
+              className="rounded-lg hover:bg-brand-hover"
             >
               العودة للطلبات
             </Button>
@@ -177,7 +177,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
                 onValueChange={(value) => setTimePeriod(value as TimePeriod)}
               >
                 <SelectTrigger
-                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                  className={`w-full border-gray-300 rounded-lg h-10 text-[16px] ${
                     timePeriod ? 'text-primary font-bold' : ''
                   }`}
                 >
@@ -250,7 +250,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               variant="default"
               size="lg"
               onClick={() => window.history.back()}
-              className="rounded-lg hover:bg-[#4a1db5]"
+              className="rounded-lg hover:bg-brand-hover"
             >
               العودة للطلبات
             </Button>
@@ -296,7 +296,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               onValueChange={(value) => setTimePeriod(value as TimePeriod)}
             >
               <SelectTrigger
-                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                className={`w-full border-gray-300 rounded-lg h-10 text-[16px] ${
                   timePeriod ? 'text-primary font-bold' : ''
                 }`}
               >
@@ -354,7 +354,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
       </div>
       <div className="relative">
         {isNavigating && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10 rounded-lg">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               <p className="mt-2 text-gray-600 text-sm">جاري البحث...</p>

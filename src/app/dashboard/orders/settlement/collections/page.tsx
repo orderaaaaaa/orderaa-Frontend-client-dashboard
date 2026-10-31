@@ -205,7 +205,7 @@ export default function CollectionsPage() {
           onChange={(e) => setSearchInput(e.target.value)}
           clearable
           onClear={() => setSearchInput('')}
-          inputClassName="pr-10 bg-white"
+          inputClassName="pr-10 bg-background"
         />
       </div>
 
@@ -244,7 +244,7 @@ export default function CollectionsPage() {
                     setSelectedBatch(batch);
                   }
                 }}
-                className={`border rounded-xl p-4 flex flex-col gap-3 bg-white cursor-pointer text-right transition-colors ${
+                className={`border rounded-xl p-4 flex flex-col gap-3 bg-card cursor-pointer text-right transition-colors ${
                   selected?.id === batch.id
                     ? 'border-primary'
                     : 'border-gray-200 hover:border-primary/40'

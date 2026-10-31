@@ -8,7 +8,7 @@ export function StockScopeListSkeleton({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <li
           key={i}
-          className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
+          className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-card p-4 shadow-sm"
           aria-hidden="true"
         >
           <div className="flex items-center gap-3">

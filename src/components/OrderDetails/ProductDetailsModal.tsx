@@ -45,9 +45,9 @@ export default function ProductDetailsModal({
 
     return (
       <div className="flex justify-between items-center py-2 border-b border-gray-100">
-        <span className="text-[#1F1F1F] font-bold text-sm">{label}:</span>
+        <span className="text-foreground font-bold text-sm">{label}:</span>
         <span
-          className={`text-sm ${isEmpty ? 'text-red-500' : 'text-[#5F5E5E]'}`}
+          className={`text-sm ${isEmpty ? 'text-red-500' : 'text-muted-foreground'}`}
         >
           {valueNode}
         </span>
@@ -69,9 +69,9 @@ export default function ProductDetailsModal({
             <img
               src={product.image || '/wireless-headphones.png'}
               alt={product.name}
-              className="w-[150px] h-[150px] object-cover rounded-xl border-2 border-[#B8A3EB] mb-3"
+              className="w-[150px] h-[150px] object-cover rounded-xl border-2 border-primary/50 mb-3"
             />
-            <h3 className="text-xl font-bold text-[#1E1E1E] text-center px-4">
+            <h3 className="text-xl font-bold text-foreground text-center px-4">
               {product.name}
             </h3>
           </div>

@@ -4,7 +4,7 @@ import { egyptRegions } from '../../constants/EgyptMapSectionConst';
 
 export default function EgyptMapSection() {
   return (
-    <div className="bg-white rounded-2xl  p-6 flex flex-col mt-10 shadow-xl">
+    <div className="bg-card rounded-2xl  p-6 flex flex-col mt-10 shadow-xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-bold text-lg text-right border-b-2 border-purple-600 pb-1 w-fit">

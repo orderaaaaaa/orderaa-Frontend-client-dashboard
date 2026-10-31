@@ -95,7 +95,7 @@ function AddSupplierForm() {
                 id="add-supplier-nickname"
                 register={register}
                 placeholder="المورد الذهبي"
-                inputClassName="bg-white"
+                inputClassName="bg-background"
                 error={errors.nickname?.message}
               />
             </div>
@@ -109,7 +109,7 @@ function AddSupplierForm() {
                 id="add-supplier-officialName"
                 register={register}
                 placeholder="احمد محمد"
-                inputClassName="bg-white"
+                inputClassName="bg-background"
                 error={errors.officialName?.message}
               />
             </div>
@@ -125,7 +125,7 @@ function AddSupplierForm() {
                 inputMode="tel"
                 register={register}
                 placeholder="01200345678"
-                inputClassName="bg-white [direction:ltr] text-left"
+                inputClassName="bg-background [direction:ltr] text-left"
                 error={errors.phone?.message}
               />
             </div>
@@ -140,7 +140,7 @@ function AddSupplierForm() {
                 type="email"
                 register={register}
                 placeholder="ahmed@gmail.com"
-                inputClassName="bg-white [direction:ltr] text-left"
+                inputClassName="bg-background [direction:ltr] text-left"
                 error={errors.email?.message}
               />
             </div>

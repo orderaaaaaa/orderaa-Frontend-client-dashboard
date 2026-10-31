@@ -46,7 +46,7 @@ export default function AutoConfirmationPage() {
           </h1>
         </div>
 
-        <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-white/60 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(85,33,206,0.15)]">
+        <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-card/60 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(85,33,206,0.15)]">
           <div
             aria-hidden
             className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-primary/20 blur-3xl pointer-events-none"
@@ -78,15 +78,15 @@ export default function AutoConfirmationPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 md:flex-nowrap md:gap-3 md:flex-shrink-0">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
                 <LiaClockSolid className="w-3.5 h-3.5 text-primary" />
                 توفير الوقت
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
                 <LiaChartLineSolid className="w-3.5 h-3.5 text-primary" />
                 زيادة التأكيد
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
                 <LiaInfinitySolid className="w-3.5 h-3.5 text-primary" />
                 عمل 24/7
               </span>

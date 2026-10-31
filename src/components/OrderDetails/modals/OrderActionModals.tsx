@@ -247,12 +247,12 @@ export function OrderActionModals({
       >
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">الملاحظة</label>
+            <label className="font-bold text-foreground">الملاحظة</label>
             <textarea
               value={newPackagingNote}
               onChange={(e) => setNewPackagingNote(e.target.value)}
               placeholder="أدخل ملاحظة للتغليف..."
-              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full border border-border rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>

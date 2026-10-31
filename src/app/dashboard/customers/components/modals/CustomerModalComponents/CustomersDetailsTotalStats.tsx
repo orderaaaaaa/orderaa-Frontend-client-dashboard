@@ -26,10 +26,10 @@ function CustomersDetailsTotalStats({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
-        <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
+        <div className="bg-primary/20 p-2 text-center text-gray-900 font-medium text-sm">
           آخر طلب
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <LiaCalendarAltSolid className="w-4 h-4 text-gray-400" />
             <p className="font-bold text-sm">
@@ -51,10 +51,10 @@ function CustomersDetailsTotalStats({
       </div>
 
       <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
-        <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
+        <div className="bg-primary/20 p-2 text-center text-gray-900 font-medium text-sm">
           عدد الطلبات
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-card p-4">
           <div className="flex items-center gap-2">
             <LiaShoppingBagSolid className="w-5 h-5 text-gray-400" />
             <p className="text-xl font-bold">{numberOfOrders}</p>
@@ -66,10 +66,10 @@ function CustomersDetailsTotalStats({
       </div>
 
       <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
-        <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
+        <div className="bg-primary/20 p-2 text-center text-gray-900 font-medium text-sm">
           إجمالي المشتريات
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-card p-4">
           <div className="flex items-center gap-2">
             <LiaMoneyBillWaveSolid className="text-gray-600 w-5 h-5" />
             <p className="text-xl font-bold">{formatAmount(totalAmount)}</p>
@@ -78,10 +78,10 @@ function CustomersDetailsTotalStats({
       </div>
 
       <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
-        <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
+        <div className="bg-primary/20 p-2 text-center text-gray-900 font-medium text-sm">
           معلومات التواصل
         </div>
-        <div className="bg-white p-4">
+        <div className="bg-card p-4">
           <div className="flex flex-col gap-2">
             {phoneNumbers.map((phone: string, index: number) => (
               <div key={index} className="flex items-center gap-2">

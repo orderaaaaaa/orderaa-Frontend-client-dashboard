@@ -75,7 +75,7 @@ const CustomerBanConfirmationModal: React.FC<
             placeholder="اكتب ملاحظاتك هنا..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="bg-white"
+            className="bg-card"
           />
         )}
 
@@ -84,8 +84,8 @@ const CustomerBanConfirmationModal: React.FC<
             onClick={handleConfirm}
             className={`w-full sm:flex-1 py-3 font-bold rounded-xl text-white ${
               isUnbanning
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-primary hover:bg-[#4a1cb5]'
+                ? 'bg-green-600 hover:brightness-90'
+                : 'bg-primary hover:bg-brand-hover'
             }`}
           >
             {isUnbanning ? 'تأكيد إلغاء الحظر' : 'تأكيد الحظر'}

@@ -155,7 +155,7 @@ export default function EmployeeForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmitHandler)}
-      className="space-y-6 bg-white p-4 sm:p-6 rounded-lg shadow"
+      className="space-y-6 bg-card p-4 sm:p-6 rounded-lg shadow"
       dir="rtl"
       noValidate
     >

@@ -120,7 +120,7 @@ function ScopeCard({ row }: { row: ScopeRow }) {
   return (
     <li
       className={clsx(
-        'group relative flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary/60',
+        'group relative flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-card p-4 shadow-sm transition hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary/60',
         row.isInactive && 'opacity-70'
       )}
     >
@@ -202,7 +202,7 @@ function ListMessage({
   return (
     <li
       className={clsx(
-        'flex min-h-14 flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-4 shadow-sm',
+        'flex min-h-14 flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-card px-4 py-4 shadow-sm',
         tone === 'error' && 'bg-red-50/40'
       )}
     >
@@ -253,7 +253,7 @@ export function StockScopeList() {
 
   if (!canReadPhysical) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white py-12 text-gray-400 shadow-sm">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-card py-12 text-gray-400 shadow-sm">
         <LiaLockSolid className="mb-3 size-12" />
         <p className="text-base font-medium text-gray-600">
           ليس لديك صلاحية عرض المخزون

@@ -107,7 +107,7 @@ export default function CopyField({
         aria-label={label}
         autoComplete="off"
         className={cn(
-          'w-full border border-gray-200 rounded-lg py-3 px-4 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary',
+          'w-full border border-gray-200 rounded-lg py-3 px-4 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary',
           canMask && 'font-mono',
           inputClassName
         )}

@@ -451,7 +451,7 @@ export function ShippingOrdersContent() {
         onPrintFlowOpenChange={setIsPrintFlowOpen}
       />
 
-      <div className="mt-4 bg-white rounded-xl shadow-sm px-4 py-3">
+      <div className="mt-4 bg-card rounded-xl shadow-sm px-4 py-3">
         <ScanInput
           onSubmit={handleScan}
           isBusy={isScanLoading}

@@ -57,14 +57,14 @@ export function EditableTextField({
   });
 
   const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
+    "flex gap-2 bg-background shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-foreground";
 
   const isEmpty = !value;
   const displayValue = isEmpty ? '-' : value;
 
   return (
     <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
-      <p className="font-bold text-[#121212]">{label}</p>
+      <p className="font-bold text-foreground">{label}</p>
       <div className={`${tagStyle} relative w-full overflow-hidden`}>
         {Icon && <Icon size={18} className="flex-shrink-0 self-start mt-1" />}
         {field.isEditing && canEdit ? (

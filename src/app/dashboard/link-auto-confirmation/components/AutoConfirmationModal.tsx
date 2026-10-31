@@ -166,7 +166,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
 
           <div className="rounded-xl flex items-center p-6 bg-primary/5 border border-primary/10">
             <div className="flex items-center gap-4 w-full">
-              <div className="flex items-center justify-center w-16 h-16 bg-white border border-primary/30 shadow-sm rounded-lg overflow-hidden">
+              <div className="flex items-center justify-center w-16 h-16 bg-card border border-primary/30 shadow-sm rounded-lg overflow-hidden">
                 <Image
                   src={provider.logo}
                   alt={provider.name}
@@ -184,7 +184,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
                   اتبع التعليمات أدناه لإكمال الربط
                 </p>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-primary bg-white px-3 py-1.5 rounded-full border border-primary/20">
+              <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-primary bg-card px-3 py-1.5 rounded-full border border-primary/20">
                 <LiaBoltSolid className="w-3.5 h-3.5" />
                 تأكيد آلي
               </div>
@@ -214,7 +214,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-4 pt-0 border-t border-gray-200">
-                  <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+                  <div className="aspect-video bg-black rounded-lg flex items-center justify-center">
                     <div className="text-center text-white">
                       <LiaPlaySolid className="w-16 h-16 mx-auto mb-2 opacity-50" />
                       <p className="text-sm opacity-75">
@@ -338,7 +338,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
                     type="button"
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white"
+                    className="flex-1 h-10 bg-red-600 hover:brightness-90 text-white"
                   >
                     {isDeleting ? 'جاري الحذف...' : 'تأكيد الإلغاء'}
                   </Button>
@@ -370,7 +370,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
                     ? 'submit-disabled-reason'
                     : undefined
                 }
-                className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
+                className="flex-1 bg-primary hover:bg-brand-hover h-12 text-lg"
               >
                 {isSaving
                   ? 'جاري الحفظ...'

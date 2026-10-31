@@ -16,8 +16,8 @@ const getStatusBadge = (status?: 'active' | 'inactive') => {
     <span
       className={`px-4 py-1 font-semibold rounded-md border inline-block text-sm ${
         isActive
-          ? 'bg-[#f7fdf5] text-[#3cc900] border-[#3cc900]'
-          : 'bg-[#f5f5f5] text-[#626262] border-[#626262]'
+          ? 'bg-green-50 text-[#3cc900] border-[#3cc900]'
+          : 'bg-muted text-muted-foreground border-muted-foreground'
       }`}
     >
       {isActive ? 'نشط' : 'غير نشط'}
@@ -36,7 +36,7 @@ function StoresTable({ data, headers }: StoresTableProps) {
         {data.map((row) => (
           <div
             key={row.id}
-            className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm"
+            className="bg-card p-5 rounded-lg border border-gray-100 shadow-sm"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex flex-col gap-1">
@@ -85,10 +85,10 @@ function StoresTable({ data, headers }: StoresTableProps) {
       </div>
 
       {/* ---------- Desktop ---------- */}
-      <div className="hidden md:block overflow-x-auto bg-white rounded-lg p-8">
+      <div className="hidden md:block overflow-x-auto bg-card rounded-lg p-8">
         <table className="w-full min-w-[1000px] border-collapse table-fixed">
           <thead>
-            <tr className="bg-[#f2edfd] text-sm">
+            <tr className="bg-primary/10 text-sm">
               {tableHeaders.map((header) => (
                 <th
                   key={header.id}
@@ -101,7 +101,7 @@ function StoresTable({ data, headers }: StoresTableProps) {
             </tr>
           </thead>
 
-          <tbody className="bg-white">
+          <tbody className="bg-card">
             {data.map((row, index) => (
               <tr
                 key={row.id}

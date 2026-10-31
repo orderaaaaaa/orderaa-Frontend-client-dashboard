@@ -61,8 +61,8 @@ export function StatusSelect({
           className={clsx(
             'flex items-center gap-2 font-medium truncate',
             !selected && 'text-gray-600',
+            selected && selected.valueColor,
           )}
-          style={selected ? { color: selected.valueColor } : undefined}
         >
           {selected ? (
             <>
@@ -97,7 +97,7 @@ export function StatusSelect({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-[200] sm:mt-2 w-full bg-white border rounded-xl shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-[200] sm:mt-2 w-full bg-card border rounded-xl shadow-lg max-h-60 overflow-auto">
           {LEADS_STATS_CONFIG.map((status) => (
             <div
               key={status.key}

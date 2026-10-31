@@ -82,7 +82,7 @@ export default function LightfunnelsWebhookCleanupDialog({
       title={DIALOG_TITLE}
       onConfirm={() => onConfirm(webhooks.map((webhook) => webhook.id))}
       confirmText={CONFIRM_TEXT}
-      confirmButtonClassName="min-h-[33px] sm:min-h-[37px] px-4 bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-red-700 transition-colors text-white hover:text-white disabled:opacity-50"
+      confirmButtonClassName="min-h-[33px] sm:min-h-[37px] px-4 bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:brightness-90 transition-colors text-white hover:text-white disabled:opacity-50"
       cancelText={CANCEL_TEXT}
       isLoading={busy}
       confirmDisabled={webhooks.length === 0}

@@ -210,7 +210,7 @@ function VariantRows({ control, edits, onEdit, disabled }: VariantRowsProps) {
         return (
           <div
             key={key}
-            className="grid grid-cols-2 sm:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] gap-2 sm:items-end rounded-lg border border-gray-200 bg-white p-3"
+            className="grid grid-cols-2 sm:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] gap-2 sm:items-end rounded-lg border border-gray-200 bg-card p-3"
           >
             <span className="col-span-2 sm:col-span-1 text-sm font-semibold text-gray-800 min-w-0 break-words sm:self-center">
               {label}
@@ -437,7 +437,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           />
         </div>
 
-        <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-8 -mb-6 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-white px-4 sm:px-8 py-3">
+        <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-8 -mb-6 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-card px-4 sm:px-8 py-3">
           <Button
             type="button"
             variant="outline"

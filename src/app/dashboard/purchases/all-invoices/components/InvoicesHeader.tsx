@@ -28,7 +28,7 @@ const InvoicesHeader = memo(() => {
       )}
       <div>
         <h1 className="ps-2 border-s-4 border-primary text-xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">ادارة الفواتير</h1>
-        <p className="ps-3 text-base sm:text-2xl text-black/90">نظام ادارة الفواتير و المشتريات</p>
+        <p className="ps-3 text-base sm:text-2xl text-foreground/90">نظام ادارة الفواتير و المشتريات</p>
       </div>
     </div>
   );

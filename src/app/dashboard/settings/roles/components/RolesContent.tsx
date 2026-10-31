@@ -274,7 +274,7 @@ export function RolesContent() {
         onClose={closeDelete}
         title="حذف الدور"
         confirmText={forceDelete ? 'حذف وإلغاء الإسناد' : 'حذف'}
-        confirmButtonClassName="bg-red-600 hover:bg-red-700 min-w-[120px] px-4 h-10 sm:min-w-[200px] sm:h-[37px] border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center"
+        confirmButtonClassName="bg-red-600 hover:brightness-90 min-w-[120px] px-4 h-10 sm:min-w-[200px] sm:h-[37px] border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center"
         onConfirm={confirmDelete}
         isLoading={deleteMutation.isPending}
         maxWidth="md:max-w-[460px]"

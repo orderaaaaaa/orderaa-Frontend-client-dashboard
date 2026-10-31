@@ -34,7 +34,7 @@ function CustomerService() {
         <CallDistributionChart />
         <TotalOrdersChart />
         <SuccessfulCallDates />
-        <div className="relative bg-white rounded-2xl pb-6 shadow-xl max-w-3xl">
+        <div className="relative bg-card rounded-2xl pb-6 shadow-xl max-w-3xl">
           <Swiper
             modules={[Pagination]}
             pagination={{

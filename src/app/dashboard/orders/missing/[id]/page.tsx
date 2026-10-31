@@ -63,7 +63,7 @@ export default function MissingOrderDetailPage() {
         <RecoverOrderForm id={id} row={row} />
       ) : (
         <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-          <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-3">
+          <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-3">
             <div>
               <span className="block text-xs text-gray-500">الحالة</span>
               <span className="font-semibold">{MISSING_ORDER_STATUS_LABELS[row.status]}</span>

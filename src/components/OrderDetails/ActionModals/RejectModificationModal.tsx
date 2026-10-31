@@ -40,7 +40,7 @@ export default function RejectModificationModal({
     >
       <div className="space-y-4">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
+          <label className="font-bold text-foreground flex items-center gap-2">
             <LiaCommentDotsSolid className="w-5 h-5" />
             سبب رفض التعديل <span className="text-red-600">*</span>
           </label>
@@ -48,7 +48,7 @@ export default function RejectModificationModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="أضف سبب رفض التعديل..."
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[150px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base min-h-[150px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             required
           />
         </div>

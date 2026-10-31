@@ -44,7 +44,7 @@ export function OrderSystemFailureItem({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-3',
+        'flex flex-col gap-2 rounded-lg border border-gray-200 bg-card p-3',
         isUnseen && 'border-s-4',
         isUnseen && (isInfo ? 'border-s-muted-foreground' : 'border-s-destructive'),
         !isUnseen && 'opacity-70'

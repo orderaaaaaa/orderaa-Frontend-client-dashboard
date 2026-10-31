@@ -96,7 +96,7 @@ export default function ReturnRefundModal({
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             المنتج المرتجع <span className="text-red-600">*</span>
           </label>
           <div className="flex flex-col gap-2">
@@ -106,8 +106,8 @@ export default function ReturnRefundModal({
                 className={clsx(
                   'flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all',
                   selectedProductId === op.id
-                    ? 'border-primary bg-[#F6F2FC]'
-                    : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF]'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/40 hover:bg-primary/5'
                 )}
                 onClick={() => setSelectedProductId(op.id)}
               >
@@ -124,7 +124,7 @@ export default function ReturnRefundModal({
                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   <span className={clsx(
                     'text-sm',
-                    selectedProductId === op.id ? 'text-primary font-semibold' : 'text-[#1F1F1F]'
+                    selectedProductId === op.id ? 'text-primary font-semibold' : 'text-foreground'
                   )}>
                     {op.products.name}
                   </span>
@@ -145,7 +145,7 @@ export default function ReturnRefundModal({
                     ) : null;
                   })()}
                 </div>
-                <span className="text-sm font-bold text-[#1F1F1F] shrink-0">
+                <span className="text-sm font-bold text-foreground shrink-0">
                   {op.price} ج.م
                 </span>
               </label>
@@ -154,7 +154,7 @@ export default function ReturnRefundModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             المبلغ <span className="text-red-600">*</span>
           </label>
           <input
@@ -163,7 +163,7 @@ export default function ReturnRefundModal({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0"
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           {amountValue !== null && amountInvalid && (
             <p className="text-xs text-red-600">
@@ -173,7 +173,7 @@ export default function ReturnRefundModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             طريقة الاسترداد <span className="text-red-600">*</span>
           </label>
           <SearchableSelect
@@ -189,7 +189,7 @@ export default function ReturnRefundModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             السبب <span className="text-red-600">*</span>
           </label>
           <SearchableSelect

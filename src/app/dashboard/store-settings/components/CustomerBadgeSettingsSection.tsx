@@ -307,7 +307,7 @@ export default function CustomerBadgeSettingsSection({
                     <li
                       key={badge}
                       className={`rounded-xl border p-4 transition-colors ${
-                        isOn ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+                        isOn ? 'border-gray-200 bg-card' : 'border-gray-100 bg-gray-50'
                       }`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -344,7 +344,7 @@ export default function CustomerBadgeSettingsSection({
                               >
                                 {field.label}
                               </label>
-                              <div className="flex items-stretch rounded-lg border border-[#CED4DA] bg-white focus-within:ring-2 focus-within:ring-primary/40 overflow-hidden">
+                              <div className="flex items-stretch rounded-lg border border-gray-300 bg-card focus-within:ring-2 focus-within:ring-primary/40 overflow-hidden">
                                 <input
                                   id={inputId}
                                   type="text"
@@ -364,7 +364,7 @@ export default function CustomerBadgeSettingsSection({
                                   }
                                   className="flex-1 min-w-0 h-10 px-3 text-base text-right outline-none disabled:bg-gray-50 disabled:text-gray-500"
                                 />
-                                <span className="flex items-center px-3 bg-gray-50 border-s border-[#CED4DA] text-sm text-gray-600 shrink-0">
+                                <span className="flex items-center px-3 bg-gray-50 border-s border-gray-300 text-sm text-gray-600 shrink-0">
                                   {field.unit}
                                 </span>
                               </div>

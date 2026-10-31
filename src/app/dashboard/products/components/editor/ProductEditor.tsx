@@ -737,7 +737,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       </EditorSection>
 
       <div
-        className={`${FIXED_BOTTOM_BAR_CLASS} border-t border-gray-200 bg-white px-4 pt-3 shadow-lg`}
+        className={`${FIXED_BOTTOM_BAR_CLASS} border-t border-gray-200 bg-card px-4 pt-3 shadow-lg`}
       >
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
           <p

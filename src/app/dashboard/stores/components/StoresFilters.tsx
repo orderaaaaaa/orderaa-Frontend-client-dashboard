@@ -71,7 +71,7 @@ const StoresFilters = () => {
 
         <button
           onClick={() => setIsOpen((v) => !v)}
-          className="flex items-center gap-2 px-4 h-[41px] rounded-sm border bg-white hover:bg-gray-50 transition"
+          className="flex items-center gap-2 px-4 h-[41px] rounded-sm border bg-card hover:bg-gray-50 transition"
         >
           <SlidersHorizontal className="w-5 h-5 text-primary" />
           <span className="font-semibold">
@@ -87,7 +87,7 @@ const StoresFilters = () => {
         }`}
       >
         <div className="relative">
-          <div className="p-6 rounded-lg shadow-md bg-white">
+          <div className="p-6 rounded-lg shadow-md bg-card">
             {/* First Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <Input
@@ -95,7 +95,7 @@ const StoresFilters = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن المتجر"
                 icon={Search}
-                inputClassName="h-[41px] !bg-primary/8 rounded-sm !text-primary !border-[#cbc7d5] text-xl font-semibold pr-10 pl-10"
+                inputClassName="h-[41px] !bg-primary/8 rounded-sm !text-primary !border-gray-300 text-xl font-semibold pr-10 pl-10"
               />
 
               <ClearableSelect

@@ -84,7 +84,7 @@ export function OrderActionsFooter({
         variant="ghost"
         onClick={onNavigatePrevious}
         disabled={isBusy || isNavigatingPrevious || !onNavigatePrevious}
-        className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
+        className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
       >
         <LiaAngleRightSolid className="w-6 h-6" />
       </Button>
@@ -94,13 +94,13 @@ export function OrderActionsFooter({
           variant="default"
           onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
           disabled={isBusy}
-          className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:bg-red-700 transition-colors flex items-center gap-3"
+          className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:brightness-90 transition-colors flex items-center gap-3"
         >
           <LiaStopCircleSolid className="w-5 h-5" />
           وقف التشغيل
         </Button>
       ) : showActionsMenu ? (
-        <div className="bg-[#6320EE] rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
+        <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
           {canUpdate && orderStatus !== 'CONFIRMED' && (
             <Button
               variant="ghost"
@@ -174,7 +174,7 @@ export function OrderActionsFooter({
         variant="ghost"
         onClick={onNavigateNext}
         disabled={isBusy || isNavigatingNext || !onNavigateNext}
-        className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
+        className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
       >
         <LiaAngleLeftSolid className="w-6 h-6" />
       </Button>

@@ -11,7 +11,7 @@ export default function CylinderChartSVG() {
   const bottomY = chartHeight + 27;
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
+    <div className="w-full max-w-3xl bg-card rounded-3xl shadow-xl p-8">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">

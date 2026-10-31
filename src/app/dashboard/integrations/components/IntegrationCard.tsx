@@ -25,7 +25,7 @@ export const IntegrationCard = ({
   }, [providerIntegrations]);
 
   return (
-    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col">
+    <div className="relative bg-card rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col">
       {storeCount > 0 && (
         <div className="absolute top-4 left-4">
           <div className="bg-green-100 text-green-700 text-sm font-medium px-2 py-1 rounded-full flex items-center gap-1">
@@ -59,8 +59,8 @@ export const IntegrationCard = ({
           'w-full h-12 rounded-lg font-medium text-white transition-all duration-200',
           platform.isActive
             ? hasConnection
-              ? 'bg-gray-600 hover:bg-gray-700'
-              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+              ? 'bg-gray-500 hover:brightness-90'
+              : 'bg-primary hover:bg-brand-hover active:bg-[#3D17A0]'
             : 'bg-gray-400 cursor-not-allowed'
         )}
         disabled={!platform.isActive}

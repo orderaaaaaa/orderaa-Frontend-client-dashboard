@@ -146,7 +146,7 @@ export default function UrgentModal({
                 onChange={(e) => setSelectedOption(e.target.value as UrgentOption)}
                 className="w-5 h-5 accent-primary"
               />
-              <span className="text-[#1F1F1F] font-medium">{option.label}</span>
+              <span className="text-foreground font-medium">{option.label}</span>
             </label>
           ))}
         </div>
@@ -155,7 +155,7 @@ export default function UrgentModal({
         <div className="flex gap-4">
           {/* Date Picker */}
           <div className="flex-1 flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
+            <label className="font-bold text-foreground flex items-center gap-2">
               <LiaCalendarAltSolid className="w-5 h-5" />
               تاريخ
             </label>

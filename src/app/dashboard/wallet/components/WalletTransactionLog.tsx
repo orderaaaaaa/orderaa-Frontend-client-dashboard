@@ -54,7 +54,7 @@ function WalletTransactionLog() {
       <div className="mt-10 sm:px-4 mb-20" dir="rtl">
         <h2 className="text-2xl font-bold mb-6 text-right">سجل المعاملات</h2>
         <div className="w-full">
-          <div className="hidden sm:grid grid-cols-4 bg-white border border-[#ebebeb] rounded-xl py-5 sm:px-6 mb-1 text-center">
+          <div className="hidden sm:grid grid-cols-4 bg-card border border-border rounded-xl py-5 sm:px-6 mb-1 text-center">
             {headers.map((header, index) => (
               <span key={index} className="text-gray-600 font-medium text-lg">
                 {header}
@@ -65,7 +65,7 @@ function WalletTransactionLog() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="flex flex-col gap-2 sm:grid sm:grid-cols-4 sm:items-center bg-white border border-[#ebebeb] rounded-xl p-4 sm:py-4 sm:px-6"
+                className="flex flex-col gap-2 sm:grid sm:grid-cols-4 sm:items-center bg-card border border-border rounded-xl p-4 sm:py-4 sm:px-6"
               >
                 {[1, 2, 3, 4].map((j) => (
                   <div key={j} className="h-6 bg-gray-200 animate-pulse rounded w-full sm:mx-auto max-w-[120px]" />
@@ -83,14 +83,14 @@ function WalletTransactionLog() {
       <div className="mt-10 sm:px-4 mb-20" dir="rtl">
         <h2 className="text-2xl font-bold mb-6 text-right">سجل المعاملات</h2>
         <div className="w-full">
-          <div className="bg-white border border-red-200 rounded-xl p-8 text-center">
+          <div className="bg-card border border-red-200 rounded-xl p-8 text-center">
             <div className="text-red-600 mb-4">
               <RefreshCw className="w-12 h-12 mx-auto" />
             </div>
             <p className="text-gray-700 font-medium mb-4">تعذر تحميل سجل المعاملات</p>
             <button
               onClick={handleRetry}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#682fee] text-white rounded-lg hover:bg-[#5a25d8] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-brand-hover transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               إعادة المحاولة
@@ -106,7 +106,7 @@ function WalletTransactionLog() {
       <div className="mt-10 sm:px-4 mb-20" dir="rtl">
         <h2 className="text-2xl font-bold mb-6 text-right">سجل المعاملات</h2>
         <div className="w-full">
-          <div className="bg-white border border-[#ebebeb] rounded-xl p-12 text-center">
+          <div className="bg-card border border-border rounded-xl p-12 text-center">
             <Wallet className="w-16 h-16 mx-auto text-gray-300 mb-4" />
             <p className="text-gray-600 text-lg">لا توجد معاملات حتى الآن</p>
           </div>
@@ -125,7 +125,7 @@ function WalletTransactionLog() {
 
       <div className="w-full">
         {/* Table Header */}
-        <div className="hidden sm:grid grid-cols-4 bg-white border border-[#ebebeb] rounded-xl py-5 sm:px-6 mb-1 text-center">
+        <div className="hidden sm:grid grid-cols-4 bg-card border border-border rounded-xl py-5 sm:px-6 mb-1 text-center">
           {headers.map((header, index) => (
             <span key={index} className="text-gray-600 font-medium text-lg">
               {header}
@@ -141,7 +141,7 @@ function WalletTransactionLog() {
           {transactions.map((transaction: WalletTransaction) => (
             <div
               key={transaction.id}
-              className="flex flex-col gap-3 sm:grid sm:grid-cols-4 sm:items-center sm:gap-0 bg-white border border-[#ebebeb] rounded-xl p-4 sm:py-4 sm:px-6 hover:shadow-sm transition-shadow sm:text-center"
+              className="flex flex-col gap-3 sm:grid sm:grid-cols-4 sm:items-center sm:gap-0 bg-card border border-border rounded-xl p-4 sm:py-4 sm:px-6 hover:shadow-sm transition-shadow sm:text-center"
             >
               <div className="flex items-center justify-between gap-2 sm:contents">
                 {/* التاريخ */}

@@ -266,13 +266,13 @@ export function ScannedOrdersModal({
       aria-modal="true"
       aria-labelledby={headingId}
       tabIndex={-1}
-      className="fixed inset-0 z-[99999] bg-white flex flex-col outline-none"
+      className="fixed inset-0 z-[99999] bg-background flex flex-col outline-none"
     >
       <div
         className="min-h-[60px] flex flex-wrap items-center gap-x-3 gap-y-1 px-4 sm:px-8 py-2 flex-shrink-0"
         style={{
           background:
-            'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
+            'linear-gradient(105.28deg, var(--background) 1.48%, color-mix(in oklab, var(--primary) 30%, var(--background)) 182.49%, var(--background) 187.88%)',
         }}
       >
         <Button
@@ -285,7 +285,7 @@ export function ScannedOrdersModal({
         </Button>
         <h2
           id={headingId}
-          className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-black text-center sm:text-start truncate"
+          className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-foreground text-center sm:text-start truncate"
         >
           {inChangeProductMode ? 'تغيير المنتج' : title}
         </h2>

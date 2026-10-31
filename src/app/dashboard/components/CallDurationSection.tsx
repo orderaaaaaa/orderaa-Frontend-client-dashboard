@@ -24,7 +24,7 @@ export function CallDurationSection({
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-lg py-5 px-4 border border-gray-100 animate-pulse"
+              className="bg-card rounded-lg py-5 px-4 border border-gray-100 animate-pulse"
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="w-32 h-4 bg-gray-200 rounded" />
@@ -54,10 +54,10 @@ export function CallDurationSection({
           {items.map((item) => (
             <div
               key={item.key}
-              className="bg-white rounded-lg py-5 px-4 border border-gray-100"
+              className="bg-card rounded-lg py-5 px-4 border border-gray-100"
             >
               <div className="text-center">
-                <span className="text-[#000000] font-bold text-sm block mb-2">
+                <span className="text-foreground font-bold text-sm block mb-2">
                   {item.label}
                 </span>
               </div>

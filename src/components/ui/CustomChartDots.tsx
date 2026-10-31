@@ -1,7 +1,7 @@
 export const CustomTooltipArabic = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 text-right">
+      <div className="bg-card p-4 rounded-lg shadow-lg border border-gray-200 text-right">
         <p className="font-semibold text-gray-800 mb-2">{label}</p>
         <div className="space-y-1">
           <div className="flex items-center justify-between gap-4">

@@ -118,7 +118,7 @@ function DataTable<T extends Record<string, unknown>>({
     className,
   )
   const mobileListClass = cn(
-    'sm:hidden rounded-lg border border-gray-100 shadow-md bg-white divide-y divide-gray-100',
+    'sm:hidden rounded-lg border border-gray-100 shadow-md bg-card divide-y divide-gray-100',
     className,
   )
 
@@ -171,9 +171,9 @@ function DataTable<T extends Record<string, unknown>>({
           </div>
         )}
         <div className={tableWrapperClass}>
-          <Table className="w-full min-w-max sm:min-w-0 bg-white">
+          <Table className="w-full min-w-max sm:min-w-0 bg-card">
             <TableHeader>
-              <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
+              <TableRow className={cn('bg-primary/10', headerClassName)}>
                 {selectable && (
                   <TableHead className="px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 w-12 text-center">
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-5 mx-auto" />
@@ -253,9 +253,9 @@ function DataTable<T extends Record<string, unknown>>({
         </div>
       )}
       <div className={tableWrapperClass}>
-        <Table className="w-full min-w-max sm:min-w-0 bg-white">
+        <Table className="w-full min-w-max sm:min-w-0 bg-card">
           <TableHeader>
-            <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
+            <TableRow className={cn('bg-primary/10', headerClassName)}>
               {selectable && (
                 <TableHead className="!px-2 !py-2 sm:!px-4 sm:!py-4 border-l border-gray-200 w-12">
                   <div className="flex items-center justify-center">

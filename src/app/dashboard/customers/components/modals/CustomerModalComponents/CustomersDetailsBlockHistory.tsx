@@ -18,7 +18,7 @@ export const CustomersDetailsBlockHistory = ({
 
   return (
     <section
-      className="mt-4 rounded-xl border border-gray-100 bg-white p-4"
+      className="mt-4 rounded-xl border border-gray-100 bg-card p-4"
       aria-label="الحظر"
     >
       {isBlocked && (

@@ -279,7 +279,7 @@ export function MainScanPanel({
         '!border rounded-xl overflow-hidden',
         mainPanelLocked
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-white border-gray-200',
+          : 'bg-card border-gray-200',
       )}
     >
       <AccordionTrigger className="px-4 sm:px-5 py-3 hover:no-underline">
@@ -406,7 +406,7 @@ export function MainScanPanel({
                       key={code}
                       className={clsx(
                         'flex items-center justify-between px-4 py-2 transition-colors',
-                        flashing ? 'bg-amber-50' : 'bg-white',
+                        flashing ? 'bg-amber-50' : 'bg-card',
                       )}
                     >
                       <div className="flex flex-col gap-0.5 min-w-0">

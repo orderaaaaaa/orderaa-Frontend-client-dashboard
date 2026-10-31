@@ -61,12 +61,13 @@ export const EmployeeCard = memo(function EmployeeCard({
       );
   };
 
-  const statusColor = isOnline ? '#3cc900' : '#9ca3af';
-  const borderColor = isOnline ? '#3cc900' : '#9ca3af';
+  const statusClass = isOnline ? 'bg-[#3cc900]' : 'bg-[#9ca3af]';
+  const borderClass = isOnline ? 'border-[#3cc900]' : 'border-[#9ca3af]';
 
   const performance = employee.performanceChange ?? 0;
   const isNegative = performance < 0;
-  const performanceColor = isNegative ? '#ff0004' : '#3cc900';
+  const performanceClass = isNegative ? 'text-[#ff0004]' : 'text-[#3cc900]';
+  const performanceBarClass = isNegative ? 'bg-[#ff0004]' : 'bg-[#3cc900]';
 
   const workDays = employee.workingDaysThisMonth ?? 0;
   const vacationDays = employee.leaveDaysThisMonth ?? 0;
@@ -87,7 +88,7 @@ export const EmployeeCard = memo(function EmployeeCard({
 
   return (
     <div
-      className={`bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 w-full max-w-[420px] ${
+      className={`bg-card relative rounded-2xl shadow-sm border border-gray-100 p-4 w-full max-w-[420px] ${
         isActive ? '' : 'opacity-60 grayscale'
       }`}
     >
@@ -144,15 +145,13 @@ export const EmployeeCard = memo(function EmployeeCard({
         {/* Avatar Area */}
         <div className="relative">
           <div
-            className="w-20 h-20 rounded-full border-2 flex items-center justify-center"
-            style={{ borderColor: borderColor }}
+            className={`w-20 h-20 rounded-full border-2 flex items-center justify-center ${borderClass}`}
           >
             <User size={32} className="text-primary" strokeWidth={2} />
           </div>
 
           <div
-            className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-white transition-transform"
-            style={{ backgroundColor: statusColor }}
+            className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-card transition-transform ${statusClass}`}
             title={isOnline ? 'متصل' : 'غير متصل'}
             aria-label={isOnline ? 'متصل' : 'غير متصل'}
           />
@@ -163,8 +162,7 @@ export const EmployeeCard = memo(function EmployeeCard({
       <div className="mb-5">
         <div className="flex flex-row-reverse items-center justify-between mb-1">
           <div
-            className="flex items-center gap-2"
-            style={{ color: performanceColor }}
+            className={`flex items-center gap-2 ${performanceClass}`}
           >
             <span className="text-lg">% {performance}</span>
             <TrendingUp size={20} />
@@ -174,11 +172,8 @@ export const EmployeeCard = memo(function EmployeeCard({
 
         <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
           <div
-            className="h-full transition-all duration-300 ease-in-out rounded-full"
-            style={{
-              width: `${Math.abs(performance)}%`,
-              backgroundColor: performanceColor,
-            }}
+            className={`h-full transition-all duration-300 ease-in-out rounded-full ${performanceBarClass}`}
+            style={{ width: `${Math.abs(performance)}%` }}
           />
         </div>
       </div>
@@ -187,7 +182,7 @@ export const EmployeeCard = memo(function EmployeeCard({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <button
           onClick={handleWorkDaysClick}
-          className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
+          className="bg-primary/10 shadow-md rounded-2xl p-3 text-center border-2 border-primary/15 hover:bg-primary/15 transition-colors cursor-pointer"
         >
           <div className="flex items-center justify-center gap-2 mb-1">
             <CalendarClock className="text-gray-700 w-5 h-5 lg:w-6 lg:h-6" />
@@ -200,7 +195,7 @@ export const EmployeeCard = memo(function EmployeeCard({
 
         <button
           onClick={handleVacationDaysClick}
-          className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
+          className="bg-primary/10 shadow-md rounded-2xl p-3 text-center border-2 border-primary/15 hover:bg-primary/15 transition-colors cursor-pointer"
         >
           <div className="flex items-center justify-center gap-2 mb-1">
             <CalendarDays className="text-gray-700 w-5 h-5 lg:w-6 lg:h-6" />
@@ -220,7 +215,7 @@ export const EmployeeCard = memo(function EmployeeCard({
         <div className="col-span-2 grid grid-cols-2 gap-4">
           <a
             href={`tel:${normalizedPhone}`}
-            className="bg-white hover:bg-gray-50 text-primary
+            className="bg-card hover:bg-gray-50 text-primary
              border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2
@@ -235,7 +230,7 @@ export const EmployeeCard = memo(function EmployeeCard({
 
           <a
             href={`mailto:${employee.email}`}
-            className="bg-white hover:bg-gray-50 text-primary
+            className="bg-card hover:bg-gray-50 text-primary
              border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2
@@ -254,7 +249,7 @@ export const EmployeeCard = memo(function EmployeeCard({
           href={`https://wa.me/+2${normalizedPhone}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="col-span-2 bg-primary hover:bg-[#682fee] text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
+          className="col-span-2 bg-primary hover:bg-brand-hover text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
         >
           <span className="text-xl">WhatsApp</span>
           <MessageCircle size={25} />
@@ -269,8 +264,8 @@ export const EmployeeCard = memo(function EmployeeCard({
             disabled={setActivationMutation.isPending}
             className={`col-span-2 rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium border-2 disabled:opacity-60 ${
               isActive
-                ? 'bg-white border-red-500 text-red-600 hover:bg-red-50'
-                : 'bg-white border-green-600 text-green-700 hover:bg-green-50'
+                ? 'bg-card border-red-500 text-red-600 hover:bg-red-50'
+                : 'bg-card border-green-600 text-green-700 hover:bg-green-50'
             }`}
           >
             {isActive ? <UserX size={22} /> : <UserCheck size={22} />}
@@ -287,7 +282,7 @@ export const EmployeeCard = memo(function EmployeeCard({
         onConfirm={confirmDeactivate}
         confirmText="إيقاف الحساب"
         isLoading={setActivationMutation.isPending}
-        confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:brightness-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         maxWidth="md:max-w-[420px]"
       >
         <p className="text-sm text-gray-600 leading-relaxed text-right">

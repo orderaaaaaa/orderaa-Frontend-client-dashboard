@@ -34,7 +34,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const remainingLabel = useMemo(() => formatSupplierBalance(supplier.remaining), [supplier.remaining]);
 
   return (
-    <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+    <div className="w-full bg-card border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-start flex-col gap-1 min-w-0">
           <Link

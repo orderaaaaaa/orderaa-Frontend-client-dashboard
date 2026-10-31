@@ -113,7 +113,7 @@ function CloseCarrierSendForm({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3">
+    <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-card p-3">
       <p className="text-sm font-semibold text-gray-800">إغلاق الإرسال</p>
       <div className="flex flex-wrap gap-2">
         {(Object.keys(CLOSE_OUTCOME_LABELS) as CarrierSendCloseChoice[]).map((choice) => (
@@ -137,7 +137,7 @@ function CloseCarrierSendForm({
           placeholder="رقم الشحنة لدى شركة الشحن"
           maxLength={SHIPMENT_ID_MAX_LENGTH}
           disabled={pending}
-          inputClassName="bg-white"
+          inputClassName="bg-background"
         />
       ) : (
         <Textarea

@@ -285,7 +285,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white shadow-sm p-3 md:flex-row md:flex-wrap md:items-center md:border-0 md:bg-transparent md:shadow-none md:p-0">
+        <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-card shadow-sm p-3 md:flex-row md:flex-wrap md:items-center md:border-0 md:bg-transparent md:shadow-none md:p-0">
           <div className="relative w-full px-1 md:w-auto md:min-w-[12rem] md:flex-1">
             <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10" />
             <Input
@@ -294,7 +294,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               onClear={() => setSearchQuery('')}
               clearable
               placeholder="بحث باسم المنتج أو SKU..."
-              inputClassName="pr-10 bg-white"
+              inputClassName="pr-10 bg-background"
             />
           </div>
           {scopeSummary.indicators?.outOfStock && (
@@ -324,7 +324,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <LiaSlidersHSolid className="w-5 h-5" />
             <span>فلاتر متقدمة</span>
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -start-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -start-2 bg-card text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {formatStockNumber(activeFilterCount)}
               </span>
             )}

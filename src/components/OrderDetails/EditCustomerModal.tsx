@@ -99,7 +99,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="محمد بدر مصطفى"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
 
           <Input
@@ -109,7 +109,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="01127454951"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
         </div>
 
@@ -121,7 +121,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="01127454951"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
 
           <Input
@@ -131,7 +131,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="القاهرة"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
         </div>
 
@@ -143,7 +143,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="مدينة نصر"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
 
           <Input
@@ -153,7 +153,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onChange={handleInputChange}
             placeholder="شارع 15, مدينة نصر"
             className="flex-1"
-            inputClassName="h-[46px] rounded-[38px] border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white"
+            inputClassName="h-[46px] rounded-[38px] border-border text-right text-lg text-muted-foreground bg-background"
           />
         </div>
       </div>

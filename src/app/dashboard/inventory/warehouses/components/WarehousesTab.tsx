@@ -142,7 +142,7 @@ export function WarehousesTab() {
         onClose={() => setPendingDelete(null)}
         title="حذف المخزن"
         confirmText="حذف"
-        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+        confirmButtonClassName="bg-red-600 hover:brightness-90"
         onConfirm={confirmDelete}
         isLoading={deleteMutation.isPending}
         maxWidth="md:max-w-[460px]"

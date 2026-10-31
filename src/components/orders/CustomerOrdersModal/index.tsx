@@ -192,7 +192,7 @@ export default function CustomerOrdersModal({
                 onClick={handleSelectAllToggle}
                 disabled={isBulkUpdating}
                 size="sm"
-                className="px-4 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
+                className="px-4 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-brand-hover transition-colors"
               >
                 {selectedOrderIds.length === orders.length && orders.length > 0 ? (
                   'إلغاء تحديد الكل'

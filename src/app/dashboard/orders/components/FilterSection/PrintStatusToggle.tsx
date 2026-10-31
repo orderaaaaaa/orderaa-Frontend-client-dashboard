@@ -25,7 +25,7 @@ export function PrintStatusToggle({
   };
 
   return (
-    <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
+    <div className="flex items-center gap-1 bg-card rounded-lg border border-gray-200 p-1">
       <Button
         variant={value === 'printed' ? 'default' : 'ghost'}
         size="sm"

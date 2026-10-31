@@ -60,7 +60,7 @@ export default function EmployeesPage() {
       dir="rtl"
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="bg-white border border-black/8 shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg overflow-hidden">
+        <div className="bg-card border border-border shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg overflow-hidden">
           <EmployeeFormHeader />
           <EmployeeFormFields
             register={register}

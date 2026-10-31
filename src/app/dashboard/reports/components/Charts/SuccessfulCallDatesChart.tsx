@@ -26,7 +26,7 @@ export default function SuccessfulCallDates() {
       : { top: 50, right: 0, left: -30, bottom: 50 }; // small/medium screens
 
   return (
-    <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
+    <div className="w-full max-w-3xl p-6 bg-card rounded-2xl shadow-xl">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">

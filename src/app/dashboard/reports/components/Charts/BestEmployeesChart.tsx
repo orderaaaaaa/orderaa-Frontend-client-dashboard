@@ -120,7 +120,7 @@ export default function EmployeeTop33DChartSVG({
   const bottomY = chartHeight;
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-lg p-6">
+    <div className="w-full bg-card rounded-2xl shadow-lg p-6">
       {/* Legend */}
       <div className="flex gap-4 items-center justify-start text-sm text-gray-600 mb-4 rtl:justify-end">
         <Legend color={COLORS.success} label="ناجحة" />

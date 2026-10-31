@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import {
   THEME_STORAGE_KEY,
   THEMES,
-  isDarkModeReadyRoute,
+  isLightOnlyRoute,
 } from '@/constants/theme';
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
@@ -18,9 +18,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
       enableSystem={false}
       disableTransitionOnChange
       storageKey={THEME_STORAGE_KEY}
-      forcedTheme={
-        isDarkModeReadyRoute(pathname) ? undefined : THEMES.LIGHT
-      }
+      forcedTheme={isLightOnlyRoute(pathname) ? THEMES.LIGHT : undefined}
     >
       {children}
     </ThemeProvider>

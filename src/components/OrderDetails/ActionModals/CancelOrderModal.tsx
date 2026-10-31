@@ -65,11 +65,11 @@ export default function CancelOrderModal({
       onConfirm={handleConfirm}
       confirmText="تأكيد الإلغاء"
       confirmDisabled={!isFormValid}
-      confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:bg-red-700 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+      confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:brightness-90 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             سبب الإلغاء <span className="text-red-600">*</span>
           </label>
 
@@ -86,8 +86,8 @@ export default function CancelOrderModal({
                   <label
                     key={reason.id}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all ${selectedReasonId === reason.id
-                      ? 'border-primary bg-[#F6F2FC]'
-                      : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF]'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-primary/40 hover:bg-primary/5'
                       }`}
                     onClick={() => setSelectedReasonId(reason.id)}
                   >
@@ -104,7 +104,7 @@ export default function CancelOrderModal({
                     <span
                       className={`text-sm ${selectedReasonId === reason.id
                         ? 'text-primary font-semibold'
-                        : 'text-[#1F1F1F]'
+                        : 'text-foreground'
                         }`}
                     >
                       {reason.reasonName}
@@ -125,14 +125,14 @@ export default function CancelOrderModal({
                     emptyMessage="لا توجد أسباب متاحة"
                     noResultsMessage="لا توجد نتائج للبحث"
                     triggerClassName={`border rounded-lg px-4 py-3 text-base ${selectedReason && !isSelectedFromTopReasons
-                      ? 'border-primary bg-[#F6F2FC]'
-                      : 'border-[#ECECEC]'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border'
                       }`}
                     clearable
                   />
                 </div>
               ) : (
-                <div className="mt-2 flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
+                <div className="mt-2 flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
                   <p>لا توجد أسباب إلغاء متاحة</p>
                   <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
                     أضف أسباب الإلغاء من إعدادات المتجر
@@ -145,7 +145,7 @@ export default function CancelOrderModal({
 
         {/* Notes */}
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
+          <label className="font-bold text-foreground flex items-center gap-2">
             <LiaCommentDotsSolid className="w-5 h-5" />
             ملاحظات
           </label>
@@ -153,7 +153,7 @@ export default function CancelOrderModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="أضف ملاحظات إضافية..."
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
       </div>

@@ -1,40 +1,40 @@
 const DEFAULT_COLOR = 'bg-gray-50 text-gray-600 border border-gray-200';
 
 const STATUS_COLORS: Record<string, string> = {
-  NEW_ORDER: 'bg-[#f1f5fd] text-[#5686e1] border border-[#e5ecfb]',
-  CONFIRMED: 'bg-[#f1f5fd] text-[#5686e1] border border-[#e5ecfb]',
+  NEW_ORDER: 'bg-blue-50 text-[#5686e1] border border-blue-100',
+  CONFIRMED: 'bg-blue-50 text-[#5686e1] border border-blue-100',
   WHATSAPP: 'bg-purple-50 text-purple-700 border border-purple-200',
-  WHATSAPP_CONFIRMED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
+  WHATSAPP_CONFIRMED: 'bg-green-50 text-[#49c116] border border-green-200',
   CALL_AGAIN: 'bg-purple-50 text-purple-700 border border-purple-200',
 
-  PREPARED: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
-  SHIPPING: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
-  WITH_DRIVER: 'bg-[#e6f6f4] text-[#0f766e] border border-[#e6f6f4]',
-  WAITING_FOR_PACKAGING: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  WAITING_FOR_APPROVAL: 'bg-[#fff7eb] text-[#b45309] border border-[#ffefd8]',
+  PREPARED: 'bg-primary/10 text-primary border border-primary/10',
+  SHIPPING: 'bg-primary/10 text-primary border border-primary/10',
+  WITH_DRIVER: 'bg-teal-50 text-[#0f766e] border border-teal-100',
+  WAITING_FOR_PACKAGING: 'bg-orange-50 text-[#ff9800] border border-orange-200',
+  WAITING_FOR_APPROVAL: 'bg-orange-50 text-[#b45309] border border-orange-200',
 
-  DELIVERED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
-  COLLECTED: 'bg-[#effbeb] text-[#15803d] border border-[#d2f3c5]',
-  RETURNED_DELIVERED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
-  RETURNED_COLLECTED: 'bg-[#fdf2f8] text-[#ec4899] border border-[#fbcfe8]',
-  RETURNED_SETTLED: 'bg-[#fdf2f8] text-[#db2777] border border-[#fbcfe8]',
-  RETURNED_FINAL: 'bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3]',
+  DELIVERED: 'bg-green-50 text-[#49c116] border border-green-200',
+  COLLECTED: 'bg-green-50 text-[#15803d] border border-green-200',
+  RETURNED_DELIVERED: 'bg-green-50 text-[#49c116] border border-green-200',
+  RETURNED_COLLECTED: 'bg-pink-50 text-[#ec4899] border border-pink-200',
+  RETURNED_SETTLED: 'bg-pink-50 text-[#db2777] border border-pink-200',
+  RETURNED_FINAL: 'bg-rose-50 text-[#be123c] border border-rose-200',
 
-  ATTEMPTED: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  WAITING_FOR_PAYMENT: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  POSTPONED: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  EDIT_REJECTED: 'bg-[#e0f7fa] text-[#0097a7] border border-[#b2ebf2]',
+  ATTEMPTED: 'bg-orange-50 text-[#ff9800] border border-orange-200',
+  WAITING_FOR_PAYMENT: 'bg-orange-50 text-[#ff9800] border border-orange-200',
+  POSTPONED: 'bg-orange-50 text-[#ff9800] border border-orange-200',
+  EDIT_REJECTED: 'bg-cyan-50 text-[#0097a7] border border-cyan-200',
 
-  CANCELLED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
-  STOPPED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
-  UNCOMPLETED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
-  MISSING: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
+  CANCELLED: 'bg-red-50 text-[#ff0004] border border-red-200',
+  STOPPED: 'bg-red-50 text-[#ff0004] border border-red-200',
+  UNCOMPLETED: 'bg-red-50 text-[#ff0004] border border-red-200',
+  MISSING: 'bg-red-50 text-[#ff0004] border border-red-200',
 
   // Frontend-only legacy keys — not OrderStatus members.
-  PARTIAL_DELIVERY: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  FINAL_RETURN: 'bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3]',
-  RETURN_RESEND_PENDING: 'bg-[#fff7eb] text-[#f59e0b] border border-[#fde68a]',
-  RETURN_WAREHOUSE: 'bg-[#eef2ff] text-[#6366f1] border border-[#c7d2fe]',
+  PARTIAL_DELIVERY: 'bg-orange-50 text-[#ff9800] border border-orange-200',
+  FINAL_RETURN: 'bg-rose-50 text-[#e11d48] border border-rose-200',
+  RETURN_RESEND_PENDING: 'bg-orange-50 text-[#f59e0b] border border-amber-200',
+  RETURN_WAREHOUSE: 'bg-indigo-50 text-[#6366f1] border border-indigo-200',
 };
 
 export const getStatusColor = (status?: string): string => {

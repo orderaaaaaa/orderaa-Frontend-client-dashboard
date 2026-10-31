@@ -97,8 +97,8 @@ export default function WorkHoursTimePicker({
           placeholder={placeholder}
           readOnly
           style={{ direction: 'ltr', textAlign: 'right' }}
-          className={`w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border ${error ? 'border-red-500' : 'border-black/16'
-            } rounded text-base font-normal text-black placeholder:text-black/60 cursor-pointer`}
+          className={`w-full h-[46px] px-4 bg-muted/25 border ${error ? 'border-red-500' : 'border-border'
+            } rounded text-base font-normal text-foreground placeholder:text-muted-foreground cursor-pointer`}
         />
         {error && (
           <span
@@ -118,8 +118,8 @@ export default function WorkHoursTimePicker({
       >
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+          <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-card rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div className="sticky top-0 z-10 bg-card border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
               <DialogPrimitive.Title className="text-2xl font-bold text-gray-800">
                 اختر ساعات العمل
               </DialogPrimitive.Title>
@@ -301,7 +301,7 @@ export default function WorkHoursTimePicker({
               </div>
             </div>
 
-            <div className="flex-shrink-0 bg-white border-t border-gray-200 p-6 flex gap-4 justify-center">
+            <div className="flex-shrink-0 bg-card border-t border-gray-200 p-6 flex gap-4 justify-center">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -314,7 +314,7 @@ export default function WorkHoursTimePicker({
                 onClick={handleApply}
                 disabled={!isComplete}
                 className={`px-8 py-3 rounded-lg font-medium transition-colors shadow-lg ${isComplete
-                    ? 'bg-primary text-white hover:bg-[#4a1cb8] cursor-pointer'
+                    ? 'bg-primary text-white hover:bg-brand-hover cursor-pointer'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
                   }`}
               >

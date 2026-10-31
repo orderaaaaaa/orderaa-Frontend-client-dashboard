@@ -16,7 +16,7 @@ export default function OrderLockedBanner({
   isUnlocking,
 }: OrderLockedBannerProps) {
   return (
-    <div className="relative bg-[#F6F2FC] border border-[#CBB5FD] rounded-full max-xl:rounded-l-3xl p-2 px-4">
+    <div className="relative bg-primary/10 border border-primary/40 rounded-full max-xl:rounded-l-3xl p-2 px-4">
       <h3 className="flex gap-2 text-sm items-center font-semibold text-primary">
         <LiaExclamationTriangleSolid className="w-5 h-5 text-primary" />
         {bypass

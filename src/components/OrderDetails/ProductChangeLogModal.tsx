@@ -73,7 +73,7 @@ export default function ProductChangeLogModal({
             {mockLogs.map((log) => (
               <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 text-gray-600">{formatDateTime(log.createdAt)}</td>
-                <td className="px-4 py-3 font-medium text-[#1E1E1E]">{log.employeeName}</td>
+                <td className="px-4 py-3 font-medium text-foreground">{log.employeeName}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${
@@ -86,7 +86,7 @@ export default function ProductChangeLogModal({
                   </span>
                 </td>
                 <td className="px-4 py-3 text-gray-600">{log.oldProductName}</td>
-                <td className="px-4 py-3 font-medium text-[#1E1E1E]">{log.newProductName}</td>
+                <td className="px-4 py-3 font-medium text-foreground">{log.newProductName}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`font-bold ${

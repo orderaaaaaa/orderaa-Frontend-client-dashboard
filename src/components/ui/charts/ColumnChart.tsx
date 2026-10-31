@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, memo } from 'react';
+import { useTheme } from 'next-themes';
 
 export interface ColumnChartSeries {
   name: string;
@@ -22,6 +23,8 @@ export const ColumnChart = memo(function ColumnChart({
 }: ColumnChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<ApexCharts | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -46,6 +49,7 @@ export const ColumnChart = memo(function ColumnChart({
           type: 'bar',
           height,
           fontFamily: 'inherit',
+          foreColor: isDark ? '#d4d4d4' : '#373d3f',
           toolbar: { show: false },
           events: {
             mounted: fixCanvasDirection,
@@ -71,7 +75,7 @@ export const ColumnChart = memo(function ColumnChart({
           style: {
             fontSize: '13px',
             fontWeight: 700,
-            colors: ['#304758'],
+            colors: [isDark ? '#e5e5e5' : '#304758'],
           },
         },
         xaxis: {
@@ -96,12 +100,12 @@ export const ColumnChart = memo(function ColumnChart({
           labels: {
             style: {
               fontSize: '11px',
-              colors: '#9ca3af',
+              colors: isDark ? '#a3a3a3' : '#9ca3af',
             },
           },
         },
         grid: {
-          borderColor: '#f3f4f6',
+          borderColor: isDark ? '#262626' : '#f3f4f6',
           strokeDashArray: 3,
         },
         colors: [color],
@@ -148,7 +152,7 @@ export const ColumnChart = memo(function ColumnChart({
         chartInstance.current = null;
       }
     };
-  }, [categories, series, color, height]);
+  }, [categories, series, color, height, isDark]);
 
   return <div ref={chartRef} />;
 });

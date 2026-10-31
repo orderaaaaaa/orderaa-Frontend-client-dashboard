@@ -61,7 +61,7 @@ export function CancelledOrdersModalContent({
         columns={summaryColumns}
         data={summaryData}
         keyField="id"
-        headerClassName="bg-[#E5E5E5]"
+        headerClassName="bg-neutral-200"
       />
       <ColumnChart
         categories={summaryData.map((item) => item.status)}
@@ -81,7 +81,7 @@ export function CancelledOrdersModalContent({
           columns={orderDetailsColumns}
           data={orderDetails}
           keyField="id"
-          headerClassName="bg-[#E5E5E5]"
+          headerClassName="bg-neutral-200"
         />
       </div>
     </div>

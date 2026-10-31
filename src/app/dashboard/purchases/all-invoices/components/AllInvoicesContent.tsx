@@ -195,7 +195,7 @@ export function AllInvoicesContent() {
             <LiaSlidersHSolid className="w-5 h-5" />
             فلاتر متقدمة
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -end-2 bg-card text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
               </span>
             )}

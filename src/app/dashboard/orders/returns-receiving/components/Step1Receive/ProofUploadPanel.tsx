@@ -104,7 +104,7 @@ export function ProofUploadPanel({
           ? 'bg-gray-50 border-gray-200'
           : proofUploaded
             ? 'bg-emerald-50 border-emerald-200'
-            : 'bg-white border-gray-200',
+            : 'bg-card border-gray-200',
       )}
     >
       <AccordionTrigger

@@ -52,7 +52,7 @@ export default function DeleteSettlementBatchDialog({
       onConfirm={handleConfirm}
       title="حذف التحصيل"
       confirmText="حذف"
-      confirmButtonClassName="bg-red-600 hover:bg-red-700"
+      confirmButtonClassName="bg-red-600 hover:brightness-90"
       maxWidth="md:max-w-md"
     >
       <p className="text-sm text-gray-700">

@@ -56,11 +56,11 @@ export function ShippingTypeSelect({
 
   return (
     <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
-      <p className="font-bold text-[#121212]">نوع الشحنة</p>
-      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
+      <p className="font-bold text-foreground">نوع الشحنة</p>
+      <div className="flex gap-2 bg-background shadow-xs items-center py-1 px-2 rounded-[5px]">
         <LiaTruckSolid size={18} className="flex-shrink-0" />
         {!canEdit ? (
-          <p className="flex-1 py-1 font-bold text-[15px] text-[#000000] truncate">
+          <p className="flex-1 py-1 font-bold text-[15px] text-foreground truncate">
             {displayValue || '-'}
           </p>
         ) : (
@@ -72,7 +72,7 @@ export function ShippingTypeSelect({
             searchPlaceholder="بحث..."
             emptyMessage="لا توجد أنواع شحن متاحة"
             noResultsMessage="لا توجد نتائج للبحث"
-            triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
+            triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-foreground"
             searchThreshold={5}
             loading={isLoading}
             onOpenChange={handleOpenChange}

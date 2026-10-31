@@ -151,7 +151,7 @@ function DelayedOrdersContent() {
           onChange={(e) =>
             replaceUrlState({ status: toOrderStatusKey(e.target.value), page: 1 })
           }
-          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
+          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-background"
         >
           <option value="">كل الحالات</option>
           {(statuses?.allStatuses ?? []).map((s) => (
@@ -167,7 +167,7 @@ function DelayedOrdersContent() {
           onChange={(e) =>
             replaceUrlState({ minMinutes: toDayOption(e.target.value), page: 1 })
           }
-          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
+          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-background"
         >
           {DAY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>

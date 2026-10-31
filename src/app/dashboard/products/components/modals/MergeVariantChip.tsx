@@ -57,7 +57,7 @@ const actionText = (
 
 export function MergeVariantChipPreview({ variantRef }: { variantRef: MergeVariantRef }) {
   return (
-    <div className="rounded-lg border border-primary bg-white px-3 py-2 text-sm font-medium shadow-xl ring-2 ring-primary/20">
+    <div className="rounded-lg border border-primary bg-card px-3 py-2 text-sm font-medium shadow-xl ring-2 ring-primary/20">
       {variantDisplayLabel(variantRef.variant)}
     </div>
   );
@@ -106,7 +106,7 @@ export function MergeVariantChip({
       role="group"
       aria-label={`${label}، ${actionText(variantRef, entry, intoRef)}`}
       className={cn(
-        'rounded-lg border bg-white p-2 transition-colors md:cursor-grab',
+        'rounded-lg border bg-card p-2 transition-colors md:cursor-grab',
         entry.action === 'KEEP' && 'border-primary/30',
         entry.action === 'MERGE_INTO' && 'border-sky-300 bg-sky-50',
         entry.action === 'DROP' && 'border-red-200 bg-red-50',
@@ -174,7 +174,7 @@ export function MergeVariantChip({
               align="end"
               sideOffset={4}
               collisionPadding={8}
-              className="z-[60] max-h-[min(360px,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-white p-1 shadow-lg"
+              className="z-[60] max-h-[min(360px,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-card p-1 shadow-lg"
             >
               <DropdownMenuPrimitive.Item
                 className={itemClass}

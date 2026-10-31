@@ -77,7 +77,7 @@ export default function LeadsSearch({
   }, [debouncedSearch]);
 
   return (
-    <div className="bg-white  mx-auto rounded-lg shadow-md mb-6 mt-10">
+    <div className="bg-card  mx-auto rounded-lg shadow-md mb-6 mt-10">
       <div className="p-4 md:p-6">
         {/* Main Search Row */}
         <div className="flex flex-col-reverse md:flex-row-reverse items-stretch md:items-center gap-4">
@@ -135,7 +135,7 @@ export default function LeadsSearch({
                 placeholder="جميع المصادر"
                 widthClass="w-full"
                 clearable
-                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-white text-right"
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-background text-right"
               />
             </div>
 
@@ -145,7 +145,7 @@ export default function LeadsSearch({
                 value={leadType}
                 onChange={handleLeadTypeChange}
                 placeholder="نوع الشارة"
-                triggerClassName="w-full border border-gray-300 !rounded-lg !py-2 h-full px-3 !text-sm font-semibold bg-white text-right"
+                triggerClassName="w-full border border-gray-300 !rounded-lg !py-2 h-full px-3 !text-sm font-semibold bg-background text-right"
               />
             </div>
             <SearchableSelect
@@ -155,7 +155,7 @@ export default function LeadsSearch({
               placeholder="حالة الدفع"
               widthClass="w-full"
               clearable
-              triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-white text-right"
+              triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-background text-right"
             />
           </div>
         </div>

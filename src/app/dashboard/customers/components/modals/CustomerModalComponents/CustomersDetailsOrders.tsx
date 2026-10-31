@@ -44,7 +44,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
             {orders.map((order) => (
               <li
                 key={order.id}
-                className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col gap-2"
+                className="bg-card border border-gray-100 rounded-xl p-4 flex flex-col gap-2"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="font-medium text-sm text-gray-800 break-all min-w-0">
@@ -78,7 +78,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
 
           <div className="hidden md:block overflow-x-auto pb-4">
             <div className="min-w-[760px] flex flex-col gap-3">
-              <div className="grid grid-cols-7 items-center bg-white border border-gray-100 rounded-xl py-3 px-4 text-gray-500 text-xs font-medium">
+              <div className="grid grid-cols-7 items-center bg-card border border-gray-100 rounded-xl py-3 px-4 text-gray-500 text-xs font-medium">
                 <div className="text-center">رقم الطلب</div>
                 <div className="text-center">التاريخ</div>
                 <div className="text-center">الحالة</div>
@@ -91,7 +91,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className="grid grid-cols-7 items-center bg-white border border-gray-100 rounded-xl py-5 px-4 hover:border-blue-100 transition-colors"
+                  className="grid grid-cols-7 items-center bg-card border border-gray-100 rounded-xl py-5 px-4 hover:border-blue-100 transition-colors"
                 >
                   <div className="text-center text-gray-800 font-medium text-xs break-all px-1">
                     <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>

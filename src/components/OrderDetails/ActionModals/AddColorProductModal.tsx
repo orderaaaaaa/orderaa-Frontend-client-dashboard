@@ -63,13 +63,13 @@ export default function AddColorProductModal({
       confirmDisabled={!isFormValid}
     >
       <div className="space-y-6">
-        <p className="text-[#5F5E5E] text-sm">
+        <p className="text-muted-foreground text-sm">
           اختر اللون المطلوب لإرسال صورته للعميل عبر واتساب
         </p>
 
         {/* Color Dropdown */}
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             اللون <span className="text-red-600">*</span>
           </label>
           <SearchableSelect
@@ -80,8 +80,8 @@ export default function AddColorProductModal({
             searchPlaceholder="بحث عن اللون..."
             emptyMessage="لا توجد ألوان متاحة"
             noResultsMessage="لا توجد نتائج للبحث"
-            triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
-            className="rounded-2xl border-[#ECECEC]"
+            triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
+            className="rounded-2xl border-border"
             loading={isLoading}
             searchThreshold={5}
           />
@@ -90,12 +90,12 @@ export default function AddColorProductModal({
         {/* Current Product Colors Info */}
         {currentProductColors.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm font-bold text-[#1F1F1F] mb-2">ألوان المنتج الحالية:</p>
+            <p className="text-sm font-bold text-foreground mb-2">ألوان المنتج الحالية:</p>
             <div className="flex flex-wrap gap-2">
               {currentProductColors.map((color, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-white border border-[#ECECEC] rounded-full text-sm text-[#5F5E5E]"
+                  className="px-3 py-1 bg-card border border-border rounded-full text-sm text-muted-foreground"
                 >
                   {color}
                 </span>

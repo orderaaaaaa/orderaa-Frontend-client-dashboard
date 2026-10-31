@@ -82,7 +82,7 @@ const OrderDetailsCardId = ({
               {order.code}
               <History
                 onClick={() => setIsHistoryModalOpen(true)}
-                className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-primary border-1 border-[#CBB5FD]"
+                className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary border-1 border-primary/40"
               />
             </h3>
             <p className="text-xs font-bold sm:mr-7 mb-4">
@@ -164,7 +164,7 @@ const OrderDetailsCardId = ({
                       </div>
                     ))
                   ) : (
-                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-1.5">
+                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-card px-3 py-1.5">
                       <Copy
                         onClick={() => handleCopy(activeShippingIdOf(order)!)}
                         className="w-3.5 h-3.5 text-[#7038f3] cursor-pointer shrink-0"
@@ -202,7 +202,7 @@ const OrderDetailsCardId = ({
               )}
               {(order?.customers?.totalCustomerOrders ?? 0) > 1 && (
                 <button
-                  className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"
+                  className="cursor-pointer bg-primary/10 text-white border-1 border-primary/40 !rounded-r-3xl p-2 px-4"
                   onClick={() => setIsCustomerOrdersModalOpen(true)}
                 >
                   <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-primary relative ">
@@ -224,7 +224,7 @@ const OrderDetailsCardId = ({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 bg-white shadow-md rounded-lg px-4 py-2 flex items-center gap-2 border border-[rgba(0,0,0,0.06)]"
+          className="fixed bottom-6 right-6 z-50 bg-card shadow-md rounded-lg px-4 py-2 flex items-center gap-2 border border-border"
         >
           <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

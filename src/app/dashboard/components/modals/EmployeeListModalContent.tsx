@@ -93,7 +93,7 @@ export function EmployeeListModalContent({
         columns={columns}
         data={data}
         keyField="id"
-        headerClassName="bg-[#E5E5E5]"
+        headerClassName="bg-neutral-200"
         onRowClick={handleRowClick}
         rowClassName={(row) =>
           row.id === selectedEmployeeId ? 'bg-primary/5' : undefined

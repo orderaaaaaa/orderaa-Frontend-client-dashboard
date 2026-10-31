@@ -8,7 +8,7 @@ export function SummaryCardsSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
+          className="flex items-center gap-4 rounded-xl border border-gray-100 bg-card p-4 shadow-sm"
         >
           <Skeleton className="size-11 rounded-lg" />
           <div className="flex-1 space-y-2">
@@ -31,7 +31,7 @@ export function ProductStockTableSkeleton({
   columns = 3,
 }: ProductStockTableSkeletonProps) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-gray-100 bg-card shadow-sm overflow-hidden">
       <div className="flex items-center gap-4 border-b border-gray-100 px-5 py-4">
         <Skeleton className="size-12 rounded-lg" />
         <div className="space-y-2">
@@ -39,7 +39,7 @@ export function ProductStockTableSkeleton({
           <Skeleton className="h-3 w-24" />
         </div>
       </div>
-      <div className="px-4 py-3 bg-[#f1eefa] flex items-center gap-3">
+      <div className="px-4 py-3 bg-primary/10 flex items-center gap-3">
         <Skeleton className="h-4 w-16" />
         {Array.from({ length: columns }).map((_, i) => (
           <Skeleton key={i} className="h-4 flex-1" />

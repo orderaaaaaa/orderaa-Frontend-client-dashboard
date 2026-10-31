@@ -138,7 +138,7 @@ export function Step2Categorize({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 flex flex-col gap-4">
+      <div className="bg-card border border-gray-200 rounded-xl p-4 sm:p-5 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex flex-col gap-0.5">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">

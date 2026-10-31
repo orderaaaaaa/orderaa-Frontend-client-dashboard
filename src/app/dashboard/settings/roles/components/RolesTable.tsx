@@ -122,7 +122,7 @@ export function RolesTable({ roles, onEdit, onDelete, onReset }: RolesTableProps
         {roles.map((role) => (
           <li
             key={role.id}
-            className="rounded-lg border border-gray-200 bg-white p-4"
+            className="rounded-lg border border-gray-200 bg-card p-4"
           >
             <div className="flex items-start justify-between gap-3">
               <p className="min-w-0 break-words font-semibold text-gray-900">

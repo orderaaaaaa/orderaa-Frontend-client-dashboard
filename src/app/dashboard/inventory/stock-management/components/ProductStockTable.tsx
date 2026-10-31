@@ -223,7 +223,7 @@ export function ProductStockTable({
   const grandTotal = totals.grandTotal;
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-gray-100 bg-card shadow-sm overflow-hidden">
       <div className="flex items-center gap-4 border-b border-gray-100 px-5 py-4">
         <div className="size-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
           <img
@@ -330,8 +330,8 @@ export function ProductStockTable({
       <div className="hidden md:block">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#f1eefa]">
-              <TableHead className="sticky start-0 z-[1] bg-[#f1eefa] px-4 py-3 text-sm font-bold text-gray-700 border-l border-gray-200 last:border-l-0 w-24 text-center">
+            <TableRow className="bg-primary/10">
+              <TableHead className="sticky start-0 z-[1] bg-primary/10 px-4 py-3 text-sm font-bold text-gray-700 border-l border-gray-200 last:border-l-0 w-24 text-center">
                 المتغير
               </TableHead>
               {visibleColors.map((color) => (
@@ -361,7 +361,7 @@ export function ProductStockTable({
               <>
                 {visibleVariants.map((variant, rowIndex) => (
                   <TableRow key={variant.size} className="group hover:bg-gray-50">
-                    <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 transition-colors px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
+                    <TableCell className="sticky start-0 z-[1] bg-card group-hover:bg-gray-50 transition-colors px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
                     {visibleColors.map((color) => (

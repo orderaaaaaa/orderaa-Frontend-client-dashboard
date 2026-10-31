@@ -67,7 +67,7 @@ export function AttendanceModal({
 
         {/* Statistics */}
         {data?.statistics && (
-          <div className="bg-[#f2eefd] rounded-xl p-4 mb-4 border-2 border-[#5D24E129]">
+          <div className="bg-primary/10 rounded-xl p-4 mb-4 border-2 border-primary/15">
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-sm text-gray-600 mb-1">
@@ -89,7 +89,7 @@ export function AttendanceModal({
               </div>
             </div>
             {type === 'attendance' && (
-              <div className="mt-4 pt-4 border-t border-[#5D24E129] text-center">
+              <div className="mt-4 pt-4 border-t border-primary/15 text-center">
                 <div className="text-sm text-gray-600 mb-1">نسبة الحضور</div>
                 <div className="text-2xl font-bold text-[#3cc900]">
                   {data.statistics.attendancePercentage.toFixed(1)}%
@@ -132,7 +132,7 @@ export function AttendanceModal({
                   {dates.map((date, index) => (
                     <div
                       key={index}
-                      className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50 transition-colors"
+                      className="bg-card border border-gray-200 rounded-lg p-3 text-center hover:bg-gray-50 transition-colors"
                     >
                       <div className="text-sm font-medium text-gray-900">
                         {formatDate(date)}

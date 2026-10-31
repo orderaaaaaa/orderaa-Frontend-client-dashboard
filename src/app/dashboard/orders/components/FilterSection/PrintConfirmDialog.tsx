@@ -211,7 +211,7 @@ export function PrintConfirmDialog({
             type="button"
             onClick={handleConfirm}
             disabled={busy}
-            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] bg-primary text-white hover:bg-[#4B1BC4] font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] bg-primary text-white hover:bg-brand-hover font-bold"
           >
             <LiaCheckSolid className="size-5" />
             نعم، تمت الطباعة
@@ -232,7 +232,7 @@ export function PrintConfirmDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={busy}
-            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-[#ECECEC] text-[#5F5E5E] font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-border text-muted-foreground font-bold"
           >
             <LiaTimesSolid className="size-5" />
             لا، إلغاء

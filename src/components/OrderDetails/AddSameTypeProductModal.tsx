@@ -95,11 +95,11 @@ export default function AddSameTypeProductModal({
     >
       <div className="flex flex-col gap-4">
         <div className="w-full">
-          <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+          <label className="block text-lg font-bold text-foreground mb-3 text-right">
             النوع
           </label>
-          <div className="w-full h-[44px] md:h-[57px] bg-[#F5F5F5] border border-[#ECECEC] rounded-[38px] px-4 md:px-6 flex items-center justify-end">
-            <span className="text-base md:text-lg text-[#1F1F1F] font-bold">
+          <div className="w-full h-[44px] md:h-[57px] bg-muted border border-border rounded-[38px] px-4 md:px-6 flex items-center justify-end">
+            <span className="text-base md:text-lg text-foreground font-bold">
               {productType}
             </span>
           </div>
@@ -107,20 +107,20 @@ export default function AddSameTypeProductModal({
 
         <div className="flex flex-col md:flex-row gap-4 flex-wrap">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+            <label className="block text-lg font-bold text-foreground mb-3 text-right">
               الكمية
             </label>
-            <div className="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-3 md:px-4 flex items-center justify-between">
+            <div className="h-[44px] md:h-[57px] bg-card border border-border rounded-[38px] px-3 md:px-4 flex items-center justify-between">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={decrementQuantity}
                 disabled={quantity <= 1}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#F5F5F5] hover:bg-[#ECECEC] p-0"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-muted hover:bg-border p-0"
               >
-                <LiaMinusSolid className="w-4 h-4 md:w-5 md:h-5 text-[#5F5E5E]" />
+                <LiaMinusSolid className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
               </Button>
-              <span className="text-lg md:text-xl font-bold text-[#1F1F1F] min-w-[40px] text-center">
+              <span className="text-lg md:text-xl font-bold text-foreground min-w-[40px] text-center">
                 {quantity}
               </span>
               <Button
@@ -128,7 +128,7 @@ export default function AddSameTypeProductModal({
                 variant="ghost"
                 onClick={incrementQuantity}
                 disabled={quantity >= 99}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary hover:bg-[#4B1BC4] p-0"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary hover:bg-brand-hover p-0"
               >
                 <LiaPlusSolid className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </Button>
@@ -146,7 +146,7 @@ export default function AddSameTypeProductModal({
           ) : (
             variantOptions.map((option) => (
               <div key={option.attribute} className="flex-1 min-w-[200px]">
-                <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+                <label className="block text-lg font-bold text-foreground mb-3 text-right">
                   {option.attribute}
                 </label>
                 <SearchableSelect
@@ -157,8 +157,8 @@ export default function AddSameTypeProductModal({
                   searchPlaceholder={`بحث عن ${option.attribute}...`}
                   emptyMessage="لا توجد خيارات متاحة"
                   noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
-                  className="rounded-2xl border-[#ECECEC]"
+                  triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
+                  className="rounded-2xl border-border"
                   disabled={option.options.length === 0}
                   searchThreshold={5}
                 />

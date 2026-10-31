@@ -43,7 +43,7 @@ export default function DeleteConfirmationModal({
       onConfirm={handleConfirm}
       confirmText={isDeleting ? 'جاري الحذف...' : 'حذف'}
       confirmIcon={<LiaTrashAltSolid className="w-5 h-5 text-white" />}
-      confirmButtonClassName="w-[146px] h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-2 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      confirmButtonClassName="w-[146px] h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-2 hover:brightness-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       isLoading={isDeleting}
     >
       <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
@@ -51,15 +51,15 @@ export default function DeleteConfirmationModal({
           <LiaTrashAltSolid className="w-8 h-8 text-red-600" />
         </div>
 
-        <p className="text-lg font-bold text-[#1F1F1F]">
+        <p className="text-lg font-bold text-foreground">
           هل أنت متأكد من حذف هذا المنتج؟
         </p>
 
-        <p className="text-base font-normal text-[#5F5E5E]">
+        <p className="text-base font-normal text-muted-foreground">
           {productName}
         </p>
 
-        <p className="text-sm font-normal text-[#5F5E5E]">
+        <p className="text-sm font-normal text-muted-foreground">
           لا يمكن التراجع عن هذا الإجراء
         </p>
       </div>

@@ -52,7 +52,7 @@ function Stepper({
                       ? 'border-primary bg-primary text-white'
                       : isActive
                         ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-gray-300 bg-white text-gray-400'
+                        : 'border-gray-300 bg-card text-gray-400'
                   )}
                 >
                   {isCompleted ? (

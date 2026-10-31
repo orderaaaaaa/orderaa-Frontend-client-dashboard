@@ -347,7 +347,7 @@ export function FilterSection({
   };
 
   return (
-    <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
+    <div className="bg-card rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
         <div className="flex items-center gap-3">
           <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>

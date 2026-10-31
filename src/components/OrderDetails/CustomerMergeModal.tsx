@@ -41,7 +41,7 @@ function CustomerSummaryCard({
       className={`text-right w-full rounded-xl border-2 p-4 space-y-2 transition-colors ${
         isSurvivor
           ? 'border-primary bg-primary/5'
-          : 'border-gray-200 bg-white hover:border-gray-300'
+          : 'border-gray-200 bg-card hover:border-gray-300'
       }`}
     >
       <div className="flex items-center justify-between gap-2">

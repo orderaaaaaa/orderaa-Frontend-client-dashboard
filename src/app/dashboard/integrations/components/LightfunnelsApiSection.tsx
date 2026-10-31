@@ -200,7 +200,7 @@ export default function LightfunnelsApiSection({
       </div>
 
       {connection && (
-        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-100">
+        <div className="space-y-3 bg-card p-4 rounded-lg border border-gray-100">
           <Can
             code={PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE}
             fallback={

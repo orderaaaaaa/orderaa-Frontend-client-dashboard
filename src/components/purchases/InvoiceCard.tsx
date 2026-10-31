@@ -211,7 +211,7 @@ const InvoiceCard = memo(
     );
 
     return (
-      <div className="relative w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md overflow-hidden">
+      <div className="relative w-full bg-card border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md overflow-hidden">
         {showRibbon && (
           <div className="absolute top-0 end-0 w-28 h-28 overflow-hidden pointer-events-none" aria-hidden="true">
             <div
@@ -326,7 +326,7 @@ const InvoiceCard = memo(
           showFooter={false}
         >
           <div className="flex flex-col items-start gap-1 pb-4">
-            <span className="text-sm font-bold text-black">رقم الفاتورة</span>
+            <span className="text-sm font-bold text-foreground">رقم الفاتورة</span>
             <CopyableCode value={invoice.invoiceNumber} label="نسخ رقم الفاتورة">
               <span className="text-base font-semibold text-gray-700">{invoice.invoiceNumber}</span>
             </CopyableCode>

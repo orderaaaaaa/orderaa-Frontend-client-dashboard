@@ -37,7 +37,7 @@ export function OrderLockedModal({
       <div className="flex flex-col items-center justify-center gap-6 py-6">
         <LiaExclamationTriangleSolid className="w-24 h-24 text-primary" />
 
-        <h3 className="text-xl font-bold text-black">
+        <h3 className="text-xl font-bold text-foreground">
           لا يمكن مشاهده هذا الطلب
         </h3>
 

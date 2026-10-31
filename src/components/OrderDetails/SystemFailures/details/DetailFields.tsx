@@ -29,7 +29,7 @@ export function DetailField({
   return (
     <div className="flex flex-col min-w-0">
       <dt className="text-xs text-gray-500">{label}</dt>
-      <dd className="text-sm font-medium text-[#1F1F1F] break-words" dir={ltr ? 'ltr' : undefined}>
+      <dd className="text-sm font-medium text-foreground break-words" dir={ltr ? 'ltr' : undefined}>
         {children}
       </dd>
     </div>

@@ -183,7 +183,7 @@ export default function SupplierProductsContent({
             setSearchQuery('');
             setCurrentPage(1);
           }}
-          inputClassName="bg-white"
+          inputClassName="bg-background"
         />
       </div>
 

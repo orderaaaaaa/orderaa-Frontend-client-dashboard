@@ -152,7 +152,7 @@ export default function ReturnReceiptsPage() {
                 selectedId === receipt.id
                   ? 'border-primary'
                   : 'border-gray-200 hover:border-primary/40'
-              } ${receipt.reviewedAt ? 'bg-green-50/40' : 'bg-white'}`}
+              } ${receipt.reviewedAt ? 'bg-green-50/40' : 'bg-card'}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>

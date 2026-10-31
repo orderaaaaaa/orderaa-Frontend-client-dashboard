@@ -50,7 +50,7 @@ function OrderDetailsInfo({
   const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
 
   return (
-    <section className="mx-auto mt-3 p-4 bg-white rounded-lg shadow-sm">
+    <section className="mx-auto mt-3 p-4 bg-card rounded-lg shadow-sm">
       <OrderDetailsCardId
         order={order}
         isLockedByOther={isLockedByOther}

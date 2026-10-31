@@ -61,7 +61,7 @@ export default function ExchangeModal({
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             المنتج المرتجع <span className="text-red-600">*</span>
           </label>
           <div className="flex flex-col gap-2">
@@ -71,8 +71,8 @@ export default function ExchangeModal({
                 className={clsx(
                   'flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all',
                   selectedProductId === op.id
-                    ? 'border-primary bg-[#F6F2FC]'
-                    : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF]'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/40 hover:bg-primary/5'
                 )}
                 onClick={() => setSelectedProductId(op.id)}
               >
@@ -89,7 +89,7 @@ export default function ExchangeModal({
                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   <span className={clsx(
                     'text-sm',
-                    selectedProductId === op.id ? 'text-primary font-semibold' : 'text-[#1F1F1F]'
+                    selectedProductId === op.id ? 'text-primary font-semibold' : 'text-foreground'
                   )}>
                     {op.products.name}
                   </span>
@@ -110,7 +110,7 @@ export default function ExchangeModal({
                     ) : null;
                   })()}
                 </div>
-                <span className="text-sm font-bold text-[#1F1F1F] shrink-0">
+                <span className="text-sm font-bold text-foreground shrink-0">
                   {op.price} ج.م
                 </span>
               </label>
@@ -119,7 +119,7 @@ export default function ExchangeModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             المنتج الجديد <span className="text-red-600">*</span>
           </label>
           <input
@@ -127,41 +127,41 @@ export default function ExchangeModal({
             value={newProductName}
             onChange={(e) => setNewProductName(e.target.value)}
             placeholder="اسم المنتج الجديد..."
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">اسم المتغير</label>
+            <label className="font-bold text-foreground">اسم المتغير</label>
             <input
               type="text"
               value={variantLabel}
               onChange={(e) => setVariantLabel(e.target.value)}
               placeholder="مثال: اللون"
-              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+              className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">قيمة المتغير</label>
+            <label className="font-bold text-foreground">قيمة المتغير</label>
             <input
               type="text"
               value={variantValue}
               onChange={(e) => setVariantValue(e.target.value)}
               placeholder="مثال: أحمر"
-              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+              className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">فرق السعر</label>
+          <label className="font-bold text-foreground">فرق السعر</label>
           <input
             type="number"
             value={priceDifference}
             onChange={(e) => setPriceDifference(e.target.value)}
             placeholder="0"
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
       </div>

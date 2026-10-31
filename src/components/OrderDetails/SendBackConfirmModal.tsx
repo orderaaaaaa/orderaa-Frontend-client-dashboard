@@ -29,7 +29,7 @@ export default function SendBackConfirmModal({
           <LiaExclamationTriangleSolid className="w-8 h-8 text-amber-600" />
         </div>
 
-        <p className="text-lg font-bold text-[#1F1F1F]">
+        <p className="text-lg font-bold text-foreground">
           الطلب تم تغليفه. التعديل سيعيده إلى «في انتظار التغليف» ويحتاج إعادة تجهيز. متابعة؟
         </p>
       </div>

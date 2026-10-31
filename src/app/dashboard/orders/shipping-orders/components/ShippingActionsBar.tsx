@@ -56,13 +56,13 @@ export function ShippingActionsBar({
 
   return (
     <div
-      className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
+      className={`${positionClasses} bg-card border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
     >
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
           <Button
             variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-6 py-2 rounded-3xl bg-primary border-primary text-white hover:bg-[#4B1BC4] transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
+            className="grid grid-cols-[auto_1fr] items-center gap-2 px-6 py-2 rounded-3xl bg-primary border-primary text-white hover:bg-brand-hover transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
             onClick={onShip}
             disabled={isDisabled}
           >

@@ -87,7 +87,7 @@ export function OrderActionsFooterLargeScreens({
 
   return (
     <div
-      className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
+      className={`${FIXED_BOTTOM_BAR_CLASS} bg-card border-t border-gray-200 shadow-lg py-4 px-6`}
     >
       <div className="flex gap-2 justify-between items-center">
         <div className="flex gap-2 items-center sm:rtl:ms-14 sm:ltr:me-14">
@@ -125,7 +125,7 @@ export function OrderActionsFooterLargeScreens({
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
             loading={isBusy}
-            className="py-2 px-10 rounded-2xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all duration-700 hover:scale-105 flex items-center gap-2"
+            className="py-2 px-10 rounded-2xl bg-red-600 text-white text-sm font-bold hover:brightness-90 transition-all duration-700 hover:scale-105 flex items-center gap-2"
           >
             <LiaStopCircleSolid className="w-5 h-5" />
             وقف التشغيل
@@ -140,7 +140,7 @@ export function OrderActionsFooterLargeScreens({
                   loading={isBusy}
                   disabled={isBusy || !canConfirmStock}
                   title={canConfirmStock ? undefined : stockBlockReason}
-                  className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
+                  className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-brand-hover transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
                 >
                   <LiaCheckCircle className="w-5 h-5" />
                   تأكيد

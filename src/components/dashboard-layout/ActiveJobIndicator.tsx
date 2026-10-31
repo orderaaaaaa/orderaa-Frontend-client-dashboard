@@ -102,7 +102,7 @@ export function ActiveJobIndicator() {
         <div className="flex-shrink-0 px-4 py-1">
           <div
             role="status"
-            className="flex min-w-0 items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+            className="flex min-w-0 items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700"
           >
             <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
             <span className="truncate">{activeJobs[0].label}</span>

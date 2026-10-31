@@ -69,7 +69,7 @@ export default function PasswordStrengthIndicator({
                     : strength === 'medium'
                     ? 'bg-orange-500'
                     : 'bg-green-500'
-                  : 'bg-white'
+                  : 'bg-background'
               } transition-all duration-300`}
               style={{ width: `${Math.min(33.33, segment1Width)}%` }}
             />
@@ -80,14 +80,14 @@ export default function PasswordStrengthIndicator({
                     ? 'bg-orange-500'
                     : strength === 'strong'
                     ? 'bg-green-500'
-                    : 'bg-white'
-                  : 'bg-white'
+                    : 'bg-background'
+                  : 'bg-background'
               } transition-all duration-300`}
               style={{ width: `${Math.min(33.33, segment2Width)}%` }}
             />
             <div
               className={`${
-                segment3Width > 0 ? 'bg-green-500' : 'bg-white'
+                segment3Width > 0 ? 'bg-green-500' : 'bg-background'
               } transition-all duration-300`}
               style={{ width: `${Math.min(33.33, segment3Width)}%` }}
             />

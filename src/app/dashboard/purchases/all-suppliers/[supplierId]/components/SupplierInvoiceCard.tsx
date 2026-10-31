@@ -103,7 +103,7 @@ const SupplierInvoiceCard = memo(
     );
 
     return (
-      <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+      <div className="w-full bg-card border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
         <div className="flex items-start gap-2">
           {select && (
             <label className="-ms-2 -mt-1.5 flex size-10 shrink-0 cursor-pointer items-center justify-center">

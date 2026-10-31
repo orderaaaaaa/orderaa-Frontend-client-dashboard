@@ -404,7 +404,7 @@ const IntegrationModal = ({
                   onSubmit={onStoreInfoSubmit}
                   className="space-y-4"
                 >
-                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                  <div className="space-y-4 bg-card p-5 rounded-xl border border-gray-100">
                     <Input
                       register={storeInfoForm.register}
                       name="storeName"
@@ -443,7 +443,7 @@ const IntegrationModal = ({
 
               <StepContent>
                 <form onSubmit={onWebhookSubmit} className="space-y-4">
-                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                  <div className="space-y-4 bg-card p-5 rounded-xl border border-gray-100">
                     {isOAuthConnect && (
                       <LightfunnelsWebhookModeSelect
                         value={webhookMode}
@@ -537,7 +537,7 @@ const IntegrationModal = ({
               {!isWebhookOnly && !isOAuthConnect && (
               <StepContent>
                 <form onSubmit={onApiKeySubmit} className="space-y-4">
-                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                  <div className="space-y-4 bg-card p-5 rounded-xl border border-gray-100">
                     {config.metadataFields?.map((field) => (
                       <Input
                         key={field.key}
@@ -604,7 +604,7 @@ const IntegrationModal = ({
                   <AccordionItem
                     key={storeId}
                     value={`store-${storeId}`}
-                    className="bg-white rounded-xl border border-gray-200 px-4"
+                    className="bg-card rounded-xl border border-gray-200 px-4"
                   >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center justify-between w-full pe-2">

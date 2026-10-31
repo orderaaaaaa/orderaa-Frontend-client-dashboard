@@ -56,7 +56,7 @@ export default function ActionConfirmationDialog({
     >
       <div className="relative">
         {showSuccess && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/95 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-10">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <LiaCheckCircle
@@ -71,7 +71,7 @@ export default function ActionConfirmationDialog({
           </div>
         )}
 
-        <p className="text-base text-[#1F1F1F] text-center py-6 whitespace-pre-line">
+        <p className="text-base text-foreground text-center py-6 whitespace-pre-line">
           {message}
         </p>
       </div>

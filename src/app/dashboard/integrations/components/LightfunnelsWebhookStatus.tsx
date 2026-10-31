@@ -132,7 +132,7 @@ export default function LightfunnelsWebhookStatus({
               {line.topics.map((topic) => (
                 <span
                   key={topic}
-                  className="font-mono text-xs bg-white/70 border border-current/20 rounded-full px-2 py-0.5"
+                  className="font-mono text-xs bg-card/70 border border-current/20 rounded-full px-2 py-0.5"
                 >
                   {topic}
                 </span>

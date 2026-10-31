@@ -92,7 +92,7 @@ export function ExchangeCandidateStep({
                 <span>{t('exchange.create.units', { count: unitCount })}</span>
               </div>
               {isBlocked && (
-                <p className="ps-7 text-xs font-medium text-amber-900 dark:text-amber-200">
+                <p className="ps-7 text-xs font-medium text-amber-900">
                   {t('exchange.create.openExchange', { code: openCode })}
                 </p>
               )}

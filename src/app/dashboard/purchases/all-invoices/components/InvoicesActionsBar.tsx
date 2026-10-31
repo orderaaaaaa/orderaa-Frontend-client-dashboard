@@ -16,13 +16,13 @@ const InvoicesActionsBar = memo(
 
     return (
       <div
-        className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
+        className={`${FIXED_BOTTOM_BAR_CLASS} bg-card border-t border-gray-200 shadow-lg py-4 px-6`}
       >
         <div className="mx-auto overflow-x-auto scrollbar-hide">
           <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             >
               <LiaFileExcelSolid className="size-5" />
               <span>مشاركة شيت اكسيل</span>
@@ -30,7 +30,7 @@ const InvoicesActionsBar = memo(
 
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             >
               <LiaFilePdfSolid className="size-5" />
               <span>تصدير PDF</span>

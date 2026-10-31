@@ -4,7 +4,7 @@ import { User } from 'lucide-react';
 export default function EmployeeFormHeader() {
   return (
     <div
-      className="h-[137px] bg-[rgba(93,36,225,0.08)] flex items-center px-6 md:px-12"
+      className="h-[137px] bg-primary/10 flex items-center px-6 md:px-12"
       style={{ direction: 'rtl', justifyContent: 'flex-start' }}
     >
       <div
@@ -25,7 +25,7 @@ export default function EmployeeFormHeader() {
             إضافة موظف جديد
           </h1>
           <p
-            className="text-sm md:text-base font-normal text-black"
+            className="text-sm md:text-base font-normal text-foreground"
             style={{ textAlign: 'right', width: '100%' }}
           >
             املأ جميع البيانات لإضافة الموظف

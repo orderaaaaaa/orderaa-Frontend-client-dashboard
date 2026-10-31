@@ -40,7 +40,7 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-4">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-4">
         <h1 className="font-bold text-[22px]">بيانات المتجر الأصلية</h1>
 
         <div className="grid grid-cols-2 gap-4">
@@ -89,7 +89,7 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
                   <label className="mt-2 flex flex-col gap-1 text-xs text-gray-600">
                     ربط بمنتج
                     <select
-                      className="border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white"
+                      className="border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-background"
                       value={linkedPositionOf(product.index)}
                       onChange={(event) => handleLink(product.index, event.target.value)}
                       disabled={selectedProducts.length === 0}

@@ -42,7 +42,7 @@ function PaymentSection({
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">طريقة الدفع</h1>
         <div className="max-w-[502px]" data-field-error="paymentMethod">
           <div className="mb-1">
@@ -59,7 +59,7 @@ function PaymentSection({
             searchPlaceholder="بحث..."
             emptyMessage="لا توجد طرق دفع متاحة"
             noResultsMessage="لا توجد نتائج للبحث"
-            triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentMethod ? 'border-red-500' : 'border-[#CED4DA]'}`}
+            triggerClassName={`w-full rounded-lg h-12 ${errors?.paymentMethod ? 'border-red-500' : 'border-gray-300'}`}
             loading={isLoading}
             searchThreshold={5}
           />

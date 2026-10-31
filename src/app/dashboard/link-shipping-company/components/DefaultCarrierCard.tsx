@@ -96,7 +96,7 @@ export function DefaultCarrierCard({
   };
 
   return (
-    <section className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-200 mb-8">
+    <section className="bg-card rounded-2xl p-5 sm:p-6 border border-gray-200 mb-8">
       <h2 className="text-lg font-semibold text-gray-900">
         الشركة الافتراضية للطلبات المستوردة
       </h2>

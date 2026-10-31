@@ -78,7 +78,7 @@ export function CustomerCard({
         aria-label={
           selectionMode ? `تحديد ${customer.name}` : `تفاصيل ${customer.name}`
         }
-        className={`bg-white rounded-2xl shadow-sm relative cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+        className={`bg-card rounded-2xl shadow-sm relative cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
           isSelected ? 'ring-2 ring-primary/60' : ''
         }`}
         dir="rtl"
@@ -95,7 +95,7 @@ export function CustomerCard({
               </div>
             )}
             {customer.isBlocked && (
-              <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">
+              <div className="flex items-center gap-1 p-1 px-3 bg-red-50 border-2 border-red-200 rounded-sm">
                 <LiaBanSolid size={18} className="text-[#dc0201]" aria-hidden />
                 <span className="text-[#dc0201] text-sm">محظور</span>
               </div>
@@ -170,7 +170,7 @@ export function CustomerCard({
         </div>
 
         {blockReason && (
-          <div className="flex flex-wrap gap-1 mx-4 mb-3 items-center p-1 px-3 bg-[#ececec] rounded-sm font-semibold break-words">
+          <div className="flex flex-wrap gap-1 mx-4 mb-3 items-center p-1 px-3 bg-muted rounded-sm font-semibold break-words">
             <span>سبب الحظر:</span>
             <span className="font-normal">{blockReason}</span>
           </div>

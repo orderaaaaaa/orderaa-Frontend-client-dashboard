@@ -26,7 +26,7 @@ export function StatisticsSection({
         {Array.from({ length: skeletonCount }).map((_, i) => (
           <div
             key={i}
-            className="bg-white rounded-lg py-5 px-4 shadow-md border border-gray-100 animate-pulse"
+            className="bg-card rounded-lg py-5 px-4 shadow-md border border-gray-100 animate-pulse"
           >
             <div className="flex gap-4 items-center">
               <div className="w-12 h-12 bg-gray-200 rounded-lg" />

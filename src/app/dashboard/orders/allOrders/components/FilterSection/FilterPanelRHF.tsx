@@ -106,7 +106,7 @@ const FilterChip = React.memo(function FilterChip({ filterKey, label, children, 
           size="icon-sm"
           onClick={() => onRemove(filterKey)}
           aria-label={`إزالة ${label}`}
-          className="flex items-center justify-center w-6 h-6 bg-gray-500 hover:bg-gray-700 text-white rounded-full hover:text-white"
+          className="flex items-center justify-center w-6 h-6 bg-muted-foreground hover:bg-foreground text-background rounded-full hover:text-background"
         >
           <LiaTimesSolid className="w-4 h-4" />
         </Button>
@@ -241,7 +241,7 @@ export default function FilterPanel({
                   value={String(field.value ?? '')}
                   placeholder={label}
                   rows={1}
-                  className={`w-full h-full px-3 rounded border bg-white resize-none text-base ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full h-full px-3 rounded border bg-background resize-none text-base ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
                 />
               </FilterChip>
             )}
@@ -261,7 +261,7 @@ export default function FilterPanel({
                     value={String(field.value ?? '')}
                     onChange={field.onChange}
                     placeholder={label}
-                    className={`w-full h-full px-3 rounded border bg-white ${errors.employeeName ? 'border-red-500' : 'border-gray-300'}`}
+                    className={`w-full h-full px-3 rounded border bg-background ${errors.employeeName ? 'border-red-500' : 'border-gray-300'}`}
                   />
                 </FilterChip>
               )}
@@ -280,7 +280,7 @@ export default function FilterPanel({
                   value={String(field.value ?? '')}
                   type="text"
                   placeholder={label}
-                  className={`w-full h-full px-3 rounded border bg-white ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full h-full px-3 rounded border bg-background ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
                 />
               </FilterChip>
             )}
@@ -299,7 +299,7 @@ export default function FilterPanel({
                   selected={field.value && typeof field.value === 'string' ? new Date(field.value) : null}
                   onChange={(date) => field.onChange(date ? formatDateForUrl(date) : '')}
                   placeholder={label}
-                  className="w-full h-full border border-gray-300 rounded bg-white"
+                  className="w-full h-full border border-gray-300 rounded bg-background"
                   isClearable
                 />
               </FilterChip>
@@ -595,7 +595,7 @@ export default function FilterPanel({
             <input
               type="text"
               placeholder={label}
-              className="w-full h-full px-3 rounded border border-gray-300 bg-white"
+              className="w-full h-full px-3 rounded border border-gray-300 bg-background"
               disabled
             />
           </FilterChip>

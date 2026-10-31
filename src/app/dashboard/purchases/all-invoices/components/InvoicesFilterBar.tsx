@@ -45,7 +45,7 @@ const InvoicesFilterBar = memo(
 
         <div className="flex flex-row gap-2">
           <Input
-            inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+            inputClassName="bg-background py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
             type="number"
             placeholder="المبلغ من"
             value={filters.totalAmountFrom}
@@ -54,7 +54,7 @@ const InvoicesFilterBar = memo(
             onClear={() => onClearFilter('totalAmountFrom')}
           />
           <Input
-            inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+            inputClassName="bg-background py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
             type="number"
             placeholder="المبلغ الى"
             value={filters.totalAmountTo}

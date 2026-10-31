@@ -98,7 +98,7 @@ export default function EditProductModal({
         ) : (
           variantOptions.map((option) => (
             <div key={option.attribute} className="w-full md:w-[374px]">
-              <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+              <label className="block text-lg font-bold text-foreground mb-3 text-right">
                 {option.attribute}
               </label>
               <SearchableSelect
@@ -108,8 +108,8 @@ export default function EditProductModal({
                 placeholder={`اختر ${option.attribute}`}
                 searchPlaceholder={`بحث عن ${option.attribute}...`}
                 disabled={option.options.length === 0}
-                triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
-                className="rounded-2xl border-[#ECECEC]"
+                triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
+                className="rounded-2xl border-border"
                 searchThreshold={5}
                 debounceMs={300}
               />

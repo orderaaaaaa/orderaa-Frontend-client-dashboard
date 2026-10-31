@@ -13,7 +13,7 @@ export const StatCard = memo(({
 }: StatCardProps) => {
   return (
     <div
-      className={`bg-white max-sm:cursor-grab max-sm:active:cursor-grabbing p-6 rounded-lg sm:shadow-lg border-2 border-solid ${
+      className={`bg-card max-sm:cursor-grab max-sm:active:cursor-grabbing p-6 rounded-lg sm:shadow-lg border-2 border-solid ${
         borderColor ?? 'border-gray-200'
       }`}
     >
@@ -26,7 +26,7 @@ export const StatCard = memo(({
           <SvgIcon src={iconPath} className="h-6 w-6" alt={alt} />
         </div>
         <div>
-          <p className="text-[#00000099] text-2xl">{title}</p>
+          <p className="text-muted-foreground text-2xl">{title}</p>
           <p className="text-3xl mt-2">{count}</p>
         </div>
       </div>

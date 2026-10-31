@@ -54,7 +54,7 @@ export default function StoresHeader({
         <div className="relative w-32 sm:w-[180px] flex-shrink-0">
           <Select value={timePeriod} onValueChange={onTimePeriodChange}>
             <SelectTrigger
-              className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+              className={`w-full border-gray-300 rounded-lg h-10 text-[16px] ${
                 timePeriod ? 'text-primary font-bold' : ''
               }`}
             >

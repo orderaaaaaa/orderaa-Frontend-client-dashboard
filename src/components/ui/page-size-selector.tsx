@@ -62,7 +62,7 @@ export default function PageSizeSelector({
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        className="flex gap-2 min-h-10 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
+        className="flex gap-2 min-h-10 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-primary/90 transition-colors min-w-[80px]"
       >
         <span className="font-medium">{displayValue}</span>
         <ChevronDown
@@ -74,7 +74,7 @@ export default function PageSizeSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full start-[-15px] mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+        <div className="absolute bottom-full start-[-15px] mb-2 bg-popover border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
           <div className="py-1">
             {PAGE_SIZE_OPTIONS.map((size) => (
               <button

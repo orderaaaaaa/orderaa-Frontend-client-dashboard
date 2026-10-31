@@ -44,8 +44,8 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
       <span
         className={
           hasSelection
-            ? 'text-[#111827]'
-            : placeholderClassName ?? 'text-[#878A99]'
+            ? 'text-foreground'
+            : placeholderClassName ?? 'text-muted-foreground'
         }
       >
         {hasSelection ? `${selectedProducts.length} منتج مختار` : placeholder}

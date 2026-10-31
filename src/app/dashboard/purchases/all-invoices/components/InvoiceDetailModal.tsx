@@ -53,18 +53,18 @@ const InvoiceDetailModal = memo(
       >
         <div className="flex flex-col">
           <div className="py-4 flex flex-col justify-between items-start gap-1">
-            <h1 className="flex flex-row items-center gap-1 text-sm sm:text-base font-bold text-black">
+            <h1 className="flex flex-row items-center gap-1 text-sm sm:text-base font-bold text-foreground">
               <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 20, height: 20 }} />
               تفاصيل الفاتورة
             </h1>
-            <p className="ps-6 text-sm sm:text-base text-black/90">تفاصيل الفاتورة المرتبطة بالمعاملة</p>
+            <p className="ps-6 text-sm sm:text-base text-foreground/90">تفاصيل الفاتورة المرتبطة بالمعاملة</p>
           </div>
 
           {fieldRows.map((row, rowIndex) => (
             <div key={rowIndex} className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 border-t border-gray-200 py-4">
               {row.map((field) => (
                 <div key={field.label} className="flex flex-col items-start gap-1">
-                  <span className="text-sm font-bold text-black">{field.label}</span>
+                  <span className="text-sm font-bold text-foreground">{field.label}</span>
                   {field.value && (
                     <span className="text-base font-semibold text-gray-700">{field.value}</span>
                   )}
@@ -78,7 +78,7 @@ const InvoiceDetailModal = memo(
 
           {imageUrl && (
             <div className="flex flex-col items-start gap-3 border-t border-gray-200 pt-4">
-              <span className="text-base font-bold text-black">
+              <span className="text-base font-bold text-foreground">
                 صورة الفاتورة
               </span>
               <div className="w-full rounded-lg overflow-hidden flex items-center justify-center">

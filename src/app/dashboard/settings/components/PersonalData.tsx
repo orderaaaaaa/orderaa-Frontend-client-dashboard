@@ -119,7 +119,7 @@ export default function PersonalData() {
     'text-base text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary transition-colors';
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm" dir="rtl">
+    <div className="bg-card rounded-xl p-6 shadow-sm" dir="rtl">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-3 bg-primary/10 rounded-lg">
           <LiaUserEditSolid className="w-6 h-6 text-primary" />

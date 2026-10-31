@@ -71,7 +71,7 @@ const ResultFileUpload = () => {
         <div className="space-y-4">
           {Result.orders.map((order) => (
             <div key={order.orderId} className="relative">
-              <div className="bg-white rounded-lg shadow-sm border-2 border-[#FF0004] relative">
+              <div className="bg-card rounded-lg shadow-sm border-2 border-[#FF0004] relative">
                 {/* Outlined Triangle Pointer - POINTING DOWN */}
                 <div className="absolute bottom-0 right-6 translate-y-full z-10">
                   <div className="relative w-0 h-0">

@@ -23,23 +23,23 @@ function CustomersDetailsShare({
     }
   };
   return (
-    <div className="flex flex-wrap gap-2 p-3 md:p-5 bg-[#f4f4f4] mb-5 rounded-md">
+    <div className="flex flex-wrap gap-2 p-3 md:p-5 bg-muted mb-5 rounded-md">
       <Button
         onClick={handleWhatsappClick}
-        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-primary text-white px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-[#4a1cb5]"
+        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-primary text-white px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-brand-hover"
       >
         <LiaWhatsapp className="text-xl" /> <span>واتساب</span>
       </Button>
       <Button
         variant="outline"
         onClick={handleEmailClick}
-        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-white border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50"
+        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-card border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50"
       >
         <LiaEnvelopeSolid /> <span>بريد</span>
       </Button>
       <Button
         variant="outline"
-        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-white border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50"
+        className="flex-1 min-w-[140px] justify-center flex gap-2 items-center bg-card border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50"
       >
         <LiaFileCsvSolid /> <span>تصدير</span>
       </Button>

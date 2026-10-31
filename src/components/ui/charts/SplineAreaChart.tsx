@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, memo } from 'react';
+import { useTheme } from 'next-themes';
 
 export interface SplineAreaChartSeries {
   name: string;
@@ -22,6 +23,8 @@ export const SplineAreaChart = memo(function SplineAreaChart({
 }: SplineAreaChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<ApexCharts | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -48,6 +51,7 @@ export const SplineAreaChart = memo(function SplineAreaChart({
           toolbar: { show: false },
           zoom: { enabled: false },
           fontFamily: 'inherit',
+          foreColor: isDark ? '#d4d4d4' : '#373d3f',
           events: {
             mounted: fixCanvasDirection,
             updated: fixCanvasDirection,
@@ -72,7 +76,7 @@ export const SplineAreaChart = memo(function SplineAreaChart({
           categories,
           tickAmount: categories.length,
           labels: {
-            style: { fontSize: '10px', colors: '#9ca3af' },
+            style: { fontSize: '10px', colors: isDark ? '#a3a3a3' : '#9ca3af' },
             hideOverlappingLabels: false,
           },
           axisBorder: { show: false },
@@ -82,11 +86,11 @@ export const SplineAreaChart = memo(function SplineAreaChart({
           min: 0,
           forceNiceScale: false,
           labels: {
-            style: { fontSize: '10px', colors: '#9ca3af' },
+            style: { fontSize: '10px', colors: isDark ? '#a3a3a3' : '#9ca3af' },
           },
         },
         grid: {
-          borderColor: '#f3f4f6',
+          borderColor: isDark ? '#262626' : '#f3f4f6',
           strokeDashArray: 3,
         },
         colors,
@@ -110,7 +114,7 @@ export const SplineAreaChart = memo(function SplineAreaChart({
         chartInstance.current = null;
       }
     };
-  }, [categories, series, height, colors]);
+  }, [categories, series, height, colors, isDark]);
 
   return <div ref={chartRef} />;
 });

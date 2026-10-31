@@ -171,7 +171,7 @@ export default function PartialDeliveryModal({
         )}
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             حدد القطع المرفوضة
           </label>
           <div className="flex flex-col gap-3">
@@ -180,10 +180,10 @@ export default function PartialDeliveryModal({
               return (
                 <div
                   key={group.key}
-                  className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-[#ECECEC]"
+                  className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-border"
                 >
                   <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                    <span className="text-sm font-medium text-[#1F1F1F] truncate">
+                    <span className="text-sm font-medium text-foreground truncate">
                       {group.name}
                     </span>
                     {group.variantLabel && (
@@ -205,7 +205,7 @@ export default function PartialDeliveryModal({
                         aria-label="زيادة"
                         disabled={isPending || refused >= group.rows.length}
                         onClick={() => setRefused(group, refused + 1)}
-                        className="flex size-8 items-center justify-center rounded-full border border-[#ECECEC] text-primary disabled:opacity-40"
+                        className="flex size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
                       >
                         <LiaPlusSolid className="size-4" />
                       </button>
@@ -217,7 +217,7 @@ export default function PartialDeliveryModal({
                         aria-label="إنقاص"
                         disabled={isPending || refused <= 0}
                         onClick={() => setRefused(group, refused - 1)}
-                        className="flex size-8 items-center justify-center rounded-full border border-[#ECECEC] text-primary disabled:opacity-40"
+                        className="flex size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
                       >
                         <LiaMinusSolid className="size-4" />
                       </button>
@@ -252,7 +252,7 @@ export default function PartialDeliveryModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">
+          <label className="font-bold text-foreground">
             السعر الجديد للطلب الأصلي (اختياري)
           </label>
           <input
@@ -262,7 +262,7 @@ export default function PartialDeliveryModal({
             disabled={isPending}
             onChange={(e) => setOverridePrice(e.target.value)}
             placeholder={String(calculatedPrice)}
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           {overrideInvalid && (
             <p className="text-xs text-red-600">
@@ -272,14 +272,14 @@ export default function PartialDeliveryModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">محتوى شحنة المرتجع</label>
+          <label className="font-bold text-foreground">محتوى شحنة المرتجع</label>
           <input
             type="text"
             value={returnShipmentContent}
             maxLength={RETURN_SHIPMENT_CONTENT_MAX_LENGTH}
             disabled={isPending}
             onChange={(e) => setContentOverride(e.target.value)}
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
           />
         </div>
       </div>

@@ -153,7 +153,7 @@ export default function ProductDetailModal({
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl p-3"
+              className="flex items-center gap-3 bg-card border border-gray-100 rounded-xl p-3"
             >
               <stat.icon className="w-5 h-5 text-primary shrink-0" />
               <div className="flex flex-col items-start flex-1 gap-1">

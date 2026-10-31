@@ -2,28 +2,28 @@
 export const ACTIVITY_STATUS_CONFIG = {
   active: {
     label: 'نشط',
-    bgColor: 'bg-[#f7fdf5]',
+    bgColor: 'bg-green-50',
     textColor: 'text-[#3cc900]',
     borderColor: 'border-[#3cc900]',
   },
   noActivity: {
     label: 'لا يوجد نشاط',
-    bgColor: 'bg-[#f5f5f5]',
-    textColor: 'text-[#626262]',
-    borderColor: 'border-[#626262]',
+    bgColor: 'bg-muted',
+    textColor: 'text-muted-foreground',
+    borderColor: 'border-muted-foreground',
   },
 } as const;
 
 export const DAYS_STATUS_CONFIG = {
   oneDayRemaining: {
     label: 'يوم واحد متبقي',
-    bgColor: 'bg-[#fff5f5]',
+    bgColor: 'bg-red-50',
     textColor: 'text-[#ff0004]',
     borderColor: 'border-[#ff0004]',
   },
   threeDaysRemaining: {
     label: '3 أيام متبقية',
-    bgColor: 'bg-[#fffbf5]',
+    bgColor: 'bg-orange-50',
     textColor: 'text-[#ff9800]',
     borderColor: 'border-[#ff9800]',
   },

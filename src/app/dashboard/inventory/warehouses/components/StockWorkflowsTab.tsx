@@ -869,7 +869,7 @@ export function StockWorkflowsTab() {
           return (
             <div
               key={rowKey}
-              className="space-y-4 rounded-lg border border-gray-200 bg-white p-4"
+              className="space-y-4 rounded-lg border border-gray-200 bg-card p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="space-y-1.5">
@@ -1102,7 +1102,7 @@ export function StockWorkflowsTab() {
         onClose={() => setPendingDelete(null)}
         title="حذف القاعدة"
         confirmText="حذف"
-        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+        confirmButtonClassName="bg-red-600 hover:brightness-90"
         onConfirm={confirmDelete}
         isLoading={deleteMutation.isPending}
         maxWidth="md:max-w-[420px]"

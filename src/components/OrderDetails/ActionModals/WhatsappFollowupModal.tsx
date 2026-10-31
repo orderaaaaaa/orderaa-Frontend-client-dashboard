@@ -91,20 +91,20 @@ export default function WhatsappFollowupModal({
       maxWidth="w-[600px]"
     >
       <div className="space-y-2">
-        <div className="flex items-center gap-2 mb-4 text-[#5F5E5E]">
+        <div className="flex items-center gap-2 mb-4 text-muted-foreground">
           <LiaWhatsapp className="w-5 h-5" />
           <p className="text-sm">اختر نوع المتابعة</p>
         </div>
 
         {followupOptions.map((option) => (
-          <div key={option.id} className="border border-[#ECECEC] rounded-lg overflow-hidden">
+          <div key={option.id} className="border border-border rounded-lg overflow-hidden">
             {/* Main Option */}
             <Button
               variant="ghost"
               onClick={() => handleOptionClick(option.id)}
               className={`w-full px-4 py-3 text-right flex items-center justify-between transition-colors rounded-none h-auto ${selectedOption === option.id && !option.hasSubOptions
-                  ? 'bg-[#F6F2FC] text-primary'
-                  : 'hover:bg-gray-50 text-[#1F1F1F]'
+                  ? 'bg-primary/10 text-primary'
+                  : 'hover:bg-gray-50 text-foreground'
                 }`}
             >
               <span className="font-bold">{option.label}</span>
@@ -118,15 +118,15 @@ export default function WhatsappFollowupModal({
 
             {/* Sub Options (Accordion) */}
             {option.hasSubOptions && expandedOption === option.id && (
-              <div className="bg-gray-50 border-t border-[#ECECEC]">
+              <div className="bg-gray-50 border-t border-border">
                 {option.subOptions?.map((subOption) => (
                   <Button
                     key={subOption.id}
                     variant="ghost"
                     onClick={() => handleSubOptionClick(option.id, subOption.id, subOption.label)}
                     className={`w-full px-6 py-3 text-right text-sm transition-colors rounded-none h-auto justify-start ${selectedSubOption === subOption.id
-                        ? 'bg-[#F6F2FC] text-primary font-bold'
-                        : 'hover:bg-gray-100 text-[#5F5E5E]'
+                        ? 'bg-primary/10 text-primary font-bold'
+                        : 'hover:bg-gray-100 text-muted-foreground'
                       }`}
                   >
                     {subOption.label}

@@ -20,7 +20,7 @@ export function ConfirmationAttemptsSection({
     return (
       <section className="space-y-4">
         <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
-        <div className="bg-white rounded-lg p-6 border border-gray-100 animate-pulse">
+        <div className="bg-card rounded-lg p-6 border border-gray-100 animate-pulse">
           <div className="h-[350px] bg-gray-100 rounded" />
         </div>
       </section>
@@ -52,7 +52,7 @@ export function ConfirmationAttemptsSection({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
-      <div className="bg-white rounded-lg p-6 border border-gray-100">
+      <div className="bg-card rounded-lg p-6 border border-gray-100">
         <ColumnChart
           categories={data.categories}
           series={[{ name: 'عدد الطلبات', data: data.values }]}

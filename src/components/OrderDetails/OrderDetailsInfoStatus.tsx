@@ -65,22 +65,22 @@ function EventCard({
   const iconColor = getIconColorFromClasses(classes);
 
   return (
-    <div className="flex gap-2 bg-white p-3 rounded-lg min-w-[180px] hover:shadow-md transition-shadow w-full">
+    <div className="flex gap-2 bg-card p-3 rounded-lg min-w-[180px] hover:shadow-md transition-shadow w-full">
       <Icon className={`w-4 h-4 shrink-0 ${iconColor}`} />
 
       <div className="flex flex-col gap-1 min-w-0 w-full">
-        <p className="text-sm font-bold text-[#1F1F1F] break-words">
+        <p className="text-sm font-bold text-foreground break-words">
           {status}
         </p>
 
         {utmSource && (
-          <p className="text-sm text-black break-words">
+          <p className="text-sm text-foreground break-words">
             المصدر: <span className="text-primary font-medium">{utmSource}</span>
           </p>
         )}
 
         {pageName && (
-          <p className="text-sm text-black break-words">
+          <p className="text-sm text-foreground break-words">
             اسم الصفحة: <span className="text-primary font-medium">{pageName}</span>
           </p>
         )}
@@ -91,7 +91,7 @@ function EventCard({
           </p>
         )}
 
-        <p className="text-sm text-black break-words">
+        <p className="text-sm text-foreground break-words">
           {date}
           {time && (
             <>
@@ -102,7 +102,7 @@ function EventCard({
         </p>
 
         {employee && (
-          <p className="text-sm text-black break-words">
+          <p className="text-sm text-foreground break-words">
             اسم الموظف: {employee.name}
             {employee.department && (
               <p> قسم: {getDepartmentLabel(employee.department)}</p>
@@ -251,7 +251,7 @@ function LogisticsChat({ events, scrollToEnd }: { events: MappedEvent[]; scrollT
   }
 
   return (
-    <div ref={containerRef} className="bg-white rounded-xl border border-gray-200 p-4 max-h-[500px] overflow-y-auto">
+    <div ref={containerRef} className="bg-card rounded-xl border border-gray-200 p-4 max-h-[500px] overflow-y-auto">
       {timeline.map((group) => (
         <div key={group.dateKey}>
           <div className="flex items-center justify-center my-4">
@@ -365,7 +365,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
               <AccordionTrigger className="px-4 py-3 hover:bg-gray-100/50">
                 <div className="flex items-center gap-2">
                   <LiaHeadsetSolid className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-bold text-[#1F1F1F]">تحديثات مركز الاتصال</span>
+                  <span className="text-sm font-bold text-foreground">تحديثات مركز الاتصال</span>
                   <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
                     {callCenterEvents.length}
                   </span>
@@ -399,7 +399,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
               <AccordionTrigger className="px-4 py-3 hover:bg-gray-100/50">
                 <div className="flex items-center gap-2">
                   <LiaTruckSolid className="w-5 h-5 text-red-600" />
-                  <span className="text-sm font-bold text-[#1F1F1F]">تحديثات اللوجستيك / المندوب</span>
+                  <span className="text-sm font-bold text-foreground">تحديثات اللوجستيك / المندوب</span>
                   <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-red-100 text-red-600 text-xs font-bold">
                     {logisticsEvents.length}
                   </span>

@@ -127,7 +127,7 @@ function ShippingSection({
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">الشحن</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -145,7 +145,7 @@ function ShippingSection({
               searchPlaceholder="بحث عن شركة..."
               emptyMessage="لا توجد شركات متاحة"
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingCompanyId ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingCompanyId ? 'border-red-500' : 'border-gray-300'}`}
               searchThreshold={5}
               loading={loadingShippingCompanies}
             />
@@ -175,7 +175,7 @@ function ShippingSection({
                     : 'لا توجد محافظات متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.governorateOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.governorateOption ? 'border-red-500' : 'border-gray-300'}`}
               loading={governoratesQuery.isLoading}
               disabled={!selectedCompanyId || noGovernorateList || governoratesQuery.isError}
               searchThreshold={5}
@@ -223,7 +223,7 @@ function ShippingSection({
                     : 'لا توجد مدن متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.cityOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.cityOption ? 'border-red-500' : 'border-gray-300'}`}
               loading={citiesQuery.isLoading}
               disabled={!selectedCompanyId || !governorateOption}
               searchThreshold={5}
@@ -250,7 +250,7 @@ function ShippingSection({
               min={0}
               placeholder="أدخل تكلفة الشحن"
               className="w-full"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               value={shippingCost}
               onChange={(e) => onShippingCostChange(e.target.value)}
               error={errors?.shippingCost}
@@ -268,7 +268,7 @@ function ShippingSection({
               dir="ltr"
               placeholder="أدخل مبلغ الإلغاء..."
               className="w-full"
-              inputClassName="bg-white"
+              inputClassName="bg-background"
               min={0}
               value={returnShippingCost}
               onChange={(e) => onReturnShippingCostChange(e.target.value)}
@@ -295,7 +295,7 @@ function ShippingSection({
               searchPlaceholder="بحث عن نوع..."
               emptyMessage="لا توجد أنواع متاحة"
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingType ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingType ? 'border-red-500' : 'border-gray-300'}`}
               searchThreshold={5}
               loading={loadingShippingTypes}
             />
@@ -314,7 +314,7 @@ function ShippingSection({
                 name="returnShipmentContent"
                 placeholder="أدخل محتوى شحنة الاسترجاع"
                 className="w-full"
-                inputClassName="bg-white"
+                inputClassName="bg-background"
                 value={returnShipmentContent}
                 onChange={(e) => onReturnShipmentContentChange(e.target.value)}
                 error={errors?.returnShipmentContent}

@@ -29,7 +29,7 @@ const DeleteConfirmationModal = ({
       onConfirm={onConfirm}
       confirmText="حذف"
       confirmIcon={<LiaTrashAltSolid className="w-4 h-4" />}
-      confirmButtonClassName="w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-red-700 transition-colors text-white hover:text-white disabled:opacity-50"
+      confirmButtonClassName="w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:brightness-90 transition-colors text-white hover:text-white disabled:opacity-50"
       cancelText="إلغاء"
       isLoading={isLoading}
       maxWidth="md:max-w-md"

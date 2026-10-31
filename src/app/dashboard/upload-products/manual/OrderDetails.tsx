@@ -340,7 +340,7 @@ function OrderDetails({
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">تفاصيل المنتج</h1>
         <div className="mb-5" data-field-error="products">
           <div className="mb-1">
@@ -351,7 +351,7 @@ function OrderDetails({
           <ProductDropdown
             placeholder="ابحث عن منتج"
             className="w-full"
-            selectClassName={`border-2 w-full bg-white p-2 rounded-sm ${errors?.products && 'border-red-500'
+            selectClassName={`border-2 w-full bg-card p-2 rounded-sm ${errors?.products && 'border-red-500'
               }`}
           />
           {errors?.products && (
@@ -382,7 +382,7 @@ function OrderDetails({
                   value={total}
                   onChange={(e) => onTotalChange(e.target.value)}
                   className="w-32 text-center font-semibold"
-                  inputClassName="bg-white"
+                  inputClassName="bg-background"
                   error={errors?.total}
                 />
                 <span className="text-lg font-semibold text-gray-700">ج.م</span>
@@ -414,7 +414,7 @@ function OrderDetails({
           <Textarea
             name="packagingNotes"
             placeholder="ملاحظات التغليف"
-            className="max-w-[1158px] h-[120px] bg-white"
+            className="max-w-[1158px] h-[120px] bg-card"
             value={packagingNotes}
             onChange={(e) => onPackagingNotesChange(e.target.value)}
           />

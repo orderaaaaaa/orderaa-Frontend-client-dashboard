@@ -67,7 +67,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
         />
       </div>
 
-      <div aria-hidden className="top-0 z-10 bg-[#EAEAEA66] p-3 sm:p-4 mx-0 sm:mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
+      <div aria-hidden className="top-0 z-10 bg-muted/60 p-3 sm:p-4 mx-0 sm:mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
         <div className="w-1/4 text-center">الصور</div>
         <div className="w-1/2 text-center">الاسم</div>
         <div className="w-1/4 text-center">السعر</div>
@@ -85,7 +85,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="border-b mb-2 border-gray-100 rounded-sm bg-white"
+                className="border-b mb-2 border-gray-100 rounded-sm bg-card"
               >
                 <div className="flex items-center p-3">
                   <div className="w-1/4 flex justify-center">
@@ -102,7 +102,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="px-3 py-8 text-[#878A99] text-center">
+          <div className="px-3 py-8 text-muted-foreground text-center">
             لا توجد نتائج
           </div>
         ) : (

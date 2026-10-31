@@ -73,9 +73,9 @@ export default function OrderStockReturnRequiredModal({
           <LiaExclamationTriangleSolid className="w-8 h-8 text-amber-600" />
         </div>
 
-        <p className="text-lg font-bold text-[#1F1F1F]">{message}</p>
+        <p className="text-lg font-bold text-foreground">{message}</p>
 
-        <p className="text-base text-[#1F1F1F]">
+        <p className="text-base text-foreground">
           {canRepair ? REPAIR_EXPLANATION : REPAIR_PERMISSION_NOTICE}
         </p>
       </div>

@@ -21,7 +21,7 @@ const ReceiptsSearchBar = memo(
           onChange={(e) => onChange(e.target.value)}
           clearable
           onClear={onClear}
-          inputClassName="pr-10 bg-white"
+          inputClassName="pr-10 bg-background"
         />
       </div>
     );

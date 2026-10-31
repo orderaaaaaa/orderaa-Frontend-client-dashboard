@@ -4,18 +4,18 @@ import { MOCK_EMPLOYEE_STATS } from '../../constants/CompareEmployeeConst';
 
 function CompareEmployees() {
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-xl mt-10 items-stretch">
+    <div className="p-6 bg-card rounded-2xl shadow-xl mt-10 items-stretch">
       <h2 className="text-xl font-bold mb-5 text-right border-b-2 pb-4">
         مقارنة الموظفين
       </h2>
       <div className="flex items-center gap-2 justify-end mb-8">
         <h3>الموظفين:</h3>
         <div className="flex gap-2 border-2 py-2 px-3 rounded-md">
-          <p className="flex px-2 gap-1 bg-[#f2edfd] border-2 border-[#dacdf9] rounded-sm cursor-pointer">
+          <p className="flex px-2 gap-1 bg-primary/10 border-2 border-primary/20 rounded-sm cursor-pointer">
             <Plus className="w-4" /> إضافة
           </p>
-          <p className="rounded-sm bg-[#f2edfd] px-3 text-center">يوستينا</p>
-          <p className="rounded-sm bg-[#f2edfd] px-3 text-center"> ندي</p>
+          <p className="rounded-sm bg-primary/10 px-3 text-center">يوستينا</p>
+          <p className="rounded-sm bg-primary/10 px-3 text-center"> ندي</p>
         </div>
       </div>
       <div className="w-full flex flex-col xl:flex-row justify-between gap-8 ">

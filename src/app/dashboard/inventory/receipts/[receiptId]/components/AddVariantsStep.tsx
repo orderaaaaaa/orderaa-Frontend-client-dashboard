@@ -341,7 +341,7 @@ const AddVariantsStep = memo(
               return (
                 <div
                   key={key}
-                  className="flex items-center gap-2 bg-white border border-primary/20 rounded-full ps-3 pe-1 py-0.5 text-xs sm:w-fit"
+                  className="flex items-center gap-2 bg-card border border-primary/20 rounded-full ps-3 pe-1 py-0.5 text-xs sm:w-fit"
                 >
                   <span className="text-primary font-medium flex-1 min-w-0 break-words">{displayLabel}</span>
                   {stock && <ReturnSourceStock cell={stock} />}
@@ -359,7 +359,7 @@ const AddVariantsStep = memo(
                          min={0}
                          clearable
                          className="w-20 sm:w-16"
-                         inputClassName="!py-0.5 !px-1.5 text-center text-base sm:text-xs !rounded-full !bg-white"
+                         inputClassName="!py-0.5 !px-1.5 text-center text-base sm:text-xs !rounded-full !bg-background"
                        />
                      </>
                    )}

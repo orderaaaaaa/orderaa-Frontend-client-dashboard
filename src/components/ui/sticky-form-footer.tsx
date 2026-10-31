@@ -34,7 +34,7 @@ export function StickyFormFooter({
         data-sticky-form-footer=""
         className={cn(
           FIXED_BOTTOM_BAR_CLASS,
-          'border-t border-gray-200 bg-white px-4 pt-3 shadow-lg',
+          'border-t border-gray-200 bg-card px-4 pt-3 shadow-lg',
           className,
         )}
       >

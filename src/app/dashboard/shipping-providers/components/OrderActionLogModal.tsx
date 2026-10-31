@@ -242,7 +242,7 @@ function ActionLogContent({
       {historyNotice && (
         <div
           role="status"
-          className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200"
+          className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900"
         >
           <Info className="mt-0.5 size-4 shrink-0" />
           <p>{historyNotice}</p>

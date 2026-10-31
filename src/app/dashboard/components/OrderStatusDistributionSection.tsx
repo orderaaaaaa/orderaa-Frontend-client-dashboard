@@ -24,7 +24,7 @@ export function OrderStatusDistributionSection({
     return (
       <section className="space-y-4">
         <h2 className="text-lg font-bold text-primary">توزيع حالات الطلبات</h2>
-        <div className="bg-white rounded-lg p-6 border border-gray-100 animate-pulse">
+        <div className="bg-card rounded-lg p-6 border border-gray-100 animate-pulse">
           <div className="flex items-center justify-center">
             <div className="w-full max-w-[300px] aspect-square rounded-full bg-gray-200" />
           </div>
@@ -63,7 +63,7 @@ export function OrderStatusDistributionSection({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">توزيع حالات الطلبات</h2>
-      <div className="bg-white rounded-lg p-3 border border-gray-100 min-h-[500px]">
+      <div className="bg-card rounded-lg p-3 border border-gray-100 min-h-[500px]">
         <PolarAreaChart series={series} labels={labels} />
       </div>
     </section>

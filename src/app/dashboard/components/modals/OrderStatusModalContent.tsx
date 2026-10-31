@@ -32,7 +32,7 @@ export function OrderStatusModalContent({
         columns={columns}
         data={data}
         keyField="id"
-        headerClassName="bg-[#E5E5E5]"
+        headerClassName="bg-neutral-200"
       />
       <ColumnChart
         categories={data.map((item) => item.status)}

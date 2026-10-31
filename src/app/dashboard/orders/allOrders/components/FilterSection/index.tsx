@@ -164,13 +164,13 @@ const FilterSection = React.memo(function FilterSection({
   );
 
   return (
-    <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
+    <div className="bg-card rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex items-center justify-start gap-5 px-4 py-2">
         <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="default"
-              className="flex items-center gap-2 bg-primary text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-[#4A1DB8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A1DB8]"
+              className="flex items-center gap-2 bg-primary text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-brand-hover transition-colors focus:outline-none focus:ring-2 focus:ring-brand-hover"
             >
               <LiaSlidersHSolid className="w-5 h-5" />
               <span>فلتر</span>
@@ -190,7 +190,7 @@ const FilterSection = React.memo(function FilterSection({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="بحث..."
                 autoFocus
-                inputClassName="bg-white"
+                inputClassName="bg-background"
               />
             </div>
 

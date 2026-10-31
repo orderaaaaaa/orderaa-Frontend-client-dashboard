@@ -22,7 +22,7 @@ export function MissingOrderHeader({ row }: MissingOrderHeaderProps) {
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-4">
+      <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm flex flex-col gap-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <span className="block text-xs text-gray-500">اسم العميل</span>

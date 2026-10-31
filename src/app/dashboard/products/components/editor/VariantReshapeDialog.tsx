@@ -120,7 +120,7 @@ export function VariantReshapeDialog({
       onConfirm={onConfirm}
       confirmText="تأكيد الدمج والحفظ"
       confirmDisabled={plan !== null && isReshapeBlocked(plan, selections)}
-      confirmButtonClassName="h-10 min-w-[146px] px-4 sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      confirmButtonClassName="h-10 min-w-[146px] px-4 sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       maxWidth="md:max-w-xl"
     >
       {plan && (

@@ -36,7 +36,7 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
 
   return (
     <div className="bg-gray-50 px-4 sm:px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
+      <div className="w-full min-w-0 bg-card border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
         <div className="flex gap-4 items-start">
           {/* Icon Container */}
           <div className="flex-shrink-0 p-4 max-sm:p-2 bg-[#CCCCCC99] rounded-lg">

@@ -27,7 +27,7 @@ export function DeleteVariantDialog({
       title={storeLinked ? 'حذف متغير مرتبط بمتجرك' : 'حذف المتغير'}
       onConfirm={onConfirm}
       confirmText="حذف"
-      confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:brightness-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       maxWidth="md:max-w-lg"
     >
       <div className="space-y-3 text-sm text-gray-700">

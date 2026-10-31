@@ -207,7 +207,7 @@ const AddVariantsModal = memo(
                   min={1}
                   value={noAttrsQuantity}
                   onChange={(e) => setNoAttrsQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  className="w-24 rounded-full border border-gray-300 bg-white px-3 py-1.5 text-center text-sm"
+                  className="w-24 rounded-full border border-gray-300 bg-card px-3 py-1.5 text-center text-sm"
                 />
               </div>
             </div>
@@ -227,7 +227,7 @@ const AddVariantsModal = memo(
                           'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
                           isPicked
                             ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary',
+                            : 'bg-card text-gray-700 border-gray-300 hover:border-primary hover:text-primary',
                         )}
                         onClick={() => handlePick(group.id, option.id)}
                       >

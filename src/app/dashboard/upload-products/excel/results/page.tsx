@@ -91,15 +91,15 @@ function RowProblems({ rows }: { rows: RowProblem[] }) {
       {rows.map((row) => (
         <li
           key={row.rowIndex}
-          className="w-full rounded-lg border border-[#FF0004] bg-white"
+          className="w-full rounded-lg border border-[#FF0004] bg-card"
         >
           <div className="flex items-start gap-2 px-3 py-2">
             <AlertCircle className="mt-0.5 w-5 h-5 flex-shrink-0 text-[#FF0004] [stroke-width:1.5px]" />
-            <span className="min-w-0 break-words text-base sm:text-lg text-black">
+            <span className="min-w-0 break-words text-base sm:text-lg text-foreground">
               الطلب {row.rowIndex}: في الصف {rowLabel(row.rowIndex)} تم العثور على أخطاء
             </span>
           </div>
-          <div className="bg-[#FF000408] px-3 py-2 text-sm leading-6 text-[#FF0004]">
+          <div className="bg-red-500/5 px-3 py-2 text-sm leading-6 text-[#FF0004]">
             <p className="mb-1">نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي:</p>
             <ul className="space-y-1 font-bold">
               {row.messages.map((message, index) => (
@@ -185,7 +185,7 @@ export default function ValidationResultsPage() {
     <button
       type="button"
       onClick={() => clearAndGo('/dashboard/upload-products/excel')}
-      className="flex min-h-10 items-center justify-center gap-2 px-6 py-2 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+      className="flex min-h-10 items-center justify-center gap-2 px-6 py-2 bg-card border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
     >
       <ArrowRight className="w-5 h-5" />
       رفع ملف جديد
@@ -197,7 +197,7 @@ export default function ValidationResultsPage() {
       <button
         type="button"
         onClick={() => clearAndGo('/dashboard/orders/allOrders')}
-        className="min-h-10 px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+        className="min-h-10 px-6 py-2 bg-primary text-white rounded-lg hover:bg-brand-hover transition-colors"
       >
         عرض الطلبات ({createdCount})
       </button>
@@ -247,7 +247,7 @@ export default function ValidationResultsPage() {
         )}
 
         <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h2 className="font-bold text-xl sm:text-[28px] leading-snug text-black">
+          <h2 className="font-bold text-xl sm:text-[28px] leading-snug text-foreground">
             {imported ? 'نتيجة الرفع:' : 'نتيجة التحقق:'}
           </h2>
           <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">

@@ -104,7 +104,7 @@ export function CustomerDataSection({
           <Then>
             <button
               onClick={() => setIsNotesModalOpen(true)}
-              className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm cursor-pointer hover:bg-[#f0d4d4] transition-colors"
+              className="flex items-center gap-1 p-1 px-3 bg-red-50 border-2 border-red-200 rounded-sm cursor-pointer hover:bg-red-100 transition-colors"
             >
               <MdBlock size={18} className="text-[#dc0201]" />
               <span className="text-[#dc0201] text-sm lg:text-base font-medium">
@@ -158,10 +158,10 @@ export function CustomerDataSection({
           {order.customers.notes && (Array.isArray(order.customers.notes) ? order.customers.notes.length > 0 : order.customers.notes.trim().length > 0) ? (
             Array.isArray(order.customers.notes) ? (
               order.customers.notes.map((note, index) => (
-                <p key={index} className="text-base text-[#1F1F1F] whitespace-pre-wrap">{note}</p>
+                <p key={index} className="text-base text-foreground whitespace-pre-wrap">{note}</p>
               ))
             ) : (
-              <p className="text-base text-[#1F1F1F] whitespace-pre-wrap">{order.customers.notes}</p>
+              <p className="text-base text-foreground whitespace-pre-wrap">{order.customers.notes}</p>
             )
           ) : (
             <div className="flex flex-col items-center justify-center py-8 gap-3">

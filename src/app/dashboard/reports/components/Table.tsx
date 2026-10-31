@@ -62,7 +62,7 @@ function Table({ data, type, headers }: ITableProps) {
       <table className="w-full border-collapse min-w-[700px] sm:min-w-full">
         <thead>
           <tr
-            className={`grid ${gridColsClass} bg-[#f2edfd] items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm`}
+            className={`grid ${gridColsClass} bg-primary/10 items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm`}
           >
             {tableHeaders.map((header) => (
               <th

@@ -6,7 +6,7 @@ export default function Heading1({ children }: { children: React.ReactNode }) {
       className="
       font-bold
       text-[18px]
-    text-[#121212]
+    text-foreground
       truncate
       text-ellipsis
       overflow-hidden

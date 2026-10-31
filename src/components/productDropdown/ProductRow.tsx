@@ -55,7 +55,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
     if (isSelected) {
       return 'border-b mb-2 border-gray-100 rounded-sm transition-colors bg-gray-50';
     }
-    return 'border-b mb-2 border-gray-100 rounded-sm transition-colors bg-white';
+    return 'border-b mb-2 border-gray-100 rounded-sm transition-colors bg-card';
   };
 
   return (
@@ -104,7 +104,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
       {isExpanded && hasVariants && (
         <div
-          className="py-4 px-6 border-t border-gray-200 bg-white"
+          className="py-4 px-6 border-t border-gray-200 bg-card"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="space-y-4">

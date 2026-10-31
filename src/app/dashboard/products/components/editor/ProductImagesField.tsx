@@ -96,7 +96,7 @@ export function ProductImagesField({
               <li
                 key={item.key}
                 className={cn(
-                  'flex flex-col overflow-hidden rounded-lg border bg-white',
+                  'flex flex-col overflow-hidden rounded-lg border bg-card',
                   invalid ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200',
                 )}
               >

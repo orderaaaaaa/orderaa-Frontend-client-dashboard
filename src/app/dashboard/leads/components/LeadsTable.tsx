@@ -32,12 +32,7 @@ const getLeadTypeBadge = (leadType: string) => {
 
   return (
     <span
-      className="px-3 py-1.5 rounded-full font-medium text-xs inline-flex items-center gap-1.5 border"
-      style={{
-        backgroundColor: config.iconBgColor,
-        color: config.iconColor,
-        borderColor: config.iconColor,
-      }}
+      className={`px-3 py-1.5 rounded-full font-medium text-xs inline-flex items-center gap-1.5 border border-current ${config.iconBgColor} ${config.iconColor}`}
     >
       <Icon />
       {config.title}
@@ -48,20 +43,19 @@ const getLeadTypeBadge = (leadType: string) => {
 const getStatusBadge = (status: string, statusText: string) => {
   const statusStyles: Record<
     string,
-    { bg: string; text: string; border: string }
+    { text: string; border: string }
   > = {
-    trialEnding: { bg: '#fff3e0', text: '#3085f2', border: '#3085f2' },
-    paid: { bg: '#e8f5e9', text: '#3cc800', border: '#3cc800' },
-    trialEnded: { bg: '#ffebee', text: '#f34336', border: '#f34336' },
-    new: { bg: '#e3f2fd', text: '#5d24e1', border: '#5d24e1' },
+    trialEnding: { text: 'text-[#3085f2]', border: 'border-[#3085f2]' },
+    paid: { text: 'text-[#3cc800]', border: 'border-[#3cc800]' },
+    trialEnded: { text: 'text-[#f34336]', border: 'border-[#f34336]' },
+    new: { text: 'text-primary', border: 'border-primary' },
   };
 
   const style = statusStyles[status] || statusStyles.new;
 
   return (
     <span
-      className="px-3 py-1 min-w-20 rounded-lg font-semibold text-xs border inline-block text-center whitespace-nowrap"
-      style={{ color: style.text, borderColor: style.border }}
+      className={`px-3 py-1 min-w-20 rounded-lg font-semibold text-xs border inline-block text-center whitespace-nowrap ${style.text} ${style.border}`}
     >
       {statusText}
     </span>
@@ -94,7 +88,7 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
   return (
     <div className="mt-8 rounded-lg">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white rounded-t-lg border-b">
+      <div className="flex items-center justify-between p-4 bg-card rounded-t-lg border-b">
         <h3 className="text-lg md:text-xl font-bold text-gray-900">
           الليدز ( {data.length} )
         </h3>
@@ -125,7 +119,7 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
         {data.map((row) => (
           <div
             key={row.id}
-            className={`bg-white p-4 rounded-xl border-2 transition-all ${
+            className={`bg-card p-4 rounded-xl border-2 transition-all ${
               selectedRows.has(row.id)
                 ? 'border-primary shadow-md'
                 : 'border-transparent shadow-sm'
@@ -180,10 +174,10 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
       </div>
 
       {/* ---------------- Desktop ---------------- */}
-      <div className="hidden md:block overflow-x-auto mt-5 bg-white p-6 rounded-lg">
+      <div className="hidden md:block overflow-x-auto mt-5 bg-card p-6 rounded-lg">
         <table className="w-full min-w-[1200px] table-fixed border-collapse">
           <thead>
-            <tr className="bg-[#f2edfd] text-sm">
+            <tr className="bg-primary/10 text-sm">
               {showCheckboxes && (
                 <th className="w-[40px] px-4 py-4">
                   <input

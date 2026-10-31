@@ -13,7 +13,7 @@ const AddInvoiceHeader = memo(({ isEdit = false, code }: AddInvoiceHeaderProps) 
       <h1 className="ps-2 border-s-4 border-primary text-xl sm:text-3xl font-bold text-foreground mb-2 sm:mb-4">
         {isEdit ? 'تعديل الفاتورة' : 'اضافة فاتورة جديدة'}
       </h1>
-      <p className="ps-3 text-base sm:text-2xl text-black/90">
+      <p className="ps-3 text-base sm:text-2xl text-foreground/90">
         {isEdit ? (
           <>
             قم بتعديل الفاتورة{' '}

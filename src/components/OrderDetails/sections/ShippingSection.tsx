@@ -32,8 +32,8 @@ function ShippingField({ label, value, sourceValue, icon, className = '', multil
 
   return (
     <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
-      <p className="font-bold text-[#121212]">{label}</p>
-      <div className={`flex gap-2 bg-white shadow-xs ${multiline ? 'items-start' : 'items-center'} py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000] ${multiline ? 'min-h-[60px]' : ''}`}>
+      <p className="font-bold text-foreground">{label}</p>
+      <div className={`flex gap-2 bg-card shadow-xs ${multiline ? 'items-start' : 'items-center'} py-2 px-2 rounded-[5px] font-bold text-[15px] text-foreground ${multiline ? 'min-h-[60px]' : ''}`}>
         <span className={multiline ? 'mt-1 flex-shrink-0' : 'flex-shrink-0'}>{icon}</span>
         <p className={`${isEmpty ? 'text-red-500' : ''} whitespace-pre-wrap break-words flex-1 min-w-0`}>
           {displayValue}

@@ -287,13 +287,13 @@ function OrderDetailsProductCard({
               key={item.id}
               className="flex flex-col
               max-w-[390px]
-              bg-gradient-to-b from-[#FFFFFF] to-[#EADBFF] border 
+              bg-gradient-to-b from-card to-primary/15 border 
               rounded-[20px] pt-4 pb-3 px-2
               shadow-[0px_4px_4px_0px_#5D24E114]"
             >
               <div className="grid grid-cols-[1fr_1fr] gap-5">
                 <div className="flex flex-col gap-2 mx-2">
-                  <h3 className="text-[#1E1E1E] font-bold text-lg ">
+                  <h3 className="text-foreground font-bold text-lg ">
                     {item.product}
                   </h3>
 
@@ -319,7 +319,7 @@ function OrderDetailsProductCard({
                       {item.attributes.map((attr) => (
                         <p
                           key={attr.id}
-                          className="text-base font-bold text-black"
+                          className="text-base font-bold text-foreground"
                         >
                           {attr.name}: {attr.value}
                         </p>
@@ -331,7 +331,7 @@ function OrderDetailsProductCard({
                         {item.variants.map((variant) => (
                           <p
                             key={variant.id}
-                            className="text-base font-bold text-black"
+                            className="text-base font-bold text-foreground"
                           >
                             {variant.title}
                           </p>
@@ -350,7 +350,7 @@ function OrderDetailsProductCard({
                     line={availabilityByLine.get(item.id)}
                   />
 
-                  <p className="text-[#1E1E1E] font-bold text-lg ">
+                  <p className="text-foreground font-bold text-lg ">
                     {item.price} جنيه
                   </p>
                 </div>
@@ -384,7 +384,7 @@ function OrderDetailsProductCard({
                     alt={item.product}
                     width={120}
                     height={120}
-                    className="w-[120px] h-[120px] border border-[#B8A3EB] rounded-xl object-cover shrink-0"
+                    className="w-[120px] h-[120px] border border-primary/50 rounded-xl object-cover shrink-0"
                   />
                 </div>
               </div>
@@ -409,7 +409,7 @@ function OrderDetailsProductCard({
             <div className="grid grid-cols-2 gap-3">
               <Button
                 onClick={() => setIsAddNewProductModalOpen(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LiaBoxSolid className="w-5 h-5 shrink-0" />
                 <span className="text-sm font-bold whitespace-nowrap">إضافة منتج جديد</span>
@@ -418,7 +418,7 @@ function OrderDetailsProductCard({
               <Button
                 onClick={() => setIsAddSameTypeModalOpen(true)}
                 disabled={productsData.length === 0}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-card border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
                 <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>

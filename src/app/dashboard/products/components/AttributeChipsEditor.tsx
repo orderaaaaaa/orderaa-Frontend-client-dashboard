@@ -117,7 +117,7 @@ export function AttributeChipsEditor({
   };
 
   return (
-    <div className="relative bg-white rounded-lg border border-gray-200 hover:border-primary/40 transition-colors">
+    <div className="relative bg-card rounded-lg border border-gray-200 hover:border-primary/40 transition-colors">
       <span
         aria-hidden
         className="absolute inset-y-0 start-0 w-1 bg-primary rounded-s-lg"
@@ -162,7 +162,7 @@ export function AttributeChipsEditor({
                 onChange={(e) => setEditingText(e.target.value)}
                 onKeyDown={handleRenameKeyDown}
                 onBlur={commitRename}
-                className="min-h-10 sm:min-h-9 rounded-full border border-primary/40 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
+                className="min-h-10 sm:min-h-9 rounded-full border border-primary/40 bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
               />
             ) : (
               <span
@@ -208,7 +208,7 @@ export function AttributeChipsEditor({
                 setIsAdding(false);
               }}
               placeholder="اكتب القيمة..."
-              className="min-h-10 sm:min-h-9 rounded-full border border-primary/40 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
+              className="min-h-10 sm:min-h-9 rounded-full border border-primary/40 bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
             />
           ) : (
             <button

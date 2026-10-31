@@ -22,7 +22,7 @@ function WalletHeader({ onOpenCharge }: WalletHeaderProps) {
     return (
       <header>
         <h1 className="text-3xl sm:text-4xl font-semibold mb-6 sm:mb-8 text-gray-800">محفظتي</h1>
-        <div className="flex flex-wrap justify-between gap-4 w-full sm:w-2/3 md:w-1/2 xl:w-1/3 items-center bg-[#5d24e1] text-white px-5 sm:px-10 py-5 sm:py-7 rounded-lg">
+        <div className="flex flex-wrap justify-between gap-4 w-full sm:w-2/3 md:w-1/2 xl:w-1/3 items-center bg-primary text-white px-5 sm:px-10 py-5 sm:py-7 rounded-lg">
           <div className="flex gap-2">
             <LiaWalletSolid className="w-7 h-7" />
             <div className="flex flex-col gap-1">
@@ -33,7 +33,7 @@ function WalletHeader({ onOpenCharge }: WalletHeaderProps) {
               </div>
             </div>
           </div>
-          <div className="hidden sm:block bg-[#6a36e3] p-1 rounded-lg" aria-hidden="true">
+          <div className="hidden sm:block bg-primary p-1 rounded-lg" aria-hidden="true">
             <LiaWalletSolid className="w-8 h-8" />
           </div>
         </div>
@@ -76,7 +76,7 @@ function WalletHeader({ onOpenCharge }: WalletHeaderProps) {
   return (
     <header>
       <h1 className="text-3xl sm:text-4xl font-semibold mb-6 sm:mb-8 text-gray-800">محفظتي</h1>
-      <div className="flex flex-wrap justify-between gap-4 w-full sm:w-2/3 md:w-1/2 xl:w-1/3 items-center bg-[#5d24e1] text-white px-5 sm:px-10 py-5 sm:py-7 rounded-lg">
+      <div className="flex flex-wrap justify-between gap-4 w-full sm:w-2/3 md:w-1/2 xl:w-1/3 items-center bg-primary text-white px-5 sm:px-10 py-5 sm:py-7 rounded-lg">
         <div className="flex gap-2">
           <LiaWalletSolid className="w-7 h-7" />
           <div className="flex flex-col gap-1">
@@ -94,7 +94,7 @@ function WalletHeader({ onOpenCharge }: WalletHeaderProps) {
             <LiaWalletSolid className="w-4 h-4 me-1" />
             اشحن المحفظة
           </Button>
-          <div className="hidden sm:block bg-[#6a36e3] p-1 rounded-lg" aria-hidden="true">
+          <div className="hidden sm:block bg-primary p-1 rounded-lg" aria-hidden="true">
             <LiaWalletSolid className="w-8 h-8" />
           </div>
         </div>

@@ -57,7 +57,7 @@ function SubscriptionPlans() {
         <h2 className="text-2xl font-bold mb-8">خطط الاشتراك</h2>
         <div className="container grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-2xl p-6 border bg-white border-gray-100 shadow-xl animate-pulse">
+            <div key={i} className="rounded-2xl p-6 border bg-card border-gray-100 shadow-xl animate-pulse">
               <div className="h-6 bg-gray-200 rounded w-3/4 mb-4" />
               <div className="h-8 bg-gray-200 rounded w-1/2 mb-6" />
               <div className="space-y-3">
@@ -77,7 +77,7 @@ function SubscriptionPlans() {
     return (
       <section id="subscription-plans" className="mt-13 sm:px-4" dir="rtl">
         <h2 className="text-2xl font-bold mb-8">خطط الاشتراك</h2>
-        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-xl">
+        <div className="text-center py-12 bg-card rounded-2xl border border-gray-100 shadow-xl">
           <p className="text-red-600 font-medium mb-4">تعذر تحميل خطط الاشتراك</p>
           <Button variant="outline" onClick={() => refetchPlans()}>
             إعادة المحاولة
@@ -93,7 +93,7 @@ function SubscriptionPlans() {
     return (
       <section id="subscription-plans" className="mt-13 sm:px-4" dir="rtl">
         <h2 className="text-2xl font-bold mb-8">خطط الاشتراك</h2>
-        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-xl">
+        <div className="text-center py-12 bg-card rounded-2xl border border-gray-100 shadow-xl">
           <p className="text-gray-600 font-medium">لا توجد خطط اشتراك متاحة حالياً</p>
         </div>
       </section>
@@ -129,10 +129,10 @@ function SubscriptionPlans() {
                 relative rounded-2xl p-6 border sm:min-h-[420px] flex flex-col transition-all duration-300 [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 overflow-hidden text-right
                 ${
                   isEconomical
-                    ? 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 border-purple-900 text-white shadow-xl shadow-purple-500/25'
+                    ? 'bg-gradient-to-br from-[oklch(55.8%_0.288_302.321)] via-[oklch(49.6%_0.265_301.924)] to-[oklch(38.1%_0.176_304.987)] border-[oklch(38.1%_0.176_304.987)] text-white shadow-xl shadow-purple-500/25'
                     : isActive
                     ? 'bg-purple-50 border-purple-200 text-gray-800 shadow-lg'
-                    : 'bg-white border-purple-100 shadow-lg text-gray-800'
+                    : 'bg-card border-purple-100 shadow-lg text-gray-800'
                 }
               `}
             >
@@ -154,7 +154,7 @@ function SubscriptionPlans() {
               )}
 
               <div className="flex items-center gap-3 mb-6">
-                <div className={isEconomical ? 'text-yellow-200' : isActive ? 'text-purple-600' : 'text-purple-600'}>
+                <div className={isEconomical ? 'text-[oklch(94.5%_0.129_101.54)]' : isActive ? 'text-[oklch(55.8%_0.288_302.321)]' : 'text-[oklch(55.8%_0.288_302.321)]'}>
                   <LiaGem className="w-7 h-7" />
                 </div>
                 <h3 className={`text-2xl font-medium ${isEconomical ? 'text-white' : 'text-gray-800'}`}>{plan.title}</h3>
@@ -173,7 +173,7 @@ function SubscriptionPlans() {
                   <p
                     className={`
                       text-xl font-medium
-                      ${isEconomical ? 'text-purple-100' : isActive ? 'text-purple-600' : 'text-gray-900'}
+                      ${isEconomical ? 'text-[oklch(94.6%_0.033_307.174)]' : isActive ? 'text-[oklch(55.8%_0.288_302.321)]' : 'text-gray-900'}
                     `}
                   >
                     {plan.type === 'UNLIMITED' ? ` ${plan.currency} / شهرياً` : ` ${plan.currency} / لكل طلب`}
@@ -190,17 +190,17 @@ function SubscriptionPlans() {
                   {getTypeLabel(plan.type)}
                 </Badge>
 
-                <p className={isEconomical ? 'text-purple-100' : 'text-gray-600'}>{getDurationDisplay(plan)}</p>
+                <p className={isEconomical ? 'text-[oklch(94.6%_0.033_307.174)]' : 'text-gray-600'}>{getDurationDisplay(plan)}</p>
 
                 {plan.description && (
-                  <p className={isEconomical ? 'text-purple-100' : 'text-gray-600'}>{plan.description}</p>
+                  <p className={isEconomical ? 'text-[oklch(94.6%_0.033_307.174)]' : 'text-gray-600'}>{plan.description}</p>
                 )}
 
                 {plan.benefits && plan.benefits.length > 0 && (
                   <ul className="space-y-4 mt-4">
                     {plan.benefits.map((benefit, idx) => (
                       <li key={idx} className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-purple-500'}>
+                        <span className={isEconomical ? 'text-[oklch(94.5%_0.129_101.54)]' : 'text-purple-500'}>
                           <LiaCheckCircle className="w-6 h-6" />
                         </span>
                         <span className="text-base font-medium">{benefit}</span>
@@ -216,8 +216,8 @@ function SubscriptionPlans() {
                   ${isActive
                     ? 'bg-purple-100 text-purple-400 cursor-not-allowed border-0'
                     : isEconomical
-                    ? 'bg-white text-purple-700 hover:bg-gray-100 border-0'
-                    : 'bg-purple-600 text-white hover:bg-purple-700 border-0 shadow-sm'}
+                    ? 'bg-card text-purple-700 hover:bg-gray-100 border-0'
+                    : 'bg-[oklch(55.8%_0.288_302.321)] text-white hover:bg-[oklch(49.6%_0.265_301.924)] border-0 shadow-sm'}
                 `}
                 onClick={() => !isActive && handleSubscribe(plan.id)}
                 disabled={isActive || subscribeMutation.isPending}

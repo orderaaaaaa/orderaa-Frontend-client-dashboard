@@ -267,7 +267,7 @@ export default function AddSettlementOrdersDialog({
                     targetStatus: e.target.value as SingleRowDraft['targetStatus'],
                   }))
                 }
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm bg-white"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm bg-background"
               >
                 {SINGLE_ROW_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>

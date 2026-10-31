@@ -610,7 +610,7 @@ const MergeProductsModal = ({
             />
           </div>
 
-          <div className="h-fit space-y-3 rounded-xl border border-gray-100 bg-white p-4 sm:p-5">
+          <div className="h-fit space-y-3 rounded-xl border border-gray-100 bg-card p-4 sm:p-5">
             <h4 className="text-sm font-semibold text-gray-900">
               المتغيرات بعد الدمج ({keptRefs.length})
             </h4>
@@ -670,7 +670,7 @@ const MergeProductsModal = ({
           </div>
         )}
 
-        <div className="sticky -bottom-6 z-10 -mx-4 -mb-6 mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="sticky -bottom-6 z-10 -mx-4 -mb-6 mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 bg-card px-4 py-3 sm:-mx-8 sm:px-8">
           <Button
             type="button"
             variant="outline"

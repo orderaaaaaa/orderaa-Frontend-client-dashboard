@@ -21,11 +21,11 @@ const StatsTab: React.FC<StatsTabProps> = (props) => {
             key={idx}
             className="flex flex-col border border-gray-100 rounded-xl overflow-hidden shadow-sm"
           >
-            <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+            <div className="bg-primary/20 p-3 text-center text-gray-900 font-medium">
               {card.title}
             </div>
 
-            <div className="bg-white p-5 flex flex-col h-full">
+            <div className="bg-card p-5 flex flex-col h-full">
               <div className="mb-4 text-center md:text-right">
                 <p className="text-3xl font-bold text-gray-900">{card.rate}%</p>
               </div>

@@ -596,7 +596,7 @@ function AllOrdersContent() {
           size="icon-lg"
           onClick={scrollToTop}
           aria-label="العودة للأعلى"
-          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg hover:bg-[#682fee] hover:scale-110 transition-all duration-300"
+          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg hover:bg-primary/90 hover:scale-110 transition-all duration-300"
         >
           <ArrowUp className="w-6 h-6" />
         </Button>

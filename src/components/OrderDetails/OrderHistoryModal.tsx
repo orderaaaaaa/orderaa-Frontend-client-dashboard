@@ -77,15 +77,15 @@ function OrderEventRow({
 
   return (
     <div className="flex items-start gap-3">
-      <div className="w-10 h-10 shrink-0 rounded-full bg-white flex items-center justify-center border-[3px] border-[#CBB5FD]">
+      <div className="w-10 h-10 shrink-0 rounded-full bg-card flex items-center justify-center border-[3px] border-primary/40">
         {getEventIcon(event.name || 'default')}
       </div>
       <div className="flex flex-col min-w-0">
-        <h3 className="text-base font-semibold text-[#1F1F1F] break-words">{statusLabel}</h3>
+        <h3 className="text-base font-semibold text-foreground break-words">{statusLabel}</h3>
         {note !== statusLabel && <p className="text-sm text-primary break-words">{note}</p>}
-        <p className="text-sm text-[#5F5E5E]">
+        <p className="text-sm text-muted-foreground">
           {formatDate(event.createdAt)}{' '}
-          <span className="text-xs text-[#888]">({getTimeAgo(event.createdAt)})</span>
+          <span className="text-xs text-muted-foreground">({getTimeAgo(event.createdAt)})</span>
         </p>
       </div>
     </div>

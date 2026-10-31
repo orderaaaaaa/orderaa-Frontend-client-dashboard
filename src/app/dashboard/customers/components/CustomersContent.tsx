@@ -284,7 +284,7 @@ export function CustomersContent() {
               <LiaSlidersHSolid className="w-5 h-5" />
               فلاتر متقدمة
               {activeFilterCount > 0 && (
-                <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+                <span className="absolute -top-2 -end-2 bg-card text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                   {activeFilterCount}
                 </span>
               )}
@@ -370,11 +370,11 @@ export function CustomersContent() {
         />
       ) : data?.data && data.data.length > 0 ? (
         <>
-          <div className="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden mx-4">
+          <div className="hidden lg:block bg-card rounded-lg shadow-sm overflow-hidden mx-4">
             <div className="overflow-x-auto">
               <table className="w-full" dir="rtl">
                 <thead>
-                  <tr className="bg-[#f1eefa]">
+                  <tr className="bg-primary/10">
                     {selectMode && <th className="px-4 py-4 w-10" />}
                     {TABLE_HEADERS.map((header) => (
                       <th
@@ -453,14 +453,14 @@ export function CustomersContent() {
 
       {showBulkActions && (
         <div
-          className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
+          className={`${FIXED_BOTTOM_BAR_CLASS} bg-card border-t border-gray-200 shadow-lg py-4 px-6`}
         >
           <div className="mx-auto overflow-x-auto scrollbar-hide">
             <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
               <Button
                 variant="outline"
                 onClick={() => setShowMergeModal(true)}
-                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               >
                 <LiaObjectGroupSolid className="size-5" />
                 <span>دمج العملاء (2)</span>

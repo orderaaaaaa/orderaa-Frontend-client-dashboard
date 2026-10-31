@@ -110,7 +110,7 @@ function SettlementCollectionContent() {
           onChange={(e) => setSearchInput(e.target.value)}
           clearable
           onClear={() => setSearchInput('')}
-          inputClassName="pr-10 bg-white"
+          inputClassName="pr-10 bg-background"
         />
       </div>
 

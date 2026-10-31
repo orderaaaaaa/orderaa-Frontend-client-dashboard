@@ -69,7 +69,7 @@ export function EmployeeStopDetailsModalContent({
           columns={columns}
           data={[]}
           keyField="id"
-          headerClassName="bg-[#E5E5E5]"
+          headerClassName="bg-neutral-200"
           isLoading
           skeletonRows={1}
         />
@@ -102,7 +102,7 @@ export function EmployeeStopDetailsModalContent({
         columns={columns}
         data={[activityData]}
         keyField="id"
-        headerClassName="bg-[#E5E5E5]"
+        headerClassName="bg-neutral-200"
       />
       <SplineAreaChart
         categories={activityData.chartCategories}

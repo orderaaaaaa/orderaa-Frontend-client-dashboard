@@ -140,7 +140,7 @@ const IntegrationsPage = () => {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-2xl p-8 border border-gray-200 animate-pulse"
+                  className="bg-card rounded-2xl p-8 border border-gray-200 animate-pulse"
                 >
                   <div className="flex justify-center mb-6">
                     <div className="w-32 h-32 bg-gray-200 rounded-full"></div>

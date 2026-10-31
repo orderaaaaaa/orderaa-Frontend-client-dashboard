@@ -63,7 +63,7 @@ export function PhoneNumberList({
   const phoneDropdownRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
+    "flex gap-2 bg-background shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-foreground";
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -105,7 +105,7 @@ export function PhoneNumberList({
 
   return (
     <div className={`flex flex-col gap-2 min-w-0 ${className}`}>
-      <p className="font-bold text-[#121212]">أرقام الهاتف</p>
+      <p className="font-bold text-foreground">أرقام الهاتف</p>
       <div className="space-y-2">
         {phones.phoneNumbers.map((phone, index) => (
           <div key={index} className="relative" ref={(el) => {
@@ -147,7 +147,7 @@ export function PhoneNumberList({
                 <Button
                   variant="ghost"
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 min-w-0 text-right hover:text-primary p-0 h-auto font-bold text-[15px] text-[#000000] truncate justify-start"
+                  className="flex-1 min-w-0 text-right hover:text-primary p-0 h-auto font-bold text-[15px] text-foreground truncate justify-start"
                 >
                   {phone}
                 </Button>
@@ -163,7 +163,7 @@ export function PhoneNumberList({
                   </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
-                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[999999999]"
+                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[999999999]"
                     >
                       <Button
                         variant="ghost"
@@ -249,7 +249,7 @@ export function PhoneNumberList({
           <Button
             variant="link"
             onClick={phones.handleAdd}
-            className="text-primary text-sm font-bold hover:text-[#4B1BC4] p-0 h-auto gap-2 hover:no-underline"
+            className="text-primary text-sm font-bold hover:text-primary/80 p-0 h-auto gap-2 hover:no-underline"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف

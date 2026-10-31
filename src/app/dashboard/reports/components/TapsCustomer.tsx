@@ -16,7 +16,7 @@ function TapsCustomer() {
       {TapCustomerConst.map(({ id, title, icon }) => (
         <div
           key={id}
-          className="relative w-full  mx-auto cursor-pointer group border border-[#CED4DA] rounded-lg hover:shadow-lg hover:border-primary transition-all duration-300C"
+          className="relative w-full  mx-auto cursor-pointer group border border-gray-300 rounded-lg hover:shadow-lg hover:border-primary transition-all duration-300C"
         >
           <div className="flex items-center justify-center gap-2 rounded-full py-2 px-5 sm:px-6">
             <Image

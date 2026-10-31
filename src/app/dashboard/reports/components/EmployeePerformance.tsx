@@ -12,7 +12,7 @@ export default function EmployeePerformance() {
   const chartWidth = (barWidth + spacing) * employeePerformanceData.length + 60;
 
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-xl mt-10 items-stretch">
+    <div className="p-6 bg-card rounded-2xl shadow-xl mt-10 items-stretch">
       {/* Header */}
       <div className="border-b border-gray-200 pb-3 mb-2 flex justify-between">
         <h2 className="font-bold text-lg text-gray-900 text-right">

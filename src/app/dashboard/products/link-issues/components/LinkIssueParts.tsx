@@ -64,7 +64,7 @@ interface VariantRefCardProps {
 export function VariantRefCard({ heading, variant }: VariantRefCardProps) {
   const { t } = useI18n();
   return (
-    <div className="flex-1 min-w-0 space-y-2 rounded-xl border border-gray-200 bg-white p-3">
+    <div className="flex-1 min-w-0 space-y-2 rounded-xl border border-gray-200 bg-card p-3">
       <p className="text-xs font-medium text-gray-500">{heading}</p>
       <p className="font-semibold text-gray-900 truncate">{variant.productName}</p>
       <p className="text-sm text-gray-700">{variant.label}</p>
@@ -96,7 +96,7 @@ export function CountsInline({ counts }: { counts: LinkIssueCountsSummary }) {
 
 export function IssueRowShell({ children, actions }: { children: ReactNode; actions: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-card p-4 shadow-sm">
       <div className="min-w-0 flex-1 space-y-3">{children}</div>
       <div className="flex flex-wrap items-center gap-2">{actions}</div>
     </div>

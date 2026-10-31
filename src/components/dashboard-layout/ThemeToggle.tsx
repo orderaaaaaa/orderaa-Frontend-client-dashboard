@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
-import { THEMES, isDarkModeReadyRoute } from '@/constants/theme';
+import { THEMES } from '@/constants/theme';
 
 interface ThemeToggleProps {
   className?: string;
@@ -14,7 +13,6 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
-  const pathname = usePathname();
   const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
 
@@ -22,7 +20,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     setMounted(true);
   }, []);
 
-  if (!mounted || !isDarkModeReadyRoute(pathname)) {
+  if (!mounted) {
     return null;
   }
 

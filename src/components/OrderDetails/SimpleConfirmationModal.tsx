@@ -45,10 +45,10 @@ export default function SimpleConfirmationModal({
       maxWidth="w-[500px]"
     >
       <div className="flex flex-col items-center justify-center py-6">
-        <div className="w-16 h-16 rounded-full bg-[#F6F2FC] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <LiaCheckCircle className="w-10 h-10 text-primary" />
         </div>
-        <p className="text-base text-[#1F1F1F] text-center">
+        <p className="text-base text-foreground text-center">
           {message}
         </p>
       </div>

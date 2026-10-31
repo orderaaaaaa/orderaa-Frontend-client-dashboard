@@ -30,7 +30,7 @@ const SuppliersHeader = memo(() => {
         <h1 className="ps-2 border-s-4 border-primary text-xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
           إدارة الموردين
         </h1>
-        <p className="ps-3 text-base sm:text-2xl text-black/90">
+        <p className="ps-3 text-base sm:text-2xl text-foreground/90">
           إدارة و متابعة جميع الموردين
         </p>
       </div>

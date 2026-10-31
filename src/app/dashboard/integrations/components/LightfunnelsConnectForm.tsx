@@ -112,7 +112,7 @@ export default function LightfunnelsConnectForm({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+      <div className="space-y-4 bg-card p-5 rounded-xl border border-gray-100">
         <div>
           <CopyField
             label="رابط إعادة التوجيه (Redirect URI)"

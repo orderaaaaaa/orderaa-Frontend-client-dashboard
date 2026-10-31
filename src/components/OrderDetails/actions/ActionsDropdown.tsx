@@ -96,7 +96,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
 
   return (
     <div
-      className="absolute bottom-full mb-2 right-0 min-w-[200px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+      className="absolute bottom-full mb-2 right-0 min-w-[200px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
       dir="rtl"
     >
       {filteredOptions.map((option) => (
@@ -104,7 +104,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
           key={option.action}
           variant="ghost"
           onClick={() => onActionClick(option.label, option.action)}
-          className="w-full px-4 py-3 text-sm font-bold text-[#1F1F1F] hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
+          className="w-full px-4 py-3 text-sm font-bold text-foreground hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
         >
           <div className="flex flex-row items-center gap-2">
             {option.icon}
