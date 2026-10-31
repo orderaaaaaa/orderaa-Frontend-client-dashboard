@@ -461,7 +461,7 @@ const ar = {
   'inProcess.reason.loadingCarrier': 'جاري تحميل بيانات جهة الشحن',
   'inProcess.reason.pending': 'جاري تنفيذ الإجراء',
   'inProcess.reason.partialStatus': 'التسليم الجزئي متاح فقط أثناء وجود الطلب لدى شركة الشحن (انتظار قبول شركة الشحن، في الشحن، مع المندوب)',
-  'partialDelivery.banner.confirmOutcome': 'عند التأكيد يتحول الطلب إلى تم التسليم بالقطع المستلمة، وينشأ طلب مرتجع للقطع المرفوضة',
+  'partialDelivery.banner.confirmOutcome': 'عند التأكيد يتحول الطلب إلى حالة «تم التسليم» بالقطع المستلمة، وينشأ طلب مرتجع للقطع المرفوضة',
   'partialDelivery.banner.noCarrierEdit': 'لن يتم تحديث شركة الشحن بالتسليم الجزئي، ويتم تسوية فرق مبلغ التحصيل معها يدوياً',
   'inProcess.reason.sendAgainTurbo': 'إعادة الإرسال متاحة لتوربو فقط',
   'inProcess.reason.sendAgainNoStatus': 'لا توجد حالة من شركة الشحن',

@@ -277,16 +277,14 @@ export function OrderActionModals({
         onClose={modals.postShippingCancel.close}
       />
 
-      {modals.partialDelivery.isOpen && (
-        <PartialDeliveryModal
-          isOpen
-          onClose={modals.partialDelivery.close}
-          orderId={order.id}
-          orderProducts={order.order_products || []}
-          totalCost={order.totalCost}
-          carrierImplementation={order.shippingCompanyRef?.implementation}
-        />
-      )}
+      <PartialDeliveryModal
+        isOpen={modals.partialDelivery.isOpen}
+        onClose={modals.partialDelivery.close}
+        orderId={order.id}
+        orderProducts={order.order_products || []}
+        totalCost={order.totalCost}
+        carrierImplementation={order.shippingCompanyRef?.implementation}
+      />
     </>
   );
 }
