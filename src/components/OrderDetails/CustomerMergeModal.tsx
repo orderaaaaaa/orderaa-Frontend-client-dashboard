@@ -47,7 +47,7 @@ function CustomerSummaryCard({
       <div className="flex items-center justify-between gap-2">
         <span className="font-bold text-gray-900 truncate">{customer.name}</span>
         {isSurvivor && (
-          <span className="flex items-center gap-1 text-xs font-medium text-primary flex-shrink-0">
+          <span className="flex items-center gap-1 text-xs font-medium text-primary-text flex-shrink-0">
             <LiaUserCheckSolid className="w-4 h-4" />
             سيبقى بعد الدمج
           </span>

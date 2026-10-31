@@ -78,7 +78,7 @@ export default function ProductDetailsModal({
 
           {attributes.length > 0 && (
             <div className="w-full mb-4">
-              <h4 className="text-base font-bold text-primary mb-2 text-center">
+              <h4 className="text-base font-bold text-primary-text mb-2 text-center">
                 الخصائص
               </h4>
               <div className="bg-gray-50/50 rounded-xl px-4 py-2">
@@ -94,7 +94,7 @@ export default function ProductDetailsModal({
           )}
 
           <div className="w-full">
-            <h4 className="text-base font-bold text-primary mb-2 text-center">
+            <h4 className="text-base font-bold text-primary-text mb-2 text-center">
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">

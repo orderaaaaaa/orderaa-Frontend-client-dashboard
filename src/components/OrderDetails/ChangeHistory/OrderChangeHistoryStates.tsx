@@ -40,7 +40,7 @@ export function OrderChangeHistoryLoadMore({
       type="button"
       variant="ghost"
       size="sm"
-      className="self-center text-primary"
+      className="self-center text-primary-text"
       loading={isFetchingNextPage}
       onClick={onLoadMore}
     >

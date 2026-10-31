@@ -147,7 +147,7 @@ export function PhoneNumberList({
                 <Button
                   variant="ghost"
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 min-w-0 text-right hover:text-primary p-0 h-auto font-bold text-[15px] text-foreground truncate justify-start"
+                  className="flex-1 min-w-0 text-right hover:text-primary-text p-0 h-auto font-bold text-[15px] text-foreground truncate justify-start"
                 >
                   {phone}
                 </Button>
@@ -159,7 +159,7 @@ export function PhoneNumberList({
                     }
                     className="p-1 hover:bg-purple-100 rounded transition-colors"
                   >
-                    <LiaEditSolid className="w-4 h-4 text-primary" />
+                    <LiaEditSolid className="w-4 h-4 text-primary-text" />
                   </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
@@ -249,7 +249,7 @@ export function PhoneNumberList({
           <Button
             variant="link"
             onClick={phones.handleAdd}
-            className="text-primary text-sm font-bold hover:text-primary/80 p-0 h-auto gap-2 hover:no-underline"
+            className="text-primary-text text-sm font-bold hover:text-primary/80 p-0 h-auto gap-2 hover:no-underline"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف

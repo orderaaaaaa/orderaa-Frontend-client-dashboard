@@ -205,7 +205,7 @@ export default function PartialDeliveryModal({
                         aria-label="زيادة"
                         disabled={isPending || refused >= group.rows.length}
                         onClick={() => setRefused(group, refused + 1)}
-                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
+                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary-text disabled:opacity-40"
                       >
                         <LiaPlusSolid className="size-4" />
                       </button>
@@ -217,7 +217,7 @@ export default function PartialDeliveryModal({
                         aria-label="إنقاص"
                         disabled={isPending || refused <= 0}
                         onClick={() => setRefused(group, refused - 1)}
-                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
+                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary-text disabled:opacity-40"
                       >
                         <LiaMinusSolid className="size-4" />
                       </button>
@@ -245,7 +245,7 @@ export default function PartialDeliveryModal({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">السعر بعد الخصم</span>
-            <span className="text-sm font-bold text-primary">
+            <span className="text-sm font-bold text-primary-text">
               {calculatedPrice} ج.م
             </span>
           </div>

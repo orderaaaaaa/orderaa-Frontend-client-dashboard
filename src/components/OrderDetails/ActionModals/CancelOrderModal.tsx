@@ -103,7 +103,7 @@ export default function CancelOrderModal({
                     </div>
                     <span
                       className={`text-sm ${selectedReasonId === reason.id
-                        ? 'text-primary font-semibold'
+                        ? 'text-primary-text font-semibold'
                         : 'text-foreground'
                         }`}
                     >
@@ -134,7 +134,7 @@ export default function CancelOrderModal({
               ) : (
                 <div className="mt-2 flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
                   <p>لا توجد أسباب إلغاء متاحة</p>
-                  <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+                  <Link href="/dashboard/store-settings" className="font-semibold text-primary-text hover:underline">
                     أضف أسباب الإلغاء من إعدادات المتجر
                   </Link>
                 </div>

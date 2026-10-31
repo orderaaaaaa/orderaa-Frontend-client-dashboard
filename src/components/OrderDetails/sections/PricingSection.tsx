@@ -55,7 +55,7 @@ export function PricingSection({
 
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
-      <h2 className="text-primary font-semibold">السعر و الدفع</h2>
+      <h2 className="text-primary-text font-semibold">السعر و الدفع</h2>
 
       {order.isCollected && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-3">

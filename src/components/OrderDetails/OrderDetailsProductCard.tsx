@@ -394,7 +394,7 @@ function OrderDetailsProductCard({
                   size="sm"
                   variant="ghost"
                   onClick={() => handleViewDetailsClick(item.id)}
-                  className="text-primary text-sm font-bold hover:underline text-right mt-1 hover:bg-transparent transition-colors hover:text-primary"
+                  className="text-primary-text text-sm font-bold hover:underline text-right mt-1 hover:bg-transparent transition-colors hover:text-primary-text"
                 >
                   المزيد
                   <LiaLongArrowAltLeftSolid className="w-4 h-4 rotate-45" />
@@ -418,7 +418,7 @@ function OrderDetailsProductCard({
               <Button
                 onClick={() => setIsAddSameTypeModalOpen(true)}
                 disabled={productsData.length === 0}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-card border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-card border-2 border-primary text-primary-text rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
                 <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>

@@ -17,8 +17,8 @@ export default function OrderLockedBanner({
 }: OrderLockedBannerProps) {
   return (
     <div className="relative bg-primary/10 border border-primary/40 rounded-full max-xl:rounded-l-3xl p-2 px-4">
-      <h3 className="flex gap-2 text-sm items-center font-semibold text-primary">
-        <LiaExclamationTriangleSolid className="w-5 h-5 text-primary" />
+      <h3 className="flex gap-2 text-sm items-center font-semibold text-primary-text">
+        <LiaExclamationTriangleSolid className="w-5 h-5 text-primary-text" />
         {bypass
           ? `مقفول بواسطة ${lockedBy.name} (تجاوز)`
           : `الطلب مفتوح من قبل ${lockedBy.name} في قسم ${lockedBy.department}`}

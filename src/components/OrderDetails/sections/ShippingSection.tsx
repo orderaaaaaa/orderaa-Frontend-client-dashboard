@@ -64,7 +64,7 @@ export function ShippingSection({
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-primary font-semibold">بيانات الشحن</h2>
+        <h2 className="text-primary-text font-semibold">بيانات الشحن</h2>
         <Can code={PERMISSION_CODES.ORDERS_UPDATE}>
           <Button
             variant="ghost"
@@ -72,7 +72,7 @@ export function ShippingSection({
             onClick={onEditClick}
             className="p-1 hover:bg-purple-100 rounded"
           >
-            <LiaEditSolid className="w-4 h-4 text-primary" />
+            <LiaEditSolid className="w-4 h-4 text-primary-text" />
           </Button>
         </Can>
       </div>

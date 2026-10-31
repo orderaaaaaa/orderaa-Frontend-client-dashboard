@@ -136,7 +136,7 @@ export function OrderSystemFailureItem({
           <button
             type="button"
             onClick={() => setDetailsOpen((open) => !open)}
-            className="flex items-center gap-1 text-sm font-semibold text-primary"
+            className="flex items-center gap-1 text-sm font-semibold text-primary-text"
           >
             {t('orderSystemFailures.item.details')}
             <LiaChevronDownSolid

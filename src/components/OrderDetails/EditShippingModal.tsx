@@ -128,7 +128,7 @@ function InlineTimePicker({
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">{label}</span>
         {hour && period && (
-          <span className="text-sm font-bold text-primary">
+          <span className="text-sm font-bold text-primary-text">
             {hour}:00 {period.toUpperCase()}
           </span>
         )}
@@ -626,7 +626,7 @@ export default function EditShippingModal({
         {deliveryWindowEnabled && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <LiaClockSolid className="w-5 h-5 text-primary" />
+            <LiaClockSolid className="w-5 h-5 text-primary-text" />
             <label className="font-bold text-foreground">وقت التوصيل</label>
           </div>
           <div className="bg-muted/50 rounded-xl border border-border p-4 space-y-4">
@@ -651,8 +651,8 @@ export default function EditShippingModal({
             </div>
             {startHour && startPeriod && endHour && endPeriod && (
               <div className="flex items-center justify-center gap-2 py-2 bg-primary/5 rounded-lg">
-                <LiaClockSolid className="w-4 h-4 text-primary" />
-                <span className="text-sm font-bold text-primary">
+                <LiaClockSolid className="w-4 h-4 text-primary-text" />
+                <span className="text-sm font-bold text-primary-text">
                   {startHour}:00 {startPeriod.toUpperCase()} — {endHour}:00 {endPeriod.toUpperCase()}
                 </span>
               </div>

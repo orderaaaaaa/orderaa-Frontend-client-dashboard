@@ -88,7 +88,7 @@ export default function PostShippingCancelModal({
           ) : reasons.length === 0 ? (
             <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
               <p>لا توجد أسباب رفض متاحة</p>
-              <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+              <Link href="/dashboard/store-settings" className="font-semibold text-primary-text hover:underline">
                 أضف أسباب الرفض من إعدادات المتجر
               </Link>
             </div>

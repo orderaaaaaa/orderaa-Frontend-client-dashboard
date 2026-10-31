@@ -131,7 +131,7 @@ export function EditableTextField({
                 onClick={field.startEdit}
                 className="p-1 hover:bg-purple-100 rounded flex-shrink-0"
               >
-                <LiaEditSolid className="w-4 h-4 text-primary" />
+                <LiaEditSolid className="w-4 h-4 text-primary-text" />
               </Button>
             )}
           </div>

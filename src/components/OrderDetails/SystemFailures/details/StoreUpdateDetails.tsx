@@ -94,7 +94,7 @@ function ComparisonTable({ rows }: { rows: ComparisonRow[] }) {
             return (
               <tr key={row.key} className="border-t border-gray-100 align-top">
                 <td className="py-1 text-gray-600">{row.label}</td>
-                <td className={`py-1 break-words ${differs ? 'text-primary font-semibold' : ''}`}>
+                <td className={`py-1 break-words ${differs ? 'text-primary-text font-semibold' : ''}`}>
                   {formatDetailValue(row.update)}
                 </td>
                 <td className="py-1 break-words">{formatDetailValue(row.current)}</td>
