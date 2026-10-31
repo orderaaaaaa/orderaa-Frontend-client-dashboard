@@ -88,7 +88,7 @@ export default function PostShippingCancelModal({
           ) : reasons.length === 0 ? (
             <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
               <p>لا توجد أسباب رفض متاحة</p>
-              <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+              <Link href="/dashboard/store-settings" className="font-semibold text-primary-text hover:underline">
                 أضف أسباب الرفض من إعدادات المتجر
               </Link>
             </div>
@@ -101,7 +101,7 @@ export default function PostShippingCancelModal({
                   className={clsx(
                     'p-3 rounded-lg cursor-pointer border transition-all text-sm text-right',
                     selectedReasonId === reason.id
-                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      ? 'border-primary bg-primary/10 text-primary-text font-semibold'
                       : 'border-border hover:border-primary/40 hover:bg-primary/5 text-foreground'
                   )}
                   onClick={() => {

@@ -293,7 +293,7 @@ export function CarrierSendPanel({ order }: { order: Order }) {
 
   return (
     <section className="mt-6 flex flex-col gap-4 rounded-xl bg-gray-50 p-4">
-      <h3 className="text-lg font-bold text-primary">إرسال شركة الشحن</h3>
+      <h3 className="text-lg font-bold text-primary-text">إرسال شركة الشحن</h3>
 
       {marker && (
         <CarrierSendMarkerBlock order={order} marker={marker} rows={markerRowsOf(failures, marker.id)} />

@@ -10,6 +10,7 @@ import {
   renderOrderEventNote,
 } from '@/lib/orderEventNote';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
+import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { LiaTruckSolid, LiaHeadsetSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
@@ -75,13 +76,13 @@ function EventCard({
 
         {utmSource && (
           <p className="text-sm text-foreground break-words">
-            المصدر: <span className="text-primary font-medium">{utmSource}</span>
+            المصدر: <span className="text-primary-text font-medium">{utmSource}</span>
           </p>
         )}
 
         {pageName && (
           <p className="text-sm text-foreground break-words">
-            اسم الصفحة: <span className="text-primary font-medium">{pageName}</span>
+            اسم الصفحة: <span className="text-primary-text font-medium">{pageName}</span>
           </p>
         )}
 
@@ -96,7 +97,7 @@ function EventCard({
           {time && (
             <>
               {' • '}
-              <span className="text-primary">{time}</span>
+              <span className="text-primary-text">{time}</span>
             </>
           )}
         </p>
@@ -222,7 +223,7 @@ function ChatBubble({
       </div>
       {isAgent && (
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <LiaHeadsetSolid className="w-4 h-4 text-primary" />
+          <LiaHeadsetSolid className="w-4 h-4 text-primary-text" />
         </div>
       )}
     </div>
@@ -292,7 +293,9 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(order.status);
 
   const events: MappedEvent[] = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel = event.name ? orderEventTitle(event.name, getStatusLabel) : 'حدث';
+    const statusLabel = event.name
+      ? (orderEventLabelOf(event.name) ?? orderEventTitle(event.name, getStatusLabel))
+      : 'حدث';
     const createdDate = new Date(event.createdAt);
     return {
       id: event.id || index + 1,
@@ -352,8 +355,8 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
-            <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
+            <h2 className="text-lg text-primary-text font-bold">سجل الأحداث</h2>
+            <p className="border-1 border-primary text-primary-text w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
               {events.length - 1}
             </p>
           </div>
@@ -364,9 +367,9 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
             <AccordionItem value="call-center" className="!border border-gray-200 rounded-lg self-start">
               <AccordionTrigger className="px-4 py-3 hover:bg-gray-100/50">
                 <div className="flex items-center gap-2">
-                  <LiaHeadsetSolid className="w-5 h-5 text-primary" />
+                  <LiaHeadsetSolid className="w-5 h-5 text-primary-text" />
                   <span className="text-sm font-bold text-foreground">تحديثات مركز الاتصال</span>
-                  <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                  <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-primary/10 text-primary-text text-xs font-bold">
                     {callCenterEvents.length}
                   </span>
                 </div>

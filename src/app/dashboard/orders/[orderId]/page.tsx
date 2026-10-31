@@ -160,7 +160,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               maxDate={toDate || undefined}
             />
 
-            <ArrowLeft className="text-primary flex-shrink-0" size="20" />
+            <ArrowLeft className="text-primary-text flex-shrink-0" size="20" />
 
             <DatePicker
               selected={toDate}
@@ -178,12 +178,12 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               >
                 <SelectTrigger
                   className={`w-full border-gray-300 rounded-lg h-10 text-[16px] ${
-                    timePeriod ? 'text-primary font-bold' : ''
+                    timePeriod ? 'text-primary-text font-bold' : ''
                   }`}
                 >
                   <SelectValue placeholder="الفترة الزمنية" />
                 </SelectTrigger>
-                <SelectContent className="[&_[data-state=checked]]:text-primary">
+                <SelectContent className="[&_[data-state=checked]]:text-primary-text">
                   <SelectItem value="day">يوم</SelectItem>
                   <SelectItem value="week">أسبوع</SelectItem>
                   <SelectItem value="month">شهر</SelectItem>
@@ -279,7 +279,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             maxDate={toDate || undefined}
           />
 
-          <ArrowLeft className="text-primary flex-shrink-0" size="20" />
+          <ArrowLeft className="text-primary-text flex-shrink-0" size="20" />
 
           <DatePicker
             selected={toDate}
@@ -297,12 +297,12 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             >
               <SelectTrigger
                 className={`w-full border-gray-300 rounded-lg h-10 text-[16px] ${
-                  timePeriod ? 'text-primary font-bold' : ''
+                  timePeriod ? 'text-primary-text font-bold' : ''
                 }`}
               >
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>
-              <SelectContent className="[&_[data-state=checked]]:text-primary">
+              <SelectContent className="[&_[data-state=checked]]:text-primary-text">
                 <SelectItem value="day">يوم</SelectItem>
                 <SelectItem value="week">أسبوع</SelectItem>
                 <SelectItem value="month">شهر</SelectItem>

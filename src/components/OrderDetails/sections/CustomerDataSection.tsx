@@ -115,7 +115,7 @@ export function CustomerDataSection({
         </If>
       </div>
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-primary font-semibold">بيانات العميل</h2>
+        <h2 className="text-primary-text font-semibold">بيانات العميل</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <EditableTextField

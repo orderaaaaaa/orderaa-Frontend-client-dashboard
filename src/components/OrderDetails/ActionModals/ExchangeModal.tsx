@@ -89,7 +89,7 @@ export default function ExchangeModal({
                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   <span className={clsx(
                     'text-sm',
-                    selectedProductId === op.id ? 'text-primary font-semibold' : 'text-foreground'
+                    selectedProductId === op.id ? 'text-primary-text font-semibold' : 'text-foreground'
                   )}>
                     {op.products.name}
                   </span>

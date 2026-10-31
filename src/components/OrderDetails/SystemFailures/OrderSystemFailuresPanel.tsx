@@ -51,7 +51,7 @@ function PanelCard({
           <div className="min-w-0 flex-1 basis-full sm:basis-auto">
             <AccordionTrigger className="py-2 text-start">
               <span className="flex items-center gap-2">
-                <span className="text-lg text-primary font-bold">{t('orderSystemFailures.panel.title')}</span>
+                <span className="text-lg text-primary-text font-bold">{t('orderSystemFailures.panel.title')}</span>
                 {!!unseenTotal && (
                   <span
                     className="min-w-6 h-6 px-1.5 text-sm rounded-full bg-red-600 text-white flex items-center justify-center"
@@ -195,7 +195,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
               type="button"
               variant="ghost"
               size="sm"
-              className="self-center text-primary"
+              className="self-center text-primary-text"
               loading={isFetchingNextPage}
               onClick={() => fetchNextPage()}
             >

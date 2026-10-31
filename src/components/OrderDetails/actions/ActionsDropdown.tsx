@@ -19,6 +19,7 @@ import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { PARTIAL_DELIVERY_CODES, partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
+import { cn } from '@/lib/utils';
 
 interface ActionOption {
   label: string;
@@ -49,10 +50,11 @@ export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: string;
   lastEventStatus?: string;
+  className?: string;
   onActionClick: (label: string, action: string) => void;
 }
 
-export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onActionClick }: ActionsDropdownProps) {
+export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, className, onActionClick }: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
   const { hasPermission, hasAllPermissions } = usePermissionCheck();
@@ -96,7 +98,10 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
 
   return (
     <div
-      className="absolute bottom-full mb-2 right-0 min-w-[200px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+      className={cn(
+        'absolute bottom-full mb-2 right-0 min-w-[200px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-y-auto z-50',
+        className,
+      )}
       dir="rtl"
     >
       {filteredOptions.map((option) => (

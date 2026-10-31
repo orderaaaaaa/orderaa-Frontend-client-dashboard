@@ -162,7 +162,7 @@ export default function TimePickerModal({
               {tempStartHour !== null &&
                 tempStartPeriod !== null &&
                 !isNaN(tempStartHour) ? (
-                <div className="text-xl sm:text-2xl font-bold text-primary flex items-center justify-center gap-1">
+                <div className="text-xl sm:text-2xl font-bold text-primary-text flex items-center justify-center gap-1">
                   <span>{tempStartHour}</span>
                   <span>{tempStartPeriod.toUpperCase()}</span>
                 </div>
@@ -236,7 +236,7 @@ export default function TimePickerModal({
               {tempEndHour !== null &&
                 tempEndPeriod !== null &&
                 !isNaN(tempEndHour) ? (
-                <div className="text-xl sm:text-2xl font-bold text-primary flex items-center justify-center gap-1">
+                <div className="text-xl sm:text-2xl font-bold text-primary-text flex items-center justify-center gap-1">
                   <span>{tempEndHour}</span>
                   <span>{tempEndPeriod.toUpperCase()}</span>
                 </div>

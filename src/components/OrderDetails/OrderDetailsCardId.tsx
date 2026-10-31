@@ -82,7 +82,7 @@ const OrderDetailsCardId = ({
               {order.code}
               <History
                 onClick={() => setIsHistoryModalOpen(true)}
-                className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary border-1 border-primary/40"
+                className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary-text border-1 border-primary/40"
               />
             </h3>
             <p className="text-xs font-bold sm:mr-7 mb-4">
@@ -205,7 +205,7 @@ const OrderDetailsCardId = ({
                   className="cursor-pointer bg-primary/10 text-white border-1 border-primary/40 !rounded-r-3xl p-2 px-4"
                   onClick={() => setIsCustomerOrdersModalOpen(true)}
                 >
-                  <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-primary relative ">
+                  <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-primary-text relative ">
                     <TriangleAlert className="w-5 text-yellow-500" />
                     <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
                       {order?.customers?.totalCustomerOrders}

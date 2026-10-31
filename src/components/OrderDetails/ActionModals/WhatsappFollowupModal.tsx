@@ -103,7 +103,7 @@ export default function WhatsappFollowupModal({
               variant="ghost"
               onClick={() => handleOptionClick(option.id)}
               className={`w-full px-4 py-3 text-right flex items-center justify-between transition-colors rounded-none h-auto ${selectedOption === option.id && !option.hasSubOptions
-                  ? 'bg-primary/10 text-primary'
+                  ? 'bg-primary/10 text-primary-text'
                   : 'hover:bg-gray-50 text-foreground'
                 }`}
             >
@@ -125,7 +125,7 @@ export default function WhatsappFollowupModal({
                     variant="ghost"
                     onClick={() => handleSubOptionClick(option.id, subOption.id, subOption.label)}
                     className={`w-full px-6 py-3 text-right text-sm transition-colors rounded-none h-auto justify-start ${selectedSubOption === subOption.id
-                        ? 'bg-primary/10 text-primary font-bold'
+                        ? 'bg-primary/10 text-primary-text font-bold'
                         : 'hover:bg-gray-100 text-muted-foreground'
                       }`}
                   >

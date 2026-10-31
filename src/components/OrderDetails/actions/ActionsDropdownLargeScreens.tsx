@@ -133,6 +133,11 @@ export function OrderActionsFooterLargeScreens({
         ) : showActionsMenu ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
+              {canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
+                <p className="max-w-md max-h-32 self-center overflow-y-auto whitespace-pre-line text-xs font-medium leading-5 text-red-700">
+                  {stockBlockReason}
+                </p>
+              )}
               {canUpdate && orderStatus !== 'CONFIRMED' && (
                 <Button
                   variant="default"
@@ -153,7 +158,7 @@ export function OrderActionsFooterLargeScreens({
                     variant="outline"
                     onClick={handleFollowUpToggle}
                     disabled={isBusy}
-                    className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+                    className="py-2 px-10 border-2 rounded-2xl border-primary text-primary-text text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
                   >
                     <LiaCommentDotsSolid className="w-5 h-5" />
                     متابعة
@@ -173,7 +178,7 @@ export function OrderActionsFooterLargeScreens({
                 className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
               >
                 <LiaAngleDownSolid
-                  className={`w-5 h-5 text-primary transition-all ${
+                  className={`w-5 h-5 text-primary-text transition-all ${
                     actionsDropdown.isOpen ? 'rotate-180' : ''
                   }`}
                 />

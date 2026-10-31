@@ -43,7 +43,7 @@ const CELL_CLASS = 'px-2 py-2.5 align-top text-sm text-foreground';
 const SECONDARY_TEXT_CLASS = 'text-xs text-muted-foreground';
 const STICKY_CELL_CLASS = 'sticky z-[1] bg-card group-hover:bg-muted';
 const PINNED_END_CUE_CLASS =
-  'before:pointer-events-none before:absolute before:inset-y-0 before:-start-3 before:hidden before:w-3 before:content-[""] before:[background-image:linear-gradient(to_right,color-mix(in_oklch,var(--foreground)_14%,transparent),transparent)] group-data-[overflow-end=true]/results:before:block';
+  'before:pointer-events-none before:absolute before:inset-y-0 before:-start-3 before:hidden before:w-3 before:content-[""] before:[background-image:linear-gradient(to_right,color-mix(in_oklch,var(--foreground)_28%,transparent),transparent)] dark:before:[background-image:linear-gradient(to_right,color-mix(in_oklch,var(--foreground)_14%,transparent),transparent)] group-data-[overflow-end=true]/results:before:block';
 const ROW_CLASS = 'group border-b transition-colors duration-150 hover:bg-surface-hover/40';
 
 export const isLockedRow = (row: ShipmentRowBase): boolean =>

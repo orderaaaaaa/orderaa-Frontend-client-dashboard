@@ -59,24 +59,4 @@ export const ACTION_EVENT_SOURCE_LABELS: Record<FollowupActionEventSource, strin
   CARRIER_SEND_AUDIT: 'إجراء الشحن',
 };
 
-export const ACTION_EVENT_NAME_LABELS: Partial<Record<string, string>> = {
-  ATTEMPTED: 'متابعة',
-  POSTPONED: 'تأجيل',
-  OVERDUE: 'متأخر',
-  CHANGE_PRODUCTS: 'تغيير منتج',
-  SEND_AGAIN: 'إعادة إرسال',
-  EXCHANGE: 'استبدال',
-  CANCELLED: 'إلغاء',
-  FOLLOWUP_CLOSED_TODAY: 'إغلاق لليوم',
-  FOLLOWUP_REFUSED: 'رفض التسليم',
-  FOLLOWUP_CLOSED_CANCEL: 'إلغاء الطلب',
-  FOLLOWUP_CLOSURE_UNDONE: 'إعادة فتح الطلب',
-  COMPANY_SWITCH_OLD_SHIPMENT_CANCELLED_BY_HAND: 'إلغاء الشحنة القديمة يدوياً',
-  LATE: 'متأخر يدوياً',
-  ON_TIME: 'في الموعد يدوياً',
-  AUTO: 'متأخر تلقائياً',
-  CLOSE_SHIPMENT_RECORDED: 'تسجيل الشحنة يدوياً',
-  CLOSE_NONE: 'إغلاق بدون شحنة',
-  CHECK_CONFIRMED: 'تأكيد الفحص',
-  CLOSE_GUARD_CHANGED: 'إغلاق تلقائي',
-};
+export { ACTION_EVENT_NAME_LABELS } from '@/constants/followupEventLabels';
