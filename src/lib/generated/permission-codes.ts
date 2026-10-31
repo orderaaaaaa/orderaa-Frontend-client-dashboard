@@ -48,6 +48,7 @@ export type OrderStatusSetCode = `orders:setStatus:${OrderStatusKey}`;
 export const PERMISSION_CODES = {
   ORDERS_READ: 'orders:read',
   ORDERS_CREATE: 'orders:create',
+  ORDERS_RETURNS_CREATE: 'orders:returns:create',
   ORDERS_UPDATE: 'orders:update',
   ORDERS_CANCEL: 'orders:cancel',
   ORDERS_BULK_UPDATE: 'orders:bulk-update',
