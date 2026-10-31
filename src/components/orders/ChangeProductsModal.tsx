@@ -3,13 +3,15 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { LiaPlusSolid, LiaSpinnerSolid, LiaTimesSolid } from 'react-icons/lia';
+import { LiaMinusSolid, LiaPlusSolid, LiaSpinnerSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import ProductSelectionModal, {
   type SelectableProduct,
+  type VariantOption,
 } from '@/components/ui/product-selection-modal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type {
   FollowupChangeProductInput,
   FollowupChangeProductsBody,
@@ -29,8 +31,16 @@ interface ChangeProductsLine {
   key: string;
   productId: number;
   name: string;
+  variantOptions: VariantOption[];
   variants: FollowupChangeProductVariant[];
   customVariants: FollowupCustomVariant[];
+  quantity: number;
+}
+
+interface CurrentProductRow {
+  key: string;
+  name: string;
+  labels: string[];
   quantity: number;
 }
 
@@ -67,34 +77,44 @@ const mergeLines = (
   return Array.from(merged.values());
 };
 
-const linesFromOrder = (order: Order): ChangeProductsLine[] =>
-  mergeLines(
-    [],
-    order.order_products.map((orderProduct) => {
-      const info = mapOrderProductToVariantInfo(orderProduct);
-      const variants = info.attributes.map((a) => ({ name: a.name, optionName: a.value }));
-      const customVariants = info.customVariants ?? [];
-      return {
-        key: lineKeyOf(orderProduct.productId, variants, customVariants),
-        productId: orderProduct.productId,
-        name: info.productName,
-        variants,
-        customVariants,
-        quantity: 1,
-      };
-    }),
-  );
+const isLineComplete = (line: ChangeProductsLine): boolean =>
+  line.variantOptions.every((option) => line.variants.some((v) => v.name === option.attribute));
+
+const currentProductsFromOrder = (order: Order): CurrentProductRow[] =>
+  order.order_products.map((orderProduct, index) => {
+    const info = mapOrderProductToVariantInfo(orderProduct);
+    return {
+      key: `${orderProduct.productId}-${index}`,
+      name: info.productName,
+      labels: [
+        ...info.attributes.map((a) => `${a.name}: ${a.value}`),
+        ...(info.customVariants ?? []).map((c) => `${c.label}: ${c.value}`),
+      ],
+      quantity: info.quantity ?? 1,
+    };
+  });
+
+const orderVariants = (
+  variantOptions: VariantOption[],
+  variants: FollowupChangeProductVariant[],
+): FollowupChangeProductVariant[] =>
+  variantOptions.flatMap((option) => {
+    const variant = variants.find((v) => v.name === option.attribute);
+    return variant ? [variant] : [];
+  });
 
 const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
   products.map((product) => {
-    const variants = (product.selectedVariants ?? []).map((v) => ({
-      name: v.attribute,
-      optionName: v.option,
-    }));
+    const variantOptions = product.variantOptions ?? [];
+    const variants = orderVariants(
+      variantOptions,
+      (product.selectedVariants ?? []).map((v) => ({ name: v.attribute, optionName: v.option })),
+    );
     return {
       key: lineKeyOf(product.id, variants, []),
       productId: product.id,
       name: product.name,
+      variantOptions,
       variants,
       customVariants: [],
       quantity: 1,
@@ -109,15 +129,14 @@ export default function ChangeProductsModal({
 }: ChangeProductsModalProps) {
   const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isOpen });
   const changeProductsMutation = useFollowupChangeProductsMutation();
-  const [editedLines, setEditedLines] = useState<ChangeProductsLine[] | null>(null);
+  const [lines, setLines] = useState<ChangeProductsLine[]>([]);
   const [totalCostInput, setTotalCostInput] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const prefilledLines = useMemo(
-    () => (orderQuery.data ? linesFromOrder(orderQuery.data) : []),
+  const currentProducts = useMemo(
+    () => (orderQuery.data ? currentProductsFromOrder(orderQuery.data) : []),
     [orderQuery.data],
   );
-  const lines = editedLines ?? prefilledLines;
 
   const isPending = changeProductsMutation.isPending;
   const totalCost = totalCostInput.trim() === '' ? undefined : Number(totalCostInput);
@@ -125,10 +144,14 @@ export default function ChangeProductsModal({
     totalCost !== undefined &&
     (!Number.isFinite(totalCost) || totalCost < 0 || totalCost > MAX_TOTAL_COST);
   const canConfirm =
-    orderQuery.isSuccess && lines.length > 0 && !isTotalCostInvalid && !isPending;
+    orderQuery.isSuccess &&
+    lines.length > 0 &&
+    lines.every(isLineComplete) &&
+    !isTotalCostInvalid &&
+    !isPending;
 
   const resetForm = () => {
-    setEditedLines(null);
+    setLines([]);
     setTotalCostInput('');
     setIsPickerOpen(false);
   };
@@ -142,11 +165,43 @@ export default function ChangeProductsModal({
   const handleProductsPicked = (products: SelectableProduct[]) => {
     setIsPickerOpen(false);
     if (products.length === 0) return;
-    setEditedLines(mergeLines(lines, linesFromPicker(products)));
+    setLines(mergeLines(lines, linesFromPicker(products)));
   };
 
   const handleRemoveLine = (key: string) => {
-    setEditedLines(lines.filter((line) => line.key !== key));
+    setLines(lines.filter((line) => line.key !== key));
+  };
+
+  const handleUpdateLine = (
+    key: string,
+    patch: Partial<Pick<ChangeProductsLine, 'variants' | 'quantity'>>,
+  ) => {
+    const target = lines.find((line) => line.key === key);
+    if (!target) return;
+    const updated = { ...target, ...patch };
+    const nextKey = lineKeyOf(updated.productId, updated.variants, updated.customVariants);
+    const others = lines.filter((line) => line.key !== key);
+    const next = { ...updated, key: nextKey };
+    setLines(
+      others.some((line) => line.key === nextKey)
+        ? mergeLines(others, [next])
+        : lines.map((line) => (line.key === key ? next : line)),
+    );
+  };
+
+  const handleChangeVariant = (key: string, attribute: string, optionName: string) => {
+    const target = lines.find((line) => line.key === key);
+    if (!target) return;
+    const variants = orderVariants(target.variantOptions, [
+      ...target.variants.filter((v) => v.name !== attribute),
+      { name: attribute, optionName },
+    ]);
+    handleUpdateLine(key, { variants });
+  };
+
+  const handleChangeQuantity = (key: string, quantity: number) => {
+    if (!Number.isInteger(quantity) || quantity < 1) return;
+    handleUpdateLine(key, { quantity });
   };
 
   const handleConfirm = async () => {
@@ -195,9 +250,29 @@ export default function ChangeProductsModal({
             <p className="text-sm text-red-600">تعذر تحميل تفاصيل الطلب</p>
           ) : (
             <>
+              {currentProducts.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-bold text-foreground">المنتجات الحالية</span>
+                  <div className="flex flex-col gap-1 rounded-lg bg-muted p-3">
+                    {currentProducts.map((row) => (
+                      <div
+                        key={row.key}
+                        className="flex items-center justify-between gap-2 text-xs text-muted-foreground"
+                      >
+                        <span className="truncate">
+                          {row.name}
+                          {row.labels.length > 0 && ` - ${row.labels.join(' • ')}`}
+                        </span>
+                        <span className="shrink-0">× {row.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-2">
-                  <label className="font-bold text-[#1F1F1F]">المنتجات</label>
+                  <label className="font-bold text-foreground">المنتجات الجديدة</label>
                   <Button
                     type="button"
                     variant="outline"
@@ -211,42 +286,90 @@ export default function ChangeProductsModal({
                   </Button>
                 </div>
                 {lines.length === 0 ? (
-                  <p className="text-sm text-gray-500">لم يتم اختيار منتجات</p>
+                  <p className="text-sm text-muted-foreground">لم يتم اختيار منتجات</p>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {lines.map((line) => {
-                      const variantLabels = [
-                        ...line.variants.map((v) => `${v.name}: ${v.optionName}`),
-                        ...line.customVariants.map((c) => `${c.label}: ${c.value}`),
-                      ];
-                      return (
-                        <div
-                          key={line.key}
-                          className="flex items-center gap-3 p-3 rounded-lg border border-[#ECECEC]"
-                        >
-                          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                            <span className="text-sm font-medium text-[#1F1F1F] truncate">
-                              {line.name}
-                            </span>
-                            {variantLabels.length > 0 && (
-                              <span className="text-xs text-gray-500">
-                                {variantLabels.join(' • ')}
-                              </span>
-                            )}
+                    {lines.map((line) => (
+                      <div
+                        key={line.key}
+                        className="flex flex-col gap-3 p-3 rounded-lg border border-border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                            {line.name}
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon-sm"
+                              aria-label="تقليل الكمية"
+                              onClick={() => handleChangeQuantity(line.key, line.quantity - 1)}
+                              disabled={isPending || line.quantity <= 1}
+                            >
+                              <LiaMinusSolid className="size-3" />
+                            </Button>
+                            <span className="w-6 text-center text-sm">{line.quantity}</span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon-sm"
+                              aria-label="زيادة الكمية"
+                              onClick={() => handleChangeQuantity(line.key, line.quantity + 1)}
+                              disabled={isPending}
+                            >
+                              <LiaPlusSolid className="size-3" />
+                            </Button>
                           </div>
-                          <span className="text-xs text-gray-500 shrink-0">× {line.quantity}</span>
                           <button
                             type="button"
                             aria-label="إزالة المنتج"
                             onClick={() => handleRemoveLine(line.key)}
                             disabled={isPending}
-                            className="shrink-0 p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            className="shrink-0 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
                           >
                             <LiaTimesSolid className="size-4" />
                           </button>
                         </div>
-                      );
-                    })}
+
+                        {line.variantOptions.length > 0 && (
+                          <div className="flex flex-col gap-2">
+                            {line.variantOptions.map((option) => (
+                              <div key={option.attribute} className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-muted-foreground min-w-16">
+                                  {option.attribute}:
+                                </span>
+                                <Select
+                                  value={
+                                    line.variants.find((v) => v.name === option.attribute)
+                                      ?.optionName ?? ''
+                                  }
+                                  onValueChange={(value) =>
+                                    handleChangeVariant(line.key, option.attribute, value)
+                                  }
+                                  disabled={isPending}
+                                >
+                                  <SelectTrigger size="sm" aria-label={option.attribute}>
+                                    <SelectValue placeholder="اختر" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {option.options.map((value) => (
+                                      <SelectItem key={value} value={value}>
+                                        {value}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {!isLineComplete(line) && (
+                          <p className="text-xs text-destructive">اختر المتغير لإكمال المنتج</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
