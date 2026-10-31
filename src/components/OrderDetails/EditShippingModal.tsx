@@ -612,7 +612,7 @@ export default function EditShippingModal({
                 returnShippingCost: e.target.value ? Number(e.target.value) : undefined,
               });
             }}
-            placeholder={isAllSections ? 'أدخل مبلغ الإلغاء...' : 'أدخل تكلفة المرتجع...'}
+            placeholder={isAllSections ? 'أدخل مبلغ الإلغاء في حالة عدم الاستلام...' : 'أدخل تكلفة المرتجع...'}
             min={0}
             disabled={costLocked}
             error={returnShippingCostError}
