@@ -10,7 +10,7 @@ export function ScrollEndFade({ visible, className }: ScrollEndFadeProps) {
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none absolute inset-y-0 end-0 w-10 from-white to-transparent rtl:bg-gradient-to-r ltr:bg-gradient-to-l transition-opacity duration-200',
+        'pointer-events-none absolute inset-y-0 end-0 w-10 from-background to-transparent rtl:bg-gradient-to-r ltr:bg-gradient-to-l transition-opacity duration-200',
         visible ? 'opacity-100' : 'opacity-0',
         className,
       )}

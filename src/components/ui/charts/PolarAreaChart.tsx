@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, memo } from 'react';
+import { useTheme } from 'next-themes';
 
 export interface PolarAreaChartProps {
   series: number[];
@@ -17,6 +18,8 @@ export const PolarAreaChart = memo(function PolarAreaChart({
 }: PolarAreaChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<ApexCharts | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -41,6 +44,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
           type: 'polarArea',
           height,
           fontFamily: 'inherit',
+          foreColor: isDark ? '#d4d4d4' : '#373d3f',
           events: {
             mounted: fixCanvasDirection,
             updated: fixCanvasDirection,
@@ -57,7 +61,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
           },
         },
         stroke: {
-          colors: ['#fff'],
+          colors: [isDark ? '#171717' : '#fff'],
         },
         fill: {
           opacity: 0.8,
@@ -124,7 +128,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
         chartInstance.current = null;
       }
     };
-  }, [series, labels, color, height]);
+  }, [series, labels, color, height, isDark]);
 
   return <div ref={chartRef} />;
 });
