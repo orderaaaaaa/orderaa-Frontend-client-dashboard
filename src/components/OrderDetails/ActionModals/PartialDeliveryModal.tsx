@@ -205,7 +205,7 @@ export default function PartialDeliveryModal({
                         aria-label="زيادة"
                         disabled={isPending || refused >= group.rows.length}
                         onClick={() => setRefused(group, refused + 1)}
-                        className="flex size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
+                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
                       >
                         <LiaPlusSolid className="size-4" />
                       </button>
@@ -217,7 +217,7 @@ export default function PartialDeliveryModal({
                         aria-label="إنقاص"
                         disabled={isPending || refused <= 0}
                         onClick={() => setRefused(group, refused - 1)}
-                        className="flex size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
+                        className="flex size-10 md:size-8 items-center justify-center rounded-full border border-border text-primary disabled:opacity-40"
                       >
                         <LiaMinusSolid className="size-4" />
                       </button>
