@@ -11,7 +11,7 @@ export type CustomerReturnUnitHolder = {
 
 export type CustomerReturnUnit = {
   orderProductId: number;
-  productName: string;
+  productName: string | null;
   variantLabel: string | null;
   sku: string | null;
   price: number;
@@ -30,9 +30,10 @@ export type CustomerReturnSourceOrder = {
 };
 
 export type CustomerReturnLastAddress = {
-  governorateOption: string;
-  cityOption: string;
-  address: string;
+  governorate: string | null;
+  city: string | null;
+  area: string | null;
+  address: string | null;
 };
 
 export type CustomerReturnCustomer = {
@@ -59,12 +60,13 @@ export type CreateCustomerReturnPayload = {
   customerId: number;
   orderProductIds: number[];
   confirm: boolean;
-  shippingCompanyId?: number;
+  shippingCompanyId?: number | null;
   governorateOption?: string;
   cityOption?: string;
+  area?: string;
   address?: string;
-  phoneNumbers?: string[];
   notes?: string;
+  phoneNumbers?: string[];
 };
 
 export type CreateCustomerReturnResponse = {

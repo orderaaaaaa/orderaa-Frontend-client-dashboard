@@ -1,20 +1,27 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LiaPlusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import CustomerPicker from '@/components/customers/CustomerPicker';
 import { Button } from '@/components/ui/button';
-import { EmptyState, ErrorState } from '@/components/ui/state-panels';
+import Input from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { Textarea } from '@/components/ui/textarea';
+import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useI18n } from '@/i18n/I18nProvider';
 import {
   useCreateCustomerReturn,
   useCustomerReturnCandidates,
 } from '@/services/customerReturns';
+import {
+  useLocationOptionCities,
+  useLocationOptionGovernorates,
+} from '@/services/lookups';
 import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
+import type { LocationOption } from '@/types/locationOptions';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   refundValueOf,
@@ -31,6 +38,7 @@ type ReturnDraft = {
   shippingCompanyId: string;
   governorateOption: string;
   cityOption: string;
+  area: string;
   address: string;
   notes: string;
   needsConfirmation: boolean;
@@ -46,14 +54,19 @@ type ReturnErrorKey =
 
 type ReturnErrors = Partial<Record<ReturnErrorKey, string>>;
 
+type CarrierSupportEntry = CarrierSupportState & { name: string };
+
 const EMPTY_DRAFT: ReturnDraft = {
   shippingCompanyId: '',
   governorateOption: '',
   cityOption: '',
+  area: '',
   address: '',
   notes: '',
   needsConfirmation: false,
 };
+
+const EMPTY_SELECTED_IDS: ReadonlySet<number> = new Set();
 
 const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   customer: 'return-customer',
@@ -64,21 +77,50 @@ const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   address: 'return-address',
 };
 
+const matchLocationOption = (
+  options: LocationOption[] | undefined,
+  label: string | null | undefined,
+): LocationOption | null => {
+  const wanted = label?.trim();
+  if (!options || !wanted) return null;
+  return options.find((option) => option.label.trim() === wanted) ?? null;
+};
+
 function CustomerReturnForm() {
   const { t } = useI18n();
+  const formRef = useRef<HTMLFormElement>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [selectedIds, setSelectedIds] = useState<ReadonlySet<number>>(
-    new Set(),
-  );
+  const [selectedIds, setSelectedIds] =
+    useState<ReadonlySet<number>>(EMPTY_SELECTED_IDS);
   const [draft, setDraft] = useState<ReturnDraft>(EMPTY_DRAFT);
   const [errors, setErrors] = useState<ReturnErrors>({});
   const candidatesQuery = useCustomerReturnCandidates(customer?.id ?? null);
   const createReturn = useCreateCustomerReturn();
+  const { shippingCompanies } = useShippingCompanies(true);
   const orders = candidatesQuery.data?.orders ?? [];
-  const lastAddress = candidatesQuery.data?.customer.lastAddress;
+  const lastAddress = candidatesQuery.data?.customer.lastAddress ?? null;
+
+  const companyId = shippingCompanyIdOf(draft.shippingCompanyId);
+  const governoratesQuery = useLocationOptionGovernorates(companyId);
+  const citiesQuery = useLocationOptionCities(
+    companyId,
+    draft.governorateOption || undefined,
+  );
+  const matchedGovernorate = useMemo(
+    () =>
+      matchLocationOption(
+        governoratesQuery.data?.options,
+        lastAddress?.governorate,
+      ),
+    [governoratesQuery.data, lastAddress],
+  );
+  const matchedCity = useMemo(
+    () => matchLocationOption(citiesQuery.data?.options, lastAddress?.city),
+    [citiesQuery.data, lastAddress],
+  );
 
   const carrierSupportById = useMemo(() => {
-    const map: Record<string, CarrierSupportState & { name: string }> = {};
+    const map: Record<string, CarrierSupportEntry> = {};
     candidatesQuery.data?.carrierSupport.forEach((carrier) => {
       map[String(carrier.shippingCompanyId)] = {
         name: carrier.name,
@@ -92,16 +134,59 @@ function CustomerReturnForm() {
   const selectedUnits = selectedUnitsOf(orders, selectedIds);
   const refundValue = refundValueOf(selectedUnits);
   const selectedCarrier = carrierSupportById[draft.shippingCompanyId] ?? null;
+  const selectedCompanyName =
+    selectedCarrier?.name ??
+    shippingCompanies.find(
+      (company) => String(company.id) === draft.shippingCompanyId,
+    )?.name ??
+    null;
 
   useEffect(() => {
     if (!lastAddress) return;
     setDraft((current) => ({
       ...current,
-      governorateOption: lastAddress.governorateOption,
-      cityOption: lastAddress.cityOption,
-      address: lastAddress.address,
+      address: lastAddress.address ?? '',
+      area: lastAddress.area ?? '',
     }));
   }, [lastAddress]);
+
+  useEffect(() => {
+    if (!matchedGovernorate || draft.governorateOption) return;
+    setDraft((current) => ({
+      ...current,
+      governorateOption: matchedGovernorate.value,
+    }));
+  }, [matchedGovernorate, draft.governorateOption]);
+
+  useEffect(() => {
+    if (!matchedCity || draft.cityOption) return;
+    if (
+      !matchedGovernorate ||
+      draft.governorateOption !== matchedGovernorate.value
+    )
+      return;
+    setDraft((current) => ({ ...current, cityOption: matchedCity.value }));
+  }, [
+    matchedCity,
+    matchedGovernorate,
+    draft.cityOption,
+    draft.governorateOption,
+  ]);
+
+  const lastAddressUnmatched =
+    lastAddress !== null &&
+    ((!!lastAddress.governorate && !draft.governorateOption) ||
+      (!!lastAddress.city && !draft.cityOption));
+
+  const locationHint =
+    lastAddress && lastAddressUnmatched ? (
+      <p className="mt-4 text-sm text-muted-foreground">
+        {t('customerReturn.lastAddress.hint', {
+          governorate: lastAddress.governorate ?? '',
+          city: lastAddress.city ?? '',
+        })}
+      </p>
+    ) : null;
 
   const updateDraft = (patch: Partial<ReturnDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -109,16 +194,28 @@ function CustomerReturnForm() {
     (Object.keys(patch) as (keyof ReturnDraft)[]).forEach((key) => {
       if (key in ERROR_FIELD_IDS) cleared[key as ReturnErrorKey] = undefined;
     });
+    if ('needsConfirmation' in patch) cleared.shippingCompanyId = undefined;
     setErrors((current) => ({ ...current, ...cleared }));
   };
 
   const handleCustomerChange = (next: Customer | null) => {
     setCustomer(next);
-    setSelectedIds(new Set());
+    setSelectedIds(EMPTY_SELECTED_IDS);
+    setDraft((current) => ({
+      ...current,
+      address: '',
+      area: '',
+      notes: '',
+      governorateOption: '',
+      cityOption: '',
+    }));
     setErrors((current) => ({
       ...current,
       customer: undefined,
       units: undefined,
+      address: undefined,
+      governorateOption: undefined,
+      cityOption: undefined,
     }));
   };
 
@@ -145,7 +242,7 @@ function CustomerReturnForm() {
 
   const resetForm = () => {
     setCustomer(null);
-    setSelectedIds(new Set());
+    setSelectedIds(EMPTY_SELECTED_IDS);
     setDraft(EMPTY_DRAFT);
     setErrors({});
   };
@@ -155,8 +252,15 @@ function CustomerReturnForm() {
     if (!customer) next.customer = t('customerReturn.customer.required');
     if (selectedUnits.length === 0)
       next.units = t('customerReturn.errors.units');
-    if (!draft.shippingCompanyId)
+    if (!draft.shippingCompanyId) {
       next.shippingCompanyId = t('customerReturn.errors.company');
+    } else if (
+      !draft.needsConfirmation &&
+      selectedCarrier &&
+      !selectedCarrier.supported
+    ) {
+      next.shippingCompanyId = t('customerReturn.errors.carrierUnsupported');
+    }
     if (!draft.governorateOption)
       next.governorateOption = t('customerReturn.errors.governorate');
     if (!draft.cityOption) next.cityOption = t('customerReturn.errors.city');
@@ -172,26 +276,26 @@ function CustomerReturnForm() {
     const firstError = (Object.keys(ERROR_FIELD_IDS) as ReturnErrorKey[]).find(
       (key) => nextErrors[key],
     );
-    if (firstError || !customer) {
-      if (firstError) {
-        document
-          .querySelector(`[data-field-error="${ERROR_FIELD_IDS[firstError]}"]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    if (firstError) {
+      formRef.current
+        ?.querySelector(`[data-field-error="${ERROR_FIELD_IDS[firstError]}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    if (!customer) return;
 
     const notes = draft.notes.trim();
+    const area = draft.area.trim();
     createReturn.mutate(
       {
         customerId: customer.id,
         orderProductIds: selectedUnits.map((unit) => unit.orderProductId),
         confirm: !draft.needsConfirmation,
-        shippingCompanyId:
-          shippingCompanyIdOf(draft.shippingCompanyId) ?? undefined,
+        shippingCompanyId: companyId,
         governorateOption: draft.governorateOption,
         cityOption: draft.cityOption,
         address: draft.address.trim(),
+        ...(area && { area }),
         ...(notes && { notes }),
       },
       {
@@ -239,15 +343,12 @@ function CustomerReturnForm() {
       return <EmptyState title={t('customerReturn.orders.empty')} />;
     }
     return (
-      <div className="flex flex-col gap-3">
-        <ReturnSourceOrders
-          orders={orders}
-          selectedIds={selectedIds}
-          onToggleUnit={handleToggleUnit}
-          onToggleOrder={handleToggleOrder}
-        />
-        {errors.units && <p className="text-sm text-red-500">{errors.units}</p>}
-      </div>
+      <ReturnSourceOrders
+        orders={orders}
+        selectedIds={selectedIds}
+        onToggleUnit={handleToggleUnit}
+        onToggleOrder={handleToggleOrder}
+      />
     );
   };
 
@@ -257,6 +358,7 @@ function CustomerReturnForm() {
 
   return (
     <form
+      ref={formRef}
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -284,12 +386,17 @@ function CustomerReturnForm() {
             {t('customerReturn.orders.title')}
           </h2>
           <div data-field-error="return-units">{renderOrders()}</div>
+          {errors.units && (
+            <p className="text-sm text-destructive">{errors.units}</p>
+          )}
         </div>
       </div>
 
       <ShippingSection
         mode="return"
+        idPrefix="return"
         carrierSupport={carrierSupportById}
+        locationHint={locationHint}
         shippingCompanyId={draft.shippingCompanyId}
         governorateOption={draft.governorateOption}
         cityOption={draft.cityOption}
@@ -322,7 +429,7 @@ function CustomerReturnForm() {
               className="font-medium text-[16px]"
             >
               {t('customerReturn.address.label')}{' '}
-              <span className="text-red-500">*</span>
+              <span className="text-destructive">*</span>
             </label>
             <Textarea
               id="return-address-input"
@@ -333,8 +440,25 @@ function CustomerReturnForm() {
               className="bg-background"
             />
             {errors.address && (
-              <p className="text-sm text-red-500">{errors.address}</p>
+              <p className="text-sm text-destructive">{errors.address}</p>
             )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="return-area-input"
+              className="font-medium text-[16px]"
+            >
+              {t('customerReturn.area.label')}
+            </label>
+            <Input
+              id="return-area-input"
+              name="area"
+              value={draft.area}
+              onChange={(e) => updateDraft({ area: e.target.value })}
+              placeholder={t('customerReturn.area.placeholder')}
+              className="w-full"
+              inputClassName="bg-background"
+            />
           </div>
           <div className="flex flex-col gap-2">
             <label
@@ -370,7 +494,7 @@ function CustomerReturnForm() {
           <ReturnSummaryPanel
             unitsCount={selectedUnits.length}
             refundValue={refundValue}
-            shippingCompanyName={selectedCarrier?.name ?? null}
+            shippingCompanyName={selectedCompanyName}
             carrier={selectedCarrier}
             pickupAddress={draft.address.trim()}
           />
@@ -395,7 +519,7 @@ function CustomerReturnForm() {
           loadingText={t('customerReturn.submit.loading')}
           className="min-h-10 min-w-40 rounded-full font-bold"
         >
-          <LiaPlusSolid className="w-5 h-5 text-white" />
+          <LiaPlusSolid className="w-5 h-5 text-primary-foreground" />
           {t('customerReturn.submit.button')}
         </Button>
       </StickyFormFooter>

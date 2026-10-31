@@ -73,7 +73,7 @@ function ReturnSummaryPanel({
               <span
                 className={
                   carrier && !carrier.supported
-                    ? 'text-sm text-red-500'
+                    ? 'text-sm text-destructive'
                     : 'text-sm text-muted-foreground'
                 }
               >

@@ -966,6 +966,10 @@ const ar = {
   'customerReturn.submit.statusSaving': 'جاري إنشاء المرتجع...',
   'customerReturn.submit.success': 'تم إنشاء المرتجع بنجاح: {code}',
   'customerReturn.submit.error': 'حدث خطأ أثناء إنشاء المرتجع. يرجى المحاولة مرة أخرى.',
+  'customerReturn.errors.carrierUnsupported': 'الشركة المختارة لا تدعم الاسترجاع عبر النظام',
+  'customerReturn.area.label': 'المنطقة',
+  'customerReturn.area.placeholder': 'اختياري',
+  'customerReturn.lastAddress.hint': 'آخر عنوان للعميل: {governorate} - {city}',
 } as const;
 
 export default ar;

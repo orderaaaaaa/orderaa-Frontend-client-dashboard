@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export type OrderProps = {
   utmSource: string;
   pageName: string;
@@ -42,6 +44,8 @@ export type CarrierSupportState = {
 export type ShippingSectionProps = {
   mode?: 'new' | 'return';
   carrierSupport?: Record<string, CarrierSupportState>;
+  idPrefix?: string;
+  locationHint?: ReactNode;
   shippingCompanyId: string;
   governorateOption: string;
   cityOption: string;

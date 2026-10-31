@@ -953,6 +953,10 @@ const en: Record<keyof typeof ar, string> = {
   'customerReturn.submit.statusSaving': 'Creating the return...',
   'customerReturn.submit.success': 'Return created: {code}',
   'customerReturn.submit.error': 'Could not create the return. Please try again.',
+  'customerReturn.errors.carrierUnsupported': 'The selected company does not support returns through the system',
+  'customerReturn.area.label': 'Area',
+  'customerReturn.area.placeholder': 'Optional',
+  'customerReturn.lastAddress.hint': 'Last address: {governorate} - {city}',
 };
 
 export default en;

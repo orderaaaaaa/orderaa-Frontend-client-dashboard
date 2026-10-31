@@ -356,14 +356,16 @@ function ManualOrderPage() {
   return (
     <div className="flex flex-col gap-[26px]">
       <div className="flex justify-center max-sm:px-4">
-        <ToggleGroup
-          options={[
-            { value: 'new', label: t('customerReturn.mode.new') },
-            { value: 'return', label: t('customerReturn.mode.return') },
-          ]}
-          value={mode}
-          onChange={setMode}
-        />
+        <div role="group" aria-label={t('customerReturn.mode.label')}>
+          <ToggleGroup
+            options={[
+              { value: 'new', label: t('customerReturn.mode.new') },
+              { value: 'return', label: t('customerReturn.mode.return') },
+            ]}
+            value={mode}
+            onChange={setMode}
+          />
+        </div>
       </div>
       <div hidden={mode !== 'new'}>
         <NewOrderForm />

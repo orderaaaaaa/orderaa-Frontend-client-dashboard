@@ -30,9 +30,136 @@ import {
 import { carrierUnsupportedReasonOf } from '@/utils/customerReturn/carrier';
 import { ShippingSectionProps } from './types';
 
+type ShippingCostFieldsProps = Pick<
+  ShippingSectionProps,
+  | 'shippingCost'
+  | 'returnShippingCost'
+  | 'shippingType'
+  | 'returnShipmentContent'
+  | 'onShippingCostChange'
+  | 'onReturnShippingCostChange'
+  | 'onShippingTypeChange'
+  | 'onReturnShipmentContentChange'
+  | 'errors'
+> & {
+  shippingTypeMap: Record<string, string>;
+  shippingTypeReverseMap: Record<string, string>;
+  shippingTypeOptions: string[];
+  loadingShippingTypes: boolean;
+  requiresReturnContent: boolean;
+};
+
+function ShippingCostFields({
+  shippingCost,
+  returnShippingCost,
+  shippingType,
+  returnShipmentContent,
+  onShippingCostChange,
+  onReturnShippingCostChange,
+  onShippingTypeChange,
+  onReturnShipmentContentChange,
+  errors,
+  shippingTypeMap,
+  shippingTypeReverseMap,
+  shippingTypeOptions,
+  loadingShippingTypes,
+  requiresReturnContent,
+}: ShippingCostFieldsProps) {
+  return (
+    <>
+      <div data-field-error="shippingCost">
+        <label htmlFor="manual-shipping-cost" className="block font-medium text-[16px] mb-1">
+          تكلفة الشحن
+        </label>
+        <Input
+          id="manual-shipping-cost"
+          name="shippingCost"
+          type="number"
+          inputMode="decimal"
+          dir="ltr"
+          min={0}
+          placeholder="أدخل تكلفة الشحن"
+          className="w-full"
+          inputClassName="bg-background"
+          value={shippingCost}
+          onChange={(e) => onShippingCostChange(e.target.value)}
+          error={errors?.shippingCost}
+        />
+      </div>
+      <div data-field-error="returnShippingCost">
+        <label htmlFor="manual-return-shipping-cost" className="block font-medium text-[16px] mb-1">
+          مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span>
+        </label>
+        <Input
+          id="manual-return-shipping-cost"
+          name="returnShippingCost"
+          type="number"
+          inputMode="decimal"
+          dir="ltr"
+          placeholder="أدخل مبلغ الإلغاء..."
+          className="w-full"
+          inputClassName="bg-background"
+          min={0}
+          value={returnShippingCost}
+          onChange={(e) => onReturnShippingCostChange(e.target.value)}
+          error={errors?.returnShippingCost}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2" data-field-error="shippingType">
+        <label htmlFor="manual-shipping-type" className="font-medium text-[16px]">
+          نوع الشحنة <span className="text-red-500">*</span>
+        </label>
+        <SearchableSelect
+          id="manual-shipping-type"
+          value={shippingType ? shippingTypeMap[shippingType] || '' : ''}
+          onValueChange={(label) => {
+            const key = shippingTypeReverseMap[label] || '';
+            onShippingTypeChange(key);
+            if (!['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(key)) {
+              onReturnShipmentContentChange('');
+            }
+          }}
+          options={shippingTypeOptions}
+          placeholder="اختر نوع الشحنة"
+          searchPlaceholder="بحث عن نوع..."
+          emptyMessage="لا توجد أنواع متاحة"
+          noResultsMessage="لا توجد نتائج للبحث"
+          triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingType ? 'border-red-500' : 'border-gray-300'}`}
+          searchThreshold={5}
+          loading={loadingShippingTypes}
+        />
+        {errors?.shippingType && (
+          <p className="text-red-500 text-sm">{errors.shippingType}</p>
+        )}
+      </div>
+
+      {requiresReturnContent && (
+        <div className="flex flex-col gap-2" data-field-error="returnShipmentContent">
+          <label htmlFor="manual-return-content" className="font-medium text-[16px]">
+            محتوى شحنة الاسترجاع <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="manual-return-content"
+            name="returnShipmentContent"
+            placeholder="أدخل محتوى شحنة الاسترجاع"
+            className="w-full"
+            inputClassName="bg-background"
+            value={returnShipmentContent}
+            onChange={(e) => onReturnShipmentContentChange(e.target.value)}
+            error={errors?.returnShipmentContent}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 function ShippingSection({
   mode = 'new',
   carrierSupport = {},
+  idPrefix = 'manual',
+  locationHint,
   shippingCompanyId,
   governorateOption,
   cityOption,
@@ -50,6 +177,7 @@ function ShippingSection({
   errors,
 }: ShippingSectionProps) {
   const { t } = useI18n();
+  const isReturnMode = mode === 'return';
   const { shippingCompanies, isLoading: loadingShippingCompanies } =
     useShippingCompanies(true);
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
@@ -96,8 +224,6 @@ function ShippingSection({
 
   const requiresReturnContent = ['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(shippingType);
 
-  const isReturnMode = mode === 'return';
-
   const shippingCompanyOptions = useMemo(
     () =>
       shippingCompanySelectOptionsOf(shippingCompanies).map((option) => {
@@ -111,8 +237,6 @@ function ShippingSection({
       }),
     [shippingCompanies, carrierSupport, t]
   );
-
-  const selectedCarrierSupport = carrierSupport[shippingCompanyId];
 
   const shippingCompanyDisplay = shippingCompanyOptions.find(
     (option) => option.key === shippingCompanyId
@@ -144,15 +268,19 @@ function ShippingSection({
   return (
     <div className="bg-card max-sm:px-0 px-6 flex items-center justify-center">
       <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
-        <h1 className="font-bold text-[22px] mb-6">الشحن</h1>
+        {isReturnMode ? (
+          <h2 className="font-bold text-[22px] mb-6">الشحن</h2>
+        ) : (
+          <h1 className="font-bold text-[22px] mb-6">الشحن</h1>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="flex flex-col gap-2" data-field-error="shippingCompanyId">
-            <label htmlFor="manual-shipping-company" className="font-medium text-[16px]">
+            <label htmlFor={`${idPrefix}-shipping-company`} className="font-medium text-[16px]">
               شركة الشحن <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              id="manual-shipping-company"
+              id={`${idPrefix}-shipping-company`}
               value={shippingCompanyDisplay ? shippingCompanyId : ''}
               displayValue={shippingCompanyDisplay}
               onValueChange={handleShippingCompanyChange}
@@ -165,22 +293,17 @@ function ShippingSection({
               searchThreshold={5}
               loading={loadingShippingCompanies}
             />
-            {selectedCarrierSupport && !selectedCarrierSupport.supported && (
-              <p className="text-sm text-red-500">
-                {carrierUnsupportedReasonOf(selectedCarrierSupport.reason, t)}
-              </p>
-            )}
             {errors?.shippingCompanyId && (
               <p className="text-red-500 text-sm">{errors.shippingCompanyId}</p>
             )}
           </div>
 
           <div className="flex flex-col gap-2" data-field-error="governorate">
-            <label htmlFor="manual-governorate" className="font-medium text-[16px]">
+            <label htmlFor={`${idPrefix}-governorate`} className="font-medium text-[16px]">
               المحافظة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              id="manual-governorate"
+              id={`${idPrefix}-governorate`}
               value={governorateOption}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
@@ -220,11 +343,11 @@ function ShippingSection({
           </div>
 
           <div className="flex flex-col gap-2" data-field-error="city">
-            <label htmlFor="manual-city" className="font-medium text-[16px]">
+            <label htmlFor={`${idPrefix}-city`} className="font-medium text-[16px]">
               المدينة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              id="manual-city"
+              id={`${idPrefix}-city`}
               value={cityOption}
               onValueChange={onCityOptionChange}
               options={cityOptions}
@@ -259,95 +382,25 @@ function ShippingSection({
             )}
           </div>
           {!isReturnMode && (
-          <>
-            <div data-field-error="shippingCost">
-              <label htmlFor="manual-shipping-cost" className="block font-medium text-[16px] mb-1">
-                تكلفة الشحن
-              </label>
-              <Input
-                id="manual-shipping-cost"
-                name="shippingCost"
-                type="number"
-                inputMode="decimal"
-                dir="ltr"
-                min={0}
-                placeholder="أدخل تكلفة الشحن"
-                className="w-full"
-                inputClassName="bg-background"
-                value={shippingCost}
-                onChange={(e) => onShippingCostChange(e.target.value)}
-                error={errors?.shippingCost}
-              />
-            </div>
-            <div data-field-error="returnShippingCost">
-              <label htmlFor="manual-return-shipping-cost" className="block font-medium text-[16px] mb-1">
-                مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="manual-return-shipping-cost"
-                name="returnShippingCost"
-                type="number"
-                inputMode="decimal"
-                dir="ltr"
-                placeholder="أدخل مبلغ الإلغاء..."
-                className="w-full"
-                inputClassName="bg-background"
-                min={0}
-                value={returnShippingCost}
-                onChange={(e) => onReturnShippingCostChange(e.target.value)}
-                error={errors?.returnShippingCost}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2" data-field-error="shippingType">
-              <label htmlFor="manual-shipping-type" className="font-medium text-[16px]">
-                نوع الشحنة <span className="text-red-500">*</span>
-              </label>
-              <SearchableSelect
-                id="manual-shipping-type"
-                value={shippingType ? shippingTypeMap[shippingType] || '' : ''}
-                onValueChange={(label) => {
-                  const key = shippingTypeReverseMap[label] || '';
-                  onShippingTypeChange(key);
-                  if (!['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(key)) {
-                    onReturnShipmentContentChange('');
-                  }
-                }}
-                options={shippingTypeOptions}
-                placeholder="اختر نوع الشحنة"
-                searchPlaceholder="بحث عن نوع..."
-                emptyMessage="لا توجد أنواع متاحة"
-                noResultsMessage="لا توجد نتائج للبحث"
-                triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingType ? 'border-red-500' : 'border-gray-300'}`}
-                searchThreshold={5}
-                loading={loadingShippingTypes}
-              />
-              {errors?.shippingType && (
-                <p className="text-red-500 text-sm">{errors.shippingType}</p>
-              )}
-            </div>
-
-          </>
-          )}
-
-          {!isReturnMode && requiresReturnContent && (
-            <div className="flex flex-col gap-2" data-field-error="returnShipmentContent">
-              <label htmlFor="manual-return-content" className="font-medium text-[16px]">
-                محتوى شحنة الاسترجاع <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="manual-return-content"
-                name="returnShipmentContent"
-                placeholder="أدخل محتوى شحنة الاسترجاع"
-                className="w-full"
-                inputClassName="bg-background"
-                value={returnShipmentContent}
-                onChange={(e) => onReturnShipmentContentChange(e.target.value)}
-                error={errors?.returnShipmentContent}
-              />
-            </div>
+            <ShippingCostFields
+              shippingCost={shippingCost}
+              returnShippingCost={returnShippingCost}
+              shippingType={shippingType}
+              returnShipmentContent={returnShipmentContent}
+              onShippingCostChange={onShippingCostChange}
+              onReturnShippingCostChange={onReturnShippingCostChange}
+              onShippingTypeChange={onShippingTypeChange}
+              onReturnShipmentContentChange={onReturnShipmentContentChange}
+              errors={errors}
+              shippingTypeMap={shippingTypeMap}
+              shippingTypeReverseMap={shippingTypeReverseMap}
+              shippingTypeOptions={shippingTypeOptions}
+              loadingShippingTypes={loadingShippingTypes}
+              requiresReturnContent={requiresReturnContent}
+            />
           )}
         </div>
+        {locationHint}
       </div>
     </div>
   );

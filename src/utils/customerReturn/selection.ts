@@ -22,4 +22,4 @@ export const selectedUnitsOf = (
   );
 
 export const refundValueOf = (units: CustomerReturnUnit[]): number =>
-  units.reduce((total, unit) => total + unit.price, 0);
+  Math.round(units.reduce((total, unit) => total + unit.price, 0) * 100) / 100;

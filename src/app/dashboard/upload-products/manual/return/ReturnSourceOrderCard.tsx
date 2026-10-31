@@ -53,7 +53,7 @@ function UnitChip({
   const details = (
     <span className="flex min-w-0 flex-col text-start">
       <span className="truncate text-sm font-medium text-foreground">
-        {unit.productName}
+        {unit.productName ?? unit.sku ?? '—'}
       </span>
       {unit.variantLabel && (
         <span className="truncate text-xs text-muted-foreground">
