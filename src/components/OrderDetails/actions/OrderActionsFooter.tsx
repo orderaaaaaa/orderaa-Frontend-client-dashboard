@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   LiaCheckSolid,
   LiaComment,
@@ -14,6 +14,8 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
+
+const FOOTER_CLEARANCE_PX = 48;
 
 export interface OrderActionsFooterProps {
   orderStatus: string;
@@ -71,115 +73,132 @@ export function OrderActionsFooter({
     if (followUpDropdown.isOpen) followUpDropdown.close();
   };
 
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [footerHeight, setFooterHeight] = useState(0);
+
+  useEffect(() => {
+    const element = footerRef.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setFooterHeight(element.offsetHeight));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div
-      className="fixed bottom-8 left-0 right-0 z-20 flex justify-center items-center gap-4 px-4 font-sans"
-    >
-      {!showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
-        <p className="absolute bottom-full mb-3 left-4 right-4 rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-xs font-medium leading-5 text-red-700 shadow-sm">
-          {stockBlockReason}
-        </p>
-      )}
-      <Button
-        variant="ghost"
-        onClick={onNavigatePrevious}
-        disabled={isBusy || isNavigatingPrevious || !onNavigatePrevious}
-        className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
+    <>
+      <div aria-hidden="true" style={{ height: footerHeight + FOOTER_CLEARANCE_PX }} />
+      <div
+        ref={footerRef}
+        className="fixed bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-3 px-4 font-sans"
       >
-        <LiaAngleRightSolid className="w-6 h-6" />
-      </Button>
+        {!showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
+          <p className="w-full max-w-md max-h-32 overflow-y-auto rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-xs font-medium leading-5 whitespace-pre-line text-red-700 shadow-sm">
+            {stockBlockReason}
+          </p>
+        )}
+        <div className="flex justify-center items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={onNavigatePrevious}
+            disabled={isBusy || isNavigatingPrevious || !onNavigatePrevious}
+            className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
+          >
+            <LiaAngleRightSolid className="w-6 h-6" />
+          </Button>
 
-      {showStopOperation ? (
-        <Button
-          variant="default"
-          onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
-          disabled={isBusy}
-          className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:brightness-90 transition-colors flex items-center gap-3"
-        >
-          <LiaStopCircleSolid className="w-5 h-5" />
-          وقف التشغيل
-        </Button>
-      ) : showActionsMenu ? (
-        <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
-          {canUpdate && orderStatus !== 'CONFIRMED' && (
+          {showStopOperation ? (
             <Button
-              variant="ghost"
-              onClick={onConfirm}
-              disabled={isBusy || !canConfirmStock}
-              title={canConfirmStock ? undefined : stockBlockReason}
-              className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
-            >
-              <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
-                <LiaCheckSolid className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">تأكيد</span>
-            </Button>
-          )}
-
-          {canUpdate && (
-            <div className="relative top-[-6px]" ref={followUpDropdown.ref}>
-              <Button
-                variant="ghost"
-                onClick={handleFollowUpToggle}
-                disabled={isBusy}
-                className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
-              >
-                <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
-                  <LiaComment className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium">متابعة</span>
-              </Button>
-
-              <div className="absolute bottom-full mb-4 right-[-50px]">
-                <FollowUpDropdown
-                  isOpen={followUpDropdown.isOpen}
-                  onClick={(l, a) => {
-                    followUpDropdown.close();
-                    onFollowUpClick(l, a);
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="relative top-[-6px]" ref={actionsDropdown.ref}>
-            <Button
-              variant="ghost"
-              onClick={handleActionsToggle}
+              variant="default"
+              onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
               disabled={isBusy}
-              aria-label="إجراءات أخرى"
-              className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 min-w-10 min-h-10 hover:bg-transparent"
+              className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:brightness-90 transition-colors flex items-center gap-3"
             >
-              <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
-                <LiaEllipsisHSolid className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">اخري</span>
+              <LiaStopCircleSolid className="w-5 h-5" />
+              وقف التشغيل
             </Button>
+          ) : showActionsMenu ? (
+            <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
+              {canUpdate && orderStatus !== 'CONFIRMED' && (
+                <Button
+                  variant="ghost"
+                  onClick={onConfirm}
+                  disabled={isBusy || !canConfirmStock}
+                  title={canConfirmStock ? undefined : stockBlockReason}
+                  className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
+                >
+                  <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+                    <LiaCheckSolid className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-medium">تأكيد</span>
+                </Button>
+              )}
 
-            <div className="fixed inset-x-4 bottom-[6.25rem]">
-              <ActionsDropdown
-                isOpen={actionsDropdown.isOpen}
-                orderStatus={orderStatus}
-                lastEventStatus={lastEventStatus}
-                className="max-h-[60vh] max-w-full overflow-y-auto"
-                onActionClick={(label, action) => {
-                  actionsDropdown.close();
-                  onActionClick(label, action);
-                }}
-              />
+              {canUpdate && (
+                <div className="relative top-[-6px]" ref={followUpDropdown.ref}>
+                  <Button
+                    variant="ghost"
+                    onClick={handleFollowUpToggle}
+                    disabled={isBusy}
+                    className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
+                  >
+                    <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+                      <LiaComment className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">متابعة</span>
+                  </Button>
+
+                  <div className="absolute bottom-full mb-4 right-[-50px]">
+                    <FollowUpDropdown
+                      isOpen={followUpDropdown.isOpen}
+                      onClick={(l, a) => {
+                        followUpDropdown.close();
+                        onFollowUpClick(l, a);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="relative top-[-6px]" ref={actionsDropdown.ref}>
+                <Button
+                  variant="ghost"
+                  onClick={handleActionsToggle}
+                  disabled={isBusy}
+                  aria-label="إجراءات أخرى"
+                  className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 min-w-10 min-h-10 hover:bg-transparent"
+                >
+                  <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+                    <LiaEllipsisHSolid className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-medium">اخري</span>
+                </Button>
+
+                <div className="fixed inset-x-4 bottom-[6.25rem]">
+                  <ActionsDropdown
+                    isOpen={actionsDropdown.isOpen}
+                    orderStatus={orderStatus}
+                    lastEventStatus={lastEventStatus}
+                    className="max-h-[60vh] max-w-full overflow-y-auto"
+                    onActionClick={(label, action) => {
+                      actionsDropdown.close();
+                      onActionClick(label, action);
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
 
-      <Button
-        variant="ghost"
-        onClick={onNavigateNext}
-        disabled={isBusy || isNavigatingNext || !onNavigateNext}
-        className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
-      >
-        <LiaAngleLeftSolid className="w-6 h-6" />
-      </Button>
-    </div>
+          <Button
+            variant="ghost"
+            onClick={onNavigateNext}
+            disabled={isBusy || isNavigatingNext || !onNavigateNext}
+            className="w-9 h-9 rounded-full border border-gray-300 bg-card shadow-sm hover:bg-gray-50 text-purple-700"
+          >
+            <LiaAngleLeftSolid className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
+    </>
   );
 }
