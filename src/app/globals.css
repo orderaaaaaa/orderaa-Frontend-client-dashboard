@@ -714,3 +714,22 @@ html {
     stroke-dashoffset: 0;
   }
 }
+
+.Toastify {
+  --toastify-color-info: #1d4ed8;
+  --toastify-color-success: #15803d;
+  --toastify-color-warning: #f1c40f;
+  --toastify-color-error: #b91c1c;
+  --toastify-text-color-info: #ffffff;
+  --toastify-text-color-success: #ffffff;
+  --toastify-text-color-warning: #1c1917;
+  --toastify-text-color-error: #ffffff;
+}
+
+.Toastify .Toastify__toast-theme--colored.Toastify__toast--warning .Toastify__close-button {
+  color: #1c1917;
+}
+
+.Toastify .Toastify__toast-theme--colored.Toastify__toast--warning .Toastify__progress-bar {
+  background: #1c1917;
+}
