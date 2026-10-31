@@ -8,7 +8,10 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { formatDate } from '@/utils/format';
 import { formatMoney } from '@/utils/formatMoney';
 import { selectableUnitIdsOf } from '@/utils/customerReturn/selection';
-import type { CustomerReturnSourceOrder, CustomerReturnUnit } from '@/types/customer-return';
+import type {
+  CustomerReturnSourceOrder,
+  CustomerReturnUnit,
+} from '@/types/customer-return';
 
 type ReturnSourceOrderCardProps = {
   order: CustomerReturnSourceOrder;
@@ -17,14 +20,18 @@ type ReturnSourceOrderCardProps = {
   onToggleOrder: (orderProductIds: number[], select: boolean) => void;
 };
 
-function StatusBadge({ status }: { status: CustomerReturnSourceOrder['status'] }) {
+function StatusBadge({
+  status,
+}: {
+  status: CustomerReturnSourceOrder['status'];
+}) {
   const { getStatusLabel } = useStatusLabel();
   const { classes, Icon } = getStatusBadgeConfig(status);
   return (
     <span
       className={cn(
         'inline-flex w-fit items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap',
-        classes
+        classes,
       )}
     >
       <Icon className="size-3" aria-hidden="true" />
@@ -45,11 +52,17 @@ function UnitChip({
   const { t } = useI18n();
   const details = (
     <span className="flex min-w-0 flex-col text-start">
-      <span className="truncate text-sm font-medium text-foreground">{unit.productName}</span>
+      <span className="truncate text-sm font-medium text-foreground">
+        {unit.productName}
+      </span>
       {unit.variantLabel && (
-        <span className="truncate text-xs text-muted-foreground">{unit.variantLabel}</span>
+        <span className="truncate text-xs text-muted-foreground">
+          {unit.variantLabel}
+        </span>
       )}
-      <span className="text-xs text-muted-foreground">{formatMoney(String(unit.price))}</span>
+      <span className="text-xs text-muted-foreground">
+        {formatMoney(String(unit.price))}
+      </span>
     </span>
   );
 
@@ -61,7 +74,9 @@ function UnitChip({
         onClick={onToggle}
         className={cn(
           'flex items-center gap-3 rounded-lg border px-3 py-2 text-start transition-colors',
-          selected ? 'border-primary bg-primary/10' : 'border-border bg-card hover:bg-muted'
+          selected
+            ? 'border-primary bg-primary/10'
+            : 'border-border bg-card hover:bg-muted',
         )}
       >
         {details}
@@ -101,7 +116,8 @@ function ReturnSourceOrderCard({
   const { t } = useI18n();
   const selectableIds = selectableUnitIdsOf(order);
   const allSelected =
-    selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+    selectableIds.length > 0 &&
+    selectableIds.every((id) => selectedIds.has(id));
 
   return (
     <article className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
@@ -111,9 +127,13 @@ function ReturnSourceOrderCard({
             {order.code}
           </span>
           <StatusBadge status={order.status} />
-          <span className="text-sm text-muted-foreground">{formatDate(order.createdAt)}</span>
+          <span className="text-sm text-muted-foreground">
+            {formatDate(order.createdAt)}
+          </span>
           {order.shippingCompanyName && (
-            <span className="text-sm text-muted-foreground">{order.shippingCompanyName}</span>
+            <span className="text-sm text-muted-foreground">
+              {order.shippingCompanyName}
+            </span>
           )}
         </div>
         {selectableIds.length > 0 ? (
@@ -122,7 +142,9 @@ function ReturnSourceOrderCard({
             onClick={() => onToggleOrder(selectableIds, !allSelected)}
             className="text-sm font-medium text-primary hover:underline"
           >
-            {allSelected ? t('customerReturn.unit.clearAll') : t('customerReturn.unit.selectAll')}
+            {allSelected
+              ? t('customerReturn.unit.clearAll')
+              : t('customerReturn.unit.selectAll')}
           </button>
         ) : (
           <span className="text-sm text-muted-foreground">

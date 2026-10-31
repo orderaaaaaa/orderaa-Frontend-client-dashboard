@@ -5,6 +5,7 @@ import ToggleField from './components/ToggleField';
 import { ConfirmationSectionProps } from './types';
 
 function ConfirmationSection({
+  description,
   needsConfirmation,
   onNeedsConfirmationChange,
 }: ConfirmationSectionProps) {
@@ -13,7 +14,7 @@ function ConfirmationSection({
       <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <ToggleField
           label="يحتاج إلى تأكيد"
-          description="إذا كان مفعلاً سيتم إنشاء الطلب بحالة 'طلب جديد'، وإلا سيكون 'مؤكد'"
+          description={description ?? "إذا كان مفعلاً سيتم إنشاء الطلب بحالة 'طلب جديد'، وإلا سيكون 'مؤكد'"}
           checked={needsConfirmation}
           onCheckedChange={onNeedsConfirmationChange}
         />

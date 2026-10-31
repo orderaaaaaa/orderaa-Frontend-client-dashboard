@@ -34,7 +34,14 @@ export type ClientInformationProps = {
   };
 };
 
+export type CarrierSupportState = {
+  supported: boolean;
+  reason: string | null;
+};
+
 export type ShippingSectionProps = {
+  mode?: 'new' | 'return';
+  carrierSupport?: Record<string, CarrierSupportState>;
   shippingCompanyId: string;
   governorateOption: string;
   cityOption: string;
@@ -67,6 +74,7 @@ export type PaymentSectionProps = {
 };
 
 export type ConfirmationSectionProps = {
+  description?: string;
   needsConfirmation: boolean;
   onNeedsConfirmationChange: (v: boolean) => void;
 };
