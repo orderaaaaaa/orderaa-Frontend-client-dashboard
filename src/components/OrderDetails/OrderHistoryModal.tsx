@@ -53,7 +53,7 @@ const getEventIcon = (eventType?: string) => {
     case 'SHIPPING':
       return <History className="w-4 h-4 text-purple-600" />;
     case 'NEW_ORDER':
-      return <History className="w-4 h-4 text-primary" />;
+      return <History className="w-4 h-4 text-primary-text" />;
     default:
       return <History className="w-4 h-4 text-gray-600" />;
   }
@@ -82,7 +82,7 @@ function OrderEventRow({
       </div>
       <div className="flex flex-col min-w-0">
         <h3 className="text-base font-semibold text-foreground break-words">{statusLabel}</h3>
-        {note !== statusLabel && <p className="text-sm text-primary break-words">{note}</p>}
+        {note !== statusLabel && <p className="text-sm text-primary-text break-words">{note}</p>}
         <p className="text-sm text-muted-foreground">
           {formatDate(event.createdAt)}{' '}
           <span className="text-xs text-muted-foreground">({getTimeAgo(event.createdAt)})</span>
