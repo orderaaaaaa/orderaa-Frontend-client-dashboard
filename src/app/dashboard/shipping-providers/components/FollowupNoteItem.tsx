@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
 import type { FollowupNoteView } from '@/lib/api/followup';
 import { formatDateTime } from '@/utils/format';
+import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_NOTE_CANCEL_LABEL,
   FOLLOWUP_NOTE_DELETE_CONFIRM_LABEL,
@@ -51,8 +52,73 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
     deleteMutation.mutate({ orderId, noteId: note.id });
   };
 
+  const meta = (
+    <span>
+      {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(note.createdAt)}
+      {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
+    </span>
+  );
+
+  const footer =
+    (canEdit || canDelete) && !isEditing ? (
+      <div className="flex items-center gap-1">
+        {isConfirmingDelete ? (
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 px-1.5 text-xs"
+              disabled={isBusy}
+              onClick={() => setIsConfirmingDelete(false)}
+            >
+              {FOLLOWUP_NOTE_CANCEL_LABEL}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="h-6 px-1.5 text-xs"
+              loading={deleteMutation.isPending}
+              disabled={isBusy}
+              onClick={confirmDelete}
+            >
+              {FOLLOWUP_NOTE_DELETE_CONFIRM_LABEL}
+            </Button>
+          </>
+        ) : (
+          <>
+            {canEdit && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-1.5 text-xs"
+                disabled={isBusy}
+                onClick={startEdit}
+              >
+                {FOLLOWUP_NOTE_EDIT_LABEL}
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-1.5 text-xs text-destructive"
+                disabled={isBusy}
+                onClick={() => setIsConfirmingDelete(true)}
+              >
+                {FOLLOWUP_NOTE_DELETE_LABEL}
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    ) : undefined;
+
   return (
-    <li className="flex flex-col gap-1.5 rounded-lg border border-gray-200 bg-white p-2.5">
+    <NoteCard meta={meta} footer={footer}>
       {isEditing ? (
         <div className="flex flex-col gap-2">
           <Textarea
@@ -84,72 +150,8 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
           </div>
         </div>
       ) : (
-        <>
-          <p className="whitespace-pre-wrap break-words text-sm text-gray-900">{note.body}</p>
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
-            <span>
-              {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(note.createdAt)}
-              {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
-            </span>
-            {(canEdit || canDelete) && (
-              <div className="flex items-center gap-1">
-                {isConfirmingDelete ? (
-                  <>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-1.5 text-xs"
-                      disabled={isBusy}
-                      onClick={() => setIsConfirmingDelete(false)}
-                    >
-                      {FOLLOWUP_NOTE_CANCEL_LABEL}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="h-6 px-1.5 text-xs"
-                      loading={deleteMutation.isPending}
-                      disabled={isBusy}
-                      onClick={confirmDelete}
-                    >
-                      {FOLLOWUP_NOTE_DELETE_CONFIRM_LABEL}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    {canEdit && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-1.5 text-xs"
-                        disabled={isBusy}
-                        onClick={startEdit}
-                      >
-                        {FOLLOWUP_NOTE_EDIT_LABEL}
-                      </Button>
-                    )}
-                    {canDelete && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-1.5 text-xs text-red-600"
-                        disabled={isBusy}
-                        onClick={() => setIsConfirmingDelete(true)}
-                      >
-                        {FOLLOWUP_NOTE_DELETE_LABEL}
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </>
+        <p className={NOTE_BODY_CLASS}>{note.body}</p>
       )}
-    </li>
+    </NoteCard>
   );
 }

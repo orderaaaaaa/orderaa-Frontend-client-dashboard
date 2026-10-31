@@ -26,6 +26,7 @@ import {
   ACTION_LOG_SYSTEM_ACTOR,
   ACTION_LOG_TITLE,
 } from './followupNotesConstants';
+import { NOTE_BODY_CLASS } from './NoteCard';
 
 const FORBIDDEN_STATUS = 403;
 
@@ -47,10 +48,10 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
   const nameLabel = ACTION_EVENT_NAME_LABELS[event.name] ?? event.name;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-          <span className="break-words text-sm font-bold text-[#1F1F1F]">
+          <span className="break-words text-sm font-bold text-foreground">
             {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
           </span>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
@@ -63,7 +64,7 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
         </span>
       </div>
       {event.note && (
-        <p className="whitespace-pre-wrap break-words text-sm text-gray-700">{event.note}</p>
+        <p className={NOTE_BODY_CLASS}>{event.note}</p>
       )}
     </div>
   );

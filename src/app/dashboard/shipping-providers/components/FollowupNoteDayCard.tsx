@@ -16,6 +16,7 @@ import type {
 } from '@/lib/api/followup';
 import { formatDate, formatDateTime } from '@/utils/format';
 import { FollowupNoteItem } from './FollowupNoteItem';
+import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_CARRIER_CONTACTS_LABEL,
   FOLLOWUP_CARRIER_REPEAT_PREFIX,
@@ -46,8 +47,8 @@ function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
   return (
     <ul className="flex flex-col gap-1">
       {texts.map((line) => (
-        <li key={`${line.at}-${line.text}`} className="text-xs text-gray-700 break-words">
-          <span className="text-gray-500">{formatDateTime(line.at)}</span> {line.text}
+        <li key={`${line.at}-${line.text}`} className="break-words text-base leading-7 text-foreground">
+          <span className="text-xs text-muted-foreground">{formatDateTime(line.at)}</span> {line.text}
           {repeatsSuffix(line.repeats)}
         </li>
       ))}
@@ -59,8 +60,8 @@ function CarrierContactList({ contacts }: { contacts: FollowupCarrierContact[] }
   return (
     <ul className="flex flex-col gap-1">
       {contacts.map((contact) => (
-        <li key={`${contact.at}-${contact.name}-${contact.phone}`} className="text-xs text-gray-700 break-words">
-          <span className="text-gray-500">{formatDateTime(contact.at)}</span>{' '}
+        <li key={`${contact.at}-${contact.name}-${contact.phone}`} className="break-words text-sm text-foreground">
+          <span className="text-xs text-muted-foreground">{formatDateTime(contact.at)}</span>{' '}
           {contact.name ?? FOLLOWUP_NOTE_NO_WRITER}
           {contact.phone && (
             <span dir="ltr" className="font-mono">
@@ -95,7 +96,7 @@ function PartySection({
 
   return (
     <section className="flex flex-col gap-2 min-w-0">
-      <h4 className="text-sm font-semibold text-gray-800">{FOLLOWUP_NOTE_PARTY_LABELS[party]}</h4>
+      <h4 className="text-sm font-semibold text-foreground">{FOLLOWUP_NOTE_PARTY_LABELS[party]}</h4>
       {notes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (
@@ -105,13 +106,13 @@ function PartySection({
       )}
       {showTexts && (
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-gray-500">{FOLLOWUP_CARRIER_TEXTS_LABEL}</span>
+          <span className="text-xs font-medium text-muted-foreground">{FOLLOWUP_CARRIER_TEXTS_LABEL}</span>
           <CarrierTextList texts={carrierTexts} />
         </div>
       )}
       {showContacts && (
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-gray-500">{FOLLOWUP_CARRIER_CONTACTS_LABEL}</span>
+          <span className="text-xs font-medium text-muted-foreground">{FOLLOWUP_CARRIER_CONTACTS_LABEL}</span>
           <CarrierContactList contacts={carrierContacts} />
         </div>
       )}
@@ -123,18 +124,23 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
   return (
     <ul className="flex flex-col gap-2">
       {legacyNotes.map((legacy) => (
-        <li key={legacy.id} className="flex flex-col gap-1 rounded-lg border border-dashed border-gray-300 p-2.5">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
-            <span className="rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
-              {FOLLOWUP_LEGACY_TAG}
-            </span>
-            <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name] ?? legacy.name}</span>
-            <span>
-              {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(legacy.createdAt)}
-            </span>
-          </div>
-          <p className="whitespace-pre-wrap break-words text-sm text-gray-700">{legacy.note}</p>
-        </li>
+        <NoteCard
+          key={legacy.id}
+          variant="legacy"
+          meta={
+            <>
+              <span className="rounded-full bg-muted px-2 py-0.5 font-semibold text-foreground">
+                {FOLLOWUP_LEGACY_TAG}
+              </span>
+              <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name] ?? legacy.name}</span>
+              <span>
+                {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(legacy.createdAt)}
+              </span>
+            </>
+          }
+        >
+          <p className={NOTE_BODY_CLASS}>{legacy.note}</p>
+        </NoteCard>
       ))}
     </ul>
   );
@@ -151,7 +157,7 @@ function AddFollowupNoteForm({ orderId }: { orderId: number }) {
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-3">
       <div className="flex flex-wrap gap-1.5">
         {FOLLOWUP_NOTE_PARTY_ORDER.map((value) => (
           <Button
@@ -206,22 +212,22 @@ export function FollowupNoteDayCard({ orderId, day, canManage }: FollowupNoteDay
   const headerLabel = day.isToday ? `${FOLLOWUP_TODAY_LABEL} - ${formatDayKey(day.day)}` : formatDayKey(day.day);
 
   return (
-    <div className="flex flex-col rounded-xl border border-gray-200 bg-white">
+    <div className="flex flex-col rounded-xl border border-border bg-card">
       <button
         type="button"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-start"
       >
-        <span className="text-sm font-bold text-gray-900">{headerLabel}</span>
+        <span className="text-xs font-medium text-muted-foreground">{headerLabel}</span>
         <LiaAngleDownSolid
-          className={clsx('size-4 shrink-0 text-gray-500 transition-transform', isOpen && 'rotate-180')}
+          className={clsx('size-4 shrink-0 text-muted-foreground transition-transform', isOpen && 'rotate-180')}
         />
       </button>
 
       {isOpen && (
-        <div className="flex flex-col gap-4 border-t border-gray-100 p-3">
-          {!hasContent && <p className="text-sm text-gray-500 text-center">{FOLLOWUP_NOTES_EMPTY_DAY}</p>}
+        <div className="flex flex-col gap-4 border-t border-border p-3">
+          {!hasContent && <p className="text-sm text-muted-foreground text-center">{FOLLOWUP_NOTES_EMPTY_DAY}</p>}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {FOLLOWUP_NOTE_PARTY_ORDER.map((party) => (
