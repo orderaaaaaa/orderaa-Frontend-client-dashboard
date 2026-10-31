@@ -73,14 +73,15 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
 
   const source = candidates.find((candidate) => candidate.id === sourceId) ?? null;
   const returnedUnits = (source?.items ?? []).flatMap((item) => {
-    const quantity = returnQuantities[itemKeyOf(item)];
-    return quantity === undefined ? [] : [{ item, quantity }];
+    const stored = returnQuantities[itemKeyOf(item)];
+    return stored === undefined ? [] : [{ item, quantity: Math.min(stored, item.quantity) }];
   });
   const returnedValue = cents(returnedUnits.reduce((sum, { item, quantity }) => sum + item.unitPrice * quantity, 0));
   const newValue = cents(lines.reduce((sum, line) => sum + line.price * line.quantity, 0));
   const difference = cents(newValue - returnedValue);
 
-  const suggestedCod = payer === 'MERCHANT' ? String(Math.max(difference, 0)) : '';
+  const shippingDue = payer === 'CUSTOMER' ? (source?.shippingCost ?? 0) : 0;
+  const suggestedCod = String(cents(Math.max(difference, 0) + shippingDue));
   const codValue = codTouched ? codInput : suggestedCod;
   const codNumber = codValue.trim() === '' ? undefined : Number(codValue);
   const isCodValid =
@@ -101,6 +102,15 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     notes.length <= MAX_TEXT_LENGTH;
   const stepValid = [isSourceValid, isProductsValid, isSummaryValid];
   const canGoNext = canManage && stepValid[step] && !isPending;
+  const productsHint =
+    returnedUnits.length === 0
+      ? t('exchange.create.step2.needReturned')
+      : lines.length === 0
+        ? t('exchange.create.step2.needNew')
+        : lines.some((line) => !isLineComplete(line))
+          ? t('exchange.create.step2.incompleteVariants')
+          : null;
+  const navHint = step === 1 && !isProductsValid ? productsHint : null;
   const canConfirm = canManage && stepValid.every(Boolean) && !isPending;
 
   const handleClose = () => {
@@ -111,6 +121,10 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   const handleSelectSource = (id: number) => {
     setSourceId(id);
     setReturnQuantities({});
+    setCodTouched(false);
+    setCodInput('');
+    setContentTouched(false);
+    setContentInput('');
   };
 
   const handleToggleItem = (item: FollowupExchangeCandidateItem) => {
@@ -127,8 +141,9 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   };
 
   const handleChangeItemQuantity = (item: FollowupExchangeCandidateItem, quantity: number) => {
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > item.quantity) return;
-    setReturnQuantities((current) => ({ ...current, [itemKeyOf(item)]: quantity }));
+    if (!Number.isInteger(quantity)) return;
+    const clamped = Math.min(Math.max(quantity, 1), item.quantity);
+    setReturnQuantities((current) => ({ ...current, [itemKeyOf(item)]: clamped }));
   };
 
   const handleProductsPicked = (products: SelectableProduct[]) => {
@@ -278,6 +293,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
 
           <div className="flex flex-col gap-3 border-t pt-4">
             {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
+            {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
             <div className="flex items-center justify-between gap-2">
               <Button
                 type="button"

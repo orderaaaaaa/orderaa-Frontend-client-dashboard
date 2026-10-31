@@ -60,6 +60,7 @@ export interface FollowupExchangeCandidate {
   code: string;
   status: OrderStatus;
   totalCost: number;
+  shippingCost: number | null;
   createdAt: string;
   items: FollowupExchangeCandidateItem[];
   openExchangeCode: string | null;

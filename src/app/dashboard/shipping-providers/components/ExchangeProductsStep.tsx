@@ -88,7 +88,7 @@ export function ExchangeProductsStep({
                   <span className="truncate text-sm font-medium text-foreground">{item.productName}</span>
                   <span className="text-xs text-muted-foreground">
                     {item.variantLabel}
-                    {` · ${formatNumber(item.unitPrice, 2)} ج.م`}
+                    {` · ${formatNumber(item.unitPrice, 2)} ${t('exchange.create.currency')}`}
                     {` · ${item.quantity}×`}
                   </span>
                 </div>
@@ -204,7 +204,7 @@ export function ExchangeProductsStep({
                           disabled={disabled}
                         >
                           <SelectTrigger size="sm" aria-label={option.attribute}>
-                            <SelectValue placeholder="اختر" />
+                            <SelectValue placeholder={t('exchange.create.step2.selectVariant')} />
                           </SelectTrigger>
                           <SelectContent>
                             {option.options.map((value) => (

@@ -39,12 +39,24 @@ export const useFollowupChangeProductsMutation = () => {
   });
 };
 
+const isConflictError = (err: unknown): boolean =>
+  (err as { response?: { status?: number } } | null)?.response?.status === 409;
+
 export const useCreateExchangeMutation = () => {
+  const queryClient = useQueryClient();
   const invalidate = useFollowupListsInvalidation();
+  const invalidateCandidates = (orderId: number) =>
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_EXCHANGE_CANDIDATES, orderId] });
   return useMutation({
     mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupExchangeBody) =>
       createFollowupExchange(orderId, body),
-    onSuccess: invalidate,
+    onSuccess: (_response, { orderId }) => {
+      invalidate();
+      void invalidateCandidates(orderId);
+    },
+    onError: (err: unknown, { orderId }) => {
+      if (isConflictError(err)) void invalidateCandidates(orderId);
+    },
   });
 };
 

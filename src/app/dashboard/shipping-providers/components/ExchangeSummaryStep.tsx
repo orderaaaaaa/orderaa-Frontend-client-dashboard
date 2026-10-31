@@ -57,15 +57,15 @@ export function ExchangeSummaryStep({
       <div className="grid grid-cols-1 gap-2 rounded-lg bg-muted p-3 text-sm sm:grid-cols-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs text-muted-foreground">{t('exchange.create.step3.returnedValue')}</span>
-          <span className="font-medium tabular-nums">{`${formatNumber(returnedValue, 2)} ج.م`}</span>
+          <span className="font-medium tabular-nums">{`${formatNumber(returnedValue, 2)} ${t('exchange.create.currency')}`}</span>
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="text-xs text-muted-foreground">{t('exchange.create.step3.newValue')}</span>
-          <span className="font-medium tabular-nums">{`${formatNumber(newValue, 2)} ج.م`}</span>
+          <span className="font-medium tabular-nums">{`${formatNumber(newValue, 2)} ${t('exchange.create.currency')}`}</span>
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="text-xs text-muted-foreground">{t('exchange.create.step3.difference')}</span>
-          <span className="font-medium tabular-nums">{`${formatNumber(difference, 2)} ج.م`}</span>
+          <span className="font-medium tabular-nums">{`${formatNumber(difference, 2)} ${t('exchange.create.currency')}`}</span>
         </div>
       </div>
       <p className="text-xs text-muted-foreground">{t('exchange.create.step3.newValueHint')}</p>
@@ -73,7 +73,7 @@ export function ExchangeSummaryStep({
       {refundDue > 0 && (
         <Alert>
           <AlertDescription>
-            {t('exchange.create.step3.refundDue', { amount: formatNumber(refundDue, 2) })}
+            {t('exchange.create.step3.refundDue', { amount: formatNumber(refundDue, 2), currency: t('exchange.create.currency') })}
           </AlertDescription>
         </Alert>
       )}

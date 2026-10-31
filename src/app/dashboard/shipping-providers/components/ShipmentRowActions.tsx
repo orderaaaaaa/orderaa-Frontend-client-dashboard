@@ -115,6 +115,11 @@ const ACTION_GROUPS: { id: ActionGroupId; titleKey: TranslationKey }[] = [
   { id: 'final', titleKey: 'inProcess.sheet.group.final' },
 ];
 
+export interface ExchangeCarrierAccess {
+  pending: boolean;
+  supported: boolean | undefined;
+}
+
 export interface ShipmentRowActionsProps {
   orderId: number;
   orderCode: string;
@@ -132,7 +137,7 @@ export interface ShipmentRowActionsProps {
   onOpenActionLog?: () => void;
   sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
   carrierResendSupported?: boolean;
-  carrierExchangeSupported?: boolean;
+  exchangeCarrier?: ExchangeCarrierAccess;
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
 }
@@ -154,7 +159,7 @@ export function ShipmentRowActions({
   onOpenActionLog,
   sendAgain,
   carrierResendSupported,
-  carrierExchangeSupported,
+  exchangeCarrier,
   editRow,
   carrierSupportsUpdate,
 }: ShipmentRowActionsProps) {
@@ -198,6 +203,13 @@ export function ShipmentRowActions({
   const isInProcessRow = partialDelivery !== undefined;
   const lockedReason = isLocked ? t('inProcess.reason.locked') : undefined;
   const rowLockedReason = rowLocked ? t('inProcess.reason.locked') : undefined;
+  const exchangeUnavailableReason = exchangeCarrier?.pending
+    ? t('inProcess.reason.loadingCarrier')
+    : exchangeCarrier?.supported === true
+      ? undefined
+      : exchangeCarrier?.supported === false
+        ? t('inProcess.reason.exchangeUnsupported')
+        : t('inProcess.reason.exchangeCarrierMissing');
   const sendAgainAction = useSendAgainAction({
     orderId,
     eligible: sendAgain?.eligible ?? false,
@@ -363,11 +375,8 @@ export function ShipmentRowActions({
             group: 'delivery' as const,
             opensModal: true,
             codes: [PERMISSIONS.FOLLOWUP_READ],
-            disabled: isLocked || rowLocked || carrierExchangeSupported === false,
-            disabledReason:
-              lockedReason ??
-              rowLockedReason ??
-              (carrierExchangeSupported === false ? t('inProcess.reason.exchangeUnsupported') : undefined),
+            disabled: isLocked || rowLocked || exchangeUnavailableReason !== undefined,
+            disabledReason: lockedReason ?? rowLockedReason ?? exchangeUnavailableReason,
             onSelect: () => setIsExchangeOpen(true),
           },
         ]

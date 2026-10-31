@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import BaseModal from '@/components/ui/base-modal';
 import { Textarea } from '@/components/ui/textarea';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -68,10 +69,13 @@ function SendAgainReasonModal({
           يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
         </p>
         {resendSupported === false && (
-          <Alert>
-            <Info className="size-4" />
-            <AlertDescription>{t('inProcess.sendAgain.resendNotSupported')}</AlertDescription>
-          </Alert>
+          <div className="flex flex-col items-start gap-2">
+            <Badge variant="secondary">{t('inProcess.sendAgain.resendBadge')}</Badge>
+            <Alert>
+              <Info className="size-4" />
+              <AlertDescription>{t('inProcess.sendAgain.resendNotSupported')}</AlertDescription>
+            </Alert>
+          </div>
         )}
         <label htmlFor="sendAgainReason" className="font-bold text-foreground">
           سبب إعادة الإرسال <span className="text-destructive">*</span>

@@ -54,49 +54,52 @@ export function ExchangeCandidateStep({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {candidates.map((candidate) => {
-        const openCode = candidate.openExchangeCode;
-        const isBlocked = openCode !== null;
-        const isDisabled = disabled || isBlocked;
-        const unitCount = candidate.items.reduce((sum, item) => sum + item.quantity, 0);
-        const isSelected = selectedId === candidate.id;
-        return (
-          <label
-            key={candidate.id}
-            className={cn(
-              'flex cursor-pointer flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:bg-accent',
-              isSelected && 'border-primary ring-1 ring-primary',
-              isDisabled && 'cursor-not-allowed opacity-60 hover:bg-transparent',
-            )}
-          >
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="radio"
-                name="exchangeSourceOrder"
-                className="size-4 accent-primary"
-                checked={isSelected}
-                disabled={isDisabled}
-                onChange={() => onSelect(candidate.id)}
-              />
-              <span dir="ltr" className="font-mono text-sm font-semibold text-foreground">
-                {candidate.code}
-              </span>
-              <ShipmentStatusBadge status={candidate.status} />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 ps-7 text-xs text-muted-foreground">
-              <span>{`${formatNumber(candidate.totalCost, 2)} ج.م`}</span>
-              <span>{formatDateTime(candidate.createdAt)}</span>
-              <span>{t('exchange.create.units', { count: unitCount })}</span>
-            </div>
-            {isBlocked && (
-              <p className="ps-7 text-xs font-medium text-amber-700">
-                {t('exchange.create.openExchange', { code: openCode })}
-              </p>
-            )}
-          </label>
-        );
-      })}
+    <div className="flex flex-col gap-3">
+      <span className="font-bold text-foreground">{t('exchange.create.step1.title')}</span>
+      <div className="flex flex-col gap-2">
+        {candidates.map((candidate) => {
+          const openCode = candidate.openExchangeCode;
+          const isBlocked = openCode !== null;
+          const isDisabled = disabled || isBlocked;
+          const unitCount = candidate.items.reduce((sum, item) => sum + item.quantity, 0);
+          const isSelected = selectedId === candidate.id;
+          return (
+            <label
+              key={candidate.id}
+              className={cn(
+                'flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors',
+                isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-accent',
+                isSelected && 'border-primary ring-1 ring-primary',
+              )}
+            >
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="radio"
+                  name="exchangeSourceOrder"
+                  className="size-4 accent-primary"
+                  checked={isSelected}
+                  disabled={isDisabled}
+                  onChange={() => onSelect(candidate.id)}
+                />
+                <span dir="ltr" className="font-mono text-sm font-semibold text-foreground">
+                  {candidate.code}
+                </span>
+                <ShipmentStatusBadge status={candidate.status} />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 ps-7 text-xs text-muted-foreground">
+                <span>{`${formatNumber(candidate.totalCost, 2)} ${t('exchange.create.currency')}`}</span>
+                <span>{formatDateTime(candidate.createdAt)}</span>
+                <span>{t('exchange.create.units', { count: unitCount })}</span>
+              </div>
+              {isBlocked && (
+                <p className="ps-7 text-xs font-medium text-amber-900 dark:text-amber-200">
+                  {t('exchange.create.openExchange', { code: openCode })}
+                </p>
+              )}
+            </label>
+          );
+        })}
+      </div>
     </div>
   );
 }

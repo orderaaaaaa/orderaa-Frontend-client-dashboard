@@ -289,7 +289,7 @@ export function InProcessRowActions({
       status={row.status}
       closure={row.closure}
       carrierImplementation={carrier.implementation}
-      carrierExchangeSupported={carrier.capabilities?.exchangeShipment.supported}
+      exchangeCarrier={{ pending: carrier.isShippingCompaniesLoading, supported: carrier.capabilities?.exchangeShipment.supported }}
       partialDelivery={{
         pending: carrier.isShippingCompaniesLoading,
         blockedReason:
