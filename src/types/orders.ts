@@ -256,6 +256,11 @@ export interface OrderProductAttribute {
   };
 }
 
+export interface OrderProductReturnOf {
+  orderId: number;
+  orderCode: string;
+}
+
 // Order Product Interface
 export interface OrderProduct {
   id: number;
@@ -278,6 +283,7 @@ export interface OrderProduct {
     }>;
   };
   customVariants?: { label: string; value: string }[];
+  returnOf?: OrderProductReturnOf | null;
   products: Product;
   createdAt?: string;
   updatedAt?: string;

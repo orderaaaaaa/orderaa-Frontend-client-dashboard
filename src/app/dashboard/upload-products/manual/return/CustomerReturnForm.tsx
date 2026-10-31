@@ -24,6 +24,10 @@ import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
 import type { LocationOption } from '@/types/locationOptions';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
+  CARRIER_SEND_NOT_SENT_WARNING,
+  carrierSendNeedsAttention,
+} from '@/utils/manualOrder/carrierSend';
+import {
   refundValueOf,
   selectedUnitsOf,
 } from '@/utils/customerReturn/selection';
@@ -303,6 +307,9 @@ function CustomerReturnForm() {
           toast.success(
             t('customerReturn.submit.success', { code: created.code }),
           );
+          if (carrierSendNeedsAttention(created.carrierSend)) {
+            toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+          }
           resetForm();
         },
         onError: (err: unknown) => {

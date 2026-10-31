@@ -970,6 +970,7 @@ const ar = {
   'customerReturn.area.label': 'المنطقة',
   'customerReturn.area.placeholder': 'اختياري',
   'customerReturn.lastAddress.hint': 'آخر عنوان للعميل: {governorate} - {city}',
+  'customerReturn.productSource': 'من الطلب #{code}',
 } as const;
 
 export default ar;

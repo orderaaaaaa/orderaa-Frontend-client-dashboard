@@ -34,6 +34,7 @@ import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
 import CopyableCode from '@/components/ui/copyable-code';
+import ProductReturnOfChip from './ProductReturnOfChip';
 
 interface OrderDetailsProductCardProps {
   order: Order;
@@ -109,6 +110,7 @@ function OrderDetailsProductCard({
         price: orderProduct.price,
         sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
+        returnOf: orderProduct.returnOf ?? null,
       };
     }) || [];
 
@@ -296,6 +298,13 @@ function OrderDetailsProductCard({
                   <h3 className="text-foreground font-bold text-lg ">
                     {item.product}
                   </h3>
+
+                  {item.returnOf && (
+                    <ProductReturnOfChip
+                      orderId={item.returnOf.orderId}
+                      orderCode={item.returnOf.orderCode}
+                    />
+                  )}
 
                   {/* T22 — المواصفات: product-wide facts recorded at order
                       time. Distinct from the variant lines below, and absent

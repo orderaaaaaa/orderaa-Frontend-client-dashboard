@@ -1,3 +1,4 @@
+import type { CarrierSendBlock } from '@/types/carrierSends';
 import type { OrderStatus } from '@/types/orders';
 
 export type CustomerReturnUnitState =
@@ -66,7 +67,6 @@ export type CreateCustomerReturnPayload = {
   area?: string;
   address?: string;
   notes?: string;
-  phoneNumbers?: string[];
 };
 
 export type CreateCustomerReturnResponse = {
@@ -75,4 +75,5 @@ export type CreateCustomerReturnResponse = {
   status: OrderStatus;
   refundValue: number;
   unitsCount: number;
+  carrierSend: CarrierSendBlock | null;
 };

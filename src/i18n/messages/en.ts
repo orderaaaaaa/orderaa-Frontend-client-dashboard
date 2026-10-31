@@ -957,6 +957,7 @@ const en: Record<keyof typeof ar, string> = {
   'customerReturn.area.label': 'Area',
   'customerReturn.area.placeholder': 'Optional',
   'customerReturn.lastAddress.hint': 'Last address: {governorate} - {city}',
+  'customerReturn.productSource': 'From order #{code}',
 };
 
 export default en;
