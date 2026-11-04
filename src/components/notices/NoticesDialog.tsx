@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { orderSystemFailureLabelKeyOf } from '@/constants/orderSystemFailures';
+import { StockTransitionBlockedDetails } from '@/components/OrderDetails/SystemFailures/details/StockTransitionBlockedDetails';
+import { narrowFailureDetails } from '@/components/OrderDetails/SystemFailures/details/guards';
 import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 import {
@@ -150,6 +152,7 @@ function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean
           </div>
         </div>
       </div>
+      <NoticeDetails notice={notice} />
       <p className="text-xs text-muted-foreground">
         <span dir="ltr" className="tabular-nums">
           {formatDateTime(notice.lastOccurredAt)}
@@ -158,4 +161,11 @@ function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean
       </p>
     </li>
   );
+}
+
+function NoticeDetails({ notice }: { notice: OrderNoticeDto }) {
+  if (notice.code !== 'STOCK_TRANSITION_BLOCKED' || !notice.details) return null;
+  const narrowed = narrowFailureDetails({ code: 'STOCK_TRANSITION_BLOCKED', details: notice.details });
+  if (narrowed?.code !== 'STOCK_TRANSITION_BLOCKED') return null;
+  return <StockTransitionBlockedDetails details={narrowed.details} />;
 }

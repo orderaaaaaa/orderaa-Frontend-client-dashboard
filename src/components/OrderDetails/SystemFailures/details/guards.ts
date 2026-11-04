@@ -1,5 +1,6 @@
 import { STOCK_SHORTAGE_CODE_LABELS, isOrderSystemFailureCode } from '@/constants/orderSystemFailures';
 import type { ShippingImplementation } from '@/types/shippingCompanies';
+import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
 import type {
   AutomationMappingNotSavedDetails,
   AutomationNotSentDetails,
@@ -66,6 +67,15 @@ const isStringOrNull = (value: unknown): value is string | null =>
 
 const isNumberArray = (value: unknown): value is number[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'number');
+
+const isAvailableStockRefusalLine = (value: unknown): value is AvailableStockRefusalLine =>
+  isRecord(value) &&
+  typeof value.variantId === 'number' &&
+  isString(value.productName) &&
+  isString(value.variantLabel) &&
+  typeof value.available === 'number' &&
+  typeof value.change === 'number' &&
+  typeof value.after === 'number';
 
 const isFailureStockShortageLine = (value: unknown): value is FailureStockShortageLine =>
   isRecord(value) &&
@@ -353,7 +363,10 @@ const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlock
   (value.ruleId === null || typeof value.ruleId === 'number') &&
   isStringOrNull(value.warehouseName) &&
   (value.lines === undefined ||
-    (Array.isArray(value.lines) && value.lines.every(isFailureStockShortageLine))) &&
+    (Array.isArray(value.lines) &&
+      value.lines.every(
+        (line) => isFailureStockShortageLine(line) || isAvailableStockRefusalLine(line)
+      ))) &&
   (value.errorCode === undefined || isStringOrNull(value.errorCode));
 
 const isMachineTransitionStockShortage = (
