@@ -45,7 +45,7 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-foreground text-background z-(--z-popover) max-w-xs rounded-lg px-3 py-1.5 text-xs leading-relaxed shadow-md",
+          "bg-foreground text-background dark:bg-popover dark:text-popover-foreground dark:border dark:border-border z-(--z-popover) max-w-xs rounded-lg px-3 py-1.5 text-xs leading-relaxed shadow-md",
           "data-[state=delayed-open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=delayed-open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=delayed-open]:zoom-in-95",
@@ -66,7 +66,7 @@ function TooltipArrow({
   return (
     <TooltipPrimitive.Arrow
       data-slot="tooltip-arrow"
-      className={cn("fill-foreground", className)}
+      className={cn("fill-foreground dark:fill-popover", className)}
       {...props}
     />
   )
