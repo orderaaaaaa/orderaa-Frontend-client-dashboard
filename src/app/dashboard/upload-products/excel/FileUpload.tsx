@@ -28,6 +28,7 @@ const FileUpload = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [stage, setStage] = useState<UploadStage | null>(null);
   const [importCount, setImportCount] = useState(0);
+  const [flaggedCount, setFlaggedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
@@ -93,21 +94,18 @@ const FileUpload = () => {
     try {
       const results = await processExcelFile(uploadedFile);
 
-      if (results.errorCount > 0) {
-        sessionStorage.setItem('excelValidationResults', JSON.stringify(results));
-        sessionStorage.setItem('excelValidationOnly', 'true');
-        router.push(`/dashboard/upload-products/excel/results`);
-        return;
-      }
-
+      const allRows = [...results.validOrders, ...results.invalidOrders].sort(
+        (a, b) => a.rowIndex - b.rowIndex
+      );
       const apiOrders = transformToApiFormat(
-        results.validOrders.map(order => ({
+        allRows.map(order => ({
           rowIndex: order.rowIndex,
           data: order.data,
         })),
         results.detectedFormat
       );
 
+      setFlaggedCount(results.errorCount);
       setImportCount(apiOrders.length);
       setStage('importing');
 
@@ -243,6 +241,12 @@ const FileUpload = () => {
               <p role="status" className="mb-4 flex items-center justify-center gap-2 text-sm text-gray-700">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {stageText}
+              </p>
+            )}
+
+            {stage === 'importing' && flaggedCount > 0 && (
+              <p className="mb-4 text-center text-sm font-semibold text-amber-700">
+                {`سيتم نقل ${flaggedCount} صفوف إلى الطلبات الناقصة`}
               </p>
             )}
 
