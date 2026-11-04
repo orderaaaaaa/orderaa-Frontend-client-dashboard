@@ -457,6 +457,7 @@
   }
   .dark .Toastify { --toastify-color-error: var(--danger-fill); }
   .dark .rdp-root { --rdp-accent-color: var(--primary-text); --rdp-accent-background-color: var(--accent); }
+  :root:not(.dark) .rdp-root { --rdp-accent-color: var(--primary-text); }
 }
 input[type='date']::-webkit-datetime-edit-text,
 input[type='date']::-webkit-datetime-edit-month-field,
