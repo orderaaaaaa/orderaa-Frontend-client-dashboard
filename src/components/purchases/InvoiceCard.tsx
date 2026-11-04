@@ -263,8 +263,8 @@ const InvoiceCard = memo(
                   className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
                 >
                   <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                  <span className="text-lg font-bold text-primary break-all">
-                    فاتورة رقم  {invoice.invoiceNumber}
+                  <span className="min-w-0 text-lg font-bold text-primary">
+                    فاتورة رقم  <span dir="ltr" className="whitespace-nowrap">{invoice.invoiceNumber}</span>
                   </span>
                 </Link>
               ) : (
@@ -274,8 +274,8 @@ const InvoiceCard = memo(
                   onClick={onTitleClick}
                 >
                   <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                  <span className="text-lg font-bold text-primary">
-                    فاتورة رقم  {invoice.invoiceNumber}
+                  <span className="min-w-0 text-lg font-bold text-primary">
+                    فاتورة رقم  <span dir="ltr" className="whitespace-nowrap">{invoice.invoiceNumber}</span>
                   </span>
                 </Button>
               )}
