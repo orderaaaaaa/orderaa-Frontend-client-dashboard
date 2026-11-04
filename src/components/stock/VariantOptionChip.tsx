@@ -30,13 +30,7 @@ const STATE_TEXT_CLASS = {
 } as const;
 
 const iconFor = (state: OptionState) =>
-  state === 'ok'
-    ? LiaCheckCircleSolid
-    : state === 'low'
-      ? LiaExclamationCircleSolid
-      : state === 'out'
-        ? LiaBanSolid
-        : null;
+  state === 'low' ? LiaExclamationCircleSolid : state === 'out' ? LiaBanSolid : null;
 
 export function VariantOptionChip({
   attributeName,
