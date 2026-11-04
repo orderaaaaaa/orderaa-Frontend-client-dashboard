@@ -545,29 +545,47 @@ export function isSalesOrderSet(set: SalesSubPageSet): set is SalesOrderSet {
 interface CountForms {
   one: string;
   two: string;
+  singular: string;
   plural: string;
   many: string;
 }
 
-const ORDER_NOUN_FORMS: CountForms = { one: 'طلب واحد', two: 'طلبان', plural: 'طلبات', many: 'طلباً' };
+const ORDER_NOUN_FORMS: CountForms = {
+  one: 'طلب واحد',
+  two: 'طلبان',
+  singular: 'طلب',
+  plural: 'طلبات',
+  many: 'طلباً',
+};
 
 const EXCLUDED_ADJECTIVE_FORMS: CountForms = {
   one: 'مستبعد',
   two: 'مستبعدان',
+  singular: 'مستبعد',
   plural: 'مستبعدة',
   many: 'مستبعداً',
+};
+
+const PIECE_NOUN_FORMS: CountForms = {
+  one: 'قطعة واحدة',
+  two: 'قطعتان',
+  singular: 'قطعة',
+  plural: 'قطع',
+  many: 'قطعة',
 };
 
 function pickCountForm(count: number, forms: CountForms): string {
   if (count === 1) return forms.one;
   if (count === 2) return forms.two;
-  if (count <= 10) return forms.plural;
+  const remainder = count % 100;
+  if (remainder <= 2) return forms.singular;
+  if (remainder <= 10) return forms.plural;
   return forms.many;
 }
 
 function countPhrase(count: number, forms: CountForms): string {
   const word = pickCountForm(count, forms);
-  return count <= 2 ? word : `${formatCount(count)} ${word}`;
+  return count === 1 || count === 2 ? word : `${formatCount(count)} ${word}`;
 }
 
 export function ordersCountText(count: number): string {
@@ -576,6 +594,10 @@ export function ordersCountText(count: number): string {
 
 export function excludedOrdersCountText(count: number): string {
   return `${ordersCountText(count)} ${pickCountForm(count, EXCLUDED_ADJECTIVE_FORMS)}`;
+}
+
+export function piecesCountText(count: number): string {
+  return countPhrase(count, PIECE_NOUN_FORMS);
 }
 
 export function resolveCardHint(card: SalesCardDefinition, approvedOnly: boolean): string {
@@ -638,7 +660,7 @@ export function resolveCardContextChip(
   }
   if (field === 'soldPiecesCost') {
     if (totals.uncostedPieces <= 0) return undefined;
-    return { tone: 'warning', text: `${formatCount(totals.uncostedPieces)} قطعة بدون تكلفة` };
+    return { tone: 'warning', text: `${piecesCountText(totals.uncostedPieces)} بدون تكلفة` };
   }
   if (field === 'purchasesTotal') {
     if (!approvedOnly) return undefined;
