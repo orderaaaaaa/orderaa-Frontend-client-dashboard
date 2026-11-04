@@ -30,6 +30,7 @@ export const MISSING_ORDER_FAILURE_LABELS: Record<
   UNKNOWN_PROVIDER: 'مصدر الطلب غير معروف',
   STORE_NOT_FOUND: 'المتجر غير موجود',
   PRODUCT_UNRESOLVED: 'المنتج غير معروف',
+  PRODUCT_WITHOUT_PRICE: 'المنتج ليس له سعر محدد',
   VARIANT_REQUIRED: 'يجب اختيار نوع المنتج',
   VARIANT_OPTIONS_INVALID: 'خيارات المنتج غير صحيحة',
   VARIANT_DUPLICATE_ATTRIBUTE: 'تم اختيار أكثر من قيمة لنفس الخاصية',
