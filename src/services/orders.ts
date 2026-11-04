@@ -454,7 +454,9 @@ export const useAllProducts = () => {
 // Variant option from API
 export interface VariantOption {
   attribute: string;
-  options: { id: number; name: string }[];
+  attributeId: number;
+  displayName: string;
+  options: { id: number; name: string; displayName: string }[];
 }
 
 // Selected variant for API payload
@@ -482,9 +484,12 @@ const fetchProductVariantsOptions = async (productId: number) => {
   const { options: attributeOptions } = await getProductAttributeOptions(productId);
   return (attributeOptions || []).map((attribute, index) => ({
     attribute: attribute.name || `attribute_${index}`,
+    attributeId: attribute.id,
+    displayName: attribute.displayName,
     options: (attribute.options || []).map((option) => ({
       id: option.id,
       name: option.name,
+      displayName: option.displayName,
     })),
   })) as VariantOption[];
 };

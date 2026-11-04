@@ -614,14 +614,28 @@ export interface OrderStockAvailability {
   availableWarehouseSet: boolean;
 }
 
+export interface VariantOptionRef {
+  attributeId: number;
+  attributeName: string;
+  optionId: number;
+  optionName: string;
+}
+
+export type AvailabilityRefusal =
+  | 'AVAILABLE_WAREHOUSE_NOT_SET'
+  | 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
+
 export interface VariantAvailability {
   variantId: number;
   variantLabel: string;
+  options: VariantOptionRef[];
   available: number | null;
   availableWarehouse: AvailableStockWarehouse | null;
   movesStock: boolean;
   fromWarehouseId: number | null;
   safe: boolean;
+  required: number;
+  refusal: AvailabilityRefusal | null;
   /** false when the product forbids picking an unavailable variant */
   selectable: boolean;
   confirmMode: ConfirmMode;
@@ -654,6 +668,26 @@ export async function getOrderStockAvailability(
 
 export interface StockEditIntent {
   quantity: number;
+}
+
+export type OrderlessAvailabilityTarget = 'NEW_ORDER' | 'CONFIRMED';
+
+export async function getOrderlessVariantAvailability(
+  productId: number,
+  target: OrderlessAvailabilityTarget,
+  quantity: number,
+  draft: Record<string, number>
+): Promise<VariantAvailability[]> {
+  const params = new URLSearchParams();
+  params.append('targetStatus', target);
+  params.append('quantity', String(quantity));
+  Object.entries(draft).forEach(([key, units]) => {
+    params.append('draft', `${key}:${units}`);
+  });
+  const response = await api.get(
+    `/products/${productId}/variants/availability?${params.toString()}`
+  );
+  return response.data as VariantAvailability[];
 }
 
 export async function getProductVariantAvailability(

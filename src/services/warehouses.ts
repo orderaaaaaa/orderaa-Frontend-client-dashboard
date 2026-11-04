@@ -28,6 +28,8 @@ import {
   transferStock,
   getOrderStockAvailability,
   getProductVariantAvailability,
+  getOrderlessVariantAvailability,
+  OrderlessAvailabilityTarget,
   GetWarehousesParams,
   GetWarehouseStockParams,
   GetStockWorkflowsParams,
@@ -409,6 +411,32 @@ export const useOrderStockAvailabilityQuery = (
     ] as QueryKey,
     queryFn: () => getOrderStockAvailability(orderId as number, targetStatus),
     enabled: typeof orderId === 'number',
+    staleTime: 0,
+  });
+};
+
+export const useOrderlessVariantAvailabilityQuery = (
+  productId: number | undefined,
+  target: OrderlessAvailabilityTarget,
+  quantity: number,
+  draft: Record<string, number>
+) => {
+  const draftKey = Object.keys(draft)
+    .sort()
+    .map((key) => `${key}:${draft[key]}`)
+    .join('|');
+  return useQuery({
+    queryKey: [
+      QUERY_KEYS.PRODUCT_VARIANT_AVAILABILITY,
+      'orderless',
+      productId,
+      target,
+      quantity,
+      draftKey,
+    ] as QueryKey,
+    queryFn: () =>
+      getOrderlessVariantAvailability(productId as number, target, quantity, draft),
+    enabled: typeof productId === 'number',
     staleTime: 0,
   });
 };
