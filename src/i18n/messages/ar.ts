@@ -165,6 +165,14 @@ const ar = {
   'orderDetails.variants.title': 'المتاح بالمخزون',
   'orderDetails.variants.blockedSelection':
     'هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر حاجة تانية',
+  'orderDetails.variants.state.low': 'متبقي: {count}',
+  'orderDetails.variants.state.out': 'غير متوفر',
+  'orderDetails.variants.state.notSet': 'المخزن غير محدد',
+  'orderDetails.variants.selectedSummary': 'الاختيار الحالي: {variant}',
+  'orderDetails.variants.pickAll': 'اختر كل الخيارات لعرض التوفر الدقيق',
+  'orderDetails.variants.noVariantRows': 'لا توجد بيانات مخزون لهذا المنتج بعد',
+  'orderDetails.productDetails.noSpecs': 'لا توجد مواصفات مسجلة لهذا المنتج',
+  'orderDetails.productDetails.orderData': 'بيانات الطلب',
 
   'stock.filters.movementDateHint':
     'يعرض المنتجات التي حدثت لها حركة مخزون في الفترة المحددة',
