@@ -32,6 +32,7 @@ import {
 } from '@/types/storeLinks';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
+import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import { blockedStoreLinesOf, capturedStoreLineIndexes } from '@/utils/manualOrder/storeLineLinks';
 import type {
   MissingOrderDetail,
@@ -387,11 +388,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           </p>
         )}
 
-        {stockBlocked && (
-          <p role="alert" className="text-red-600 text-sm font-semibold">
-            {t('stockShortage.submitBlocked')}
-          </p>
-        )}
+        <StockSubmitBlockedHint visible={stockBlocked} />
 
         <div className="flex justify-end gap-3 ml-6">
           <Can code={PERMISSION_CODES.ORDERS_MISSING_MANAGE}>

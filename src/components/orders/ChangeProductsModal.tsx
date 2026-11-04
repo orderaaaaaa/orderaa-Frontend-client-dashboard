@@ -26,6 +26,7 @@ import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
 import { getAvailabilityRefusalMessage } from '@/utils/apiError';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
+import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
   draftFromLines,
@@ -352,11 +353,7 @@ export default function ChangeProductsModal({
                     إضافة منتج
                   </Button>
                 </div>
-                {stockBlocked && (
-                  <p role="alert" className="text-sm font-semibold text-destructive">
-                    {t('stockShortage.submitBlocked')}
-                  </p>
-                )}
+                <StockSubmitBlockedHint visible={stockBlocked} />
                 {lines.length === 0 ? (
                   <EmptyState
                     icon={

@@ -19,6 +19,7 @@ import { Stepper } from '@/components/ui/stepper';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
+import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import type {
   FollowupChangeProductInput,
   FollowupExchangeBody,
@@ -257,11 +258,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       )}
       {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
       {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
-      {stockBlocked && (
-        <p role="alert" className="text-sm font-semibold text-destructive">
-          {t('stockShortage.submitBlocked')}
-        </p>
-      )}
+      <StockSubmitBlockedHint visible={stockBlocked} />
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0 || isPending}>
           {t('exchange.create.nav.back')}

@@ -297,16 +297,10 @@ export default function AddNewProductModal({
                 showWarehouseNote={false}
               />
             )}
-            {availableWarehouseNotSet ? (
+            {availableWarehouseNotSet && (
               <p className="text-sm font-semibold text-destructive">
                 {t('orderDetails.stock.availableWarehouseNotSet')}
               </p>
-            ) : (
-              selectedVariantAvailability?.blocked === true && (
-                <p className="text-sm font-semibold text-destructive">
-                  {t('orderDetails.variants.blockedSelection')}
-                </p>
-              )
             )}
           </div>
         )}

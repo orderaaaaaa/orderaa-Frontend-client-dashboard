@@ -12,8 +12,10 @@ import {
   availableStockRefusalText,
   formatAvailableStockLines,
   getApiErrorMessage,
+  getOutOfStockBlock,
 } from '@/utils/apiError';
-import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
+import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
+import { availableRefusalLineOf } from '@/components/stock/variantAvailabilityModel';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { CustomerDataSection } from './sections/CustomerDataSection';
@@ -174,14 +176,8 @@ function OrderDetailsInfoComponent({
     // Undefined while loading — do NOT block on that, or the confirm button is
     // dead on every first paint.
     const warehouseName = stockAvailability?.availableWarehouse?.name ?? '';
-    const toRefusalLine = (line: SettledAvailabilityLine): AvailableStockRefusalLine => ({
-      variantId: line.variantId,
-      productName: line.productName,
-      variantLabel: line.variantLabel,
-      available: line.available,
-      change: line.change,
-      after: line.after ?? line.available + line.change,
-    });
+    const toRefusalLine = (line: SettledAvailabilityLine) =>
+      availableRefusalLineOf(line.productName, line);
     const warned = notSet ? [] : settled.filter((line) => line.warning && !line.blocked);
     const warning =
       warned.length > 0
@@ -335,13 +331,17 @@ function OrderDetailsInfoComponent({
         succeeded = await actions.handleConfirmAction(action);
       }
     } catch (error: unknown) {
+      const block = getOutOfStockBlock(error);
       setErrorModal({
         isOpen: true,
-        message: getApiErrorMessage(
-          error,
-          (error instanceof Error && error.message) ||
-            'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.'
-        ),
+        message:
+          block?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE
+            ? block.message
+            : getApiErrorMessage(
+                error,
+                (error instanceof Error && error.message) ||
+                  'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.'
+              ),
       });
     }
 

@@ -197,11 +197,16 @@ export function draftFromLines(
   return { draft, excluded };
 }
 
-function availableLineOf(
+export function availableRefusalLineOf(
   productName: string,
-  row: VariantAvailability,
-): AvailableStockRefusalLine | null {
-  if (row.available === null) return null;
+  row: {
+    variantId: number;
+    variantLabel: string;
+    available: number;
+    change: number;
+    after: number | null;
+  },
+): AvailableStockRefusalLine {
   return {
     variantId: row.variantId,
     productName,
@@ -210,6 +215,14 @@ function availableLineOf(
     change: row.change,
     after: row.after ?? row.available + row.change,
   };
+}
+
+function availableLineOf(
+  productName: string,
+  row: VariantAvailability,
+): AvailableStockRefusalLine | null {
+  if (row.available === null) return null;
+  return availableRefusalLineOf(productName, { ...row, available: row.available });
 }
 
 export function refusalTextFor({
