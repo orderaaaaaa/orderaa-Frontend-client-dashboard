@@ -302,13 +302,15 @@ export function formatBulkStockWarnings(
 }
 
 export function availableStockRefusalText(
-  warehouseName: string,
+  warehouseName: string | null | undefined,
   lines: AvailableStockRefusalLine[]
 ): string {
   const locale = readStoredLocale();
-  const heading = translate(locale, 'stockShortage.availableWouldGoNegative', {
-    warehouse: warehouseName,
-  });
+  const heading = warehouseName
+    ? translate(locale, 'stockShortage.availableWouldGoNegative', {
+        warehouse: warehouseName,
+      })
+    : translate(locale, 'stockShortage.availableWouldGoNegativeNoWarehouse');
   const rows = formatAvailableStockLines(lines);
   return rows ? `${heading}\n${rows}` : heading;
 }
@@ -331,7 +333,7 @@ export function getOutOfStockBlock(err: unknown): OutOfStockBlock | null {
     const lines = (data.lines ?? []) as AvailableStockRefusalLine[];
     return {
       code: AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
-      message: availableStockRefusalText(data.warehouseName ?? '', lines),
+      message: availableStockRefusalText(data.warehouseName, lines),
       lines,
     };
   }

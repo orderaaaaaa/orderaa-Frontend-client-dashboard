@@ -60,7 +60,7 @@ export type BatchShortageOrder =
   | {
       orderCode: string;
       reason: typeof AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE;
-      warehouseName: string;
+      warehouseName?: string;
       lines: AvailableStockRefusalLine[];
     };
 
