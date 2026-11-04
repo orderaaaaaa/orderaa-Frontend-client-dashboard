@@ -30,6 +30,7 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import ToggleGroup from '@/components/ui/toggle-group';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
+import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import CustomerReturnForm from './return/CustomerReturnForm';
 
 const DIRTY = { shouldDirty: true } as const;
@@ -327,14 +328,13 @@ function NewOrderForm() {
           }}
         />
 
+        <StockSubmitBlockedHint visible={stockBlocked} />
         <StickyFormFooter
           isDirty={hasUnsavedChanges}
           isSaving={isSubmitting}
           status={
             isSubmitting
               ? 'جاري إنشاء الطلب...'
-              : stockBlocked
-                ? t('stockShortage.submitBlocked')
               : hasUnsavedChanges
                 ? 'الطلب لم يُضف بعد'
                 : 'املأ بيانات الطلب ثم اضغط إضافة طلب'
