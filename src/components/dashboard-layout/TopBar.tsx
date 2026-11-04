@@ -16,6 +16,9 @@ import { useDebounce } from '@/utils/debounce';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import clsx from 'clsx';
 
+const THEME_COLOR_LIGHT = '#5D24E1';
+const THEME_COLOR_DARK = '#0a0e1e';
+
 interface TopBarProps {
   onMenuToggle: () => void;
   onSearch: (query: string) => void;
@@ -111,7 +114,8 @@ export function TopBar({
 
   // ✅ Update the browser top bar color
   useEffect(() => {
-    const themeColor = resolvedTheme === 'dark' ? '#0a0e1e' : '#5D24E1';
+    if (!resolvedTheme) return;
+    const themeColor = resolvedTheme === 'dark' ? THEME_COLOR_DARK : THEME_COLOR_LIGHT;
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', themeColor);
@@ -122,7 +126,7 @@ export function TopBar({
       document.head.appendChild(newMeta);
     }
     return () => {
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#5D24E1');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR_LIGHT);
     };
   }, [resolvedTheme]);
 
