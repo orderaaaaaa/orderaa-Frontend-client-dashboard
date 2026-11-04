@@ -2,7 +2,13 @@
 
 import { PackageSearch } from 'lucide-react';
 import { LiaMinusSolid, LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
-import { type ChangeProductsLine, isLineComplete } from '@/components/orders/ChangeProductsModal';
+import {
+  type ChangeProductsLine,
+  draftForProductLines,
+  isLineComplete,
+} from '@/components/orders/ChangeProductsModal';
+import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
+import type { Selection } from '@/components/stock/variantAvailabilityModel';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/state-panels';
@@ -38,7 +44,7 @@ interface ExchangeProductsStepProps {
   onAddProducts: () => void;
   onRemoveLine: (key: string) => void;
   onChangeLineQuantity: (key: string, quantity: number) => void;
-  onChangeLineVariant: (key: string, attribute: string, optionName: string) => void;
+  onChangeLineSelection: (key: string, next: Selection) => void;
   onChangeReason: (reason: FollowupExchangeReason) => void;
 }
 
@@ -53,7 +59,7 @@ export function ExchangeProductsStep({
   onAddProducts,
   onRemoveLine,
   onChangeLineQuantity,
-  onChangeLineVariant,
+  onChangeLineSelection,
   onChangeReason,
 }: ExchangeProductsStepProps) {
   const { t } = useI18n();
@@ -192,31 +198,15 @@ export function ExchangeProductsStep({
                   </button>
                 </div>
                 {line.variantOptions.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    {line.variantOptions.map((option) => (
-                      <div key={option.attribute} className="flex items-center gap-2">
-                        <span className="min-w-16 text-xs font-semibold text-muted-foreground">
-                          {option.attribute}:
-                        </span>
-                        <Select
-                          value={line.variants.find((v) => v.name === option.attribute)?.optionName ?? ''}
-                          onValueChange={(value) => onChangeLineVariant(line.key, option.attribute, value)}
-                          disabled={disabled}
-                        >
-                          <SelectTrigger size="sm" aria-label={option.attribute}>
-                            <SelectValue placeholder={t('exchange.create.step2.selectVariant')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {option.options.map((value) => (
-                              <SelectItem key={value} value={value}>
-                                {value}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    ))}
-                  </div>
+                  <OrderlessVariantAvailabilityPanel
+                    productId={line.productId}
+                    productName={line.name}
+                    targetStatus="CONFIRMED"
+                    quantity={line.quantity}
+                    draft={draftForProductLines(lines, line.productId, line.key)}
+                    selection={line.attributeOptionIds}
+                    onChange={(next) => onChangeLineSelection(line.key, next)}
+                  />
                 )}
                 {!isLineComplete(line) && (
                   <p className="text-sm text-destructive">{t('exchange.create.step2.incompleteVariants')}</p>

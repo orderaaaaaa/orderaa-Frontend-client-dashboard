@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import {
+  draftForProductLines,
   isLineComplete,
   lineKeyOf,
   linesFromPicker,
   mergeLines,
-  orderVariants,
+  variantsFromSelection,
 } from '@/components/orders/ChangeProductsModal';
+import type { Selection } from '@/components/stock/variantAvailabilityModel';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -163,7 +165,10 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     setLines(lines.filter((line) => line.key !== key));
   };
 
-  const updateLine = (key: string, patch: Partial<Pick<ExchangeLine, 'variants' | 'quantity'>>) => {
+  const updateLine = (
+    key: string,
+    patch: Partial<Pick<ExchangeLine, 'variants' | 'quantity' | 'attributeOptionIds'>>,
+  ) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
     const updated = { ...target, ...patch };
@@ -182,15 +187,17 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     updateLine(key, { quantity });
   };
 
-  const handleChangeLineVariant = (key: string, attribute: string, optionName: string) => {
+  const handleChangeLineSelection = (key: string, next: Selection) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
-    const variants = orderVariants(target.variantOptions, [
-      ...target.variants.filter((v) => v.name !== attribute),
-      { name: attribute, optionName },
-    ]);
-    updateLine(key, { variants });
+    updateLine(key, {
+      variants: variantsFromSelection(target.variantOptions, next),
+      attributeOptionIds: next,
+    });
   };
+
+  const draftForProduct = (productId: number, excludeKey?: string) =>
+    draftForProductLines(lines, productId, excludeKey);
 
   const handleChangeReason = (next: FollowupExchangeReason) => {
     setReason(next);
@@ -310,7 +317,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
               onAddProducts={() => setIsPickerOpen(true)}
               onRemoveLine={handleRemoveLine}
               onChangeLineQuantity={handleChangeLineQuantity}
-              onChangeLineVariant={handleChangeLineVariant}
+              onChangeLineSelection={handleChangeLineSelection}
               onChangeReason={handleChangeReason}
             />
           )}
@@ -344,6 +351,11 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
         onConfirm={handleProductsPicked}
+        availability={{
+          targetStatus: 'CONFIRMED',
+          quantity: 1,
+          draftFor: (productId) => draftForProduct(productId),
+        }}
       />
     </>
   );

@@ -115,6 +115,35 @@ export const orderVariants = (
     return variant ? [variant] : [];
   });
 
+export const variantsFromSelection = (
+  variantOptions: VariantOption[],
+  selection: Selection,
+): FollowupChangeProductVariant[] =>
+  orderVariants(
+    variantOptions,
+    variantOptions.flatMap((option) => {
+      const optionId = selection[option.attributeId];
+      const name = option.optionDetails.find((detail) => detail.id === optionId)?.name;
+      return optionId !== undefined && name ? [{ name: option.attribute, optionName: name }] : [];
+    }),
+  );
+
+export const draftForProductLines = (
+  lines: ChangeProductsLine[],
+  productId: number,
+  excludeKey?: string,
+): Record<string, number> => {
+  const sameProduct = lines.filter((line) => line.productId === productId && line.key !== excludeKey);
+  const attributeCount = lines.find((line) => line.productId === productId)?.variantOptions.length ?? 0;
+  return draftFromLines(
+    sameProduct.map((line) => ({
+      optionIds: Object.values(line.attributeOptionIds),
+      quantity: line.quantity,
+    })),
+    attributeCount,
+  ).draft;
+};
+
 export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
   products.map((product) => {
     const variantOptions = product.variantOptions ?? [];
@@ -212,25 +241,14 @@ export default function ChangeProductsModal({
   const handleSelectionChange = (key: string, next: Selection) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
-    const chosen = target.variantOptions.flatMap((option) => {
-      const optionId = next[option.attributeId];
-      const name = option.optionDetails.find((detail) => detail.id === optionId)?.name;
-      return optionId !== undefined && name ? [{ name: option.attribute, optionName: name }] : [];
+    handleUpdateLine(key, {
+      variants: variantsFromSelection(target.variantOptions, next),
+      attributeOptionIds: next,
     });
-    handleUpdateLine(key, { variants: orderVariants(target.variantOptions, chosen), attributeOptionIds: next });
   };
 
-  const draftForProduct = (productId: number, excludeKey?: string) => {
-    const sameProduct = lines.filter((line) => line.productId === productId && line.key !== excludeKey);
-    const attributeCount = lines.find((line) => line.productId === productId)?.variantOptions.length ?? 0;
-    return draftFromLines(
-      sameProduct.map((line) => ({
-        optionIds: Object.values(line.attributeOptionIds),
-        quantity: line.quantity,
-      })),
-      attributeCount,
-    ).draft;
-  };
+  const draftForProduct = (productId: number, excludeKey?: string) =>
+    draftForProductLines(lines, productId, excludeKey);
 
   const handleChangeQuantity = (key: string, quantity: number) => {
     if (!Number.isInteger(quantity) || quantity < 1) return;
