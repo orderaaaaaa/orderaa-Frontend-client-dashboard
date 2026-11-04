@@ -116,7 +116,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
           {canAddNote && (
             <div
               dir="rtl"
-              className="sticky bottom-0 z-10 mt-4 -mx-5 border-t border-border bg-card px-5 py-3 sm:-mx-6 sm:px-6"
+              className="sticky bottom-0 z-(--z-inpage-sticky) mt-4 -mx-5 border-t border-border bg-card px-5 py-3 sm:-mx-6 sm:px-6"
             >
               <AddFollowupNoteForm orderId={orderId} />
             </div>

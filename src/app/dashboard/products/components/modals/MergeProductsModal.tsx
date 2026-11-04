@@ -670,7 +670,7 @@ const MergeProductsModal = ({
           </div>
         )}
 
-        <div className="sticky -bottom-6 z-10 -mx-4 -mb-6 mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 bg-card px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="sticky -bottom-6 z-(--z-inpage-sticky) -mx-4 -mb-6 mt-2 flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 bg-card px-4 py-3 sm:-mx-8 sm:px-8">
           <Button
             type="button"
             variant="outline"

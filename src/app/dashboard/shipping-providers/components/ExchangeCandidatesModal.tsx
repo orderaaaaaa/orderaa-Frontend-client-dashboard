@@ -276,7 +276,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
         maxWidth="md:max-w-2xl"
       >
         <div className="flex flex-col gap-6" dir="rtl">
-          <div className="sticky top-0 z-10 -mx-5 -mt-5 border-b border-border bg-card px-5 pt-5 pb-3 sm:-mx-6 sm:px-6">
+          <div className="sticky top-0 z-(--z-inpage-sticky) -mx-5 -mt-5 border-b border-border bg-card px-5 pt-5 pb-3 sm:-mx-6 sm:px-6">
             <Stepper
               steps={[
                 { label: t('exchange.create.steps.order') },

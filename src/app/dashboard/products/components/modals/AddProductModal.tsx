@@ -437,7 +437,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           />
         </div>
 
-        <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-8 -mb-6 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-card px-4 sm:px-8 py-3">
+        <div className="sticky bottom-0 z-(--z-inpage-sticky) -mx-4 sm:-mx-8 -mb-6 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-card px-4 sm:px-8 py-3">
           <Button
             type="button"
             variant="outline"
