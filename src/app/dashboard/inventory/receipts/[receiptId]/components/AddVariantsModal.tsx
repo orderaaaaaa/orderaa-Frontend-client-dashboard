@@ -227,7 +227,7 @@ const AddVariantsModal = memo(
                           'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
                           isPicked
                             ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
-                            : 'bg-card text-gray-700 border-gray-300 hover:border-primary hover:text-primary',
+                            : 'bg-card text-gray-700 border-gray-300 hover:border-primary hover:text-primary-text',
                         )}
                         onClick={() => handlePick(group.id, option.id)}
                       >
@@ -242,7 +242,7 @@ const AddVariantsModal = memo(
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-full font-semibold flex items-center gap-2 px-5 border-primary text-primary hover:bg-primary hover:text-white"
+                  className="rounded-full font-semibold flex items-center gap-2 px-5 border-primary text-primary-text hover:bg-primary hover:text-white"
                   onClick={handleAddCombo}
                   disabled={!combo || isComboAdded}
                 >
@@ -270,7 +270,7 @@ const AddVariantsModal = memo(
                       return (
                         <span
                           key={key}
-                          className="flex items-center gap-2 rounded-full bg-primary/10 text-primary text-sm font-medium px-3 py-1.5"
+                          className="flex items-center gap-2 rounded-full bg-primary/10 text-primary-text text-sm font-medium px-3 py-1.5"
                         >
                           {variant.attributeLabels.join(' / ')}
                           <button

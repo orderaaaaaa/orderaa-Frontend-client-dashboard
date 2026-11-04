@@ -45,7 +45,7 @@ export default function CopyButton({ value, label, successMessage, className }: 
       type="button"
       onClick={handleCopy}
       aria-label={label ?? 'نسخ الكود'}
-      className={cn('relative inline-flex items-center justify-center text-muted-foreground hover:text-primary transition-colors max-sm:before:absolute max-sm:before:-inset-[13px] max-sm:before:content-[""]', className)}
+      className={cn('relative inline-flex items-center justify-center text-muted-foreground hover:text-primary-text transition-colors max-sm:before:absolute max-sm:before:-inset-[13px] max-sm:before:content-[""]', className)}
     >
       <Copy className={`w-3.5 h-3.5 ${copied ? 'text-green-600' : ''}`} />
     </button>

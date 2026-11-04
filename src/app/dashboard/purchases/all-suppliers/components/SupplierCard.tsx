@@ -40,9 +40,9 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex items-start flex-col gap-1 min-w-0">
           <Link
             href={`/dashboard/purchases/all-suppliers/${supplier.id}`}
-            className="flex min-h-10 min-w-0 items-center gap-2 text-lg font-bold text-primary hover:underline transition-colors"
+            className="flex min-h-10 min-w-0 items-center gap-2 text-lg font-bold text-primary-text hover:underline transition-colors"
           >
-            <LiaUserSolid className="w-6 h-6 shrink-0 text-primary" />
+            <LiaUserSolid className="w-6 h-6 shrink-0 text-primary-text" />
             <span className="break-words min-w-0">{supplier.name}</span>
           </Link>
           {supplier.nickname && (
@@ -90,7 +90,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="col-span-2 md:col-span-1 flex flex-col items-start sm:items-center gap-1.5 min-w-0">
           <a
             href={`tel:${supplier.phoneNumber}`}
-            className="flex min-h-10 items-center gap-1.5 text-sm text-gray-600 hover:text-primary transition-colors"
+            className="flex min-h-10 items-center gap-1.5 text-sm text-gray-600 hover:text-primary-text transition-colors"
           >
             <LiaPhoneSolid className="w-4 h-4 shrink-0" />
             <span dir="ltr">{supplier.phoneNumber}</span>
@@ -98,7 +98,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           {supplier.email && (
             <a
               href={`mailto:${supplier.email}`}
-              className="flex min-h-10 min-w-0 max-w-full items-center gap-1.5 text-sm text-gray-600 hover:text-primary transition-colors"
+              className="flex min-h-10 min-w-0 max-w-full items-center gap-1.5 text-sm text-gray-600 hover:text-primary-text transition-colors"
             >
               <LiaEnvelopeSolid className="w-4 h-4 shrink-0" />
               <span dir="ltr" className="truncate">{supplier.email}</span>
@@ -108,7 +108,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <span className="text-sm sm:text-base text-gray-600">المبلغ الاجمالي</span>
           <div className="flex items-center gap-1.5">
-            <LiaMoneyBillWaveSolid className="w-4 h-4 text-primary" />
+            <LiaMoneyBillWaveSolid className="w-4 h-4 text-primary-text" />
             <span className="text-base font-semibold text-gray-800">
               {formatCurrency(supplier.totalPurchased)}
             </span>
@@ -118,7 +118,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <span className="text-sm sm:text-base text-gray-600">فواتير الشراء</span>
           <div className="flex items-center gap-1.5">
-            <LiaFileInvoiceSolid className="w-4 h-4 text-primary" />
+            <LiaFileInvoiceSolid className="w-4 h-4 text-primary-text" />
             <span className="text-base font-semibold text-gray-800">
               {supplier.invoiceCount}
             </span>
@@ -128,7 +128,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <span className="text-sm sm:text-base text-gray-600">مدفوع</span>
           <div className="flex items-center gap-1.5">
-            <LiaHandHoldingUsdSolid className="w-4 h-4 text-primary" />
+            <LiaHandHoldingUsdSolid className="w-4 h-4 text-primary-text" />
             <span className="text-base font-semibold text-gray-800">
               {formatCurrency(supplier.paidAmount)}
             </span>
@@ -138,7 +138,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <span className="text-sm sm:text-base text-gray-600">المرتجعات</span>
           <div className="flex items-center gap-1.5">
-            <LiaUndoAltSolid className="w-4 h-4 text-primary" />
+            <LiaUndoAltSolid className="w-4 h-4 text-primary-text" />
             <span className="text-base font-semibold text-gray-800">
               {formatCurrency(supplier.totalReturned)}
             </span>
@@ -159,7 +159,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           <span className="text-sm sm:text-base text-gray-600">معلّق</span>
           <div className="flex items-center gap-1.5">
             <LiaHourglassHalfSolid
-              className={clsx('w-4 h-4', supplier.held > 0 ? 'text-warning' : 'text-primary')}
+              className={clsx('w-4 h-4', supplier.held > 0 ? 'text-warning' : 'text-primary-text')}
             />
             <span className="text-base font-semibold text-gray-800">
               {formatCurrency(supplier.held)}

@@ -80,7 +80,7 @@ export default function MissingOrderDetailPage() {
                 <CopyableCode value={row.recoveredOrder.code} label="نسخ كود الطلب">
                   <Link
                     href={`/dashboard/orders/allOrders?search=${row.recoveredOrder.code}`}
-                    className="text-primary hover:underline font-semibold"
+                    className="text-primary-text hover:underline font-semibold"
                   >
                     {row.recoveredOrder.code}
                   </Link>

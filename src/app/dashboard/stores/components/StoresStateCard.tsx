@@ -17,13 +17,13 @@ function StoresStateCard({
     <div className="px-4 py-6 border-2 bg-card border-primary/20 rounded-lg flex gap-3 shadow-md shadow-[#f5f4f4]">
       <div>
         <div className="w-10 h-10 rounded-full border border-primary bg-primary/5 flex items-center justify-center">
-          <Icon className="w-6 h-6 text-primary" />
+          <Icon className="w-6 h-6 text-primary-text" />
         </div>{' '}
       </div>
       <div className="flex flex-col">
         <h3 className="text-xl font-semibold">{title}</h3>
 
-        <p className="font-semibold text-3xl text-primary">{value}</p>
+        <p className="font-semibold text-3xl text-primary-text">{value}</p>
 
         <p className="flex items-center gap-2 text-lg text-green-500">
           <FaArrowTrendUp className="w-4 h-4" />

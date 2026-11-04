@@ -390,7 +390,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                 isSaving || fields.length >= PRODUCT_CREATE_LIMITS.attributes
               }
               onClick={() => append({ name: '', options: [] })}
-              className="min-h-10 text-primary font-semibold hover:bg-primary hover:text-white"
+              className="min-h-10 text-primary-text font-semibold hover:bg-primary hover:text-white"
             >
               <LiaPlusSolid className="w-4 h-4" />
               إضافة متغير

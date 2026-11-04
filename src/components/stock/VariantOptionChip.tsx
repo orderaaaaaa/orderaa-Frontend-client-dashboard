@@ -72,7 +72,7 @@ export function VariantOptionChip({
       <span className="flex max-w-[12rem] items-center gap-1.5 font-medium text-foreground">
         {Icon && <Icon className={cn('size-4 shrink-0', STATE_TEXT_CLASS[status.state])} aria-hidden="true" />}
         <span className="truncate">{optionName}</span>
-        {status.selected && <LiaCheckCircleSolid className="size-4 shrink-0 text-primary" aria-hidden="true" />}
+        {status.selected && <LiaCheckCircleSolid className="size-4 shrink-0 text-primary-text" aria-hidden="true" />}
       </span>
       {stateText && (
         <span className={cn('text-xs', STATE_TEXT_CLASS[status.state])}>{stateText}</span>

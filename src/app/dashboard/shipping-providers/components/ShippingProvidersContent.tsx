@@ -199,9 +199,9 @@ export function ShippingProvidersContent() {
                     <div className="flex min-h-12 items-start gap-2">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         {carrier.type === 'DELEGATE' ? (
-                          <LiaUserSolid className="size-5 text-primary" />
+                          <LiaUserSolid className="size-5 text-primary-text" />
                         ) : (
-                          <LiaTruckSolid className="size-5 text-primary" />
+                          <LiaTruckSolid className="size-5 text-primary-text" />
                         )}
                       </span>
                       <div className="min-w-0 flex-1">

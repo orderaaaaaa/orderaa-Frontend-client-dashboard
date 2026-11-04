@@ -456,7 +456,7 @@ function AllOrdersContent() {
             <div className="flex flex-row items-center justify-center gap-2">
               <X
                 onClick={exitSelectMode}
-                className="cursor-pointer text-primary h-5 w-5"
+                className="cursor-pointer text-primary-text h-5 w-5"
               />
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedOrderIds.length} طلب

@@ -72,7 +72,7 @@ export function ReservationSettingsSection({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <LiaWarehouseSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <LiaWarehouseSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             حدود المخزون
@@ -143,7 +143,7 @@ export function ReservationSettingsSection({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <ModeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <ModeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-gray-700">
               {t('storeSettings.confirmOutOfStock.title')}

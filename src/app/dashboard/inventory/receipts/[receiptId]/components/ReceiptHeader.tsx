@@ -14,7 +14,7 @@ const ReceiptHeader = memo(
     return (
       <div className="w-full bg-card border border-gray-200 rounded-xl px-6 py-4 flex items-center gap-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-          <LiaFileInvoiceSolid className="text-primary w-5 h-5" />
+          <LiaFileInvoiceSolid className="text-primary-text w-5 h-5" />
         </div>
         <div className="flex flex-col gap-0.5">
           <CopyableCode value={invoiceNumber} label="نسخ رقم الفاتورة">

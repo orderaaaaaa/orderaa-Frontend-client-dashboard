@@ -143,7 +143,7 @@ function DataTable<T extends Record<string, unknown>>({
           'px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm max-sm:!w-auto',
           isSkeleton ? 'font-medium text-gray-700' : 'font-bold',
           isSortable && 'cursor-pointer hover:bg-gray-100 transition-colors select-none',
-          isSortable && sortBy === col.key && 'text-primary',
+          isSortable && sortBy === col.key && 'text-primary-text',
           col.headerClassName,
           col.className,
         )}

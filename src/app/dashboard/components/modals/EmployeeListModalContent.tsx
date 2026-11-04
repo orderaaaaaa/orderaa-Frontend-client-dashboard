@@ -56,7 +56,7 @@ export function EmployeeListModalContent({
       render: (value, row) => (
         <span
           className={clsx(
-            selectedEmployeeId === row.id && 'font-bold text-primary',
+            selectedEmployeeId === row.id && 'font-bold text-primary-text',
           )}
         >
           {String(value ?? '')}
@@ -107,7 +107,7 @@ export function EmployeeListModalContent({
                 <span
                   className={clsx(
                     'min-w-0 break-words font-medium',
-                    isSelected && 'font-bold text-primary',
+                    isSelected && 'font-bold text-primary-text',
                   )}
                 >
                   {row.name}
@@ -134,7 +134,7 @@ export function EmployeeListModalContent({
 
       {selectedPerformance && (
         <div className="space-y-3">
-          <h3 className="text-base font-bold text-primary">
+          <h3 className="text-base font-bold text-primary-text">
             أداء الموظف: {selectedPerformance.employeeName}
           </h3>
           <DataTable

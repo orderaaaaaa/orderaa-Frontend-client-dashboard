@@ -769,7 +769,7 @@ function InProcessList({
         ) : (
           <SummaryStatCard
             icon={<PackageSearch aria-hidden="true" />}
-            iconBgClassName="bg-primary/10 text-primary"
+            iconBgClassName="bg-primary/10 text-primary-text"
             label={t('inProcess.kpi.results')}
             value={isError ? '—' : formatNumber(total)}
           />
@@ -780,7 +780,7 @@ function InProcessList({
           ) : (
             <SummaryStatCard
               icon={<CircleDollarSign aria-hidden="true" />}
-              iconBgClassName="bg-primary/10 text-primary"
+              iconBgClassName="bg-primary/10 text-primary-text"
               label={t('inProcess.kpi.netInProcess')}
               value={isError || netAmount == null ? '—' : formatNumber(netAmount, 2) + ' جنيه'}
             />
@@ -960,7 +960,7 @@ function ReturnedList({
         ) : (
           <SummaryStatCard
             icon={<ClipboardList aria-hidden="true" />}
-            iconBgClassName="bg-primary/10 text-primary"
+            iconBgClassName="bg-primary/10 text-primary-text"
             label={t('inProcess.kpi.returnedCount')}
             value={isError ? '—' : formatNumber(total)}
           />

@@ -568,7 +568,7 @@ export function ShipmentRowActions({
           >
             <SheetHeader className="gap-3 border-b p-4 pe-12 text-start">
               <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-text">
                   <Truck className="size-5" />
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">

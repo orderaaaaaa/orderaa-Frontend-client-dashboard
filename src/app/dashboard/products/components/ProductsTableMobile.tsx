@@ -151,7 +151,7 @@ function ProductsTableMobile({
                         // does — without this the card handler would toggle the
                         // selection a second time and cancel it out.
                         onClick={(e) => e.stopPropagation()}
-                        className="w-5 h-5 shrink-0 text-primary rounded border-gray-300"
+                        className="w-5 h-5 shrink-0 text-primary-text rounded border-gray-300"
                       />
                     )}
                   </div>
@@ -172,7 +172,7 @@ function ProductsTableMobile({
                       <Button
                         asChild
                         variant="ghost"
-                        className="text-primary min-h-10"
+                        className="text-primary-text min-h-10"
                       >
                         <Link
                           href={productEditHref(product.id)}

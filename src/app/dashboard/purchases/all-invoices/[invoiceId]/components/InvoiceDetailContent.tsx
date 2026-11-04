@@ -83,7 +83,7 @@ function InvoiceLinkField({ label, id, text }: { label: string; id: number; text
     <DetailField label={label}>
       <Link
         href={`${INVOICES_LIST_HREF}/${id}`}
-        className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+        className="text-sm font-semibold text-primary-text underline-offset-4 hover:underline"
       >
         {text}
       </Link>
@@ -109,7 +109,7 @@ function InvoiceSettlementsPanel({ invoice }: { invoice: SupplierInvoiceApiItem 
             key: 'code',
             header: 'رقم الدفعة',
             render: (_value, row) => (
-              <Link href={`${INVOICES_LIST_HREF}/${row.id}`} className="text-primary underline-offset-4 hover:underline" dir="ltr">
+              <Link href={`${INVOICES_LIST_HREF}/${row.id}`} className="text-primary-text underline-offset-4 hover:underline" dir="ltr">
                 {row.code}
               </Link>
             ),
@@ -227,7 +227,7 @@ function InvoiceDetailsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-primary underline-offset-4 hover:underline"
+                className="text-sm text-primary-text underline-offset-4 hover:underline"
               >
                 صورة {formatCount(index + 1)}
               </a>

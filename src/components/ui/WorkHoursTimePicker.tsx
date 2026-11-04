@@ -193,7 +193,7 @@ export default function WorkHoursTimePicker({
                     {tempStartHour !== null &&
                       tempStartPeriod !== null &&
                       !isNaN(tempStartHour) ? (
-                      <div className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
+                      <div className="text-2xl font-bold text-primary-text flex items-center justify-center gap-1">
                         <span>{tempStartPeriod}</span>
                         <span>:</span>
                         <span>{tempStartHour}</span>
@@ -265,7 +265,7 @@ export default function WorkHoursTimePicker({
                     {tempEndHour !== null &&
                       tempEndPeriod !== null &&
                       !isNaN(tempEndHour) ? (
-                      <div className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
+                      <div className="text-2xl font-bold text-primary-text flex items-center justify-center gap-1">
                         <span>{tempEndPeriod}</span>
                         <span>:</span>
                         <span>{tempEndHour}</span>

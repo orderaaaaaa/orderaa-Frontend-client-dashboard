@@ -284,7 +284,7 @@ export function CustomersContent() {
               <LiaSlidersHSolid className="w-5 h-5" />
               فلاتر متقدمة
               {activeFilterCount > 0 && (
-                <span className="absolute -top-2 -end-2 bg-card text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+                <span className="absolute -top-2 -end-2 bg-card text-primary-text text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                   {activeFilterCount}
                 </span>
               )}
@@ -318,7 +318,7 @@ export function CustomersContent() {
               aria-label="إلغاء التحديد"
               onClick={handleToggleSelectMode}
             >
-              <X className="text-primary h-5 w-5" />
+              <X className="text-primary-text h-5 w-5" />
             </Button>
             <span className="text-sm text-gray-600">
               تم تحديد {selectedIds.size} عميل (اختر عميلين للدمج)
@@ -460,7 +460,7 @@ export function CustomersContent() {
               <Button
                 variant="outline"
                 onClick={() => setShowMergeModal(true)}
-                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               >
                 <LiaObjectGroupSolid className="size-5" />
                 <span>دمج العملاء (2)</span>

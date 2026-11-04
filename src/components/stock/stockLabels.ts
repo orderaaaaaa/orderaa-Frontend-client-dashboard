@@ -31,7 +31,7 @@ export const MOVEMENT_SOURCE_LABELS: Record<StockMovementSource, string> = {
 export const MOVEMENT_SOURCE_MARKER_CLASSES: Record<StockMovementSource, string> = {
   INBOUND: 'text-success',
   WORKFLOW: 'text-muted-foreground',
-  ADJUSTMENT: 'text-primary',
+  ADJUSTMENT: 'text-primary-text',
   TRANSFER: 'text-chart-2',
   OUTBOUND: 'text-warning',
   MERGE: 'text-chart-4',

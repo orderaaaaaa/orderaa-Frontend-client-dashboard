@@ -84,7 +84,7 @@ export function PrintInvoicesModal({
     >
       <div className="space-y-6">
         <div className="grid grid-cols-[auto_1fr] items-center gap-3">
-          <LiaPrintSolid className="size-10 text-primary" />
+          <LiaPrintSolid className="size-10 text-primary-text" />
           <div>
             <p className="font-bold text-xl">طباعة الفواتير</p>
             <p className="text-gray-500 text-base">

@@ -294,7 +294,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
             type="button"
             onClick={handleClear}
             className="absolute end-10 top-1/2 -translate-y-1/2 z-(--z-raised)
-                       text-foreground-subtle hover:text-primary cursor-pointer"
+                       text-foreground-subtle hover:text-primary-text cursor-pointer"
             aria-label="مسح الاختيار"
           >
             <X className="w-4 h-4" />

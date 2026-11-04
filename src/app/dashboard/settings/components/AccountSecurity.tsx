@@ -61,7 +61,7 @@ export default function AccountSecurity() {
     <div className="bg-card rounded-xl p-6 shadow-sm" dir="rtl">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-3 bg-primary/10 rounded-lg">
-          <LiaShieldAltSolid className="w-6 h-6 text-primary" />
+          <LiaShieldAltSolid className="w-6 h-6 text-primary-text" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900">أمان الحساب</h2>
       </div>
@@ -70,7 +70,7 @@ export default function AccountSecurity() {
         <div className="flex flex-col gap-5 md:w-[70%]">
           <div className="space-y-2">
             <label htmlFor="security-old-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <LiaLockSolid className="w-5 h-5 text-primary-text !cursor-pointer" />
               <span>كلمة المرور الحالية</span>
             </label>
             <Input
@@ -88,7 +88,7 @@ export default function AccountSecurity() {
 
           <div className="space-y-2">
             <label htmlFor="security-new-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <LiaLockSolid className="w-5 h-5 text-primary-text !cursor-pointer" />
               <span>كلمة المرور الجديدة</span>
             </label>
             <Input
@@ -106,7 +106,7 @@ export default function AccountSecurity() {
 
           <div className="space-y-2">
             <label htmlFor="security-confirm-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <LiaLockSolid className="w-5 h-5 text-primary-text !cursor-pointer" />
               <span>تأكيد كلمة المرور الجديدة</span>
             </label>
             <Input

@@ -247,7 +247,7 @@ function OrderDetails({
             e.stopPropagation();
             setEditingIndex(row.index);
           }}
-          className="mt-2 min-h-10 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline cursor-pointer"
+          className="mt-2 min-h-10 inline-flex items-center gap-1 text-sm font-semibold text-primary-text hover:underline cursor-pointer"
         >
           <LiaEditSolid className="w-4 h-4" />
           تعديل الخيارات

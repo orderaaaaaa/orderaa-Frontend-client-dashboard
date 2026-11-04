@@ -94,7 +94,7 @@ export function StockMovementsTab() {
             <button
               type="button"
               onClick={resetFilters}
-              className="text-sm text-primary hover:underline whitespace-nowrap"
+              className="text-sm text-primary-text hover:underline whitespace-nowrap"
             >
               مسح الفلاتر
             </button>

@@ -32,7 +32,7 @@ export function ShippingSection({
       {/* Phone Number */}
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <LiaPhoneSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <LiaPhoneSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
               رقم الهاتف
@@ -59,7 +59,7 @@ export function ShippingSection({
       {/* Open Order */}
       <div className="flex items-start justify-between gap-4 relative">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <LiaBoxOpenSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <LiaBoxOpenSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
               فتح الشحنة
@@ -83,7 +83,7 @@ export function ShippingSection({
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4 relative">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <LiaEditSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+            <LiaEditSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
                 تعديل محتوي الشحنة
@@ -108,7 +108,7 @@ export function ShippingSection({
           )}
         >
           <div className="flex items-center gap-2 mb-2">
-            <LiaPenSolid className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+            <LiaPenSolid className="w-4 h-4 sm:w-5 sm:h-5 text-primary-text shrink-0" />
             <span className="text-xs sm:text-sm text-gray-700">اسم المنتج</span>
           </div>
           <Input
@@ -129,7 +129,7 @@ export function ShippingSection({
       {/* Return Cost */}
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <LiaRedoAltSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <LiaRedoAltSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
               تكلفة مرتجع الشحن

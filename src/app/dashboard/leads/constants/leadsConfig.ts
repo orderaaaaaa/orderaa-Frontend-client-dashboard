@@ -25,8 +25,8 @@ export const LEADS_STATS_CONFIG: LeadStatConfig[] = [
     title: 'Total Leads',
     icon: PiUsersThree,
     iconBgColor: 'bg-primary/10',
-    iconColor: 'text-primary',
-    valueColor: 'text-primary',
+    iconColor: 'text-primary-text',
+    valueColor: 'text-primary-text',
   },
   {
     key: 'hotLeads',

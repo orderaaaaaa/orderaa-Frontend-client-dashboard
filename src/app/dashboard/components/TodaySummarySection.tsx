@@ -108,7 +108,7 @@ export function TodaySummarySection({
   if (isLoading) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
+        <h2 className="text-lg font-bold text-primary-text">ملخص اليوم</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <SummaryStatCardSkeleton />
           <SummaryStatCardSkeleton />
@@ -130,7 +130,7 @@ export function TodaySummarySection({
   if (error?.isError) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
+        <h2 className="text-lg font-bold text-primary-text">ملخص اليوم</h2>
         <ErrorState
           error={error.error}
           fallback="تعذّر تحميل ملخص اليوم"
@@ -142,7 +142,7 @@ export function TodaySummarySection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
+      <h2 className="text-lg font-bold text-primary-text">ملخص اليوم</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {activeStoppedCards.map((card) => (
@@ -156,7 +156,7 @@ export function TodaySummarySection({
           />
         ))}
         <SummaryStatCard
-          icon={<LiaStopwatchSolid className="w-6 h-6 text-primary" />}
+          icon={<LiaStopwatchSolid className="w-6 h-6 text-primary-text" />}
           iconBgClassName="bg-purple-100"
           label="أول محاولة تتم بعد"
           value={formatMinutesToArabic(firstAttempt.minutes)}

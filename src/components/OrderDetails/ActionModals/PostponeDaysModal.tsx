@@ -109,7 +109,7 @@ export default function PostponeDaysModal({
                   value={option.value}
                   checked={selectedDuration === option.value}
                   onChange={() => setSelectedDuration(option.value)}
-                  className="w-5 h-5 text-primary border-gray-300 focus:ring-primary focus:ring-2"
+                  className="w-5 h-5 text-primary-text border-gray-300 focus:ring-primary focus:ring-2"
                 />
                 <span className="text-base font-bold text-foreground">
                   {option.label}

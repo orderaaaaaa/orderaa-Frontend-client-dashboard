@@ -19,7 +19,7 @@ export function ConfirmationAttemptsSection({
   if (isLoading) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
+        <h2 className="text-lg font-bold text-primary-text">عدد محاولات التأكيد</h2>
         <div className="bg-card rounded-lg p-6 border border-gray-100 animate-pulse">
           <div className="h-[350px] bg-gray-100 rounded" />
         </div>
@@ -30,7 +30,7 @@ export function ConfirmationAttemptsSection({
   if (error?.isError) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
+        <h2 className="text-lg font-bold text-primary-text">عدد محاولات التأكيد</h2>
         <ErrorState
           error={error.error}
           fallback="تعذّر تحميل محاولات التأكيد"
@@ -43,7 +43,7 @@ export function ConfirmationAttemptsSection({
   if (data.categories.length === 0) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
+        <h2 className="text-lg font-bold text-primary-text">عدد محاولات التأكيد</h2>
         <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
       </section>
     );
@@ -51,7 +51,7 @@ export function ConfirmationAttemptsSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-bold text-primary">عدد محاولات التأكيد</h2>
+      <h2 className="text-lg font-bold text-primary-text">عدد محاولات التأكيد</h2>
       <div className="bg-card rounded-lg p-6 border border-gray-100">
         <ColumnChart
           categories={data.categories}

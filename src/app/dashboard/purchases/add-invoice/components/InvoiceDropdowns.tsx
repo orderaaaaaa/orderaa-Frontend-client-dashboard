@@ -56,7 +56,7 @@ const InvoiceDropdowns = memo(
       <div className="sm:px-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-base font-normal">
-            <LiaTagSolid className="w-6 h-6 text-primary" />
+            <LiaTagSolid className="w-6 h-6 text-primary-text" />
             <span>المورد</span>
           </label>
           <SearchableSelect
@@ -70,7 +70,7 @@ const InvoiceDropdowns = memo(
         </div>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-base font-normal">
-            <LiaUserTieSolid className="w-6 h-6 text-primary" />
+            <LiaUserTieSolid className="w-6 h-6 text-primary-text" />
             <span>الموظف</span>
           </label>
           <SearchableSelect
@@ -84,7 +84,7 @@ const InvoiceDropdowns = memo(
         {showPayment && (
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-base font-normal">
-              <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary" />
+              <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary-text" />
               <span>حالة الدفع</span>
             </label>
             <SearchableSelect
@@ -98,7 +98,7 @@ const InvoiceDropdowns = memo(
         {showPayment && paymentStatus === 'partial' && (
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-base font-normal">
-              <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary" />
+              <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary-text" />
               <span>المبلغ المدفوع</span>
             </label>
             <Input

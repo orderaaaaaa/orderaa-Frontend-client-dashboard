@@ -31,7 +31,7 @@ export default function SelectModeControls({
             aria-label="إلغاء التحديد"
             onClick={onClear}
           >
-            <X className="text-primary h-5 w-5" />
+            <X className="text-primary-text h-5 w-5" />
           </Button>
         )}
         <span className="text-sm text-gray-600 whitespace-nowrap empty:hidden" aria-live="polite">

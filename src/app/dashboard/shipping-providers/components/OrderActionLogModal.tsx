@@ -86,7 +86,7 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
         <span className="break-words text-sm font-semibold text-foreground">
           {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
         </span>
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">{nameLabel}</span>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary-text">{nameLabel}</span>
         <span>{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
         <span className="ms-auto whitespace-nowrap">
           {formatDateTime(event.createdAt)} ({getTimeAgo(event.createdAt)})

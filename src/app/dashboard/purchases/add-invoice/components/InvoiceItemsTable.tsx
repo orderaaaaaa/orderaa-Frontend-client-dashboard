@@ -342,7 +342,7 @@ const InvoiceItemsTable = memo(
             <div className="flex justify-end px-2 py-3 sm:px-4 sm:py-4">
               <div className="flex items-center gap-2 text-sm sm:text-base font-bold">
                 <span className="text-gray-800">الإجمالي الكلي</span>
-                <span className="text-primary">{formatMoney(String(grandTotal))}</span>
+                <span className="text-primary-text">{formatMoney(String(grandTotal))}</span>
               </div>
             </div>
           )}

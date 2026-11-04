@@ -22,14 +22,14 @@ const TodaysFollowups: React.FC<TodaysFollowupsProps> = ({
       <div className="flex items-center justify-between px-1">
         <div className="flex flex-col gap-2 mb-10 ">
           <div className="flex items-center gap-2">
-            <BsClock className="w-5 h-5 text-primary" />
+            <BsClock className="w-5 h-5 text-primary-text" />
             <h2 className="text-2xl font-bold text-gray-900">متابعات اليوم</h2>
           </div>
           <p className="text-right text-gray-600 text-xl">
             4 متابعة مطلوبة - ابدأ الآن
           </p>
         </div>
-        <button className="border border-gray-900 px-6 py-2 rounded-md text-primary font-semibold cursor-pointer">
+        <button className="border border-gray-900 px-6 py-2 rounded-md text-primary-text font-semibold cursor-pointer">
           مشاهدة المزيد
         </button>
       </div>

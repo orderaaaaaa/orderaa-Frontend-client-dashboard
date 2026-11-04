@@ -163,7 +163,7 @@ export default function EmployeeForm({
         <div className="w-full flex flex-col gap-2">
           <Label
             htmlFor="edit-employee-roles"
-            icon={<LiaUserShieldSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaUserShieldSolid className="w-6 h-6 text-primary-text" />}
             text="أدوار الموظف"
           />
           <MultiSelectDropdown
@@ -185,7 +185,7 @@ export default function EmployeeForm({
       {!canAssignRoles && (employee.roles?.length ?? 0) > 0 && (
         <div className="w-full flex flex-col gap-2">
           <div className="flex items-center gap-2 mb-1 justify-start w-full">
-            <LiaUserShieldSolid className="w-6 h-6 text-primary" />
+            <LiaUserShieldSolid className="w-6 h-6 text-primary-text" />
             <span className="text-base md:text-lg font-normal">
               أدوار الموظف
             </span>
@@ -194,7 +194,7 @@ export default function EmployeeForm({
             {employee.roles?.map((role) => (
               <span
                 key={role.id}
-                className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+                className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary-text"
               >
                 {role.name}
               </span>
@@ -208,7 +208,7 @@ export default function EmployeeForm({
           <Label
             htmlFor="edit-employee-full-name"
             required
-            icon={<LiaUserSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaUserSolid className="w-6 h-6 text-primary-text" />}
             text="الاسم الكامل"
           />
           <Input
@@ -224,7 +224,7 @@ export default function EmployeeForm({
           <Label
             htmlFor="edit-employee-phone"
             required
-            icon={<LiaPhoneSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaPhoneSolid className="w-6 h-6 text-primary-text" />}
             text="رقم الهاتف"
           />
           <Input
@@ -245,7 +245,7 @@ export default function EmployeeForm({
         <div>
           <Label
             htmlFor="edit-employee-email"
-            icon={<LiaEnvelopeSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaEnvelopeSolid className="w-6 h-6 text-primary-text" />}
             text="البريد الإلكتروني"
           />
           <Input
@@ -262,7 +262,7 @@ export default function EmployeeForm({
         <div>
           <Label
             htmlFor="edit-employee-governorate"
-            icon={<LiaMapMarkerAltSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaMapMarkerAltSolid className="w-6 h-6 text-primary-text" />}
             text="المحافظة"
           />
           <SearchableSelect
@@ -282,7 +282,7 @@ export default function EmployeeForm({
         <div>
           <Label
             htmlFor="edit-employee-password"
-            icon={<LiaLockSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaLockSolid className="w-6 h-6 text-primary-text" />}
             text="كلمة المرور الجديدة"
           />
           <Input
@@ -298,7 +298,7 @@ export default function EmployeeForm({
         <div>
           <Label
             htmlFor="edit-employee-confirm-password"
-            icon={<LiaLockSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaLockSolid className="w-6 h-6 text-primary-text" />}
             text="تأكيد كلمة المرور"
           />
           <Input
@@ -317,7 +317,7 @@ export default function EmployeeForm({
         <div>
           <Label
             htmlFor="edit-employee-working-hours"
-            icon={<LiaClockSolid className="w-6 h-6 text-primary" />}
+            icon={<LiaClockSolid className="w-6 h-6 text-primary-text" />}
             text="ساعات العمل"
           />
           <WorkHoursTimePicker

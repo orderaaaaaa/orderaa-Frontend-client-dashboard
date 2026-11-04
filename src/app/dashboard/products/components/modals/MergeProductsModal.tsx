@@ -170,7 +170,7 @@ function ProductColumn({
         </div>
       </div>
       {isTarget ? (
-        <p className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-primary">
+        <p className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-primary-text">
           <LiaStarSolid className="size-4" aria-hidden />
           المنتج الرئيسي
         </p>
@@ -626,7 +626,7 @@ const MergeProductsModal = ({
                         'inline-flex min-h-8 items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium',
                         colliding
                           ? 'border-red-400 bg-red-50 text-red-700'
-                          : 'border-primary/20 bg-primary/10 text-primary',
+                          : 'border-primary/20 bg-primary/10 text-primary-text',
                       )}
                     >
                       {colliding && <AlertTriangle className="size-3" aria-hidden />}

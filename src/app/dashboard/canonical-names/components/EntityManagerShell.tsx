@@ -183,7 +183,7 @@ export function EntityManagerShell({
                     className={cn(
                       'inline-flex min-h-11 items-center whitespace-nowrap rounded-md border px-3 py-1.5 text-sm sm:min-h-0',
                       active
-                        ? 'border-primary bg-primary/5 font-semibold text-primary'
+                        ? 'border-primary bg-primary/5 font-semibold text-primary-text'
                         : 'text-foreground hover:bg-accent',
                     )}
                   >

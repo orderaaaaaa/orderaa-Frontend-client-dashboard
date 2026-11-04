@@ -242,7 +242,7 @@ export function ProductStockTable({
         {canViewOperations && (
           <Link
             href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary/5"
           >
             <ArrowLeftRight className="size-4" aria-hidden="true" />
             <span>العمليات</span>
@@ -320,7 +320,7 @@ export function ProductStockTable({
               ))}
               <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-2 text-sm">
                 <span className="font-bold text-gray-600">الإجمالي</span>
-                <span className="font-bold text-primary">{formatStockNumber(grandTotal)}</span>
+                <span className="font-bold text-primary-text">{formatStockNumber(grandTotal)}</span>
               </div>
             </div>
           </>
@@ -393,7 +393,7 @@ export function ProductStockTable({
                       {formatStockNumber(total)}
                     </TableCell>
                   ))}
-                  <TableCell className="px-4 py-3 text-center text-sm font-bold text-primary border-l border-gray-200 last:border-l-0">
+                  <TableCell className="px-4 py-3 text-center text-sm font-bold text-primary-text border-l border-gray-200 last:border-l-0">
                     {formatStockNumber(grandTotal)}
                   </TableCell>
                 </TableRow>

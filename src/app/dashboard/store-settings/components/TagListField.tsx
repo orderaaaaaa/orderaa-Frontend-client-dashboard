@@ -65,7 +65,7 @@ export function TagListField({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <label
             htmlFor={inputId}

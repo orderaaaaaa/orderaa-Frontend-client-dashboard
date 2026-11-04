@@ -126,13 +126,13 @@ function ScopeCard({ row }: { row: ScopeRow }) {
     >
       <div className="flex min-w-0 items-center gap-3">
         <div className="shrink-0 rounded-lg bg-primary/10 p-2">
-          <Icon className="size-5 text-primary" />
+          <Icon className="size-5 text-primary-text" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <Link
               href={row.href}
-              className="truncate rounded text-sm font-bold text-gray-900 after:absolute after:inset-0 after:content-[''] hover:text-primary focus-visible:outline-none md:text-base"
+              className="truncate rounded text-sm font-bold text-gray-900 after:absolute after:inset-0 after:content-[''] hover:text-primary-text focus-visible:outline-none md:text-base"
             >
               {row.title}
             </Link>

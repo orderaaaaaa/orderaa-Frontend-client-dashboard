@@ -184,7 +184,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
                   اتبع التعليمات أدناه لإكمال الربط
                 </p>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-primary bg-card px-3 py-1.5 rounded-full border border-primary/20">
+              <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-primary-text bg-card px-3 py-1.5 rounded-full border border-primary/20">
                 <LiaBoltSolid className="w-3.5 h-3.5" />
                 تأكيد آلي
               </div>

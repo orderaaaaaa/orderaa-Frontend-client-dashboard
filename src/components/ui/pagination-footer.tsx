@@ -111,7 +111,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
             aria-label="الصفحة السابقة"
             className="size-10 sm:size-10 p-0 bg-card cursor-pointer"
           >
-            <ChevronRight className="h-4 w-4 text-primary" />
+            <ChevronRight className="h-4 w-4 text-primary-text" />
           </Button>
           <div className="flex items-center gap-1">
             {pageNumbers.map((page, index) => (
@@ -128,7 +128,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
                     className={`size-10 sm:size-10 p-0 cursor-pointer ${
                       page === currentPage
                         ? 'bg-primary text-white hover:bg-brand-hover'
-                        : 'text-primary hover:bg-gray-50'
+                        : 'text-primary-text hover:bg-gray-50'
                     }`}
                   >
                     {page}
@@ -145,7 +145,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
             aria-label="الصفحة التالية"
             className="size-10 sm:size-10 p-0 bg-card cursor-pointer"
           >
-            <ChevronLeft className="h-4 w-4 text-primary" />
+            <ChevronLeft className="h-4 w-4 text-primary-text" />
           </Button>
         </nav>
       </div>

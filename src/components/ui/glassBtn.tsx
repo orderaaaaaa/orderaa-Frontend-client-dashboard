@@ -29,7 +29,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
         rounded-3xl 
         px-5 py-2.5 
         text-xs font-bold  
-        text-primary 
+        text-primary-text 
 
         backdrop-blur-md 
         border-[1.5px] border-primary

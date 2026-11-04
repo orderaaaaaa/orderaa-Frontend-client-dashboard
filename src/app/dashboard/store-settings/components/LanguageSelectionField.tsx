@@ -12,7 +12,7 @@ export function LanguageSelectionField({
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0">
-          <span className="text-primary font-bold text-sm sm:text-base">A/ع</span>
+          <span className="text-primary-text font-bold text-sm sm:text-base">A/ع</span>
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
@@ -35,7 +35,7 @@ export function LanguageSelectionField({
             />
             <div className="absolute w-2.5 h-2.5 bg-primary rounded-full scale-0 peer-checked:scale-100 transition-transform" />
           </div>
-          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary transition-colors">
+          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary-text transition-colors">
             العربية
           </span>
         </label>
@@ -50,7 +50,7 @@ export function LanguageSelectionField({
             />
             <div className="absolute w-2.5 h-2.5 bg-primary rounded-full scale-0 peer-checked:scale-100 transition-transform" />
           </div>
-          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary transition-colors">
+          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary-text transition-colors">
             English
           </span>
         </label>

@@ -163,7 +163,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
           </Button>
         )}
         {Icon && (
-          <div className="absolute start-3 top-1/2 transform -translate-y-1/2 text-primary">
+          <div className="absolute start-3 top-1/2 transform -translate-y-1/2 text-primary-text">
             <Icon size={20} />
           </div>
         )}

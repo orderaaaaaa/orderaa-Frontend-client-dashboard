@@ -26,5 +26,5 @@ export const invoiceListTabToQuery = (tab: InvoiceListTab): InvoiceListQuery => 
 export const INVOICE_LIFECYCLE_BADGE: Record<InvoiceLifecycle, { label: string; className: string }> = {
   DRAFT: { label: 'قيد الاستلام', className: 'border-border bg-muted text-muted-foreground' },
   OPEN: { label: 'مفتوحة', className: 'border-warning/30 bg-warning/10 text-foreground' },
-  CLOSED: { label: 'مغلقة', className: 'border-primary/30 bg-primary/10 text-primary' },
+  CLOSED: { label: 'مغلقة', className: 'border-primary/30 bg-primary/10 text-primary-text' },
 };

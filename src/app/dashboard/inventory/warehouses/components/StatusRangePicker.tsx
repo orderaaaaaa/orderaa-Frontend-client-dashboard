@@ -99,7 +99,7 @@ export function StatusRangePicker({
             {preview.map((status) => (
               <span
                 key={status}
-                className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
+                className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary-text"
               >
                 {label(status)}
               </span>

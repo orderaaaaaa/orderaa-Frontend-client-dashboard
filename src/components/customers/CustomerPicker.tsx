@@ -50,7 +50,7 @@ export default function CustomerPicker({
             onChange(null);
             setQuery('');
           }}
-          className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-primary hover:bg-muted"
+          className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-primary-text hover:bg-muted"
         >
           <X className="size-4" aria-hidden="true" />
           {t('customerReturn.customer.change')}

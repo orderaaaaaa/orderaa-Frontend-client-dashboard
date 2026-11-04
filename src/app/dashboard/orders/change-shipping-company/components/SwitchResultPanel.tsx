@@ -43,7 +43,7 @@ function ResultItem({
       <CopyableCode value={row.order.code} label="نسخ كود الطلب">
         <Link
           href={`/dashboard/orders/${row.order.id}`}
-          className="font-mono text-primary hover:underline"
+          className="font-mono text-primary-text hover:underline"
         >
           {row.order.code}
         </Link>

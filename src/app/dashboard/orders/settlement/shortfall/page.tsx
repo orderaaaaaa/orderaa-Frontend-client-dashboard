@@ -107,7 +107,7 @@ export default function ShortfallSettlementPage() {
           <CopyableCode value={row.code} label="نسخ كود الطلب" className="min-w-0">
             <Link
               href={`/dashboard/orders/${row.id}`}
-              className="font-mono font-semibold text-primary hover:underline truncate"
+              className="font-mono font-semibold text-primary-text hover:underline truncate"
             >
               {row.code}
             </Link>
@@ -138,7 +138,7 @@ export default function ShortfallSettlementPage() {
           <CopyableCode value={row.code} label="نسخ كود الطلب" className="min-w-0">
             <Link
               href={`/dashboard/orders/${row.id}`}
-              className="text-primary hover:underline font-mono"
+              className="text-primary-text hover:underline font-mono"
             >
               {row.code}
             </Link>

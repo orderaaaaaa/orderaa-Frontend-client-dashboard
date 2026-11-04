@@ -59,7 +59,7 @@ export default function SettlementBatchOrdersPanel({
                       <CopyableCode value={row.orderCode} label="نسخ كود الطلب">
                         <Link
                           href={`/dashboard/orders/${row.orderId}`}
-                          className="text-primary hover:underline"
+                          className="text-primary-text hover:underline"
                         >
                           {row.orderCode}
                         </Link>
@@ -145,7 +145,7 @@ export default function SettlementBatchOrdersPanel({
                     <CopyableCode value={row.orderCode} label="نسخ كود الطلب">
                       <Link
                         href={`/dashboard/orders/${row.orderId}`}
-                        className="text-primary hover:underline"
+                        className="text-primary-text hover:underline"
                       >
                         {row.orderCode}
                       </Link>

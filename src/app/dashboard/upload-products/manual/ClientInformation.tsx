@@ -86,7 +86,7 @@ function ClientInformation({
                   variant="ghost"
                   size="sm"
                   onClick={handleAddPhone}
-                  className="flex min-h-10 items-center gap-1 text-primary hover:text-primary hover:bg-purple-50 px-2 py-1 h-auto"
+                  className="flex min-h-10 items-center gap-1 text-primary-text hover:text-primary-text hover:bg-purple-50 px-2 py-1 h-auto"
                 >
                   <LiaPlusSolid className="w-4 h-4" />
                   <span className="text-sm font-medium">إضافة رقم</span>
@@ -140,7 +140,7 @@ function ClientInformation({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsModalOpen(true)}
-                    className="text-primary hover:text-primary hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold me-auto"
+                    className="text-primary-text hover:text-primary-text hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold me-auto"
                   >
                     عرض الطلبات
                   </Button>

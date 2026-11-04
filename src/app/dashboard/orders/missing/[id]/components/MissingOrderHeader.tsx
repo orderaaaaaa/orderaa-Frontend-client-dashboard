@@ -74,7 +74,7 @@ export function MissingOrderHeader({ row }: MissingOrderHeaderProps) {
             <button
               type="button"
               onClick={() => setIsDiagnosticOpen((v) => !v)}
-              className="flex items-center gap-1 text-sm font-semibold text-primary"
+              className="flex items-center gap-1 text-sm font-semibold text-primary-text"
             >
               تفاصيل الخطأ
               <LiaChevronDownSolid

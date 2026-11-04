@@ -144,7 +144,7 @@ export default function ValidationResultsPage() {
           <button
             type="button"
             onClick={() => clearAndGo('/dashboard/upload-products/excel')}
-            className="mt-4 min-h-10 px-4 text-primary hover:underline"
+            className="mt-4 min-h-10 px-4 text-primary-text hover:underline"
           >
             العودة
           </button>
@@ -281,7 +281,7 @@ export default function ValidationResultsPage() {
             <button
               type="button"
               onClick={() => clearAndGo('/dashboard/orders/missing')}
-              className="min-h-10 px-4 py-2 font-semibold text-primary hover:underline"
+              className="min-h-10 px-4 py-2 font-semibold text-primary-text hover:underline"
             >
               قائمة المفقودات
             </button>

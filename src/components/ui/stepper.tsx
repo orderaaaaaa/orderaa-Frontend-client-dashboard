@@ -51,7 +51,7 @@ function Stepper({
                     isCompleted
                       ? 'border-primary bg-primary text-white'
                       : isActive
-                        ? 'border-primary bg-primary/10 text-primary'
+                        ? 'border-primary bg-primary/10 text-primary-text'
                         : 'border-gray-300 bg-card text-gray-400'
                   )}
                 >
@@ -65,9 +65,9 @@ function Stepper({
                   className={cn(
                     'text-xs font-medium whitespace-nowrap transition-colors duration-300',
                     isCompleted
-                      ? 'text-primary'
+                      ? 'text-primary-text'
                       : isActive
-                        ? 'text-primary font-bold'
+                        ? 'text-primary-text font-bold'
                         : 'text-gray-400'
                   )}
                 >

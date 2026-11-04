@@ -143,7 +143,7 @@ export function ChangeCompanyContent() {
       <div className="flex flex-col gap-1">
         <Link
           href="/dashboard/orders/print-orders"
-          className="w-fit text-sm text-primary hover:underline"
+          className="w-fit text-sm text-primary-text hover:underline"
         >
           {CHANGE_COMPANY_TEXT.backToPackaging}
         </Link>

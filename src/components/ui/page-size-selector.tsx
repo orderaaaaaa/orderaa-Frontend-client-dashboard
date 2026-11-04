@@ -82,7 +82,7 @@ export default function PageSizeSelector({
                 key={size}
                 onClick={() => handleSizeSelect(size)}
                 className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size && !(isCapped && size === maxSize)
-                    ? 'bg-primary/20 text-primary font-medium'
+                    ? 'bg-primary/20 text-primary-text font-medium'
                     : 'text-gray-700'
                   }`}
               >
@@ -94,7 +94,7 @@ export default function PageSizeSelector({
                 type="button"
                 onClick={() => handleSizeSelect(allSize)}
                 className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === allSize
-                    ? 'bg-primary/20 text-primary font-medium'
+                    ? 'bg-primary/20 text-primary-text font-medium'
                     : 'text-gray-700'
                   }`}
               >

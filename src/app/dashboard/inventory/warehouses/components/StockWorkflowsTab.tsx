@@ -880,7 +880,7 @@ export function StockWorkflowsTab() {
                     // The event type is fixed at creation — what fires a rule
                     // is what the rule IS. Changing it means a new rule, so a
                     // saved card shows it rather than offering it.
-                    <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-primary">
+                    <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-primary-text">
                       {t(eventLabelKey)}
                     </span>
                   ) : (

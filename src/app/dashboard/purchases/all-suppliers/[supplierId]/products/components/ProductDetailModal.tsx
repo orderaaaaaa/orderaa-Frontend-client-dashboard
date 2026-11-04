@@ -155,7 +155,7 @@ export default function ProductDetailModal({
               key={stat.label}
               className="flex items-center gap-3 bg-card border border-gray-100 rounded-xl p-3"
             >
-              <stat.icon className="w-5 h-5 text-primary shrink-0" />
+              <stat.icon className="w-5 h-5 text-primary-text shrink-0" />
               <div className="flex flex-col items-start flex-1 gap-1">
                 <span className="text-xs font-bold">{stat.label}</span>
                 <span className="text-sm sm:text-base font-bold text-gray-800">

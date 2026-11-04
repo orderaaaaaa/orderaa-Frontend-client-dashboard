@@ -61,7 +61,7 @@ export function ScanInput({
         <div className="relative">
           <ScanLine
             aria-hidden="true"
-            className="absolute start-3 top-1/2 -translate-y-1/2 size-5 text-primary"
+            className="absolute start-3 top-1/2 -translate-y-1/2 size-5 text-primary-text"
           />
           <input
             ref={inputRef}

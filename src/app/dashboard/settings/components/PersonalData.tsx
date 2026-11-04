@@ -122,7 +122,7 @@ export default function PersonalData() {
     <div className="bg-card rounded-xl p-6 shadow-sm" dir="rtl">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-3 bg-primary/10 rounded-lg">
-          <LiaUserEditSolid className="w-6 h-6 text-primary" />
+          <LiaUserEditSolid className="w-6 h-6 text-primary-text" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900">البيانات الشخصية</h2>
       </div>
@@ -131,7 +131,7 @@ export default function PersonalData() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div className="space-y-2">
             <label htmlFor="personal-full-name" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaUserSolid className="w-5 h-5 text-primary" />
+              <LiaUserSolid className="w-5 h-5 text-primary-text" />
               <span>الاسم الكامل</span>
             </label>
             <Input
@@ -148,7 +148,7 @@ export default function PersonalData() {
 
           <div className="space-y-2">
             <label htmlFor="personal-phone" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaPhoneSolid className="w-5 h-5 text-primary" />
+              <LiaPhoneSolid className="w-5 h-5 text-primary-text" />
               <span>رقم الهاتف</span>
             </label>
             <Input
@@ -168,7 +168,7 @@ export default function PersonalData() {
 
           <div className="space-y-2">
             <label htmlFor="personal-email" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaEnvelope className="w-5 h-5 text-primary" />
+              <LiaEnvelope className="w-5 h-5 text-primary-text" />
               <span>البريد الإلكتروني</span>
             </label>
             <Input
@@ -187,7 +187,7 @@ export default function PersonalData() {
 
           <div className="space-y-2">
             <label htmlFor="personal-governorate" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaBuilding className="w-5 h-5 text-primary" />
+              <LiaBuilding className="w-5 h-5 text-primary-text" />
               <span>المحافظة</span>
             </label>
             <SearchableSelect
@@ -207,7 +207,7 @@ export default function PersonalData() {
 
           <div className="space-y-2">
             <label htmlFor="personal-city" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <LiaBuilding className="w-5 h-5 text-primary" />
+              <LiaBuilding className="w-5 h-5 text-primary-text" />
               <span>المنطقة</span>
             </label>
             <SearchableSelect

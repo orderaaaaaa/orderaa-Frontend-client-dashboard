@@ -81,7 +81,7 @@ export function LogisticsSettingsSection({
     return (
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          <LiaTruckSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <LiaTruckSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
               إعدادات اللوجستيك والمحافظات
@@ -98,7 +98,7 @@ export function LogisticsSettingsSection({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <LiaTruckSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <LiaTruckSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             إعدادات اللوجستيك والمحافظات
@@ -118,7 +118,7 @@ export function LogisticsSettingsSection({
           >
             <AccordionTrigger className="px-4 py-3 hover:bg-muted/50">
               <div className="flex items-center gap-3">
-                <LiaTruckSolid className="w-5 h-5 text-primary" />
+                <LiaTruckSolid className="w-5 h-5 text-primary-text" />
                 <span className="font-semibold text-gray-900">
                   {company.name}
                 </span>

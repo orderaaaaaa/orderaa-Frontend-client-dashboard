@@ -26,7 +26,7 @@ function InProcessShipmentsPage() {
           <p className="text-sm text-muted-foreground">جهة الشحن غير موجودة</p>
           <Link
             href="/dashboard/shipping-providers"
-            className="text-xs text-primary hover:underline"
+            className="text-xs text-primary-text hover:underline"
           >
             رجوع إلى جهات الشحن
           </Link>

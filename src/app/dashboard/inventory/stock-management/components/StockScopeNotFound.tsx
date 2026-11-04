@@ -11,7 +11,7 @@ export function StockScopeNotFound() {
       <p className="text-lg font-medium text-gray-600">المخزن غير موجود</p>
       <Link
         href={STOCK_MANAGEMENT_BASE_PATH}
-        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary-text hover:underline"
       >
         <LiaArrowRightSolid className="size-4" />
         كل المخازن

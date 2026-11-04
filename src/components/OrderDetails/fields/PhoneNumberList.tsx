@@ -226,7 +226,7 @@ export function PhoneNumberList({
           <Button
             variant="link"
             onClick={phones.handleAdd}
-            className="text-primary-text text-sm font-bold hover:text-primary/80 p-0 h-auto gap-2 hover:no-underline"
+            className="text-primary-text text-sm font-bold hover:text-primary-text/80 p-0 h-auto gap-2 hover:no-underline"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف

@@ -7,8 +7,8 @@ const STATUS_COLORS: Record<string, string> = {
   WHATSAPP_CONFIRMED: 'bg-green-50 text-[#49c116] border border-green-200',
   CALL_AGAIN: 'bg-purple-50 text-purple-700 border border-purple-200',
 
-  PREPARED: 'bg-primary/10 text-primary border border-primary/10',
-  SHIPPING: 'bg-primary/10 text-primary border border-primary/10',
+  PREPARED: 'bg-primary/10 text-primary-text border border-primary/10',
+  SHIPPING: 'bg-primary/10 text-primary-text border border-primary/10',
   WITH_DRIVER: 'bg-teal-50 text-[#0f766e] border border-teal-100',
   WAITING_FOR_PACKAGING: 'bg-orange-50 text-[#ff9800] border border-orange-200',
   WAITING_FOR_APPROVAL: 'bg-orange-50 text-[#b45309] border border-orange-200',

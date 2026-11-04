@@ -116,7 +116,7 @@ export const EmployeeCard = memo(function EmployeeCard({
               {roles.map((role) => (
                 <span
                   key={role.id}
-                  className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium"
+                  className="inline-block bg-primary/10 text-primary-text px-3 py-1 rounded-full text-sm font-medium"
                 >
                   {role.name}
                 </span>
@@ -147,7 +147,7 @@ export const EmployeeCard = memo(function EmployeeCard({
           <div
             className={`w-20 h-20 rounded-full border-2 flex items-center justify-center ${borderClass}`}
           >
-            <User size={32} className="text-primary" strokeWidth={2} />
+            <User size={32} className="text-primary-text" strokeWidth={2} />
           </div>
 
           <div
@@ -215,7 +215,7 @@ export const EmployeeCard = memo(function EmployeeCard({
         <div className="col-span-2 grid grid-cols-2 gap-4">
           <a
             href={`tel:${normalizedPhone}`}
-            className="bg-card hover:bg-gray-50 text-primary
+            className="bg-card hover:bg-gray-50 text-primary-text
              border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2
@@ -230,7 +230,7 @@ export const EmployeeCard = memo(function EmployeeCard({
 
           <a
             href={`mailto:${employee.email}`}
-            className="bg-card hover:bg-gray-50 text-primary
+            className="bg-card hover:bg-gray-50 text-primary-text
              border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2

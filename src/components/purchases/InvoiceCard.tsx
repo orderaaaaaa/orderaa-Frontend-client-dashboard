@@ -169,7 +169,7 @@ const InvoiceCard = memo(
     const typeConfig = TRANSACTION_TYPE_CONFIG[invoice.transactionType];
     const typeColors = typeConfig ?? {
       text: 'text-gray-800',
-      iconColor: 'text-primary',
+      iconColor: 'text-primary-text',
       icon: LiaCheckCircleSolid,
     };
 
@@ -268,21 +268,21 @@ const InvoiceCard = memo(
               {titleHref ? (
                 <Link
                   href={titleHref}
-                  className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
+                  className="flex items-center gap-2 p-0 h-auto hover:text-primary-text hover:underline"
                 >
-                  <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                  <span className="min-w-0 text-lg font-bold text-primary">
+                  <LiaFileInvoiceSolid className="text-primary-text shrink-0" style={{ width: 24, height: 24 }} />
+                  <span className="min-w-0 text-lg font-bold text-primary-text">
                     فاتورة رقم  <span dir="ltr" className="whitespace-nowrap">{invoice.invoiceNumber}</span>
                   </span>
                 </Link>
               ) : (
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                  className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary-text hover:underline"
                   onClick={onTitleClick}
                 >
-                  <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                  <span className="min-w-0 text-lg font-bold text-primary">
+                  <LiaFileInvoiceSolid className="text-primary-text shrink-0" style={{ width: 24, height: 24 }} />
+                  <span className="min-w-0 text-lg font-bold text-primary-text">
                     فاتورة رقم  <span dir="ltr" className="whitespace-nowrap">{invoice.invoiceNumber}</span>
                   </span>
                 </Button>
@@ -320,8 +320,8 @@ const InvoiceCard = memo(
               >
                 <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
                 <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/20 rounded-full px-3 py-1 group-hover:bg-primary/10 group-hover:border-primary/40 transition-colors">
-                  <field.icon className="w-4 h-4 text-primary" />
-                  <span className="text-base font-semibold text-primary">
+                  <field.icon className="w-4 h-4 text-primary-text" />
+                  <span className="text-base font-semibold text-primary-text">
                     {field.value}
                   </span>
                 </div>
@@ -330,7 +330,7 @@ const InvoiceCard = memo(
               <div key={field.label} className="flex flex-col items-start sm:items-center gap-1.5">
                 <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
                 <div className="flex items-center gap-1.5">
-                  <field.icon className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary')} />
+                  <field.icon className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary-text')} />
                   <span className={clsx('text-base font-semibold', field.valueClassName ?? 'text-gray-800')}>
                     {field.value}
                   </span>

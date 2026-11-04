@@ -12,10 +12,10 @@ interface BreadcrumbProps {
 }
 
 const FIRST_ITEM_CLASSES =
-  'text-primary font-bold text-xl md:text-3xl transition-all hover:opacity-80';
+  'text-primary-text font-bold text-xl md:text-3xl transition-all hover:opacity-80';
 
 const SECONDARY_ITEM_CLASSES =
-  'font-normal text-lg md:text-xl text-foreground-heading transition-all hover:text-primary';
+  'font-normal text-lg md:text-xl text-foreground-heading transition-all hover:text-primary-text';
 
 function findBackItem(items: BreadcrumbItem[]) {
   for (let index = items.length - 2; index >= 0; index -= 1) {

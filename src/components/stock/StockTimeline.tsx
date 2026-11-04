@@ -125,7 +125,7 @@ function ReferenceLabel({ reference }: { reference: StockTimelineReferenceDto })
     return <span className="text-xs text-muted-foreground">{text}</span>;
   }
   return (
-    <Link href={reference.href} className="text-xs font-medium text-primary hover:underline">
+    <Link href={reference.href} className="text-xs font-medium text-primary-text hover:underline">
       {text}
     </Link>
   );

@@ -111,7 +111,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
               <stat.icon
                 className={clsx(
                   'w-4 h-4 sm:w-5 sm:h-5',
-                  stat.iconClassName ?? stat.className ?? 'text-primary',
+                  stat.iconClassName ?? stat.className ?? 'text-primary-text',
                 )}
               />
               <span className={clsx('text-base sm:text-lg font-bold text-center break-words', stat.className ?? 'text-gray-800')}>{stat.value}</span>

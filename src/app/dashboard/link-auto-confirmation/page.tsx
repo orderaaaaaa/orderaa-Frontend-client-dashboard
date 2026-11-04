@@ -66,7 +66,7 @@ export default function AutoConfirmationPage() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold tracking-wider text-primary uppercase mb-1">
+                <p className="text-xs font-semibold tracking-wider text-primary-text uppercase mb-1">
                   ما هو التأكيد الآلي؟
                 </p>
                 <p className="text-gray-700 text-base leading-relaxed">
@@ -79,15 +79,15 @@ export default function AutoConfirmationPage() {
 
             <div className="flex flex-wrap gap-2 md:flex-nowrap md:gap-3 md:flex-shrink-0">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
-                <LiaClockSolid className="w-3.5 h-3.5 text-primary" />
+                <LiaClockSolid className="w-3.5 h-3.5 text-primary-text" />
                 توفير الوقت
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
-                <LiaChartLineSolid className="w-3.5 h-3.5 text-primary" />
+                <LiaChartLineSolid className="w-3.5 h-3.5 text-primary-text" />
                 زيادة التأكيد
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/80 border border-primary/15 text-xs font-medium text-gray-700 shadow-sm">
-                <LiaInfinitySolid className="w-3.5 h-3.5 text-primary" />
+                <LiaInfinitySolid className="w-3.5 h-3.5 text-primary-text" />
                 عمل 24/7
               </span>
             </div>

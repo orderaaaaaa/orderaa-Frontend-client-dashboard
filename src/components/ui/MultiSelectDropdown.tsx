@@ -228,7 +228,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                 {selectedDisplayValues.map((display, idx) => (
                   <span
                     key={value[idx]}
-                    className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full"
+                    className="inline-flex items-center gap-1 bg-primary/10 text-primary-text text-xs px-2 py-0.5 rounded-full"
                   >
                     {display}
                     <X
@@ -272,7 +272,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
             <button
               type="button"
               onClick={toggleSelectAll}
-              className="text-xs md:text-sm font-medium text-primary hover:underline"
+              className="text-xs md:text-sm font-medium text-primary-text hover:underline"
             >
               {allFilteredSelected ? clearAllLabel : selectAllLabel}
             </button>

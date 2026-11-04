@@ -108,7 +108,7 @@ export const CustomerRow = memo(function CustomerRow({
                   aria-label={`واتساب ${phone}`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
+                  <LiaWhatsapp className="w-5 h-5 text-primary-text hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}

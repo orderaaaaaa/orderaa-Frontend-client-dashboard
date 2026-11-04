@@ -506,7 +506,7 @@ const EditIntegrationModal = ({
             type="button"
             variant="outline"
             onClick={() => setShowAddWebhook(true)}
-            className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary gap-2"
+            className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary-text hover:border-primary gap-2"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة ربط Webhook
@@ -605,7 +605,7 @@ const EditIntegrationModal = ({
             type="button"
             variant="outline"
             onClick={() => setShowAddApi(true)}
-            className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary gap-2"
+            className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary-text hover:border-primary gap-2"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة Client Secret

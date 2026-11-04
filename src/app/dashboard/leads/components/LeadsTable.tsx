@@ -48,7 +48,7 @@ const getStatusBadge = (status: string, statusText: string) => {
     trialEnding: { text: 'text-[#3085f2]', border: 'border-[#3085f2]' },
     paid: { text: 'text-[#3cc800]', border: 'border-[#3cc800]' },
     trialEnded: { text: 'text-[#f34336] dark:text-danger-text', border: 'border-[#f34336] dark:border-danger-border' },
-    new: { text: 'text-primary', border: 'border-primary' },
+    new: { text: 'text-primary-text', border: 'border-primary' },
   };
 
   const style = statusStyles[status] || statusStyles.new;

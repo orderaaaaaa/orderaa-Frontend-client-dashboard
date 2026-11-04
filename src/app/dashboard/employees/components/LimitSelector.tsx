@@ -53,7 +53,7 @@ export const LimitSelector = ({
             <div
               key={option}
               onClick={() => handleSelectLimit(option)}
-              className="text-primary text-center py-1 cursor-pointer hover:bg-primary/10"
+              className="text-primary-text text-center py-1 cursor-pointer hover:bg-primary/10"
             >
               {option}
             </div>

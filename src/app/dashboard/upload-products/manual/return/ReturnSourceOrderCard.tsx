@@ -96,7 +96,7 @@ function UnitChip({
       >
         <Check
           className={cn(
-            'size-4 shrink-0 text-primary',
+            'size-4 shrink-0 text-primary-text',
             !selected && 'invisible',
           )}
           aria-hidden="true"
@@ -165,7 +165,7 @@ function ReturnSourceOrderCard({
           <button
             type="button"
             onClick={() => onToggleOrder(selectableIds, !allSelected)}
-            className="text-sm font-medium text-primary hover:underline"
+            className="text-sm font-medium text-primary-text hover:underline"
           >
             {allSelected
               ? t('customerReturn.unit.clearAll')

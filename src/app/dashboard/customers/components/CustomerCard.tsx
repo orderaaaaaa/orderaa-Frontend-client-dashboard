@@ -109,7 +109,7 @@ export function CustomerCard({
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-x-4 gap-y-3 text-right px-4 py-4">
           <div className="space-y-3 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <LiaUserSolid size={18} className="text-primary shrink-0" aria-hidden />
+              <LiaUserSolid size={18} className="text-primary-text shrink-0" aria-hidden />
               <span className="font-medium break-words min-w-0">{customer.name}</span>
             </div>
 
@@ -123,7 +123,7 @@ export function CustomerCard({
                   onClick={(e) => e.stopPropagation()}
                   className="size-10 -m-2.5 flex items-center justify-center shrink-0"
                 >
-                  <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
+                  <LiaWhatsapp className="w-5 h-5 text-primary-text hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}
@@ -138,7 +138,7 @@ export function CustomerCard({
 
             {customer.email && (
               <div className="flex items-center gap-2 overflow-hidden">
-                <LiaEnvelopeSolid size={18} className="text-primary shrink-0" aria-hidden />
+                <LiaEnvelopeSolid size={18} className="text-primary-text shrink-0" aria-hidden />
                 <span dir="ltr" className="truncate font-medium text-sm">
                   {customer.email}
                 </span>
@@ -148,13 +148,13 @@ export function CustomerCard({
 
           <div className="space-y-3 min-w-0">
             <div className="flex items-center gap-2">
-              <LiaShoppingBagSolid size={18} className="text-primary shrink-0" aria-hidden />
+              <LiaShoppingBagSolid size={18} className="text-primary-text shrink-0" aria-hidden />
               <span className="font-medium">
                 عدد الطلبات: <span className="font-medium">{customer.numberOfOrders}</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <LiaCalendarAltSolid size={18} className="text-primary shrink-0" aria-hidden />
+              <LiaCalendarAltSolid size={18} className="text-primary-text shrink-0" aria-hidden />
               <span className="font-medium">
                 آخر طلب:{' '}
                 <span className="font-medium">
@@ -163,7 +163,7 @@ export function CustomerCard({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <LiaMoneyBillWaveSolid size={20} className="text-primary shrink-0" aria-hidden />
+              <LiaMoneyBillWaveSolid size={20} className="text-primary-text shrink-0" aria-hidden />
               <span className="font-medium">{formatAmount(customer.totalAmount)}</span>
             </div>
           </div>

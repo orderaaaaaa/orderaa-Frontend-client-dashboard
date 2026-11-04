@@ -38,7 +38,7 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
             <div className="flex flex-row items-center justify-center gap-2">
               <X
                 onClick={() => setSelectMode(false)}
-                className="cursor-pointer text-primary h-5 w-5"
+                className="cursor-pointer text-primary-text h-5 w-5"
               />
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedCount} طلب

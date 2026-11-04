@@ -64,7 +64,7 @@ export default function EmployeeFormFields({
             <Label
               htmlFor="employee-roles"
               required
-              icon={<ShieldCheck className="w-6 h-6 text-primary" />}
+              icon={<ShieldCheck className="w-6 h-6 text-primary-text" />}
               text="أدوار الموظف"
             />
             <MultiSelectDropdown
@@ -102,7 +102,7 @@ export default function EmployeeFormFields({
           <Label
             htmlFor="employee-full-name"
             required
-            icon={<Briefcase className="w-6 h-6 text-primary" />}
+            icon={<Briefcase className="w-6 h-6 text-primary-text" />}
             text="الاسم الكامل للموظف"
           />
           <Input
@@ -119,7 +119,7 @@ export default function EmployeeFormFields({
           <Label
             htmlFor="employee-phone"
             required
-            icon={<Phone className="w-6 h-6 text-primary" />}
+            icon={<Phone className="w-6 h-6 text-primary-text" />}
             text="رقم الهاتف"
           />
           <Input
@@ -139,7 +139,7 @@ export default function EmployeeFormFields({
         <div className="flex flex-col gap-4">
           <Label
             htmlFor="employee-email"
-            icon={<Mail className="w-6 h-6 text-primary" />}
+            icon={<Mail className="w-6 h-6 text-primary-text" />}
             text="البريد الإلكتروني"
           />
           <Input
@@ -158,7 +158,7 @@ export default function EmployeeFormFields({
         <div className="flex flex-col gap-4">
           <Label
             htmlFor="employee-governorate"
-            icon={<MapPin className="w-6 h-6 text-primary" />}
+            icon={<MapPin className="w-6 h-6 text-primary-text" />}
             text="المحافظة"
           />
           <SearchableSelect
@@ -177,7 +177,7 @@ export default function EmployeeFormFields({
           <Label
             htmlFor="employee-password"
             required
-            icon={<Lock className="w-6 h-6 text-primary" />}
+            icon={<Lock className="w-6 h-6 text-primary-text" />}
             text="كلمة المرور"
           />
           <Input
@@ -196,7 +196,7 @@ export default function EmployeeFormFields({
           <Label
             htmlFor="employee-confirm-password"
             required
-            icon={<Lock className="w-6 h-6 text-primary" />}
+            icon={<Lock className="w-6 h-6 text-primary-text" />}
             text="تأكيد كلمة المرور"
           />
           <Input
@@ -214,7 +214,7 @@ export default function EmployeeFormFields({
         <div className="flex flex-col gap-4">
           <Label
             htmlFor="employee-working-hours"
-            icon={<Clock className="w-6 h-6 text-primary" />}
+            icon={<Clock className="w-6 h-6 text-primary-text" />}
             text="ساعات العمل"
           />
           <WorkHoursTimePicker

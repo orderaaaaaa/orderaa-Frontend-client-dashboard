@@ -46,7 +46,7 @@ const STATE_VIEW: Record<QueueItemState, StateView> = {
     labelKey: 'canonical.state.implicit',
     icon: Wand2,
     badgeClassName: 'bg-primary/10',
-    iconClassName: 'text-primary',
+    iconClassName: 'text-primary-text',
   },
   stale: {
     labelKey: 'canonical.state.stale',

@@ -88,7 +88,7 @@ export function SpecificationsEditor({
       <Button
         type="button"
         variant="outline"
-        className="w-full min-h-10 border-dashed text-primary hover:bg-primary hover:text-white"
+        className="w-full min-h-10 border-dashed text-primary-text hover:bg-primary hover:text-white"
         disabled={disabled || rows.length >= PRODUCT_EDIT_LIMITS.specifications}
         onClick={() =>
           onChange([...rows, { key: nextKey('spec'), name: '', value: '' }])

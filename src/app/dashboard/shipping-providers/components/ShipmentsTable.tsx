@@ -222,7 +222,7 @@ export function DueCell({
         <Tooltip>
           <TooltipTrigger asChild>
             <span tabIndex={0} className="inline-flex rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-              <Badge variant="outline" className="text-primary">
+              <Badge variant="outline" className="text-primary-text">
                 {t('inProcess.lateness.manual')}
               </Badge>
             </span>

@@ -179,7 +179,7 @@ export function ProductImagesField({
         <Button
           type="button"
           variant="outline"
-          className="min-h-10 border-dashed text-primary"
+          className="min-h-10 border-dashed text-primary-text"
           disabled={!canAdd}
           onClick={() => inputRef.current?.click()}
         >

@@ -39,7 +39,7 @@ const ClearableSelect = ({
             onClear();
           }}
           className="absolute left-10 top-1/2 -translate-y-1/2 z-(--z-raised)
-                     text-gray-400 hover:text-primary cursor-pointer"
+                     text-gray-400 hover:text-primary-text cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -67,13 +67,13 @@ const StoresFilters = () => {
     <div className="mt-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-primary">تصفية المتاجر</h3>
+        <h3 className="text-lg font-bold text-primary-text">تصفية المتاجر</h3>
 
         <button
           onClick={() => setIsOpen((v) => !v)}
           className="flex items-center gap-2 px-4 h-[41px] rounded-sm border bg-card hover:bg-gray-50 transition"
         >
-          <SlidersHorizontal className="w-5 h-5 text-primary" />
+          <SlidersHorizontal className="w-5 h-5 text-primary-text" />
           <span className="font-semibold">
             {isOpen ? 'إغلاق الفلاتر' : 'عرض الفلاتر'}
           </span>
@@ -95,7 +95,7 @@ const StoresFilters = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن المتجر"
                 icon={Search}
-                inputClassName="h-[41px] !bg-primary/8 rounded-sm !text-primary !border-gray-300 text-xl font-semibold pr-10 pl-10"
+                inputClassName="h-[41px] !bg-primary/8 rounded-sm !text-primary-text !border-gray-300 text-xl font-semibold pr-10 pl-10"
               />
 
               <ClearableSelect

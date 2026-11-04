@@ -171,7 +171,7 @@ function AddSupplierForm() {
                   <span>تعذّر تحميل المحافظات</span>
                   <button
                     type="button"
-                    className="min-h-10 px-3 font-semibold text-primary underline"
+                    className="min-h-10 px-3 font-semibold text-primary-text underline"
                     onClick={() => {
                       refetchGovernorates();
                     }}

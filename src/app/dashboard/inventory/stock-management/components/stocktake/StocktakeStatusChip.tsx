@@ -9,7 +9,7 @@ const STATUS_LABELS: Record<StocktakeStatusWire, string> = {
 };
 
 const STATUS_CLASSES: Record<StocktakeStatusWire, string> = {
-  OPEN: 'border-transparent bg-primary/10 text-primary',
+  OPEN: 'border-transparent bg-primary/10 text-primary-text',
   POSTED: 'border-transparent bg-success/10 text-success',
   CANCELLED: 'border-transparent bg-muted text-muted-foreground',
 };

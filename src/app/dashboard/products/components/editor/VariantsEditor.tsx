@@ -327,7 +327,7 @@ export function VariantsEditor({
         <Button
           type="button"
           variant="outline"
-          className="w-full min-h-10 border-dashed text-primary hover:bg-primary hover:text-white"
+          className="w-full min-h-10 border-dashed text-primary-text hover:bg-primary hover:text-white"
           disabled={disabled}
           onClick={() => onNewRowsChange([...newRows, emptyNewVariantRow()])}
         >

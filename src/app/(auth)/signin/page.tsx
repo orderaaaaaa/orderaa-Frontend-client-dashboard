@@ -102,7 +102,7 @@ export default function LoginPage() {
             تذكرني
           </label>
         </div>
-        <Link href="/forgot-password" className="text-primary hover:underline">
+        <Link href="/forgot-password" className="text-primary-text hover:underline">
           نسيت كلمة المرور؟
         </Link>
       </div>

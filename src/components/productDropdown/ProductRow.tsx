@@ -156,7 +156,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         <div className="w-1/2 min-w-0 text-center font-medium flex flex-col items-center gap-1">
           <span className="break-words">{product.name}</span>
           {isAlreadyInOrder && (
-            <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-primary-text bg-primary/10 px-2 py-0.5 rounded-full">
               في الطلب
             </span>
           )}

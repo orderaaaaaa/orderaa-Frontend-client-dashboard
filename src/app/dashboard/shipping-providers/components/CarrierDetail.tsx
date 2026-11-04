@@ -41,7 +41,7 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-lg font-bold text-foreground">{carrier.name}</h3>
             {carrier.type && (
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+              <span className="text-xs bg-primary/10 text-primary-text px-2 py-0.5 rounded-full font-semibold">
                 {carrier.type === 'DELEGATE' ? 'مندوب' : 'شركة شحن'}
               </span>
             )}

@@ -21,7 +21,7 @@ const InvoiceImageSection = memo(
           <Button
             type="button"
             variant="outline"
-            className="w-fit flex items-center gap-2 rounded-full border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+            className="w-fit flex items-center gap-2 rounded-full border-primary text-primary-text hover:bg-primary hover:text-white transition-colors"
             onClick={() => setShowUpload((prev) => !prev)}
           >
             <LiaImageSolid className="w-5 h-5" />

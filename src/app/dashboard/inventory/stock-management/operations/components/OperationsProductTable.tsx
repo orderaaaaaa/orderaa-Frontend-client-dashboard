@@ -138,7 +138,7 @@ export function OperationsProductTable({
                       <button
                         type="button"
                         onClick={() => onSelectProduct(row.product.id)}
-                        className="block max-w-full break-words text-start font-medium text-foreground hover:text-primary"
+                        className="block max-w-full break-words text-start font-medium text-foreground hover:text-primary-text"
                       >
                         {row.product.name}
                       </button>

@@ -137,7 +137,7 @@ export function DefaultCarrierCard({
                 />
                 <div className="absolute w-2.5 h-2.5 bg-primary rounded-full scale-0 peer-checked:scale-100 transition-transform" />
               </div>
-              <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary transition-colors">
+              <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary-text transition-colors">
                 {choice.label}
               </span>
             </label>

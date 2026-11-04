@@ -60,7 +60,7 @@ function SettlementCollectionContent() {
   }, [ordersQuery.isSuccess, orders.length, page]);
 
   const backLink = (
-    <Link href={COLLECTIONS_HREF} className="text-xs text-primary hover:underline w-fit">
+    <Link href={COLLECTIONS_HREF} className="text-xs text-primary-text hover:underline w-fit">
       رجوع إلى التحصيلات
     </Link>
   );

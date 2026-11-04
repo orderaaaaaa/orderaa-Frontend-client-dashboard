@@ -109,7 +109,7 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
                 <CopyableCode value={row.recoveredOrder.code} label="نسخ كود الطلب">
                   <Link
                     href={missingOrderHref(row)}
-                    className="text-primary hover:underline font-semibold"
+                    className="text-primary-text hover:underline font-semibold"
                   >
                     {row.recoveredOrder.code}
                   </Link>
@@ -121,7 +121,7 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
             <span onClick={stopRowClick}>
               <Link
                 href={missingOrderHref(row)}
-                className="text-primary hover:underline font-semibold"
+                className="text-primary-text hover:underline font-semibold"
               >
                 فتح
               </Link>
@@ -158,7 +158,7 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
           <span onClick={stopRowClick}>
             <Link
               href={missingOrderHref(row)}
-              className="text-primary hover:underline font-semibold text-sm"
+              className="text-primary-text hover:underline font-semibold text-sm"
             >
               فتح
             </Link>

@@ -35,7 +35,7 @@ export function OrderLockedModal({
       maxWidth="md:max-w-[600px]"
     >
       <div className="flex flex-col items-center justify-center gap-6 py-6">
-        <LiaExclamationTriangleSolid className="w-24 h-24 text-primary" />
+        <LiaExclamationTriangleSolid className="w-24 h-24 text-primary-text" />
 
         <h3 className="text-xl font-bold text-foreground">
           لا يمكن مشاهده هذا الطلب

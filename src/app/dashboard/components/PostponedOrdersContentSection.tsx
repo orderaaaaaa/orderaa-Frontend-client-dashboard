@@ -44,7 +44,7 @@ export function PostponedOrdersContentSection({
   if (error?.isError) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">محتوي الطلبات المؤجلة</h2>
+        <h2 className="text-lg font-bold text-primary-text">محتوي الطلبات المؤجلة</h2>
         <ErrorState
           error={error.error}
           fallback="تعذّر تحميل محتوى الطلبات المؤجلة"
@@ -57,7 +57,7 @@ export function PostponedOrdersContentSection({
   if (!isLoading && data.length === 0) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-primary">محتوي الطلبات المؤجلة</h2>
+        <h2 className="text-lg font-bold text-primary-text">محتوي الطلبات المؤجلة</h2>
         <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
       </section>
     );
@@ -65,7 +65,7 @@ export function PostponedOrdersContentSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-bold text-primary">محتوي الطلبات المؤجلة</h2>
+      <h2 className="text-lg font-bold text-primary-text">محتوي الطلبات المؤجلة</h2>
       <DataTable columns={columns} data={data} isLoading={isLoading} />
     </section>
   );

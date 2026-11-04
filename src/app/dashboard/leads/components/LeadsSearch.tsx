@@ -117,7 +117,7 @@ export default function LeadsSearch({
                 <XIcon className="w-4 h-4" />
               </button>
             )}
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-text" />
           </div>
         </div>
       </div>

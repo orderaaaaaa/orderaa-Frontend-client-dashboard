@@ -113,7 +113,7 @@ function PermissionSectionCard({
         <label
           className={cn(
             'flex min-h-10 shrink-0 items-center gap-2 text-sm',
-            disabled ? 'text-gray-400' : 'cursor-pointer text-primary'
+            disabled ? 'text-gray-400' : 'cursor-pointer text-primary-text'
           )}
         >
           <Checkbox

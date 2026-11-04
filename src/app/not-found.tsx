@@ -17,18 +17,18 @@ export default function NotFound() {
         <div className="relative mb-8">
           <div className="inline-block relative">
             <h1 className="text-[clamp(8rem,20vw,16rem)] font-bold leading-none tracking-tighter">
-              <span className="inline-block text-primary animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="inline-block text-primary-text animate-in fade-in slide-in-from-bottom-4 duration-700">
                 4
               </span>
               <span className="inline-block relative mx-2">
-                <span className="text-primary animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+                <span className="text-primary-text animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
                   0
                 </span>
                 {/* <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-[120%] h-[120%] border-4 border-primary rounded-full animate-spin-slow opacity-40" />
                 </div> */}
               </span>
-              <span className="inline-block text-primary animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+              <span className="inline-block text-primary-text animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 4
               </span>
             </h1>

@@ -200,7 +200,7 @@ export function PrintConfirmDialog({
             لن تُعلَّم الطلبات كمطبوعة إلا بعد الضغط على «نعم، تمت الطباعة».
           </p>
           {printTimes > 1 && (
-            <p className="text-sm font-semibold text-primary" role="status">
+            <p className="text-sm font-semibold text-primary-text" role="status">
               عدد مرات الطباعة: {printTimes}
             </p>
           )}
@@ -222,7 +222,7 @@ export function PrintConfirmDialog({
             onClick={handleReprint}
             disabled={busy || markDone || reprintLimitReached}
             title={reprintTitle}
-            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-primary text-primary font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-primary text-primary-text font-bold"
           >
             <LiaPrintSolid className="size-5" />
             إعادة الطباعة

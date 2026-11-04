@@ -14,7 +14,7 @@ export default function SupportWhatsAppButton({
       href={buildSupportWhatsAppUrl(message)}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-full text-center border border-primary text-primary py-2.5 rounded-lg transition hover:bg-primary/5"
+      className="w-full text-center border border-primary text-primary-text py-2.5 rounded-lg transition hover:bg-primary/5"
     >
       تواصل مع الدعم
     </a>

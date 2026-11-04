@@ -350,7 +350,7 @@ const IntegrationModal = ({
         >
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <LiaLinkSolid className="w-5 h-5 text-primary" />
+              <LiaLinkSolid className="w-5 h-5 text-primary-text" />
               <h4 className="font-semibold text-gray-900">
                 {automaticGuideSteps
                   ? 'خطوات الربط التلقائي'
@@ -366,7 +366,7 @@ const IntegrationModal = ({
           {!isWebhookOnly && (
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <LiaKeySolid className="w-5 h-5 text-primary" />
+              <LiaKeySolid className="w-5 h-5 text-primary-text" />
               <h4 className="font-semibold text-gray-900">
                 خطوات ربط الـ API
               </h4>
@@ -650,7 +650,7 @@ const IntegrationModal = ({
                                 onEditStore(Number(storeId), configs);
                               }}
                               aria-label="تعديل المتجر"
-                              className="size-10 sm:size-10 text-gray-400 hover:text-primary hover:bg-primary/5"
+                              className="size-10 sm:size-10 text-gray-400 hover:text-primary-text hover:bg-primary/5"
                             >
                               <LiaEditSolid className="w-4 h-4" />
                             </Button>

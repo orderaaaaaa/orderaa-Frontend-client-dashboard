@@ -56,7 +56,7 @@ const SupplierInvoiceCard = memo(
     const typeConfig = TRANSACTION_TYPE_CONFIG[invoice.type];
     const typeColors = typeConfig ?? {
       text: 'text-gray-800',
-      iconColor: 'text-primary',
+      iconColor: 'text-primary-text',
       icon: LiaDollarSignSolid,
     };
 
@@ -114,11 +114,11 @@ const SupplierInvoiceCard = memo(
           <CopyableCode value={invoice.code} label="نسخ رقم الفاتورة" className="min-w-0 max-w-full">
             <button
               type="button"
-              className="flex min-h-10 min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
+              className="flex min-h-10 min-w-0 items-center gap-2 text-start text-lg font-bold text-primary-text hover:underline transition-colors"
               onClick={() => setIsDetailOpen(true)}
             >
               <LiaFileInvoiceSolid
-                className="text-primary shrink-0"
+                className="text-primary-text shrink-0"
                 style={{ width: 24, height: 24 }}
               />
               <span className="break-all">فاتورة رقم {invoice.code}</span>
@@ -135,7 +135,7 @@ const SupplierInvoiceCard = memo(
               <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
               <div className="flex items-center gap-1.5">
                 <field.icon
-                  className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary')}
+                  className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary-text')}
                 />
                 <span
                   className={clsx(

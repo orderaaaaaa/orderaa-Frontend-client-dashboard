@@ -215,7 +215,7 @@ const FileUpload = () => {
                   <div className="min-w-0 max-w-full">
                     <h5 className="flex gap-2 items-center justify-center text-lg max-sm:text-base break-all">
                       {uploadedFile.name}
-                      <CircleCheck className="w-6 h-6 shrink-0 text-primary" />
+                      <CircleCheck className="w-6 h-6 shrink-0 text-primary-text" />
                     </h5>
                     <p className="text-gray-600 text-[14px]">
                       اضغط لتغيير الملف
@@ -253,7 +253,7 @@ const FileUpload = () => {
                 type="button"
                 onClick={handleBrowseClick}
                 disabled={isProcessing}
-                className="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-primary px-5 text-base text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-primary px-5 text-base text-primary-text transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FolderOpen className="w-5 h-5" />
                 اختر ملف

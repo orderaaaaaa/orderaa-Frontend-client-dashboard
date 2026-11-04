@@ -208,7 +208,7 @@ export default function OrderCard({
               )}
               <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
 
-              <span className="text-xs text-primary whitespace-nowrap">
+              <span className="text-xs text-primary-text whitespace-nowrap">
                 {getTimeAgo(createdAt)}
               </span>
               <If condition={isBlocked}>
@@ -414,7 +414,7 @@ export default function OrderCard({
               </span>
             </CopyableCode>
             {shippingCompanyName && (
-              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full break-words">
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary-text text-xs font-semibold px-2 py-0.5 rounded-full break-words">
                 {shippingCompanyName}
               </span>
             )}
@@ -508,10 +508,10 @@ export default function OrderCard({
                 width={20}
                 height={20}
               />
-              <span className="text-xs font-medium text-primary">
+              <span className="text-xs font-medium text-primary-text">
                 المحاولات:
               </span>
-              <span className="text-xs font-medium text-primary">{trys}</span>
+              <span className="text-xs font-medium text-primary-text">{trys}</span>
             </div>
           </Then>
         </If>

@@ -95,7 +95,7 @@ export function EmployeeSearchFilter({
           aria-label="الفلاتر"
           aria-expanded={showFilterDropdown}
           className={`flex-shrink-0 size-10 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer transition-colors ${
-            hasActiveFilters ? 'text-primary' : 'text-gray-600'
+            hasActiveFilters ? 'text-primary-text' : 'text-gray-600'
           }`}
         >
           <SlidersVertical size={20} />

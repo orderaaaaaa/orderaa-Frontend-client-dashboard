@@ -47,13 +47,13 @@ function ReturnSummaryPanel({
       <div className="grid grid-cols-2 gap-3">
         <SummaryStatCard
           icon={<Package className="size-5" aria-hidden="true" />}
-          iconBgClassName="bg-primary/10 text-primary"
+          iconBgClassName="bg-primary/10 text-primary-text"
           label={t('customerReturn.summary.units')}
           value={formatCount(unitsCount)}
         />
         <SummaryStatCard
           icon={<Wallet className="size-5" aria-hidden="true" />}
-          iconBgClassName="bg-primary/10 text-primary"
+          iconBgClassName="bg-primary/10 text-primary-text"
           label={t('customerReturn.summary.refundValue')}
           value={formatMoney(String(refundValue))}
         />

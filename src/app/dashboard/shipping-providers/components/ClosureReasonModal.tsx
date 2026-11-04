@@ -95,7 +95,7 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
           ) : isError ? (
             <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-foreground">
               <p>لا توجد أسباب متاحة</p>
-              <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+              <Link href="/dashboard/store-settings" className="font-semibold text-primary-text hover:underline">
                 أضف الأسباب من إعدادات المتجر
               </Link>
             </div>
@@ -110,7 +110,7 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
                   className={clsx(
                     'p-3 rounded-lg cursor-pointer border transition-all text-sm text-right',
                     selectedReasonId === reason.id
-                      ? 'border-primary bg-primary/5 text-primary font-semibold'
+                      ? 'border-primary bg-primary/5 text-primary-text font-semibold'
                       : 'border-border hover:border-primary/40 hover:bg-primary/10 text-foreground',
                   )}
                   onClick={() => {

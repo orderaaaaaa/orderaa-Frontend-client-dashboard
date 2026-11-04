@@ -39,7 +39,7 @@ export function SettlementShippingDisclosure({ shipping }: SettlementShippingCol
   if (!shipping) return null;
   return (
     <details className="group rounded-md bg-gray-50 px-3">
-      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-primary [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-primary-text [&::-webkit-details-marker]:hidden">
         بيانات الشحن
         <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
       </summary>

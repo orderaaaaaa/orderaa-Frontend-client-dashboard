@@ -461,8 +461,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
           <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
             <div className="flex items-center gap-2">
-              <LiaCheckCircleSolid className="text-primary" />
-              <span className="font-semibold text-primary">
+              <LiaCheckCircleSolid className="text-primary-text" />
+              <span className="font-semibold text-primary-text">
                 {isReturn ? 'تم تسليم هذا المرتجع' : 'تم استلام هذه الفاتورة'}
               </span>
             </div>

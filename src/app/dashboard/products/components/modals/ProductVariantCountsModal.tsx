@@ -55,7 +55,7 @@ export default function ProductVariantCountsModal({
                 <span className="font-medium">{item.label}</span>
                 {item.value && <span>: {item.value}</span>}
               </div>
-              <span className="font-semibold text-primary shrink-0">
+              <span className="font-semibold text-primary-text shrink-0">
                 {item.count}
               </span>
             </div>

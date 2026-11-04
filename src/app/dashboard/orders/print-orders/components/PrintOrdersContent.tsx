@@ -703,7 +703,7 @@ export function PrintOrdersContent() {
                 onClick={handleClearSelection}
                 aria-label="إلغاء التحديد"
                 title="إلغاء التحديد"
-                className="text-primary"
+                className="text-primary-text"
               >
                 <X className="size-5" />
               </Button>

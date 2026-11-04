@@ -97,7 +97,7 @@ export function VirtualWarehousesTab() {
         className: 'text-center',
         render: (_val, row) => (
           <div className="flex items-center justify-center gap-1">
-            <Button variant="ghost" size="sm" asChild className="text-primary">
+            <Button variant="ghost" size="sm" asChild className="text-primary-text">
               <Link
                 href={`/dashboard/inventory/stock-management/virtual/${row.id}`}
               >
@@ -110,7 +110,7 @@ export function VirtualWarehousesTab() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary"
+                  className="text-primary-text"
                   onClick={() => openEdit(row)}
                 >
                   <LiaEditSolid className="ml-1 size-4" />

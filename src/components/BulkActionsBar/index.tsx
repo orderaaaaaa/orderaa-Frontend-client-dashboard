@@ -98,7 +98,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                 onValueChange={handleStatusSelect}
                 disabled={isDisabled}
               >
-                <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-background border-primary !text-primary enabled:hover:bg-primary enabled:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
+                <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-background border-primary !text-primary-text enabled:hover:bg-primary enabled:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
                   {isLoading ? (
                     <span
                       aria-hidden
@@ -136,7 +136,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onExportExcel}
               disabled={isDisabled}
             >
@@ -146,7 +146,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onShareWhatsApp}
               disabled={isDisabled}
             >
@@ -156,7 +156,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onShipping}
               disabled={isDisabled}
             >
@@ -166,7 +166,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onOther}
               disabled={isDisabled}
             >

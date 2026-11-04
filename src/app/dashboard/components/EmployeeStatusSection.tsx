@@ -130,7 +130,7 @@ export function EmployeeStatusSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-bold text-primary">حالة الموظفين</h2>
+      <h2 className="text-lg font-bold text-primary-text">حالة الموظفين</h2>
       {error?.isError ? (
         <ErrorState
           error={error.error}

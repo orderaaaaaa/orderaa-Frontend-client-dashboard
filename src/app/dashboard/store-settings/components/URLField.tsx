@@ -12,7 +12,7 @@ export function URLField({ register, errors }: URLFieldProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <LiaLinkSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <LiaLinkSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             رابط المتجر

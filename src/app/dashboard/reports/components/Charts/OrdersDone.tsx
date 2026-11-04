@@ -26,7 +26,7 @@ export default function OrdersAttempted(): JSX.Element {
         <h2 className="font-bold text-lg text-right text-gray-900">
           طلبات تم المحاولة
         </h2>
-        <span className="text-primary text-lg font-bold">
+        <span className="text-primary-text text-lg font-bold">
           الإجمالي:{' '}
           <span className="text-gray-500/50 text-lg font-semibold">
             {totalDone}
@@ -77,7 +77,7 @@ export default function OrdersAttempted(): JSX.Element {
               className="transition-all duration-500"
             />
           </svg>
-          <span className="text-primary text-lg font-bold">
+          <span className="text-primary-text text-lg font-bold">
             الإجمالي:{' '}
             <span className="text-gray-500/50 text-lg font-semibold">
               {totalDone}
@@ -99,7 +99,7 @@ export default function OrdersAttempted(): JSX.Element {
                     style={{ width: `${value}%` }}
                   />
                 </div>
-                <span className="text-primary text-sm font-semibold">
+                <span className="text-primary-text text-sm font-semibold">
                   {bar.current}
                 </span>
               </div>

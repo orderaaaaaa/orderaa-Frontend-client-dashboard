@@ -21,7 +21,7 @@ function CarrierSendRow({ row }: { row: CarrierSendView }) {
       <div className="flex flex-col gap-1">
         <Link
           href={`/dashboard/orders/${row.orderId}`}
-          className="font-bold text-primary hover:underline"
+          className="font-bold text-primary-text hover:underline"
         >
           {row.orderCode}
         </Link>

@@ -54,7 +54,7 @@ const InvoiceDetailModal = memo(
         <div className="flex flex-col">
           <div className="py-4 flex flex-col justify-between items-start gap-1">
             <h1 className="flex flex-row items-center gap-1 text-sm sm:text-base font-bold text-foreground">
-              <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 20, height: 20 }} />
+              <LiaFileInvoiceSolid className="text-primary-text shrink-0" style={{ width: 20, height: 20 }} />
               تفاصيل الفاتورة
             </h1>
             <p className="ps-6 text-sm sm:text-base text-foreground/90">تفاصيل الفاتورة المرتبطة بالمعاملة</p>

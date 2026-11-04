@@ -391,7 +391,7 @@ export default function FilterPanel({
                                   className={
                                     isSelected
                                       ? 'rounded-full text-xs px-3 py-1 bg-primary text-white font-medium'
-                                      : 'rounded-full text-xs px-3 py-1 border border-gray-300 text-gray-600 hover:border-primary hover:text-primary'
+                                      : 'rounded-full text-xs px-3 py-1 border border-gray-300 text-gray-600 hover:border-primary hover:text-primary-text'
                                   }
                                 >
                                   {option.name}

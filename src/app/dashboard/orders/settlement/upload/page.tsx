@@ -411,7 +411,7 @@ export default function SettlementUploadPage() {
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-muted-foreground">الإجمالي</span>
                 {/* A decimal string, rendered as-is. */}
-                <span className="text-lg font-bold text-primary">
+                <span className="text-lg font-bold text-primary-text">
                   {batch.totalAmount} جنيه
                 </span>
               </div>

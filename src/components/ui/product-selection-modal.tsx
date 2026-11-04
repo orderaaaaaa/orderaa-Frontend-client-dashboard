@@ -516,7 +516,7 @@ export default function ProductSelectionModal({
                       <div className="w-1/2 text-center font-medium flex flex-col items-center gap-1">
                         <span>{product.name}</span>
                         {isAlreadyInTable && (
-                          <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          <span className="text-xs text-primary-text bg-primary/10 px-2 py-0.5 rounded-full">
                             في الفاتورة
                           </span>
                         )}
@@ -557,7 +557,7 @@ export default function ProductSelectionModal({
                                     disabled={disabled}
                                     className={clsx(
                                       'rounded-full text-xs h-7 px-3 max-sm:h-10',
-                                      !isSelected && !disabled && 'border-input text-foreground hover:border-primary hover:text-primary',
+                                      !isSelected && !disabled && 'border-input text-foreground hover:border-primary hover:text-primary-text',
                                     )}
                                     onClick={() => handleVariantSelect(product.id, option.attribute, value)}
                                   >
@@ -613,7 +613,7 @@ export default function ProductSelectionModal({
                                       'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full',
                                       isPreExisting
                                         ? 'bg-muted text-muted-foreground'
-                                        : 'bg-primary/10 text-primary',
+                                        : 'bg-primary/10 text-primary-text',
                                     )}
                                   >
                                     {combo.map((v) => v.option).join(' - ')}

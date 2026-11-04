@@ -80,7 +80,7 @@ export function StatusSelect({
             type="button"
             onClick={handleClear}
             className="absolute left-10 top-1/2 -translate-y-1/2
-                       text-gray-400 hover:text-primary z-(--z-raised)"
+                       text-gray-400 hover:text-primary-text z-(--z-raised)"
             aria-label="Clear selection"
           >
             <X className="w-4 h-4" />

@@ -229,7 +229,7 @@ function ProductsTable() {
         className: 'text-center',
         render: (_val, row) => (
           <Can code={PERMISSIONS.PRODUCTS_UPDATE}>
-            <Button asChild variant="ghost" className="text-primary">
+            <Button asChild variant="ghost" className="text-primary-text">
               <Link href={productEditHref(row.id)}>
                 <LiaEditSolid className="size-5" />
                 تعديل المنتج
@@ -285,7 +285,7 @@ function ProductsTable() {
               size="touch"
               onClick={() => setSelect(false)}
               aria-label="إلغاء التحديد"
-              className="text-primary"
+              className="text-primary-text"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -386,7 +386,7 @@ function ProductsTable() {
               <Button
                 variant="outline"
                 onClick={() => setShowMergeModal(true)}
-                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-card border-primary text-primary-text hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               >
                 <LiaObjectGroupSolid className="size-5" />
                 <span>دمج المنتجات ({selectedIds.size})</span>

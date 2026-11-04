@@ -172,7 +172,7 @@ function NonConfirmedSection({
                           variant="outline"
                           size="sm"
                           onClick={() => onForceActionable(order.id)}
-                          className="h-7 px-2.5 text-xs font-semibold text-primary border-primary/30 hover:bg-primary/10"
+                          className="h-7 px-2.5 text-xs font-semibold text-primary-text border-primary/30 hover:bg-primary/10"
                         >
                           نقل للتنفيذ
                         </Button>
@@ -354,7 +354,7 @@ export function ScannedOrdersModal({
             <div className="relative w-full md:max-w-md">
               <LiaSearchSolid
                 aria-hidden="true"
-                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-(--z-raised)"
+                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary-text z-(--z-raised)"
               />
               <Input
                 value={searchQuery}

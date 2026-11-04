@@ -60,7 +60,7 @@ export default function PickupsPage() {
       <CopyableCode value={order.code} label="نسخ كود الطلب">
         <Link
           href={`/dashboard/orders/${order.orderId}`}
-          className="text-primary hover:underline"
+          className="text-primary-text hover:underline"
         >
           {order.code}
         </Link>
@@ -170,7 +170,7 @@ export default function PickupsPage() {
                     </p>
                   )}
                 </div>
-                <span className="text-xs font-bold text-primary shrink-0">
+                <span className="text-xs font-bold text-primary-text shrink-0">
                   {pickup.ordersCount} طلب
                 </span>
               </div>

@@ -181,7 +181,7 @@ export function MergeVariantChip({
                 onSelect={() => onChoose({ action: 'KEEP' })}
               >
                 {entry.action === 'KEEP' ? (
-                  <Check className="size-4 text-primary" aria-hidden />
+                  <Check className="size-4 text-primary-text" aria-hidden />
                 ) : (
                   <span className="size-4" aria-hidden />
                 )}
@@ -210,7 +210,7 @@ export function MergeVariantChip({
                   >
                     {entry.action === 'MERGE_INTO' &&
                     entry.intoVariantId === target.variant.id ? (
-                      <Check className="size-4 shrink-0 text-primary" aria-hidden />
+                      <Check className="size-4 shrink-0 text-primary-text" aria-hidden />
                     ) : (
                       <span className="size-4 shrink-0" aria-hidden />
                     )}

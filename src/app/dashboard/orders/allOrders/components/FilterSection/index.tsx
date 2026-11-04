@@ -220,7 +220,7 @@ const FilterSection = React.memo(function FilterSection({
             <span
               className={clsx(
                 'text-base font-medium transition-colors',
-                isNewOrdersActive ? 'text-primary' : 'text-gray-600'
+                isNewOrdersActive ? 'text-primary-text' : 'text-gray-600'
               )}
             >
               طلبات جديدة

@@ -102,7 +102,7 @@ export function AttendanceModal({
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-text" />
           </div>
         )}
 
@@ -120,9 +120,9 @@ export function AttendanceModal({
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 <div className="flex items-center gap-2 mb-3">
                   {type === 'attendance' ? (
-                    <CalendarClock className="w-5 h-5 text-primary" />
+                    <CalendarClock className="w-5 h-5 text-primary-text" />
                   ) : (
-                    <CalendarDays className="w-5 h-5 text-primary" />
+                    <CalendarDays className="w-5 h-5 text-primary-text" />
                   )}
                   <span className="font-semibold text-gray-700">
                     {getMonthName(selectedMonth)}

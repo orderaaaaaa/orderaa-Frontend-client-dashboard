@@ -68,7 +68,7 @@ const DateRangeFilter = memo(
             maxDate={toDate || undefined}
           />
 
-          <ArrowLeft className="text-primary flex-shrink-0" size={20} />
+          <ArrowLeft className="text-primary-text flex-shrink-0" size={20} />
 
           <DatePicker
             selected={toDate}
@@ -90,7 +90,7 @@ const DateRangeFilter = memo(
             placeholder="الفترة الزمنية"
             triggerClassName={clsx(
               'w-full',
-              timePeriod && 'text-primary font-bold',
+              timePeriod && 'text-primary-text font-bold',
               timeTriggerClassName,
             )}
             overlayOnMobile={overlayOnMobile}

@@ -167,7 +167,7 @@ export function AttributeChipsEditor({
             ) : (
               <span
                 key={`${value}-${valueIndex}`}
-                className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary ps-1 pe-0.5 min-h-10 sm:min-h-9 text-sm font-medium max-w-full"
+                className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 text-primary-text ps-1 pe-0.5 min-h-10 sm:min-h-9 text-sm font-medium max-w-full"
               >
                 {onRenameValue ? (
                   <button
@@ -186,7 +186,7 @@ export function AttributeChipsEditor({
                   type="button"
                   onClick={() => removeValue(valueIndex)}
                   disabled={disabled}
-                  className="inline-flex items-center justify-center size-10 sm:size-9 shrink-0 rounded-full text-primary/70 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                  className="inline-flex items-center justify-center size-10 sm:size-9 shrink-0 rounded-full text-primary-text/70 hover:text-primary-text hover:bg-primary/10 cursor-pointer"
                   aria-label={`حذف ${value}`}
                 >
                   <LiaTimesSolid className="w-3.5 h-3.5" />
@@ -215,7 +215,7 @@ export function AttributeChipsEditor({
               type="button"
               onClick={() => setIsAdding(true)}
               disabled={disabled}
-              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-gray-400 text-gray-600 hover:border-primary hover:text-primary px-3 min-h-10 sm:min-h-9 text-sm cursor-pointer transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-gray-400 text-gray-600 hover:border-primary hover:text-primary-text px-3 min-h-10 sm:min-h-9 text-sm cursor-pointer transition-colors disabled:opacity-50"
             >
               <LiaPlusSolid className="w-3.5 h-3.5" />
               إضافة قيمة

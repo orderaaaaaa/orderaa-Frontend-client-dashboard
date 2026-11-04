@@ -252,7 +252,7 @@ export default function CollectionsPage() {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <Wallet className="w-5 h-5 text-primary shrink-0" />
+                    <Wallet className="w-5 h-5 text-primary-text shrink-0" />
                     <CopyableCode value={batch.code} label="نسخ كود التحصيل" className="min-w-0 max-w-full">
                       <span className="font-bold text-gray-900 truncate">
                         {batch.code}
@@ -279,7 +279,7 @@ export default function CollectionsPage() {
                   <div className="flex flex-col gap-0.5">
                     <span className="text-xs text-muted-foreground">الإجمالي</span>
                     {/* A decimal string, rendered as-is. */}
-                    <span className="text-lg font-bold text-primary">
+                    <span className="text-lg font-bold text-primary-text">
                       {batch.totalAmount} جنيه
                     </span>
                   </div>
@@ -307,7 +307,7 @@ export default function CollectionsPage() {
                     <Link
                       href="/dashboard/orders/settlement/upload"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-[11px] font-semibold text-primary hover:underline"
+                      className="text-[11px] font-semibold text-primary-text hover:underline"
                     >
                       متابعة الرفع
                     </Link>
@@ -346,7 +346,7 @@ export default function CollectionsPage() {
               — {selected.totalAmount} جنيه عن {selected.ordersCount} طلب
               <Link
                 href={`${COLLECTIONS_HREF}/${selected.id}`}
-                className="text-xs font-normal text-primary hover:underline"
+                className="text-xs font-normal text-primary-text hover:underline"
               >
                 فتح في صفحة مستقلة
               </Link>

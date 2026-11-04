@@ -152,7 +152,7 @@ export default function LightfunnelsApiSection({
           variant="outline"
           onClick={() => setShowConnectForm(true)}
           disabled={disabled}
-          className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary gap-2"
+          className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary-text hover:border-primary gap-2"
         >
           <LiaPlusSolid className="w-4 h-4" />
           ربط Lightfunnels عبر API
