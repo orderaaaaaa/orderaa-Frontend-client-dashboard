@@ -194,10 +194,10 @@ function getBatchShortageMessage(err: unknown): string | null {
 
   const locale = readStoredLocale();
   const rows = (data.orders ?? []).map(formatBatchShortageRow);
-  return [
-    data.message ?? translate(locale, 'stockShortage.batchFallback'),
-    ...rows,
-  ].join('\n');
+  if (rows.length === 0) {
+    return data.message ?? translate(locale, 'stockShortage.batchFallback');
+  }
+  return [translate(locale, 'stockShortage.batchFallback'), ...rows].join('\n');
 }
 
 export function getBatchErrorMessage(err: unknown, fallback: string): string {
