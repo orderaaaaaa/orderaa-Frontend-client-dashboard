@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   LiaPhoneSolid,
   LiaEditSolid,
@@ -10,6 +10,7 @@ import {
 } from 'react-icons/lia';
 import { usePhoneNumbers } from '@/hooks/OrderDetails/usePhoneNumbers';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'react-toastify';
 import { PhoneConflictDetails } from '@/app/dashboard/customers/types/merge';
 
@@ -60,30 +61,9 @@ export function PhoneNumberList({
   });
 
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState<number | null>(null);
-  const phoneDropdownRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const tagStyle =
     "flex gap-2 bg-background shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-foreground";
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isPhoneDropdownOpen !== null) {
-        const activeRef = phoneDropdownRefs.current.get(isPhoneDropdownOpen);
-        if (activeRef && !activeRef.contains(event.target as Node)) {
-          setIsPhoneDropdownOpen(null);
-        }
-      }
-    };
-
-    if (isPhoneDropdownOpen !== null) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isPhoneDropdownOpen]);
 
   const handlePhoneCall = (phone: string) => {
     window.location.href = `tel:${phone}`;
@@ -108,13 +88,7 @@ export function PhoneNumberList({
       <p className="font-bold text-foreground">أرقام الهاتف</p>
       <div className="space-y-2">
         {phones.phoneNumbers.map((phone, index) => (
-          <div key={index} className="relative" ref={(el) => {
-            if (el) {
-              phoneDropdownRefs.current.set(index, el);
-            } else {
-              phoneDropdownRefs.current.delete(index);
-            }
-          }}>
+          <div key={index} className="relative">
             {phones.editingIndex === index ? (
               <div className="flex gap-2 items-center w-full overflow-hidden">
                 <input
@@ -151,68 +125,71 @@ export function PhoneNumberList({
                 >
                   {phone}
                 </Button>
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      setIsPhoneDropdownOpen(isPhoneDropdownOpen === index ? null : index)
-                    }
-                    className="p-1 hover:bg-purple-100 rounded transition-colors"
-                  >
-                    <LiaEditSolid className="w-4 h-4 text-primary-text" />
-                  </Button>
-                  {isPhoneDropdownOpen === index && (
-                    <div
-                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-(--z-inpage-popup)"
+                <Popover
+                  open={isPhoneDropdownOpen === index}
+                  onOpenChange={(open) => setIsPhoneDropdownOpen(open ? index : null)}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="p-1 hover:bg-purple-100 rounded transition-colors"
                     >
+                      <LiaEditSolid className="w-4 h-4 text-primary-text" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    side="bottom"
+                    sideOffset={8}
+                    className="w-auto min-w-[150px] p-0 overflow-hidden rounded-lg bg-card border border-gray-200 shadow-lg"
+                  >
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        handlePhoneCall(phone);
+                        setIsPhoneDropdownOpen(null);
+                      }}
+                      className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                    >
+                      <LiaPhoneSolid className="w-4 h-4" />
+                      اتصال
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        handleCopyPhone(phone);
+                        setIsPhoneDropdownOpen(null);
+                      }}
+                      className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                    >
+                      <LiaCopySolid className="w-4 h-4" />
+                      نسخ
+                    </Button>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleEditClick(index)}
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                      >
+                        <LiaEditSolid className="w-4 h-4" />
+                        تعديل
+                      </Button>
+                    )}
+                    {canEdit && phones.phoneNumbers.length > 1 && (
                       <Button
                         variant="ghost"
                         onClick={() => {
-                          handlePhoneCall(phone);
+                          phones.handleRemove(index);
                           setIsPhoneDropdownOpen(null);
                         }}
-                        className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-red-50 transition-colors flex items-center gap-2 justify-start text-red-600"
                       >
-                        <LiaPhoneSolid className="w-4 h-4" />
-                        اتصال
+                        <LiaTrashSolid className="w-4 h-4" />
+                        حذف
                       </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          handleCopyPhone(phone);
-                          setIsPhoneDropdownOpen(null);
-                        }}
-                        className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
-                      >
-                        <LiaCopySolid className="w-4 h-4" />
-                        نسخ
-                      </Button>
-                      {canEdit && (
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleEditClick(index)}
-                          className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
-                        >
-                          <LiaEditSolid className="w-4 h-4" />
-                          تعديل
-                        </Button>
-                      )}
-                      {canEdit && phones.phoneNumbers.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            phones.handleRemove(index);
-                            setIsPhoneDropdownOpen(null);
-                          }}
-                          className="w-full px-4 py-2 text-right text-sm hover:bg-red-50 transition-colors flex items-center gap-2 justify-start text-red-600"
-                        >
-                          <LiaTrashSolid className="w-4 h-4" />
-                          حذف
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
           </div>
