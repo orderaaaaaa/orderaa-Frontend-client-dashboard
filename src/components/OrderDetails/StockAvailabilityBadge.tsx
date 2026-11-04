@@ -36,7 +36,7 @@ export function StockAvailabilityBadge({ line }: Props) {
     );
   }
 
-  if (line.safe) {
+  if (line.safe || (!line.warning && !line.blocked)) {
     return (
       <p className="flex items-center gap-1 text-sm text-gray-600">
         <LiaBoxSolid className="size-4 shrink-0" />
@@ -55,9 +55,10 @@ export function StockAvailabilityBadge({ line }: Props) {
     );
   }
 
+  const tone = line.blocked ? 'text-red-600' : 'text-warning';
   return (
     <div className="flex flex-col gap-0.5">
-      <p className="flex items-center gap-1 text-sm font-semibold text-red-600">
+      <p className={`flex items-center gap-1 text-sm font-semibold ${tone}`}>
         <LiaExclamationTriangleSolid className="size-4 shrink-0" />
         <span>
           {t('orderDetails.stock.unavailable', {
