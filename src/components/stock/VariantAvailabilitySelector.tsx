@@ -105,6 +105,7 @@ export function VariantAvailabilitySelector({
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =
     variants.length > 0 && variants.every((variant) => variant.available === null);
+  const exactNotSet = exact !== null && exact.available === null && refusal === null;
   const hasStates = variants.length > 0 || (!availabilityLoading && !availabilityError);
 
   const choose = (attributeId: number, optionId: number) => {
@@ -219,8 +220,18 @@ export function VariantAvailabilitySelector({
         </p>
       )}
 
+      {exactNotSet && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="mt-2 text-sm font-semibold text-destructive"
+        >
+          {t('orderDetails.stock.availableWarehouseNotSet')}
+        </p>
+      )}
       {showWarehouseNote &&
         allWarehouseNotSet &&
+        !exactNotSet &&
         refusal !== 'AVAILABLE_WAREHOUSE_NOT_SET' && (
           <p className="mt-2 text-sm text-muted-foreground">
             {t('orderDetails.stock.availableWarehouseNotSet')}
