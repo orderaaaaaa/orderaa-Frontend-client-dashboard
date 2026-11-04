@@ -9,15 +9,16 @@ interface NoteCardProps {
   meta: ReactNode;
   footer?: ReactNode;
   variant?: 'default' | 'legacy';
+  tone?: string;
   children: ReactNode;
 }
 
-export function NoteCard({ meta, footer, variant = 'default', children }: NoteCardProps) {
+export function NoteCard({ meta, footer, variant = 'default', tone, children }: NoteCardProps) {
   return (
     <li
       className={clsx(
         'flex flex-col gap-2 rounded-xl border p-3',
-        variant === 'legacy' ? 'border-dashed border-border bg-background' : 'border-border bg-muted/40'
+        variant === 'legacy' ? 'border-dashed border-border bg-background' : (tone ?? 'border-border bg-muted/40')
       )}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">{meta}</div>

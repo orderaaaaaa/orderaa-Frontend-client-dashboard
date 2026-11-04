@@ -23,6 +23,7 @@ import {
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
   FOLLOWUP_NOTE_NO_WRITER,
+  FOLLOWUP_NOTE_PARTY_HEADING_TONES,
   FOLLOWUP_NOTE_PARTY_LABELS,
   FOLLOWUP_NOTE_PARTY_ORDER,
   FOLLOWUP_NOTES_EMPTY_DAY,
@@ -92,7 +93,14 @@ function PartySection({
 
   return (
     <section className="flex flex-col gap-2 min-w-0">
-      <h4 className="text-sm font-semibold text-foreground">{FOLLOWUP_NOTE_PARTY_LABELS[party]}</h4>
+      <h4
+        className={clsx(
+          'w-fit rounded-md px-2 py-0.5 text-sm font-semibold',
+          FOLLOWUP_NOTE_PARTY_HEADING_TONES[party]
+        )}
+      >
+        {FOLLOWUP_NOTE_PARTY_LABELS[party]}
+      </h4>
       {notes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (

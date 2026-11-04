@@ -14,6 +14,18 @@ export const FOLLOWUP_NOTE_PARTY_LABELS: Record<FollowupNotePartyValue, string> 
   COURIER: 'المندوب',
 };
 
+export const FOLLOWUP_NOTE_PARTY_TONES: Record<FollowupNotePartyValue, string> = {
+  CUSTOMER: 'border-primary/40 bg-primary/20',
+  SHIPPING_COMPANY: 'border-warning/50 bg-warning/25',
+  COURIER: 'border-success/40 bg-success/20',
+};
+
+export const FOLLOWUP_NOTE_PARTY_HEADING_TONES: Record<FollowupNotePartyValue, string> = {
+  CUSTOMER: 'bg-primary/15 text-primary-text',
+  SHIPPING_COMPANY: 'bg-warning/20 text-foreground',
+  COURIER: 'bg-success/15 text-success',
+};
+
 export const FOLLOWUP_NOTES_TITLE = 'ملاحظات المتابعة';
 export const FOLLOWUP_NOTES_LOADING = 'جاري تحميل الملاحظات...';
 export const FOLLOWUP_NOTES_LOAD_ERROR = 'تعذر تحميل الملاحظات';

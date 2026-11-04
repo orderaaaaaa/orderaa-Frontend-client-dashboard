@@ -16,6 +16,7 @@ import {
   FOLLOWUP_NOTE_EDITED_TAG,
   FOLLOWUP_NOTE_MAX_LENGTH,
   FOLLOWUP_NOTE_NO_WRITER,
+  FOLLOWUP_NOTE_PARTY_TONES,
   FOLLOWUP_NOTE_SAVE_LABEL,
 } from './followupNotesConstants';
 
@@ -121,7 +122,7 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
     ) : undefined;
 
   return (
-    <NoteCard meta={meta} footer={footer}>
+    <NoteCard meta={meta} footer={footer} tone={FOLLOWUP_NOTE_PARTY_TONES[note.party]}>
       {isEditing ? (
         <div className="flex flex-col gap-2">
           <Textarea
