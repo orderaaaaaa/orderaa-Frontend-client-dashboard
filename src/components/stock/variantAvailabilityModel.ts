@@ -53,7 +53,7 @@ export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[]
   }));
 }
 
-export type OptionState = 'ok' | 'low' | 'out' | 'notSet' | 'unknown';
+export type OptionState = 'ok' | 'low' | 'out' | 'notSet' | 'unknown' | 'warning';
 
 export interface OptionStatus {
   state: OptionState;
@@ -89,7 +89,7 @@ export function comboKeyOf(optionIds: readonly number[]): string {
   return [...optionIds].sort((a, b) => a - b).join('-');
 }
 
-export function optionStatus({
+function baseOptionStatus({
   variants,
   attribute,
   optionId,
@@ -136,6 +136,25 @@ export function optionStatus({
   const best = bestRow.available ?? 0;
   const state: OptionState = covered ? 'ok' : best > 0 ? 'low' : 'out';
   return { state, best, required: bestRow.required, selected };
+}
+
+export function optionStatus({
+  variants,
+  attribute,
+  optionId,
+  selection,
+  attributeCount,
+}: {
+  variants: VariantAvailability[];
+  attribute: CatalogAttribute;
+  optionId: number;
+  selection: Selection;
+  attributeCount: number;
+}): OptionStatus {
+  const base = baseOptionStatus({ variants, attribute, optionId, selection });
+  if (!base.selected || (base.state !== 'out' && base.state !== 'low')) return base;
+  const exact = exactVariantFor(variants, selection, attributeCount);
+  return exact?.warning === true ? { ...base, state: 'warning' } : base;
 }
 
 export function exactVariantFor(

@@ -166,6 +166,7 @@ const ar = {
   'orderDetails.variants.blockedSelection':
     'هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر حاجة تانية',
   'orderDetails.variants.state.low': 'متبقي: {count}',
+  'orderDetails.variants.state.warning': 'مسموح بالبيع: {count}',
   'orderDetails.variants.state.out': 'غير متوفر',
   'orderDetails.variants.state.notSet': 'المخزن غير محدد',
   'orderDetails.variants.selectedSummary': 'الاختيار الحالي: {variant}',

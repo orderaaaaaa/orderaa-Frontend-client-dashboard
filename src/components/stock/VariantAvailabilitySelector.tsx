@@ -150,6 +150,7 @@ export function VariantAvailabilitySelector({
                             attribute,
                             optionId: option.optionId,
                             selection,
+                            attributeCount: attributes.length,
                           })
                         : unknownOptionStatus(
                             selection[attribute.attributeId] === option.optionId,

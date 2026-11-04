@@ -16,6 +16,7 @@ interface VariantOptionChipProps {
 const STATE_CLASS = {
   ok: 'border-success/40 bg-success/10',
   low: 'border-warning/50 bg-warning/10',
+  warning: 'border-warning/50 bg-warning/10',
   out: 'border-destructive/40 bg-destructive/10',
   notSet: 'border-dashed border-border bg-muted',
   unknown: 'border-border bg-card',
@@ -24,13 +25,18 @@ const STATE_CLASS = {
 const STATE_TEXT_CLASS = {
   ok: 'text-success',
   low: 'text-warning',
+  warning: 'text-warning',
   out: 'text-destructive',
   notSet: 'text-muted-foreground',
   unknown: 'text-muted-foreground',
 } as const;
 
 const iconFor = (state: OptionState) =>
-  state === 'low' ? LiaExclamationCircleSolid : state === 'out' ? LiaBanSolid : null;
+  state === 'low' || state === 'warning'
+    ? LiaExclamationCircleSolid
+    : state === 'out'
+      ? LiaBanSolid
+      : null;
 
 export function VariantOptionChip({
   attributeName,
@@ -53,6 +59,8 @@ export function VariantOptionChip({
           : t('orderDetails.stock.available', { count: best })
         : status.state === 'low'
           ? t('orderDetails.variants.state.low', { count: best })
+          : status.state === 'warning'
+            ? t('orderDetails.variants.state.warning', { count: best })
           : status.state === 'out'
             ? t('orderDetails.variants.state.out')
             : t('orderDetails.variants.state.notSet');

@@ -153,6 +153,7 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.blockedSelection':
     'This option is out of stock and the product settings block adding it — pick something else',
   'orderDetails.variants.state.low': 'Left: {count}',
+  'orderDetails.variants.state.warning': 'Sale allowed: {count}',
   'orderDetails.variants.state.out': 'Out of stock',
   'orderDetails.variants.state.notSet': 'Warehouse not set',
   'orderDetails.variants.selectedSummary': 'Current choice: {variant}',
