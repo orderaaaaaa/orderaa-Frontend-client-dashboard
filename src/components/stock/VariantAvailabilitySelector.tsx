@@ -29,6 +29,8 @@ export interface VariantAvailabilitySelectorProps {
   onChange?: (selection: Selection) => void;
   isLoading?: boolean;
   isError?: boolean;
+  catalogError?: unknown;
+  onCatalogRetry?: () => void;
   availabilityLoading?: boolean;
   availabilityError?: unknown;
   onRetry?: () => void;
@@ -48,6 +50,8 @@ export function VariantAvailabilitySelector({
   onChange,
   isLoading = false,
   isError = false,
+  catalogError = null,
+  onCatalogRetry,
   availabilityLoading = false,
   availabilityError = null,
   onRetry,
@@ -95,7 +99,11 @@ export function VariantAvailabilitySelector({
 
   if (isError) {
     return container(
-      <ErrorState error={null} fallback={t('orderDetails.variants.title')} />,
+      <ErrorState
+        error={catalogError}
+        fallback={t('orderDetails.variants.loadError')}
+        onRetry={onCatalogRetry}
+      />,
     );
   }
 
