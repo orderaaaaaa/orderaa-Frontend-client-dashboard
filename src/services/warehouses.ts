@@ -437,7 +437,9 @@ export const useOrderlessVariantAvailabilityQuery = (
     queryFn: () =>
       getOrderlessVariantAvailability(productId as number, target, quantity, draft),
     placeholderData: (previous, previousQuery) =>
-      previousQuery?.queryKey[2] === productId ? previous : undefined,
+      previousQuery?.queryKey[2] === productId && previousQuery?.queryKey[3] === target
+        ? previous
+        : undefined,
     enabled: typeof productId === 'number',
     staleTime: 0,
   });
