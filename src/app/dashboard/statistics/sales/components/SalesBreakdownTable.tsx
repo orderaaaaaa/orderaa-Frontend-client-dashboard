@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { BREAKDOWN_GROUP_HEADINGS, SALES_COPY } from '../constants';
 import type { SalesBreakdownDimension, SalesBreakdownRow, SalesMetrics } from '../types';
+import { STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesBreakdownTableProps {
   breakdown: SalesBreakdownRow[];
@@ -15,7 +16,6 @@ interface SalesBreakdownTableProps {
 const DIMENSION_ORDER: SalesBreakdownDimension[] = ['STORE', 'CARRIER', 'PAGE'];
 
 const STICKY_FIRST_COLUMN = 'sticky start-0 z-[1] bg-card';
-const STICKY_HEADER = 'sticky top-0 z-10 bg-card/95 backdrop-blur text-muted-foreground text-xs';
 
 function metricCells(metrics: SalesMetrics) {
   return [
@@ -46,8 +46,7 @@ export function SalesBreakdownTable({ breakdown, totals }: SalesBreakdownTablePr
                   scope="col"
                   className={cn(
                     'whitespace-nowrap',
-                    STICKY_HEADER,
-                    index === 0 && cn(STICKY_FIRST_COLUMN, 'z-20'),
+                    index === 0 ? STICKY_HEADER_CORNER : STICKY_HEADER,
                     index > 0 && 'text-end tabular-nums',
                   )}
                 >

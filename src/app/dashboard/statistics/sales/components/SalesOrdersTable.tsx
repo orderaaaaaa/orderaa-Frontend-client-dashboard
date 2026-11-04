@@ -15,6 +15,7 @@ import {
   type SalesOrderColumn,
 } from '../constants';
 import type { SalesOrderRow, SalesOrderSet } from '../types';
+import { STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesOrdersTableProps {
   set: SalesOrderSet;
@@ -28,7 +29,6 @@ const MONEY_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
   'shippingCost',
 ]);
 
-const STICKY_HEADER = 'sticky top-0 z-10 bg-card/95 backdrop-blur text-muted-foreground text-xs';
 
 function joinStoreAndPage(row: SalesOrderRow): string | null {
   const parts = [row.storeName, row.pageName].filter((part): part is string => Boolean(part));
@@ -153,8 +153,7 @@ export function SalesOrdersTable({ set, rows }: SalesOrdersTableProps) {
                   scope="col"
                   className={cn(
                     'whitespace-nowrap',
-                    STICKY_HEADER,
-                    index === 0 && 'start-0 z-20',
+                    index === 0 ? STICKY_HEADER_CORNER : STICKY_HEADER,
                     MONEY_COLUMNS.has(column) && 'text-end tabular-nums',
                   )}
                 >

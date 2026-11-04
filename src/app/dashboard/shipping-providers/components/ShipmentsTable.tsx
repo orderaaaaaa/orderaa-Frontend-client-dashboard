@@ -130,7 +130,7 @@ export function PhoneCell({ phones }: { phones: string[] }) {
             type="button"
             variant="ghost"
             size="xs"
-            className={'relative z-10 max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}
+            className={'relative z-(--z-raised) max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}
             aria-label={t('inProcess.table.morePhones', { n: phones.length })}
             onClick={() => setIsListOpen(true)}
           >
@@ -382,9 +382,9 @@ export function InProcessShipmentsTable({
   return (
     <table dir="rtl" className="w-full caption-bottom text-sm">
       <caption className="sr-only">{t('inProcess.table.captionInProcess')}</caption>
-      <thead className="sticky top-0 z-10 bg-muted">
+      <thead className="sticky top-0 z-(--z-inpage-sticky) bg-muted">
         <tr className="border-b">
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-(--z-inpage-sticky-corner)')}>
             <div className="flex items-center gap-2">
               {selection && (
                 <Checkbox
@@ -427,7 +427,7 @@ export function InProcessShipmentsTable({
               {t('inProcess.table.columns.net')}
             </th>
           </Can>
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20', PINNED_END_CUE_CLASS)}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-(--z-inpage-sticky)', PINNED_END_CUE_CLASS)}>
             <span className="sr-only">{t('inProcess.table.actions')}</span>
           </th>
         </tr>
@@ -531,9 +531,9 @@ export function ReturnedShipmentsTable({
   return (
     <table dir="rtl" className="w-full caption-bottom text-sm">
       <caption className="sr-only">{t('inProcess.table.captionReturned')}</caption>
-      <thead className="sticky top-0 z-10 bg-muted">
+      <thead className="sticky top-0 z-(--z-inpage-sticky) bg-muted">
         <tr className="border-b">
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-(--z-inpage-sticky-corner)')}>
             {t('inProcess.table.columns.code')}
           </th>
           <th scope="col" className={HEAD_CLASS}>
@@ -551,7 +551,7 @@ export function ReturnedShipmentsTable({
           <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
             {t('inProcess.table.columns.total')}
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20', PINNED_END_CUE_CLASS)}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-(--z-inpage-sticky)', PINNED_END_CUE_CLASS)}>
             <span className="sr-only">{t('inProcess.table.actions')}</span>
           </th>
         </tr>

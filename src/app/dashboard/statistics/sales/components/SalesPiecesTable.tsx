@@ -7,6 +7,7 @@ import type { SalesExportCell } from '@/lib/excel/export-sales-statistics';
 import { cn } from '@/lib/utils';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
 import type { SalesPieceProduct } from '../types';
+import { STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesPiecesTableProps {
   withCost: boolean;
@@ -21,7 +22,6 @@ const PIECE_TABLE_HEADERS = {
   uncostedPieces: 'قطع بدون تكلفة',
 } as const;
 
-const STICKY_HEADER = 'sticky top-0 z-10 bg-card/95 backdrop-blur text-muted-foreground text-xs';
 
 export function buildSalesPieceExport(
   products: SalesPieceProduct[],
@@ -79,7 +79,7 @@ export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) 
         <table className="w-full min-w-[480px] caption-bottom text-sm">
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b-0">
-              <TableHead scope="col" className={cn('whitespace-nowrap start-0 z-20', STICKY_HEADER)}>
+              <TableHead scope="col" className={cn('whitespace-nowrap', STICKY_HEADER_CORNER)}>
                 {PIECE_TABLE_HEADERS.name}
               </TableHead>
               <TableHead scope="col" className={cn('whitespace-nowrap text-end', STICKY_HEADER)}>
