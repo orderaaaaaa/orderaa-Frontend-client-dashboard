@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useI18n } from '@/i18n/I18nProvider';
 import { toStockNumber } from '@/utils/format';
 import { cn } from '@/lib/utils';
-import type { OptionStatus } from './variantAvailabilityModel';
+import type { OptionState, OptionStatus } from './variantAvailabilityModel';
 
 interface VariantOptionChipProps {
   attributeName: string;
@@ -14,20 +14,29 @@ interface VariantOptionChipProps {
 }
 
 const STATE_CLASS = {
-  ok: 'border-success/40 bg-success/10 text-foreground',
-  low: 'border-warning/50 bg-warning/10 text-foreground',
-  out: 'border-destructive/40 bg-destructive/10 text-foreground',
-  notSet: 'border-dashed border-border bg-muted text-muted-foreground',
-  unknown: 'border-border bg-card text-foreground',
+  ok: 'border-success/40 bg-success/10',
+  low: 'border-warning/50 bg-warning/10',
+  out: 'border-destructive/40 bg-destructive/10',
+  notSet: 'border-dashed border-border bg-muted',
+  unknown: 'border-border bg-card',
 } as const;
 
-const ICON_CLASS = {
+const STATE_TEXT_CLASS = {
   ok: 'text-success',
   low: 'text-warning',
   out: 'text-destructive',
   notSet: 'text-muted-foreground',
   unknown: 'text-muted-foreground',
 } as const;
+
+const iconFor = (state: OptionState) =>
+  state === 'ok'
+    ? LiaCheckCircleSolid
+    : state === 'low'
+      ? LiaExclamationCircleSolid
+      : state === 'out'
+        ? LiaBanSolid
+        : null;
 
 export function VariantOptionChip({
   attributeName,
@@ -42,43 +51,37 @@ export function VariantOptionChip({
     status.state === 'unknown'
       ? null
       : status.state === 'ok'
-      ? status.required !== null && status.required > 1
-        ? t('orderDetails.stock.availableWithRequired', {
-            available: best,
-            required: toStockNumber(status.required),
-          })
-        : t('orderDetails.stock.available', { count: best })
-      : status.state === 'low'
-        ? t('orderDetails.variants.state.low', { count: best })
-        : status.state === 'out'
-          ? t('orderDetails.variants.state.out')
-          : t('orderDetails.variants.state.notSet');
+        ? status.required !== null && status.required > 1
+          ? t('orderDetails.stock.availableWithRequired', {
+              available: best,
+              required: toStockNumber(status.required),
+            })
+          : t('orderDetails.stock.available', { count: best })
+        : status.state === 'low'
+          ? t('orderDetails.variants.state.low', { count: best })
+          : status.state === 'out'
+            ? t('orderDetails.variants.state.out')
+            : t('orderDetails.variants.state.notSet');
 
-  const Icon = status.selected
-    ? LiaCheckCircleSolid
-    : status.state === 'low'
-      ? LiaExclamationCircleSolid
-      : status.state === 'out'
-        ? LiaBanSolid
-        : null;
-
-  const iconClass = status.selected ? 'text-primary' : ICON_CLASS[status.state];
+  const Icon = status.selected ? LiaCheckCircleSolid : iconFor(status.state);
+  const iconClass = status.selected ? 'text-primary' : STATE_TEXT_CLASS[status.state];
 
   const content = (
     <>
-      <span className="flex max-w-[12rem] items-center gap-1.5 font-medium">
+      <span className="flex max-w-[12rem] items-center gap-1.5 font-medium text-foreground">
         {Icon && <Icon className={cn('size-4 shrink-0', iconClass)} aria-hidden="true" />}
         <span className="truncate">{optionName}</span>
       </span>
-      {stateText && <span className="text-xs">{stateText}</span>}
+      {stateText && (
+        <span className={cn('text-xs', STATE_TEXT_CLASS[status.state])}>{stateText}</span>
+      )}
     </>
   );
 
   const chipClass = cn(
-    'inline-flex h-auto flex-col items-start gap-0.5 rounded-full border px-3 py-1.5 text-start text-sm',
-    status.selected
-      ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary'
-      : STATE_CLASS[status.state],
+    'inline-flex h-auto min-h-14 min-w-24 flex-col items-start justify-center gap-1 rounded-xl border px-3 py-2 text-start text-sm',
+    STATE_CLASS[status.state],
+    status.selected && 'ring-2 ring-primary',
   );
 
   const element = onSelect ? (

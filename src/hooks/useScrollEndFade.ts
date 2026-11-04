@@ -16,7 +16,7 @@ export function useScrollEndFade<T extends HTMLElement>(axis: 'x' | 'y' = 'x') {
         axis === 'y'
           ? element.scrollHeight - element.clientHeight - element.scrollTop
           : element.scrollWidth - element.clientWidth - Math.abs(element.scrollLeft);
-      setHasMoreAtEnd(remaining > 1);
+      setHasMoreAtEnd(remaining > (axis === 'y' ? 2 : 1));
     };
     const resize = new ResizeObserver(update);
     const observeChildren = () =>
