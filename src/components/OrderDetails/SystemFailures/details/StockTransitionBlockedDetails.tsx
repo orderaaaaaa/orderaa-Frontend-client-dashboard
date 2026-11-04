@@ -23,7 +23,13 @@ const isRefusalTransition = (
 const toShortage = (
   details: StockTransitionBlockedPayload
 ): FailureStockShortage | null => {
-  if (!details.lines || isRefusalTransition(details)) return null;
+  if (
+    !details.lines ||
+    details.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE ||
+    isRefusalTransition(details)
+  ) {
+    return null;
+  }
   const blocks = new Map<string, FailureStockShortageBlock>();
   for (const line of details.lines) {
     const warehouseName = line.warehouseName ?? details.warehouseName ?? undefined;
