@@ -206,7 +206,7 @@ function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: Sale
   const copyable = isCopyableColumn(set, column);
   const derivedBadge =
     column === 'code' && row.derivedKind ? (
-      <span className="ms-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+      <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
         {SALES_DERIVED_KIND_LABELS[row.derivedKind]}
       </span>
     ) : null;
@@ -214,10 +214,12 @@ function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: Sale
   if (!copyable && !derivedBadge) return text;
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
       {copyable ? (
         <>
-          <span dir="ltr">{text}</span>
+          <span dir="ltr" className="whitespace-nowrap">
+            {text}
+          </span>
           <CopyButton value={text} label={`نسخ ${label}`} successMessage={`تم نسخ ${label}`} />
         </>
       ) : (
