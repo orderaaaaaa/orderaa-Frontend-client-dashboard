@@ -28,6 +28,7 @@ import {
   type InvoicePaymentStatus,
 } from '@/lib/api/suppliers';
 import { formatMoney } from '@/utils/formatMoney';
+import { invoiceTypeLabel, signedInvoiceAmount } from '@/app/dashboard/purchases/constants';
 import { formatStockNumber } from '@/utils/format';
 import { INVOICE_LIFECYCLE_BADGE } from './receivingStatus';
 import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
@@ -68,6 +69,7 @@ export interface InvoiceCardData {
   invoiceType: 'PURCHASE' | 'PAID' | 'RETURN';
   paymentStatus: InvoicePaymentStatus;
   transactionType: string;
+  reversesInvoiceId?: number | null;
   lifecycle: InvoiceLifecycle;
   imageUrl?: string;
 }
@@ -171,10 +173,16 @@ const InvoiceCard = memo(
       icon: LiaCheckCircleSolid,
     };
 
-    const isNegativeAmount = invoice.transactionType === 'استبدال' || invoice.transactionType === 'مرتجع';
+    const isReversal = invoice.invoiceType === 'PAID' && invoice.reversesInvoiceId != null;
+    const typeLabel = isReversal
+      ? invoiceTypeLabel({ type: invoice.invoiceType, reversesInvoiceId: invoice.reversesInvoiceId })
+      : invoice.transactionType;
+    const amountText = isReversal
+      ? signedInvoiceAmount({ type: invoice.invoiceType, totalAmount: invoice.totalAmount })
+      : formatMoney(String(invoice.totalAmount));
 
     const paymentStatus = PAYMENT_STATUS_RIBBON[invoice.paymentStatus];
-    const showRibbon = invoice.invoiceType !== 'RETURN';
+    const showRibbon = invoice.invoiceType !== 'RETURN' && !isReversal;
 
     const productColumns = useMemo(
       () => buildProductColumns(invoice.products, invoice.lifecycle !== INVOICE_LIFECYCLE.DRAFT),
@@ -209,7 +217,7 @@ const InvoiceCard = memo(
         },
         {
           label: 'نوع الفاتورة',
-          value: invoice.transactionType,
+          value: typeLabel,
           icon: typeColors.icon,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
@@ -218,13 +226,13 @@ const InvoiceCard = memo(
           ? [
               {
                 label: 'المبلغ الإجمالي',
-                value: formatMoney(String(invoice.totalAmount)),
+                value: amountText,
                 icon: LiaMoneyBillWaveSolid,
               },
             ]
           : []),
       ],
-      [invoice, typeColors, formatDate, showAmount]
+      [invoice, typeColors, typeLabel, amountText, formatDate, showAmount]
     );
 
     return (

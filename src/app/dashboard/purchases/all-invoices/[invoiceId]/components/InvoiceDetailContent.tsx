@@ -438,13 +438,19 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="ملخص الفاتورة">
         <KpiCard
           label="الإجمالي"
-          value={signedMoney(invoice)}
+          value={invoice.reversesInvoiceId != null ? signedMoney(invoice) : money(invoice.totalAmount)}
           icon={<LiaMoneyBillWaveSolid className="size-5" aria-hidden="true" />}
           accent="primary"
         />
         <KpiCard
           label="المدفوع"
-          value={paid === null ? '—' : money(paid)}
+          value={
+            paid === null
+              ? '—'
+              : invoice.reversesInvoiceId != null
+                ? signedMoney({ type: 'PAID', totalAmount: paid })
+                : money(paid)
+          }
           icon={<LiaWalletSolid className="size-5" aria-hidden="true" />}
           accent="chart2"
         />

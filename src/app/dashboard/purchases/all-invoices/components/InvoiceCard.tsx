@@ -67,6 +67,7 @@ const InvoiceCard = memo(
       invoiceType: invoice.type,
       paymentStatus: invoice.paymentStatus,
       transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
+      reversesInvoiceId: invoice.reversesInvoiceId,
       lifecycle: invoice.lifecycle,
       imageUrl: invoice.images?.[0] ?? undefined,
     };
