@@ -103,7 +103,7 @@ export function findTemplate(
 export function WhatsAppLink({ template }: { template: ShipmentWhatsAppTemplate | undefined }) {
   if (template === undefined) return null;
   return (
-    <Button asChild variant="ghost" size="icon-xs" className="relative z-[2]">
+    <Button asChild variant="ghost" size="icon-xs" className={'relative z-[2] max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}>
       <a href={template.url} target="_blank" rel="noopener noreferrer" aria-label={template.label}>
         <LiaWhatsapp className="size-4" aria-hidden />
       </a>
@@ -172,7 +172,7 @@ export function CustomerCell({
   return (
     <div className="flex min-w-max flex-col items-start gap-1">
       <span className="block max-w-32 truncate font-medium" title={name ?? undefined}>{name ?? '—'}</span>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 max-sm:gap-6">
         <PhoneCell phones={phones} />
         <WhatsAppLink template={whatsapp} />
       </div>
