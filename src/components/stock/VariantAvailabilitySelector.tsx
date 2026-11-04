@@ -12,6 +12,7 @@ import {
   optionStatus,
   refusalTextFor,
   selectionLabel,
+  warningTextFor,
   sortedCatalog,
   unknownOptionStatus,
   type CatalogAttribute,
@@ -83,6 +84,8 @@ export function VariantAvailabilitySelector({
   const sorted = sortedCatalog(attributes);
   const exact = exactVariantFor(variants, selection, attributes.length);
   const refusal = exact?.refusal ?? null;
+  const warningText =
+    exact && !refusal ? warningTextFor({ productName, row: exact }) : null;
   const summary = selectionLabel(attributes, selection);
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =
@@ -188,6 +191,16 @@ export function VariantAvailabilitySelector({
           className="mt-2 whitespace-pre-line text-sm font-semibold text-destructive"
         >
           {refusalTextFor({ refusal, productName, row: exact })}
+        </p>
+      )}
+
+      {warningText && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="mt-2 whitespace-pre-line text-sm font-semibold text-warning"
+        >
+          {warningText}
         </p>
       )}
 

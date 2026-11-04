@@ -2,7 +2,8 @@ import type { AvailabilityRefusal, VariantAvailability } from '@/lib/api/warehou
 import type { VariantOption } from '@/services/orders';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
-import { formatStockShortageLines } from '@/utils/apiError';
+import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
+import { formatAvailableStockLines } from '@/utils/apiError';
 
 export interface CatalogOption {
   optionId: number;
@@ -196,6 +197,21 @@ export function draftFromLines(
   return { draft, excluded };
 }
 
+function availableLineOf(
+  productName: string,
+  row: VariantAvailability,
+): AvailableStockRefusalLine | null {
+  if (row.available === null) return null;
+  return {
+    variantId: row.variantId,
+    productName,
+    variantLabel: row.variantLabel,
+    available: row.available,
+    change: row.change,
+    after: row.after ?? row.available + row.change,
+  };
+}
+
 export function refusalTextFor({
   refusal,
   productName,
@@ -206,17 +222,27 @@ export function refusalTextFor({
   row: VariantAvailability;
 }): string {
   const locale = readStoredLocale();
-  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET') {
+  const line = availableLineOf(productName, row);
+  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET' || line === null) {
     return translate(locale, 'orderDetails.stock.availableWarehouseNotSet');
   }
-  const lines = formatStockShortageLines([
-    {
-      variantId: row.variantId,
-      productName,
-      variantLabel: row.variantLabel,
-      required: row.required,
-      available: row.available ?? 0,
-    },
-  ]);
-  return `${translate(locale, 'stockShortage.confirmBlocked')}\n${lines}`;
+  const heading = translate(locale, 'stockShortage.availableWouldGoNegative', {
+    warehouse: row.availableWarehouse?.name ?? '',
+  });
+  return `${heading}\n${formatAvailableStockLines([line])}`;
+}
+
+export function warningTextFor({
+  productName,
+  row,
+}: {
+  productName: string;
+  row: VariantAvailability;
+}): string | null {
+  const line = availableLineOf(productName, row);
+  if (!row.warning || line === null) return null;
+  const heading = translate(readStoredLocale(), 'stockShortage.availableWarning', {
+    warehouse: row.availableWarehouse?.name ?? '',
+  });
+  return `${heading}\n${formatAvailableStockLines([line])}`;
 }
