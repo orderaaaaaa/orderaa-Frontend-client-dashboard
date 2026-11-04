@@ -71,6 +71,15 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const cairoDayNumber = (year: number, month: number, day: number): number =>
   Date.UTC(year, month - 1, day) / MS_PER_DAY;
 
+export function cairoDayKey(date: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: CAIRO_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
 export function getTimeAgoCompact(
   dayKey: string | null | undefined,
   now: Date = new Date(),
@@ -78,12 +87,7 @@ export function getTimeAgoCompact(
   const match = dayKey ? DAY_KEY_PATTERN.exec(dayKey) : null;
   if (!match) return '';
 
-  const cairoToday = new Intl.DateTimeFormat('en-CA', {
-    timeZone: CAIRO_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now);
+  const cairoToday = cairoDayKey(now);
   const todayMatch = DAY_KEY_PATTERN.exec(cairoToday);
   if (!todayMatch) return '';
 
