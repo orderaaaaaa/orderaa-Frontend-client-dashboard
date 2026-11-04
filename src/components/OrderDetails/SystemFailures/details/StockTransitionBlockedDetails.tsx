@@ -5,7 +5,11 @@ import type {
   FailureStockShortageBlock,
   StockTransitionBlockedDetails as StockTransitionBlockedPayload,
 } from '@/types/orderSystemFailures';
-import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
+import {
+  AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
+  AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+} from '@/lib/api/stockShortage';
+import { AvailableStockWouldGoNegativeNotice } from './AvailableStockWouldGoNegativeNotice';
 import { AvailableWarehouseNotSetNotice } from './AvailableWarehouseNotSetNotice';
 import { DetailField, DetailGrid } from './DetailFields';
 import { StockShortageDetails } from './StockShortageDetails';
@@ -58,6 +62,9 @@ export function StockTransitionBlockedDetails({
         </DetailGrid>
       )}
       {details.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE && <AvailableWarehouseNotSetNotice />}
+      {details.errorCode === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE && (
+        <AvailableStockWouldGoNegativeNotice warehouseName={details.warehouseName ?? ''} />
+      )}
       {shortage && <StockShortageDetails shortage={shortage} />}
     </div>
   );
