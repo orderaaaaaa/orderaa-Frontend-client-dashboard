@@ -38,7 +38,7 @@ const ClearableSelect = ({
             e.stopPropagation();
             onClear();
           }}
-          className="absolute left-10 top-1/2 -translate-y-1/2 z-20
+          className="absolute left-10 top-1/2 -translate-y-1/2 z-(--z-raised)
                      text-gray-400 hover:text-primary cursor-pointer"
         >
           <X className="w-4 h-4" />

@@ -197,7 +197,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
                     e.stopPropagation();
                     clearTimePeriod();
                   }}
-                  className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+                  className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-(--z-raised)"
                   type="button"
                 >
                   <X size={16} className="text-gray-500 hover:text-gray-700" />
@@ -318,7 +318,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
                   e.stopPropagation();
                   clearTimePeriod();
                 }}
-                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 rounded-full z-10"
+                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 rounded-full z-(--z-raised)"
                 type="button"
               >
                 <X size={16} className="text-gray-500 hover:text-gray-700" />

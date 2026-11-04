@@ -103,7 +103,7 @@ function SettlementCollectionContent() {
       </div>
 
       <div className="relative max-w-md">
-        <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+        <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-(--z-raised) pointer-events-none" />
         <Input
           placeholder="ابحث بكود الطلب أو كود الشحن أو اسم العميل أو رقم الهاتف..."
           value={searchInput}

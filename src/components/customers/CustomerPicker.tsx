@@ -63,7 +63,7 @@ export default function CustomerPicker({
     <div className="flex flex-col gap-3" data-field-error={id}>
       <div className="relative">
         <Search
-          className="pointer-events-none absolute start-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 z-(--z-raised) size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         {customersQuery.isFetching && !customersQuery.isLoading && (

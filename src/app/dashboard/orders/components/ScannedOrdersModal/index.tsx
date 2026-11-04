@@ -344,7 +344,7 @@ export function ScannedOrdersModal({
             <div className="relative w-full md:max-w-md">
               <LiaSearchSolid
                 aria-hidden="true"
-                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-(--z-raised)"
               />
               <Input
                 value={searchQuery}
