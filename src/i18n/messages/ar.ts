@@ -352,6 +352,7 @@ const ar = {
   'orderSystemFailures.label.STOCK_MOVEMENT_BYPASSED': 'تم تخطي جزء من حركة المخزون لأن مرحلة سابقة لم تحركه',
   'orderSystemFailures.label.STOCK_MOVEMENT_ALL_BYPASSED': 'طلب خارج تتبع المخزون',
   'orderSystemFailures.label.STOCK_TRANSITION_BLOCKED': 'تم منع تغيير حالة الطلب لعدم كفاية المخزون',
+  'orderSystemFailures.label.STOCK_TRANSITION_BLOCKED_WAREHOUSE_NOT_SET': 'تم منع تغيير حالة الطلب لعدم تحديد المخزن المتاح',
   'orderSystemFailures.label.MACHINE_TRANSITION_STOCK_SHORTAGE': 'لم يُطبَّق الانتقال بسبب نقص المخزون',
   'orderSystemFailures.label.STORE_CREATE_CREATION_STOCK_SHORTAGE': 'وصل طلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون',
   'orderSystemFailures.label.SCHEDULED_TRANSITION_FAILED': 'فشل تغيير حالة الطلب التلقائي',

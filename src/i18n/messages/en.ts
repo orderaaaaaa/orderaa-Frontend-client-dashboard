@@ -339,6 +339,7 @@ const en: Record<keyof typeof ar, string> = {
   'orderSystemFailures.label.STOCK_MOVEMENT_BYPASSED': 'Part of a stock movement was skipped because an earlier stage did not move it',
   'orderSystemFailures.label.STOCK_MOVEMENT_ALL_BYPASSED': 'Order outside stock tracking',
   'orderSystemFailures.label.STOCK_TRANSITION_BLOCKED': 'The order status change was blocked because stock is insufficient',
+  'orderSystemFailures.label.STOCK_TRANSITION_BLOCKED_WAREHOUSE_NOT_SET': 'The order status change was blocked because the available-stock warehouse is not set',
   'orderSystemFailures.label.MACHINE_TRANSITION_STOCK_SHORTAGE': 'The transition was not applied because of a stock shortage',
   'orderSystemFailures.label.STORE_CREATE_CREATION_STOCK_SHORTAGE': 'An order arrived from the store and its stock was not reserved because stock is insufficient',
   'orderSystemFailures.label.SCHEDULED_TRANSITION_FAILED': 'The automatic order status change failed',

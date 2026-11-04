@@ -10,6 +10,8 @@ import { orderSystemFailureLabelKeyOf } from '@/constants/orderSystemFailures';
 import { StockTransitionBlockedDetails } from '@/components/OrderDetails/SystemFailures/details/StockTransitionBlockedDetails';
 import { narrowFailureDetails } from '@/components/OrderDetails/SystemFailures/details/guards';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translate';
+import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
 import { cn } from '@/lib/utils';
 import {
   noticeErrorMessageOf,
@@ -136,7 +138,7 @@ function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean
         <div className="flex min-w-0 flex-col gap-1.5">
           <span className="flex items-center gap-2 text-sm font-semibold break-words text-foreground">
             {unread && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-destructive" />}
-            {t(orderSystemFailureLabelKeyOf(notice.code))}
+            {t(noticeTitleKeyOf(notice))}
           </span>
           <div className="flex flex-wrap items-center gap-2">
             <OrderChip order={{ id: notice.orderId, code: notice.orderCode }} />
@@ -163,9 +165,22 @@ function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean
   );
 }
 
-function NoticeDetails({ notice }: { notice: OrderNoticeDto }) {
+function narrowedTransitionOf(notice: OrderNoticeDto) {
   if (notice.code !== 'STOCK_TRANSITION_BLOCKED' || !notice.details) return null;
   const narrowed = narrowFailureDetails({ code: 'STOCK_TRANSITION_BLOCKED', details: notice.details });
-  if (narrowed?.code !== 'STOCK_TRANSITION_BLOCKED') return null;
-  return <StockTransitionBlockedDetails details={narrowed.details} />;
+  return narrowed?.code === 'STOCK_TRANSITION_BLOCKED' ? narrowed.details : null;
+}
+
+function noticeTitleKeyOf(notice: OrderNoticeDto): TranslationKey {
+  const transition = narrowedTransitionOf(notice);
+  if (transition?.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
+    return 'orderSystemFailures.label.STOCK_TRANSITION_BLOCKED_WAREHOUSE_NOT_SET';
+  }
+  return orderSystemFailureLabelKeyOf(notice.code);
+}
+
+function NoticeDetails({ notice }: { notice: OrderNoticeDto }) {
+  const transition = narrowedTransitionOf(notice);
+  if (!transition) return null;
+  return <StockTransitionBlockedDetails details={transition} />;
 }
