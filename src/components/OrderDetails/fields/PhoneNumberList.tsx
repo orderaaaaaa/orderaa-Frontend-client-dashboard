@@ -163,7 +163,7 @@ export function PhoneNumberList({
                   </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
-                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[999999999]"
+                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-(--z-inpage-popup)"
                     >
                       <Button
                         variant="ghost"

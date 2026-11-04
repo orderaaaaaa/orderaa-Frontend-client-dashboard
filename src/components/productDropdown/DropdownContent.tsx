@@ -67,7 +67,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
         />
       </div>
 
-      <div aria-hidden className="top-0 z-10 bg-muted/60 p-3 sm:p-4 mx-0 sm:mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
+      <div aria-hidden className="bg-muted/60 p-3 sm:p-4 mx-0 sm:mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
         <div className="w-1/4 text-center">الصور</div>
         <div className="w-1/2 text-center">الاسم</div>
         <div className="w-1/4 text-center">السعر</div>

@@ -105,11 +105,11 @@ export function EmployeeSearchFilter({
         {showFilterDropdown && (
           <>
             <div
-              className="fixed inset-0 z-10"
+              className="fixed inset-0 z-(--z-inpage-popup)"
               onClick={() => setShowFilterDropdown(false)}
             />
 
-            <div className="absolute inset-x-0 sm:inset-x-auto sm:end-0 top-full mt-2 bg-card border border-gray-200 rounded-lg shadow-lg z-20 max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
+            <div className="absolute inset-x-0 sm:inset-x-auto sm:end-0 top-full mt-2 bg-card border border-gray-200 rounded-lg shadow-lg z-(--z-inpage-popup) max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-card border-b border-gray-200 px-4 py-3  items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>

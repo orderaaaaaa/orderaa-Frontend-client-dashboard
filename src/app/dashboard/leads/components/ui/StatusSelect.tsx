@@ -97,7 +97,7 @@ export function StatusSelect({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-[200] sm:mt-2 w-full bg-card border rounded-xl shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-(--z-inpage-popup) sm:mt-2 w-full bg-card border rounded-xl shadow-lg max-h-60 overflow-auto">
           {LEADS_STATS_CONFIG.map((status) => (
             <div
               key={status.key}

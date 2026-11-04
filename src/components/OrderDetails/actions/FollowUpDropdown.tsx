@@ -30,7 +30,7 @@ export function FollowUpDropdown({ isOpen, onClick }: FollowUpDropdownProps) {
 
   return (
     <div
-      className="absolute bottom-full mb-2 right-0 min-w-[120px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+      className="absolute bottom-full mb-2 right-0 min-w-[120px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-(--z-inpage-popup)"
       dir="rtl"
     >
       {followUpOptions.map((option) => (

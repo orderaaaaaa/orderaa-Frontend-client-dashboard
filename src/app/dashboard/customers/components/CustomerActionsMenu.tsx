@@ -42,7 +42,7 @@ export function CustomerActionsMenu({
           collisionPadding={8}
           onClick={stop}
           onKeyDown={stop}
-          className="z-50 min-w-[140px] overflow-hidden rounded-lg border bg-card p-1 shadow-lg"
+          className="z-(--z-popover) min-w-[140px] overflow-hidden rounded-lg border bg-card p-1 shadow-lg"
         >
           <DropdownMenuPrimitive.Item
             disabled={isPending}

@@ -48,7 +48,7 @@ export const LimitSelector = ({
       </div>
 
       {isLimitOpen && (
-        <div className="absolute bottom-full mb-2 w-full bg-card rounded-lg shadow-md overflow-hidden z-50">
+        <div className="absolute bottom-full mb-2 w-full bg-card rounded-lg shadow-md overflow-hidden z-(--z-inpage-popup)">
           {LIMIT_OPTIONS.map((option) => (
             <div
               key={option}
