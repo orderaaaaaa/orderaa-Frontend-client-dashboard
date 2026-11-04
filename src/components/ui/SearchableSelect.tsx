@@ -293,7 +293,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           <button
             type="button"
             onClick={handleClear}
-            className="absolute end-10 top-1/2 -translate-y-1/2 z-20
+            className="absolute end-10 top-1/2 -translate-y-1/2 z-(--z-raised)
                        text-foreground-subtle hover:text-primary cursor-pointer"
             aria-label="مسح الاختيار"
           >
@@ -413,7 +413,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   transition={{ duration: 0.15 }}
                   className={cn(
                     overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
-                    'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
+                    'z-(--z-inpage-popup) mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
                   )}
                   role="listbox"
                 >

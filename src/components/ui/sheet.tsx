@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OverlayLayerContext } from './overlay-layer';
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -61,7 +62,7 @@ function SheetContent({
         )}
         {...props}
       >
-        {children}
+        <OverlayLayerContext.Provider value={true}>{children}</OverlayLayerContext.Provider>
         <SheetPrimitive.Close className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground max-sm:before:absolute max-sm:before:-inset-3 max-sm:before:content-['']">
           <X className="size-4" />
           <span className="sr-only">إغلاق</span>

@@ -280,11 +280,11 @@ function TimePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-48 p-0 max-h-60 overflow-auto"
+        className="w-48 p-0 overflow-auto"
         align="start"
         sideOffset={4}
       >
-        <div className="flex flex-col">
+        <div className="flex flex-col max-h-60 overflow-auto">
           {timeOptions.map((option) => (
             <button
               key={option.value}

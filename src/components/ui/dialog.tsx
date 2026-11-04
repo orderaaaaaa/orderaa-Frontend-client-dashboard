@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { LiaTimesSolid } from "react-icons/lia"
 
 import { cn } from "@/lib/utils"
+import { OverlayLayerContext } from "./overlay-layer"
 
 function Dialog({
   ...props
@@ -65,7 +66,7 @@ function DialogContent({
         )}
         {...props}
       >
-        {children}
+        <OverlayLayerContext.Provider value={true}>{children}</OverlayLayerContext.Provider>
         {showCloseButton && (
           <DialogPrimitive.Close className="absolute left-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
             <LiaTimesSolid className="h-4 w-4" />

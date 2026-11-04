@@ -268,7 +268,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
         )}
 
         {showSelectAll && filteredKeys.length > 0 && (
-          <div className="sticky top-0 z-10 border-b bg-popover px-2 py-1.5 md:px-3 md:py-2">
+          <div className="sticky top-0 z-(--z-raised) border-b bg-popover px-2 py-1.5 md:px-3 md:py-2">
             <button
               type="button"
               onClick={toggleSelectAll}
@@ -374,7 +374,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                   transition={{ duration: 0.15 }}
                   className={cn(
                     overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
-                    'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
+                    'z-(--z-inpage-popup) mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
                   )}
                   role="listbox"
                   aria-multiselectable="true"

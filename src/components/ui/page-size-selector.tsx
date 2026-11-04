@@ -74,7 +74,7 @@ export default function PageSizeSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full start-[-15px] mb-2 bg-popover border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+        <div className="absolute bottom-full start-[-15px] mb-2 bg-popover border border-gray-200 rounded-lg shadow-lg z-(--z-inpage-popup) min-w-[120px] overflow-hidden">
           <div className="py-1">
             {PAGE_SIZE_OPTIONS.map((size) => (
               <button

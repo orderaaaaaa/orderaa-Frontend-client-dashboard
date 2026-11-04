@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { Button } from './button';
 import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
+import { OverlayLayerContext } from './overlay-layer';
 import { getApiErrorMessage } from '@/utils/apiError';
 
 export const ModalContainerContext = React.createContext<HTMLElement | null>(
@@ -106,64 +107,66 @@ export default function BaseModal({
             onEscapeKeyDown?.(e);
           }}
         >
-          <ModalContainerContext.Provider value={contentEl}>
-            <div className="flex shrink-0 items-center gap-3 rounded-t-2xl border-b border-border bg-card px-5 py-4 sm:px-6">
-              <DialogPrimitive.Title className="min-w-0 flex-1 text-start text-lg font-semibold break-words text-foreground">
-                {title}
-              </DialogPrimitive.Title>
+          <OverlayLayerContext.Provider value={true}>
+            <ModalContainerContext.Provider value={contentEl}>
+              <div className="flex shrink-0 items-center gap-3 rounded-t-2xl border-b border-border bg-card px-5 py-4 sm:px-6">
+                <DialogPrimitive.Title className="min-w-0 flex-1 text-start text-lg font-semibold break-words text-foreground">
+                  {title}
+                </DialogPrimitive.Title>
 
-              <DialogPrimitive.Close
-                disabled={isLoading}
-                aria-label={t('common.close')}
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-md max-sm:size-10 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-              >
-                <LiaTimesSolid className="size-4" />
-              </DialogPrimitive.Close>
-            </div>
-
-            <DialogPrimitive.Description className="sr-only">
-              {title}
-            </DialogPrimitive.Description>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
-
-            {footer !== undefined && (
-              <div className="flex shrink-0 flex-col gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
-                {footer}
-              </div>
-            )}
-
-            {footer === undefined && showFooter && (
-              <div className="flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
-                <Button
-                  variant="outline"
-                  onClick={onClose}
+                <DialogPrimitive.Close
                   disabled={isLoading}
-                  className={
-                    cancelButtonClassName ||
-                    'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-medium sm:min-w-36'
-                  }
+                  aria-label={t('common.close')}
+                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-md max-sm:size-10 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                 >
                   <LiaTimesSolid className="size-4" />
-                  <span>{cancelText}</span>
-                </Button>
+                </DialogPrimitive.Close>
+              </div>
 
-                {onConfirm && (
+              <DialogPrimitive.Description className="sr-only">
+                {title}
+              </DialogPrimitive.Description>
+
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
+
+              {footer !== undefined && (
+                <div className="flex shrink-0 flex-col gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
+                  {footer}
+                </div>
+              )}
+
+              {footer === undefined && showFooter && (
+                <div className="flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
                   <Button
-                    onClick={handleConfirm}
-                    disabled={isLoading || confirmDisabled}
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={isLoading}
                     className={
-                      confirmButtonClassName ||
-                      'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-semibold shadow-soft sm:min-w-36'
+                      cancelButtonClassName ||
+                      'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-medium sm:min-w-36'
                     }
                   >
-                    {confirmIcon}
-                    <span>{isLoading ? 'جاري الحفظ...' : confirmText}</span>
+                    <LiaTimesSolid className="size-4" />
+                    <span>{cancelText}</span>
                   </Button>
-                )}
-              </div>
-            )}
-          </ModalContainerContext.Provider>
+
+                  {onConfirm && (
+                    <Button
+                      onClick={handleConfirm}
+                      disabled={isLoading || confirmDisabled}
+                      className={
+                        confirmButtonClassName ||
+                        'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-semibold shadow-soft sm:min-w-36'
+                      }
+                    >
+                      {confirmIcon}
+                      <span>{isLoading ? 'جاري الحفظ...' : confirmText}</span>
+                    </Button>
+                  )}
+                </div>
+              )}
+            </ModalContainerContext.Provider>
+          </OverlayLayerContext.Provider>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
