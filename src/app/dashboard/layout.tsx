@@ -21,6 +21,10 @@ import {
   ContentError,
 } from '@/components/dashboard-layout';
 import { ActiveJobIndicator } from '@/components/dashboard-layout/ActiveJobIndicator';
+import {
+  AppHeaderBar,
+  AppHeaderHeightProvider,
+} from '@/components/dashboard-layout/AppHeaderHeight';
 
 const ALL_ORDERS_PATH = '/dashboard/orders/allOrders';
 
@@ -112,55 +116,57 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AuthGuard>
-      <div
-        className="flex min-h-dvh bg-surface-subtle"
-        style={
-          {
-            '--sidebar-w': isCollapsed
-              ? SIDEBAR_WIDTH.COLLAPSED_CSS
-              : SIDEBAR_WIDTH.EXPANDED_CSS,
-          } as React.CSSProperties
-        }
-      >
-        <ErrorBoundary
-          fallback={(reset) => <SidebarError onRetry={reset} />}
+      <AppHeaderHeightProvider>
+        <div
+          className="flex min-h-dvh bg-surface-subtle"
+          style={
+            {
+              '--sidebar-w': isCollapsed
+                ? SIDEBAR_WIDTH.COLLAPSED_CSS
+                : SIDEBAR_WIDTH.EXPANDED_CSS,
+            } as React.CSSProperties
+          }
         >
-          <Sidebar
-            open={sidebarOpen}
-            collapsed={isCollapsed}
-            openDropdown={openDropdown}
-            onToggle={handleSidebarToggle}
-            onCollapseToggle={handleCollapseToggle}
-            onDropdownToggle={handleDropdownToggle}
-            onNavItemClick={handleNavItemClick}
-          />
-        </ErrorBoundary>
-
-        <MainContent>
-          <div className="sticky top-0 z-(--z-header) bg-surface-subtle">
-            <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
-              <TopBar
-                onMenuToggle={handleSidebarToggle}
-                onSearch={handleSearch}
-                onClearSearch={handleClearSearch}
-                isSearching={isSearching}
-                autoSearch={isAutoSearchPage}
-                username={user?.name}
-                onUserAction={handleUserAction}
-              />
-            </div>
-
-            <ActiveJobIndicator />
-          </div>
-
           <ErrorBoundary
-            key={pathname}
-            fallback={(reset) => <ContentError onRetry={reset} />}
+            fallback={(reset) => <SidebarError onRetry={reset} />}
           >
-            <PageContent>{children}</PageContent>
+            <Sidebar
+              open={sidebarOpen}
+              collapsed={isCollapsed}
+              openDropdown={openDropdown}
+              onToggle={handleSidebarToggle}
+              onCollapseToggle={handleCollapseToggle}
+              onDropdownToggle={handleDropdownToggle}
+              onNavItemClick={handleNavItemClick}
+            />
           </ErrorBoundary>
-        </MainContent>
-      </div>
+
+          <MainContent>
+            <AppHeaderBar className="sticky top-0 z-(--z-header) bg-surface-subtle">
+              <div className="flex-shrink-0 pt-[env(safe-area-inset-top)] max-lg:bg-primary">
+                <TopBar
+                  onMenuToggle={handleSidebarToggle}
+                  onSearch={handleSearch}
+                  onClearSearch={handleClearSearch}
+                  isSearching={isSearching}
+                  autoSearch={isAutoSearchPage}
+                  username={user?.name}
+                  onUserAction={handleUserAction}
+                />
+              </div>
+
+              <ActiveJobIndicator />
+            </AppHeaderBar>
+
+            <ErrorBoundary
+              key={pathname}
+              fallback={(reset) => <ContentError onRetry={reset} />}
+            >
+              <PageContent>{children}</PageContent>
+            </ErrorBoundary>
+          </MainContent>
+        </div>
+      </AppHeaderHeightProvider>
     </AuthGuard>
   );
 }
