@@ -595,6 +595,8 @@ export interface AvailabilityLine {
   /** short AND this product's settings forbid confirming — blocks the order */
   blocked: boolean;
   warning: boolean;
+  selectable: boolean;
+  refusal: AvailabilityRefusal | null;
   change: number;
   after: number | null;
   confirmMode: ConfirmMode;
