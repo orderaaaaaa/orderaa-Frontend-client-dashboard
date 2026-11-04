@@ -21,7 +21,14 @@ export function NoteCard({ meta, footer, variant = 'default', tone, children }: 
         variant === 'legacy' ? 'border-dashed border-border bg-background' : (tone ?? 'border-border bg-muted/40')
       )}
     >
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">{meta}</div>
+      <div
+        className={clsx(
+          'flex flex-wrap items-center gap-x-2 gap-y-1 text-xs',
+          tone ? 'text-foreground-muted' : 'text-muted-foreground'
+        )}
+      >
+        {meta}
+      </div>
       {children}
       {footer && <div className="flex items-center justify-end gap-1">{footer}</div>}
     </li>

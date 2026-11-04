@@ -23,7 +23,7 @@ export const FOLLOWUP_NOTE_PARTY_TONES: Record<FollowupNotePartyValue, string> =
 export const FOLLOWUP_NOTE_PARTY_HEADING_TONES: Record<FollowupNotePartyValue, string> = {
   CUSTOMER: 'bg-primary/15 text-primary-text',
   SHIPPING_COMPANY: 'bg-warning/20 text-foreground',
-  COURIER: 'bg-success/15 text-success',
+  COURIER: 'bg-success/15 text-foreground',
 };
 
 export const FOLLOWUP_NOTES_TITLE = 'ملاحظات المتابعة';

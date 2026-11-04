@@ -108,7 +108,7 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-10 px-2 text-sm text-destructive sm:h-8"
+                className="h-10 bg-card/80 px-2 text-sm text-destructive hover:bg-card sm:h-8"
                 disabled={isBusy}
                 onClick={() => setIsConfirmingDelete(true)}
               >
