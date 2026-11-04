@@ -117,6 +117,7 @@ export const PERMISSION_CODES = {
   SUPPLIER_INVOICES_UPDATE: 'supplier-invoices:update',
   SUPPLIER_INVOICES_DELETE: 'supplier-invoices:delete',
   SUPPLIER_INVOICES_APPROVE: 'supplier-invoices:approve',
+  SUPPLIER_INVOICES_CLOSE: 'supplier-invoices:close',
   SUPPLIER_INVOICES_ATTRIBUTE: 'supplier-invoices:attribute',
   SUPPLIER_INVOICES_HISTORY_READ: 'supplier-invoices:history:read',
   WAREHOUSES_READ: 'warehouses:read',
