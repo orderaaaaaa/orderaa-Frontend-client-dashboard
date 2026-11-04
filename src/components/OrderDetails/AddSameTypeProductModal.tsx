@@ -44,6 +44,8 @@ export default function AddSameTypeProductModal({
     data: variantAvailability = [],
     isLoading: isLoadingAvailability,
     isError: isErrorAvailability,
+    error: errorAvailability,
+    refetch: refetchAvailability,
   } = useProductVariantAvailabilityQuery(
     isOpen ? (productId ?? undefined) : undefined,
     orderId,
@@ -161,8 +163,9 @@ export default function AddSameTypeProductModal({
             variants={variantAvailability}
             selection={selection}
             onChange={setSelection}
-            isLoading={isLoadingAvailability}
-            isError={isErrorAvailability}
+            availabilityLoading={isLoadingAvailability}
+            availabilityError={isErrorAvailability ? errorAvailability : null}
+            onRetry={() => void refetchAvailability()}
           />
         )}
         {!isLoading && <MissingAttributesHint missing={missingAttributes} />}

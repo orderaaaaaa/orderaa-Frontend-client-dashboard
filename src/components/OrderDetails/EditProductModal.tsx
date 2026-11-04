@@ -130,8 +130,9 @@ export default function EditProductModal({
           variants={variantAvailability}
           selection={selection}
           onChange={setDraft}
-          isLoading={activeAvailability.isLoading}
-          isError={activeAvailability.isError}
+          availabilityLoading={activeAvailability.isLoading}
+          availabilityError={activeAvailability.isError ? activeAvailability.error : null}
+          onRetry={() => void activeAvailability.refetch()}
         />
       )}
       {!isLoading && (

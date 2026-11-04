@@ -145,6 +145,13 @@ function ProductAvailabilityBlock({
   );
 }
 
+const sameCombo = (a: SelectedVariant[], b: SelectedVariant[], attributes: string[]) =>
+  attributes.every(
+    (attr) =>
+      a.find((v) => v.attribute === attr)?.option ===
+      b.find((v) => v.attribute === attr)?.option,
+  );
+
 function isValueDisabled(
   attribute: string,
   option: string,
@@ -274,6 +281,7 @@ export default function ProductSelectionModal({
 
       const combo = resolveCombo(product, attributes, selection);
       if (!combo) return;
+      if ((addedCombos.get(productId) ?? []).some((staged) => sameCombo(staged, combo, attributes))) return;
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -288,7 +296,7 @@ export default function ProductSelectionModal({
         return next;
       });
     },
-    [currentSelection, products],
+    [addedCombos, currentSelection, products],
   );
 
   /**
@@ -322,18 +330,11 @@ export default function ProductSelectionModal({
       );
 
       const attributes = groups.map((g) => g.attribute);
-      const sameCombo = (a: SelectedVariant[], b: SelectedVariant[]) =>
-        attributes.every(
-          (attr) =>
-            a.find((v) => v.attribute === attr)?.option ===
-            b.find((v) => v.attribute === attr)?.option,
-        );
-
       setAddedCombos((prev) => {
         const next = new Map(prev);
         const existing = next.get(productId) ?? [];
         const missing = combos.filter(
-          (combo) => !existing.some((staged) => sameCombo(staged, combo)),
+          (combo) => !existing.some((staged) => sameCombo(staged, combo, attributes)),
         );
         next.set(productId, [...existing, ...missing]);
         return next;
@@ -582,7 +583,7 @@ export default function ProductSelectionModal({
                             type="button"
                             variant="default"
                             size="sm"
-                            disabled={!readyCombo}
+                            disabled={!readyCombo || productCombos.some((staged) => sameCombo(staged, readyCombo, allAttributes))}
                             className="rounded-full text-xs h-7 px-4 max-sm:h-10"
                             onClick={() => handleAddCombo(product.id, allAttributes)}
                           >

@@ -1,9 +1,11 @@
+import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/state-panels';
 import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
 import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 import { cn } from '@/lib/utils';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { VariantOptionChip } from './VariantOptionChip';
 import {
   exactVariantFor,
@@ -11,6 +13,7 @@ import {
   refusalTextFor,
   selectionLabel,
   sortedCatalog,
+  unknownOptionStatus,
   type CatalogAttribute,
   type Selection,
 } from './variantAvailabilityModel';
@@ -23,9 +26,13 @@ export interface VariantAvailabilitySelectorProps {
   onChange?: (selection: Selection) => void;
   isLoading?: boolean;
   isError?: boolean;
+  availabilityLoading?: boolean;
+  availabilityError?: unknown;
+  onRetry?: () => void;
   maxHeightClassName?: string;
   className?: string;
   excludedLines?: number;
+  showWarehouseNote?: boolean;
 }
 
 export function VariantAvailabilitySelector({
@@ -36,9 +43,13 @@ export function VariantAvailabilitySelector({
   onChange,
   isLoading = false,
   isError = false,
+  availabilityLoading = false,
+  availabilityError = null,
+  onRetry,
   maxHeightClassName,
   className,
   excludedLines = 0,
+  showWarehouseNote = true,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
@@ -76,6 +87,7 @@ export function VariantAvailabilitySelector({
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =
     variants.length > 0 && variants.every((variant) => variant.available === null);
+  const hasStates = variants.length > 0 || (!availabilityLoading && !availabilityError);
 
   const choose = (attributeId: number, optionId: number) => {
     if (!onChange) return;
@@ -109,12 +121,18 @@ export function VariantAvailabilitySelector({
                     key={option.optionId}
                     attributeName={attribute.attributeName}
                     optionName={option.optionName}
-                    status={optionStatus({
-                      variants,
-                      attribute,
-                      optionId: option.optionId,
-                      selection,
-                    })}
+                    status={
+                      hasStates
+                        ? optionStatus({
+                            variants,
+                            attribute,
+                            optionId: option.optionId,
+                            selection,
+                          })
+                        : unknownOptionStatus(
+                            selection[attribute.attributeId] === option.optionId,
+                          )
+                    }
                     onSelect={
                       onChange
                         ? () => choose(attribute.attributeId, option.optionId)
@@ -128,6 +146,24 @@ export function VariantAvailabilitySelector({
         </div>
         <ScrollEndFade visible={hasMoreAtEnd} axis="y" fromClassName="from-card" />
       </div>
+
+      {availabilityError ? (
+        <div
+          role="alert"
+          className="mt-2 flex flex-wrap items-center gap-2 text-sm text-destructive"
+        >
+          <span>
+            {getApiErrorMessage(availabilityError, t('orderDetails.variants.loadError'))}
+          </span>
+          {onRetry && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => onRetry()}>
+              {t('common.retry')}
+            </Button>
+          )}
+        </div>
+      ) : availabilityLoading ? (
+        <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
+      ) : null}
 
       {summary ? (
         <p className="mt-3 text-sm text-foreground">
@@ -155,12 +191,14 @@ export function VariantAvailabilitySelector({
         </p>
       )}
 
-      {allWarehouseNotSet && (
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('orderDetails.stock.availableWarehouseNotSet')}
-        </p>
-      )}
-      {variants.length === 0 && (
+      {showWarehouseNote &&
+        allWarehouseNotSet &&
+        refusal !== 'AVAILABLE_WAREHOUSE_NOT_SET' && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t('orderDetails.stock.availableWarehouseNotSet')}
+          </p>
+        )}
+      {variants.length === 0 && !availabilityLoading && !availabilityError && (
         <p className="mt-2 text-sm text-muted-foreground">
           {t('orderDetails.variants.noVariantRows')}
         </p>

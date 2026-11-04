@@ -18,6 +18,7 @@ const STATE_CLASS = {
   low: 'border-warning/50 bg-warning/10 text-foreground',
   out: 'border-destructive/40 bg-destructive/10 text-foreground',
   notSet: 'border-dashed border-border bg-muted text-muted-foreground',
+  unknown: 'border-border bg-card text-foreground',
 } as const;
 
 const ICON_CLASS = {
@@ -25,6 +26,7 @@ const ICON_CLASS = {
   low: 'text-warning',
   out: 'text-destructive',
   notSet: 'text-muted-foreground',
+  unknown: 'text-muted-foreground',
 } as const;
 
 export function VariantOptionChip({
@@ -37,7 +39,9 @@ export function VariantOptionChip({
   const best = toStockNumber(status.best);
 
   const stateText =
-    status.state === 'ok'
+    status.state === 'unknown'
+      ? null
+      : status.state === 'ok'
       ? status.required !== null && status.required > 1
         ? t('orderDetails.stock.availableWithRequired', {
             available: best,
@@ -66,7 +70,7 @@ export function VariantOptionChip({
         {Icon && <Icon className={cn('size-4 shrink-0', iconClass)} aria-hidden="true" />}
         <span className="truncate">{optionName}</span>
       </span>
-      <span className="text-xs">{stateText}</span>
+      {stateText && <span className="text-xs">{stateText}</span>}
     </>
   );
 
@@ -95,7 +99,7 @@ export function VariantOptionChip({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{element}</TooltipTrigger>
-      <TooltipContent>{`${attributeName}: ${optionName} — ${stateText}`}</TooltipContent>
+      <TooltipContent>{stateText ? `${attributeName}: ${optionName} — ${stateText}` : `${attributeName}: ${optionName}`}</TooltipContent>
     </Tooltip>
   );
 }

@@ -46,8 +46,11 @@ export function OrderlessVariantAvailabilityPanel({
       variants={availability.data ?? []}
       selection={selection}
       onChange={onChange}
-      isLoading={catalog.isLoading || availability.isLoading}
-      isError={catalog.isError || availability.isError}
+      isLoading={catalog.isLoading}
+      isError={catalog.isError}
+      availabilityLoading={availability.isLoading}
+      availabilityError={availability.isError ? availability.error : null}
+      onRetry={() => void availability.refetch()}
       maxHeightClassName={maxHeightClassName}
       className={className}
       excludedLines={excludedLines}

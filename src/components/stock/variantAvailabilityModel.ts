@@ -52,7 +52,7 @@ export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[]
   }));
 }
 
-export type OptionState = 'ok' | 'low' | 'out' | 'notSet';
+export type OptionState = 'ok' | 'low' | 'out' | 'notSet' | 'unknown';
 
 export interface OptionStatus {
   state: OptionState;
@@ -60,6 +60,13 @@ export interface OptionStatus {
   required: number | null;
   selected: boolean;
 }
+
+export const unknownOptionStatus = (selected: boolean): OptionStatus => ({
+  state: 'unknown',
+  best: null,
+  required: null,
+  selected,
+});
 
 const byName = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -116,13 +123,16 @@ export function optionStatus({
     };
   }
 
-  const bestRow = measured.reduce((best, variant) =>
-    (variant.available ?? 0) > (best.available ?? 0) ? variant : best,
-  );
-  const best = bestRow.available ?? 0;
   const covered = measured.some(
     (variant) => (variant.available ?? 0) >= variant.required,
   );
+  const pool = covered
+    ? measured.filter((variant) => (variant.available ?? 0) >= variant.required)
+    : measured;
+  const bestRow = pool.reduce((best, variant) =>
+    (variant.available ?? 0) > (best.available ?? 0) ? variant : best,
+  );
+  const best = bestRow.available ?? 0;
   const state: OptionState = covered ? 'ok' : best > 0 ? 'low' : 'out';
   return { state, best, required: bestRow.required, selected };
 }

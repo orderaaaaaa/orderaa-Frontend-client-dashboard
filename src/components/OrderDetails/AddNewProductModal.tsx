@@ -78,6 +78,8 @@ export default function AddNewProductModal({
     data: variantAvailability = [],
     isLoading: isLoadingAvailability,
     isError: isErrorAvailability,
+    error: errorAvailability,
+    refetch: refetchAvailability,
   } = useProductVariantAvailabilityQuery(
     selectedProduct?.id,
     orderId,
@@ -289,8 +291,10 @@ export default function AddNewProductModal({
                 variants={variantAvailability}
                 selection={selection}
                 onChange={setSelection}
-                isLoading={isLoadingAvailability}
-                isError={isErrorAvailability}
+                availabilityLoading={isLoadingAvailability}
+                availabilityError={isErrorAvailability ? errorAvailability : null}
+                onRetry={() => void refetchAvailability()}
+                showWarehouseNote={false}
               />
             )}
             {availableWarehouseNotSet ? (
