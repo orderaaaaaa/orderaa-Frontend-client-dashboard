@@ -99,6 +99,7 @@ export default function PaymentModal({
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
   const totalOwed = Math.max(remaining + held, 0);
   const linkedOutstanding = Math.max(linkedInvoice?.outstandingAmount ?? 0, 0);
+  const linkedOpen = linkedInvoice !== null && linkedInvoice.lifecycle !== INVOICE_LIFECYCLE.CLOSED;
 
   const {
     register,
@@ -158,6 +159,11 @@ export default function PaymentModal({
           setSubmitError(null);
           return;
         }
+        if (linkedOpen) {
+          setSubmitError(null);
+          setPendingAmount(amount);
+          return;
+        }
         await submitPayment(amount);
         return;
       }
@@ -168,14 +174,22 @@ export default function PaymentModal({
       }
       await submitPayment(amount);
     },
-    [linkedInvoice, linkedOutstanding, totalOwed, submitPayment],
+    [linkedInvoice, linkedOpen, linkedOutstanding, totalOwed, submitPayment],
   );
 
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title={showSuccess ? '' : pendingAmount !== null ? 'المبلغ أكبر من المستحق' : 'إضافة معاملة جديدة'}
+      title={
+        showSuccess
+          ? ''
+          : pendingAmount !== null
+            ? linkedInvoice
+              ? 'تأكيد الدفع'
+              : 'المبلغ أكبر من المستحق'
+            : 'إضافة معاملة جديدة'
+      }
       showFooter={false}
       maxWidth="md:max-w-[500px]"
     >
@@ -219,12 +233,20 @@ export default function PaymentModal({
         </div>
       ) : pendingAmount !== null ? (
         <div className="flex flex-col gap-6">
-          <p className="text-base leading-7 text-gray-700">
-            المبلغ ({formatCurrency(pendingAmount)}) أكبر من إجمالي المستحق للمورد ({formatCurrency(totalOwed)}). هل تريد المتابعة؟
-          </p>
-          <p className="text-base leading-7 text-gray-700">
-            بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}.
-          </p>
+          {linkedInvoice ? (
+            <p className="text-base leading-7 text-gray-700">
+              بعد الدفع سينخفض المعلّق من {formatCurrency(held)} إلى {formatCurrency(held - pendingAmount)}.
+            </p>
+          ) : (
+            <>
+              <p className="text-base leading-7 text-gray-700">
+                المبلغ ({formatCurrency(pendingAmount)}) أكبر من إجمالي المستحق للمورد ({formatCurrency(totalOwed)}). هل تريد المتابعة؟
+              </p>
+              <p className="text-base leading-7 text-gray-700">
+                بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}.
+              </p>
+            </>
+          )}
 
           {submitError && (
             <p className="text-red-500 text-sm">{submitError}</p>
