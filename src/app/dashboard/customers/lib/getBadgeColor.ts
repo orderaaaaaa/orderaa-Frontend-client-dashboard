@@ -18,7 +18,7 @@ const STATUS_COLORS: Record<string, string> = {
   RETURNED_DELIVERED: 'bg-green-50 text-[#49c116] border border-green-200',
   RETURNED_COLLECTED: 'bg-pink-50 text-[#ec4899] border border-pink-200',
   RETURNED_SETTLED: 'bg-pink-50 text-[#db2777] border border-pink-200',
-  RETURNED_FINAL: 'bg-rose-50 text-[#be123c] border border-rose-200',
+  RETURNED_FINAL: 'bg-rose-50 text-[#be123c] dark:bg-danger-tint dark:text-danger-text border border-rose-200 dark:border-danger-border',
 
   ATTEMPTED: 'bg-orange-50 text-[#ff9800] border border-orange-200',
   WAITING_FOR_PAYMENT: 'bg-orange-50 text-[#ff9800] border border-orange-200',
@@ -32,7 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
 
   // Frontend-only legacy keys — not OrderStatus members.
   PARTIAL_DELIVERY: 'bg-orange-50 text-[#ff9800] border border-orange-200',
-  FINAL_RETURN: 'bg-rose-50 text-[#e11d48] border border-rose-200',
+  FINAL_RETURN: 'bg-rose-50 text-[#e11d48] dark:bg-danger-tint dark:text-danger-text border border-rose-200 dark:border-danger-border',
   RETURN_RESEND_PENDING: 'bg-orange-50 text-[#f59e0b] border border-amber-200',
   RETURN_WAREHOUSE: 'bg-indigo-50 text-[#6366f1] border border-indigo-200',
 };
