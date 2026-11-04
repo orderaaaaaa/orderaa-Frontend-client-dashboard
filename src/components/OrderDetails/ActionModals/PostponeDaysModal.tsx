@@ -16,7 +16,7 @@ interface PostponeDaysModalProps {
 const dayOptions = [
   { label: 'يوم', value: '1day' as const, days: 1 },
   { label: 'يومين', value: '2days' as const, days: 2 },
-  { label: '3 ايام', value: '3days' as const, days: 3 },
+  { label: '3 أيام', value: '3days' as const, days: 3 },
   { label: 'أسبوع', value: 'week' as const, days: 7 },
 ];
 

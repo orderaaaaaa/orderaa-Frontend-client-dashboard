@@ -30,7 +30,7 @@ const LeadsList: React.FC<LeadsListProps> = ({
             </h2>
           </div>
           <p className="text-right text-gray-600 text-xl max-md:mb-3">
-            4 عميل باقي لهم 5 ايام او اقل - تابع معهم الان{' '}
+            4 عميل باقي لهم 5 أيام أو أقل - تابع معهم الآن{' '}
           </p>
         </div>
         <button className="border w-fit border-gray-900 px-6 py-2 rounded-md text-primary font-semibold cursor-pointer max-md:self-end">
