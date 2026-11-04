@@ -4,6 +4,7 @@ import Input from '../ui/Input';
 import type { ApiProduct } from './useProductDropdown';
 import { Button } from '../ui/button';
 import { ErrorState } from '../ui/state-panels';
+import { draftFromLines } from '@/components/stock/variantAvailabilityModel';
 
 interface SelectedVariantValue {
   attribute: string;
@@ -13,6 +14,8 @@ interface SelectedVariantValue {
 interface SelectedProduct {
   id: number;
   selectedVariants: SelectedVariantValue[];
+  attributeOptionIds: number[];
+  quantity: number;
 }
 
 interface DropdownContentProps {
@@ -31,6 +34,7 @@ interface DropdownContentProps {
   onRetry: () => void;
   hasNextPage: boolean;
   onLoadMore: () => void;
+  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
 }
 
 export const DropdownContent: React.FC<DropdownContentProps> = ({
@@ -49,7 +53,15 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
   onRetry,
   hasNextPage,
   onLoadMore,
+  availabilityTarget,
 }) => {
+  const draftFor = (product: ApiProduct) =>
+    draftFromLines(
+      selectedProducts
+        .filter((line) => line.id === product.id)
+        .map((line) => ({ optionIds: line.attributeOptionIds, quantity: line.quantity })),
+      product.variantOptions.length,
+    ).draft;
   const isProductInOrder = (productId: number) => {
     return selectedProducts.some((p) => p.id === productId);
   };
@@ -119,6 +131,8 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
                 onVariantSelect={onVariantSelect}
                 onAddProductWithoutVariants={onAddProductWithoutVariants}
                 onRemoveProductFromPending={onRemoveProductFromPending}
+                availabilityTarget={availabilityTarget}
+                draft={draftFor(product)}
               />
             ))}
             {loadError ? (

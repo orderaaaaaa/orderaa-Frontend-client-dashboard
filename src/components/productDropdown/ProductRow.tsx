@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/button';
 import type { ApiProduct } from './useProductDropdown';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { missingAttributesOf } from '@/utils/variantSelection';
+import { useProductVariantsOptions, type VariantOption } from '@/services/orders';
+import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
+import {
+  selectionFromNames,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
 
 interface SelectedVariantValue {
   attribute: string;
@@ -20,7 +26,57 @@ interface ProductRowProps {
   onVariantSelect: (productId: number, attribute: string, option: string) => void;
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
+  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
+  draft: Record<string, number>;
 }
+
+interface RowAvailabilityPanelProps {
+  product: ApiProduct;
+  targetStatus: 'NEW_ORDER' | 'CONFIRMED';
+  draft: Record<string, number>;
+  selectedVariants: SelectedVariantValue[];
+  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+}
+
+const optionNameOf = (group: VariantOption, optionId: number | undefined) =>
+  group.options.find((option) => option.id === optionId)?.name ?? '';
+
+const RowAvailabilityPanel = ({
+  product,
+  targetStatus,
+  draft,
+  selectedVariants,
+  onVariantSelect,
+}: RowAvailabilityPanelProps) => {
+  const catalog = useProductVariantsOptions(product.id);
+  const groups = catalog.data ?? [];
+  const selection = selectionFromNames(
+    groups,
+    Object.fromEntries(selectedVariants.map((variant) => [variant.attribute, variant.option])),
+  );
+
+  const handleChange = (next: Selection) => {
+    for (const group of groups) {
+      const previousId = selection[group.attributeId];
+      const nextId = next[group.attributeId];
+      if (previousId === nextId) continue;
+      const name = optionNameOf(group, nextId === undefined ? previousId : nextId);
+      if (name) onVariantSelect(product.id, group.attribute, name);
+    }
+  };
+
+  return (
+    <OrderlessVariantAvailabilityPanel
+      productId={product.id}
+      productName={product.name}
+      targetStatus={targetStatus}
+      quantity={1}
+      draft={draft}
+      selection={selection}
+      onChange={handleChange}
+    />
+  );
+};
 
 export const ProductRow: React.FC<ProductRowProps> = ({
   product,
@@ -32,6 +88,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   onVariantSelect,
   onAddProductWithoutVariants,
   onRemoveProductFromPending,
+  availabilityTarget,
+  draft,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasVariants = product.variantOptions && product.variantOptions.length > 0;
@@ -107,33 +165,43 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           className="py-4 px-6 border-t border-gray-200 bg-card"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="space-y-4">
-            {product.variantOptions.map((option) => (
-              <div key={option.attribute}>
-                <div className="text-sm font-medium text-gray-700 mb-2">
-                  {option.attribute}
+          {availabilityTarget ? (
+            <RowAvailabilityPanel
+              product={product}
+              targetStatus={availabilityTarget}
+              draft={draft}
+              selectedVariants={selectedVariants}
+              onVariantSelect={onVariantSelect}
+            />
+          ) : (
+            <div className="space-y-4">
+              {product.variantOptions.map((option) => (
+                <div key={option.attribute}>
+                  <div className="text-sm font-medium text-gray-700 mb-2">
+                    {option.attribute}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {option.options.map((opt) => {
+                      const isValueSelected = getSelectedValue(option.attribute) === opt;
+                      return (
+                        <Button
+                          key={`${option.attribute}-${opt}`}
+                          type="button"
+                          variant={isValueSelected ? 'default' : 'outline'}
+                          size="sm"
+                          className="min-h-10"
+                          aria-pressed={isValueSelected}
+                          onClick={() => onVariantSelect(product.id, option.attribute, opt)}
+                        >
+                          {opt}
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {option.options.map((opt) => {
-                    const isValueSelected = getSelectedValue(option.attribute) === opt;
-                    return (
-                      <Button
-                        key={`${option.attribute}-${opt}`}
-                        type="button"
-                        variant={isValueSelected ? 'default' : 'outline'}
-                        size="sm"
-                        className="min-h-10"
-                        aria-pressed={isValueSelected}
-                        onClick={() => onVariantSelect(product.id, option.attribute, opt)}
-                      >
-                        {opt}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

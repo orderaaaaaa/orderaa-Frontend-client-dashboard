@@ -17,6 +17,7 @@ interface ProductDropdownProps {
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
   icon?: React.ComponentType<{ size?: number }>;
+  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
 }
 
 export default function ProductDropdown({
@@ -27,6 +28,7 @@ export default function ProductDropdown({
   placeholderClassName,
   placeholderStyle,
   icon,
+  availabilityTarget,
 }: ProductDropdownProps) {
   const {
     ref,
@@ -100,6 +102,7 @@ export default function ProductDropdown({
             onRetry={handlers.handleRetry}
             hasNextPage={hasNextPage}
             onLoadMore={handlers.handleLoadMore}
+            availabilityTarget={availabilityTarget}
           />
           {incompleteSelections.length > 0 && (
             <div className="mt-3 flex flex-col gap-1 px-0 sm:px-4">

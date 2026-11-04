@@ -364,6 +364,7 @@ function OrderDetails({
             </label>
           </div>
           <ProductDropdown
+            availabilityTarget={availabilityTarget}
             placeholder="ابحث عن منتج"
             className="w-full"
             selectClassName={`border-2 w-full bg-card p-2 rounded-sm ${errors?.products && 'border-red-500'
