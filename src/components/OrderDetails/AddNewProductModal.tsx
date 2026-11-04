@@ -70,8 +70,13 @@ export default function AddNewProductModal({
     enabled: isOpen,
   });
 
-  const { data: variantOptions = [], isLoading: isLoadingVariants } =
-    useProductVariantsOptions(selectedProduct?.id ?? null);
+  const {
+    data: variantOptions = [],
+    isLoading: isLoadingVariants,
+    isError: isErrorVariants,
+    error: errorVariants,
+    refetch: refetchVariants,
+  } = useProductVariantsOptions(selectedProduct?.id ?? null);
 
   // T27 — availability beside each size and colour.
   const {
@@ -129,7 +134,7 @@ export default function AddNewProductModal({
 
   const isFormValid = useMemo(() => {
     const hasProduct = !!selectedProduct;
-    const variantsReady = !isLoadingVariants;
+    const variantsReady = !isLoadingVariants && !isErrorVariants;
     const allVariantsSelected =
       variantOptions.length === 0 ||
       Object.keys(selection).length === variantOptions.length;
@@ -151,6 +156,7 @@ export default function AddNewProductModal({
     variantOptions,
     selection,
     isLoadingVariants,
+    isErrorVariants,
     selectedVariantAvailability,
     availableWarehouseNotSet,
     quantity,
@@ -267,7 +273,7 @@ export default function AddNewProductModal({
                   جاري تحميل الخيارات...
                 </span>
               </div>
-            ) : variantOptions.length === 0 ? (
+            ) : variantOptions.length === 0 && !isErrorVariants ? (
               <div className="flex-1 min-w-[200px] flex items-center justify-center">
                 <span className="text-gray-500">
                   لا توجد خيارات متاحة لهذا المنتج
@@ -284,13 +290,16 @@ export default function AddNewProductModal({
 
         {selectedProduct && !isLoadingVariants && (
           <div className="flex flex-col gap-2">
-            {variantOptions.length > 0 && (
+            {(variantOptions.length > 0 || isErrorVariants) && (
               <VariantAvailabilitySelector
                 productName={selectedProduct.name}
                 attributes={catalogAttributesOf(variantOptions)}
                 variants={variantAvailability}
                 selection={selection}
                 onChange={setSelection}
+                isError={isErrorVariants}
+                catalogError={isErrorVariants ? errorVariants : null}
+                onCatalogRetry={() => void refetchVariants()}
                 availabilityLoading={isLoadingAvailability}
                 availabilityError={isErrorAvailability ? errorAvailability : null}
                 onRetry={() => void refetchAvailability()}

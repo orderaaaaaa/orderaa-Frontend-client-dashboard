@@ -54,9 +54,13 @@ export default function EditProductModal({
 }: EditProductModalProps) {
   const [draft, setDraft] = useState<Selection | null>(null);
 
-  const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
-    isOpen ? productId : null
-  );
+  const {
+    data: variantOptions = [],
+    isLoading,
+    isError: isErrorCatalog,
+    error: catalogError,
+    refetch: refetchCatalog,
+  } = useProductVariantsOptions(isOpen ? productId : null);
 
   const orderAvailability = useProductVariantAvailabilityQuery(
     productId,
@@ -104,7 +108,7 @@ export default function EditProductModal({
   );
 
   const handleSave = async () => {
-    if (!hasChanges || missingAttributes.length > 0 || stockBlocked) return;
+    if (!hasChanges || missingAttributes.length > 0 || stockBlocked || isErrorCatalog) return;
 
     const attributeOptionIds = Object.values(selection);
 
@@ -123,11 +127,11 @@ export default function EditProductModal({
       onConfirm={handleSave}
       confirmText="حفظ"
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
-      confirmDisabled={!hasChanges || missingAttributes.length > 0 || stockBlocked}
+      confirmDisabled={!hasChanges || missingAttributes.length > 0 || stockBlocked || isErrorCatalog}
     >
       {isLoading ? (
         <div className="w-full text-center text-gray-500">جاري التحميل...</div>
-      ) : variantOptions.length === 0 ? (
+      ) : variantOptions.length === 0 && !isErrorCatalog ? (
         <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
       ) : (
         <VariantAvailabilitySelector
@@ -136,6 +140,9 @@ export default function EditProductModal({
           variants={variantAvailability}
           selection={selection}
           onChange={setDraft}
+          isError={isErrorCatalog}
+          catalogError={isErrorCatalog ? catalogError : null}
+          onCatalogRetry={() => void refetchCatalog()}
           availabilityLoading={activeAvailability.isLoading}
           availabilityError={activeAvailability.isError ? activeAvailability.error : null}
           onRetry={() => void activeAvailability.refetch()}

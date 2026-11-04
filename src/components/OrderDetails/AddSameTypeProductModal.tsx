@@ -37,9 +37,13 @@ export default function AddSameTypeProductModal({
   const [selection, setSelection] = useState<Selection>({});
   const [quantity, setQuantity] = useState(1);
 
-  const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
-    isOpen ? productId : null
-  );
+  const {
+    data: variantOptions = [],
+    isLoading,
+    isError: isErrorCatalog,
+    error: catalogError,
+    refetch: refetchCatalog,
+  } = useProductVariantsOptions(isOpen ? productId : null);
 
   const {
     data: variantAvailability = [],
@@ -68,8 +72,14 @@ export default function AddSameTypeProductModal({
 
   const isFormValid = useMemo(() => {
     const hasVariants = variantOptions.length === 0 || Object.keys(selection).length === variantOptions.length;
-    return hasVariants && quantity > 0 && selectedVariantAvailability?.blocked !== true;
-  }, [selection, quantity, variantOptions.length, selectedVariantAvailability]);
+    return (
+      !isLoading &&
+      !isErrorCatalog &&
+      hasVariants &&
+      quantity > 0 &&
+      selectedVariantAvailability?.blocked !== true
+    );
+  }, [isLoading, isErrorCatalog, selection, quantity, variantOptions.length, selectedVariantAvailability]);
 
   const missingAttributes = useMemo(
     () =>
@@ -156,19 +166,22 @@ export default function AddSameTypeProductModal({
             <div className="flex-1 min-w-[200px] flex items-center justify-center">
               <span className="text-gray-500">جاري تحميل الخيارات...</span>
             </div>
-          ) : variantOptions.length === 0 ? (
+          ) : variantOptions.length === 0 && !isErrorCatalog ? (
             <div className="flex-1 min-w-[200px] flex items-center justify-center">
               <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
             </div>
           ) : null}
         </div>
-        {!isLoading && variantOptions.length > 0 && (
+        {!isLoading && (variantOptions.length > 0 || isErrorCatalog) && (
           <VariantAvailabilitySelector
             productName={productType}
             attributes={catalogAttributesOf(variantOptions)}
             variants={variantAvailability}
             selection={selection}
             onChange={setSelection}
+            isError={isErrorCatalog}
+            catalogError={isErrorCatalog ? catalogError : null}
+            onCatalogRetry={() => void refetchCatalog()}
             availabilityLoading={isLoadingAvailability}
             availabilityError={isErrorAvailability ? errorAvailability : null}
             onRetry={() => void refetchAvailability()}
