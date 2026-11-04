@@ -270,6 +270,50 @@ export function getOutOfStockBlock(
   };
 }
 
+const AVAILABILITY_REFUSAL_CODES = [
+  AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+  'OUT_OF_STOCK_CONFIRMATION_BLOCKED',
+  'INSUFFICIENT_STOCK_FOR_VARIANT',
+];
+
+export function isAvailabilityRefusal(err: unknown): boolean {
+  const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
+  return code !== undefined && AVAILABILITY_REFUSAL_CODES.includes(code);
+}
+
+export function getAvailabilityRefusalMessage(err: unknown, fallback: string): string {
+  const data = (
+    err as {
+      response?: {
+        data?: {
+          code?: string;
+          message?: string;
+          lines?: StockShortageLineInput[];
+        };
+      };
+    }
+  )?.response?.data;
+  const locale = readStoredLocale();
+
+  if (data?.code === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
+    return translate(locale, 'orderDetails.stock.availableWarehouseNotSet');
+  }
+
+  if (data?.code === 'OUT_OF_STOCK_CONFIRMATION_BLOCKED') {
+    const heading = translate(locale, 'stockShortage.confirmBlocked');
+    const lines = data.lines ?? [];
+    return lines.length > 0
+      ? `${heading}\n${formatStockShortageLines(lines)}`
+      : heading;
+  }
+
+  if (data?.code === 'INSUFFICIENT_STOCK_FOR_VARIANT') {
+    return getOutOfStockBlock(err)?.message ?? getApiErrorMessage(err, fallback);
+  }
+
+  return getApiErrorMessage(err, fallback);
+}
+
 function isOrderLineEditConflictBody(
   data: unknown
 ): data is OrderLineEditConflictBody {

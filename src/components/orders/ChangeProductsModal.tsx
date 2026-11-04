@@ -24,7 +24,7 @@ import type {
 import { useFollowupChangeProductsMutation } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage } from '@/utils/apiError';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 
 const MAX_TOTAL_COST = 9_999_999;
@@ -232,7 +232,7 @@ export default function ChangeProductsModal({
       onDone?.(response);
       onClose();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'تعذر تغيير المنتج'));
+      toast.error(getAvailabilityRefusalMessage(err, 'تعذر تغيير المنتج'));
     }
   };
 

@@ -22,7 +22,7 @@ import {
   useAddOrderProduct,
 } from '@/services/orders';
 import { ORDER_LINE_EDIT_CONFLICT } from '@/types/orderLineEdits';
-import { getOrderLineEditConflict } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage, getOrderLineEditConflict } from '@/utils/apiError';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -179,8 +179,7 @@ function OrderDetailsProductCard({
       if (applied) notifyUpdated();
       return applied;
     } catch (error: any) {
-      const message = error?.response?.data?.message;
-      toast.error(message || 'فشل في تحديث المنتج');
+      toast.error(getAvailabilityRefusalMessage(error, 'فشل في تحديث المنتج'));
       return false;
     }
   };
@@ -252,8 +251,7 @@ function OrderDetailsProductCard({
       if (applied) notifyAdded();
       return applied;
     } catch (err: any) {
-      const msg = err?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في إضافة المنتج');
+      toast.error(getAvailabilityRefusalMessage(err, 'فشل في إضافة المنتج'));
       return false;
     }
   };

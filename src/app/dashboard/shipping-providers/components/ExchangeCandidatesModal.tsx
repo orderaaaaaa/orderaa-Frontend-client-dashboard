@@ -26,7 +26,7 @@ import type {
 } from '@/lib/api/followup';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useCreateExchangeMutation, useExchangeCandidatesQuery } from '@/services/followup';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage } from '@/utils/apiError';
 import { carrierSendNeedsAttention, carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 import { ExchangeCandidateStep } from './ExchangeCandidateStep';
 import { ExchangeProductsStep, itemKeyOf, type ExchangeLine } from './ExchangeProductsStep';
@@ -233,7 +233,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       onDone?.(response);
       onClose();
     } catch (err: unknown) {
-      const message = getApiErrorMessage(err, t('exchange.create.submitError'));
+      const message = getAvailabilityRefusalMessage(err, t('exchange.create.submitError'));
       setSubmitError(message);
       toast.error(message);
     }

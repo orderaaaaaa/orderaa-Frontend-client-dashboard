@@ -18,6 +18,7 @@ import { incompleteLinesMessage } from '@/utils/variantSelection';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
+import { getAvailabilityRefusalMessage, isAvailabilityRefusal } from '@/utils/apiError';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
 import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
@@ -155,8 +156,11 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         return;
       }
 
+      const fallback = 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
       toast.error(
-        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'),
+        isAvailabilityRefusal(err)
+          ? getAvailabilityRefusalMessage(err, fallback)
+          : locationSaveErrorTextOf(err, fallback),
       );
 
       if (status === 500) {

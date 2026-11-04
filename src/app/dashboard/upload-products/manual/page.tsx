@@ -18,6 +18,7 @@ import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
+import { getAvailabilityRefusalMessage, isAvailabilityRefusal } from '@/utils/apiError';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
@@ -150,8 +151,11 @@ function NewOrderForm() {
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
     } catch (err: unknown) {
+      const fallback = 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
       toast.error(
-        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.')
+        isAvailabilityRefusal(err)
+          ? getAvailabilityRefusalMessage(err, fallback)
+          : locationSaveErrorTextOf(err, fallback)
       );
     }
   };
