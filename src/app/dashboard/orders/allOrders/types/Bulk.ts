@@ -49,7 +49,13 @@ export interface BulkRequest {
 export interface BulkRefusedOrder {
   id: number;
   code: string;
-  reason: 'NO_COMPANY' | 'NO_SHIPPING_CODE' | 'OUT_OF_WINDOW';
+  reason:
+    | 'NO_COMPANY'
+    | 'NO_SHIPPING_CODE'
+    | 'OUT_OF_WINDOW'
+    | 'CUSTOMER_RETURN_STATUS_NOT_ALLOWED'
+    | 'CUSTOMER_RETURN_CONFIRM_ONE_BY_ONE'
+    | 'CUSTOMER_RETURN_FIELDS_LOCKED';
   message: string;
 }
 
