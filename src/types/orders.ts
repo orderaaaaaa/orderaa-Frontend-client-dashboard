@@ -240,10 +240,7 @@ export interface Product {
   updatedAt: string;
   size?: string;
   color?: string;
-  material?: string;
-  weight?: string;
   variants?: Variant[];
-  manufactureCompany?: string;
 }
 
 // Order Product Attribute (from API: name + selected option)

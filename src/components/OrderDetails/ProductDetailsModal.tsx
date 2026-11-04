@@ -3,24 +3,34 @@
 import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { Button } from '../ui/button';
-import { OrderProduct } from '@/types/orders';
+import { useI18n } from '@/i18n/I18nProvider';
+import { Order, OrderProduct } from '@/types/orders';
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderProduct: OrderProduct | null;
+  order: Pick<Order, 'material' | 'weight' | 'countryOfManufacture'> | null;
 }
 
 export default function ProductDetailsModal({
   isOpen,
   onClose,
   orderProduct,
+  order,
 }: ProductDetailsModalProps) {
+  const { t } = useI18n();
   const product = orderProduct?.products;
   const attributes = (orderProduct?.attributes ?? []).filter(
     (a) => a?.name && a?.options?.name,
   );
   const price = orderProduct?.price ?? product?.price;
+  const specRows = (orderProduct?.specifications ?? []).filter((spec) => spec.value);
+  const orderRows = [
+    { label: 'الخامة', value: order?.material },
+    { label: 'الوزن', value: order?.weight },
+    { label: 'بلد الصنع', value: order?.countryOfManufacture },
+  ].filter((row) => row.value);
 
   const DetailRow = ({
     label,
@@ -108,13 +118,27 @@ export default function ProductDetailsModal({
                 label="السعر"
                 value={price != null ? `${price} جنيه` : undefined}
               />
-              <DetailRow label="الخامة" value={product.material} />
-              <DetailRow label="الوزن" value={product.weight} />
-              <DetailRow
-                label="شركة التصنيع"
-                value={product.manufactureCompany}
-              />
+              {specRows.map((spec, index) => (
+                <DetailRow key={index} label={spec.name} value={spec.value} />
+              ))}
+              {specRows.length === 0 && orderRows.length === 0 && (
+                <p className="py-2 text-sm text-muted-foreground">
+                  {t('orderDetails.productDetails.noSpecs')}
+                </p>
+              )}
             </div>
+            {orderRows.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-base font-bold text-primary-text mb-2 text-center">
+                  {t('orderDetails.productDetails.orderData')}
+                </h4>
+                <div className="bg-gray-50/50 rounded-xl px-4 py-2">
+                  {orderRows.map((row) => (
+                    <DetailRow key={row.label} label={row.label} value={row.value} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

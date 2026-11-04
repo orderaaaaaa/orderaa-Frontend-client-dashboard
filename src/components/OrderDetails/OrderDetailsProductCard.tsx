@@ -33,6 +33,7 @@ import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
 import CopyableCode from '@/components/ui/copyable-code';
 import ProductReturnOfChip from './ProductReturnOfChip';
+import ProductSpecificationRows from './ProductSpecificationRows';
 
 interface OrderDetailsProductCardProps {
   order: Order;
@@ -307,18 +308,7 @@ function OrderDetailsProductCard({
                       time. Distinct from the variant lines below, and absent
                       specs render NOTHING rather than an empty block, which is
                       the normal case for most products. */}
-                  {item.specifications.length > 0 && (
-                    <div className="flex flex-col gap-0.5">
-                      {item.specifications.map((spec) => (
-                        <p
-                          key={spec.name}
-                          className="text-sm text-gray-600"
-                        >
-                          {spec.name}: {spec.value}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+                  <ProductSpecificationRows specifications={item.specifications} />
 
                   {item.attributes.length > 0 ? (
                     <div className="flex flex-col gap-1">
@@ -487,6 +477,7 @@ function OrderDetailsProductCard({
         isOpen={viewingProductId !== null}
         onClose={() => setViewingProductId(null)}
         orderProduct={viewingOrderProduct || null}
+        order={order}
       />
     </>
   );
