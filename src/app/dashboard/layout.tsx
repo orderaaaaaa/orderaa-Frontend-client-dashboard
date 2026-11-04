@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           <MainContent>
             <AppHeaderBar className="sticky top-0 z-(--z-header) bg-surface-subtle">
-              <div className="flex-shrink-0 pt-[env(safe-area-inset-top)] max-lg:bg-primary">
+              <div className="flex-shrink-0 pt-[env(safe-area-inset-top)] max-lg:bg-primary dark:bg-sidebar">
                 <TopBar
                   onMenuToggle={handleSidebarToggle}
                   onSearch={handleSearch}

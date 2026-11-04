@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Menu, Search } from 'lucide-react';
 import { LiaSearchSolid, LiaTimesSolid, LiaSyncSolid } from 'react-icons/lia';
@@ -106,18 +107,24 @@ export function TopBar({
     };
   }, [queryClient]);
 
+  const { resolvedTheme } = useTheme();
+
   // ✅ Update the browser top bar color
   useEffect(() => {
+    const themeColor = resolvedTheme === 'dark' ? '#0a0e1e' : '#5D24E1';
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#5D24E1');
+      metaThemeColor.setAttribute('content', themeColor);
     } else {
       const newMeta = document.createElement('meta');
       newMeta.name = 'theme-color';
-      newMeta.content = '#5D24E1';
+      newMeta.content = themeColor;
       document.head.appendChild(newMeta);
     }
-  }, []);
+    return () => {
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#5D24E1');
+    };
+  }, [resolvedTheme]);
 
   return (
     <header
@@ -125,6 +132,7 @@ export function TopBar({
         'flex flex-col lg:flex-row justify-between items-center',
         'px-4 lg:px-6 py-3 lg:py-0',
         'max-lg:bg-gradient-to-b from-primary to-brand-deep max-sm:text-white border-b',
+        'dark:bg-none dark:bg-sidebar dark:border-sidebar-border',
         'relative'
       )}
       style={{ boxShadow: '0px 4px 12px 0px #00000014' }}
