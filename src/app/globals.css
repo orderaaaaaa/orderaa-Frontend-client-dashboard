@@ -144,6 +144,11 @@
   --rail-active-shadow: var(--aurora-glow);
   --rail-subactive-background: var(--sidebar-accent);
   --rail-subactive-shadow: inset -2px 0 0 var(--primary);
+  --danger-fill: #c93b3f;
+  --danger-fill-hover: #b3343a;
+  --danger-text: #f09a9a;
+  --danger-tint: rgba(239, 68, 68, 0.12);
+  --danger-border: rgba(239, 68, 68, 0.28);
 }
 
 @media screen {
@@ -203,14 +208,17 @@
     --color-stone-800: oklch(92.2% 0.03 265);
     --color-stone-900: oklch(97% 0.03 265);
     --color-stone-950: oklch(98.5% 0.03 265);
-    --color-red-50: oklch(25.8% 0.092 26.042);
-    --color-red-100: oklch(39.6% 0.141 25.723);
-    --color-red-200: oklch(44.4% 0.177 26.899);
-    --color-red-300: oklch(50.5% 0.213 27.518);
-    --color-red-700: oklch(80.8% 0.114 19.571);
-    --color-red-800: oklch(88.5% 0.062 18.334);
-    --color-red-900: oklch(93.6% 0.032 17.717);
-    --color-red-950: oklch(97.1% 0.013 17.38);
+    --color-red-50: rgba(239, 68, 68, 0.12);
+    --color-red-100: rgba(239, 68, 68, 0.18);
+    --color-red-200: rgba(239, 68, 68, 0.28);
+    --color-red-300: rgba(239, 68, 68, 0.40);
+    --color-red-400: #f09a9a;
+    --color-red-500: #f09a9a;
+    --color-red-600: #f09a9a;
+    --color-red-700: #f5b8b8;
+    --color-red-800: #f9d4d4;
+    --color-red-900: #fce8e8;
+    --color-red-950: #fdf2f2;
     --color-orange-50: oklch(26.6% 0.079 36.259);
     --color-orange-100: oklch(40.8% 0.123 38.172);
     --color-orange-200: oklch(47% 0.157 37.304);
@@ -405,6 +413,11 @@
   --color-surface-contrast: var(--surface-contrast);
   --color-border-strong: var(--border-strong);
   --color-brand-hover: var(--brand-hover);
+  --color-danger-fill: var(--danger-fill);
+  --color-danger-fill-hover: var(--danger-fill-hover);
+  --color-danger-text: var(--danger-text);
+  --color-danger-tint: var(--danger-tint);
+  --color-danger-border: var(--danger-border);
 }
 
 @layer base {
@@ -432,6 +445,13 @@
     box-shadow: var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
       var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--aurora-glow-hover);
   }
+}
+@media screen {
+  .dark :is(.bg-red-500, .bg-red-600, :is(button, a, [role='button']).bg-destructive):not(:disabled[class*='disabled:bg-']) { background-color: var(--danger-fill); }
+  .dark :is(.bg-red-500, .bg-red-600, :is(button, a, [role='button']).bg-destructive):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled[class*='disabled:bg-']) { border-color: var(--danger-fill); }
+  .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):not(:disabled):hover { background-color: var(--danger-fill-hover); }
+  .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled):hover { border-color: var(--danger-fill-hover); }
+  .dark .Toastify { --toastify-color-error: var(--danger-fill); }
 }
 input[type='date']::-webkit-datetime-edit-text,
 input[type='date']::-webkit-datetime-edit-month-field,
