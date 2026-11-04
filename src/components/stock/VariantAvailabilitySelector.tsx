@@ -25,6 +25,7 @@ export interface VariantAvailabilitySelectorProps {
   isError?: boolean;
   maxHeightClassName?: string;
   className?: string;
+  excludedLines?: number;
 }
 
 export function VariantAvailabilitySelector({
@@ -37,6 +38,7 @@ export function VariantAvailabilitySelector({
   isError = false,
   maxHeightClassName,
   className,
+  excludedLines = 0,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
@@ -136,6 +138,12 @@ export function VariantAvailabilitySelector({
           {t('orderDetails.variants.pickAll')}
         </p>
       ) : null}
+
+      {excludedLines > 0 && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t('orderDetails.variants.excludedLines', { count: excludedLines })}
+        </p>
+      )}
 
       {exact && refusal && (
         <p

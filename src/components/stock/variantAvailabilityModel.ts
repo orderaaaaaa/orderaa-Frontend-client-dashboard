@@ -161,10 +161,15 @@ export function selectionLabel(
   return names.join(' / ');
 }
 
+export interface DraftSummary {
+  draft: Record<string, number>;
+  excluded: number;
+}
+
 export function draftFromLines(
   lines: { optionIds: number[]; quantity: number }[],
   attributeCount: number,
-): { draft: Record<string, number>; excluded: number } {
+): DraftSummary {
   const draft: Record<string, number> = {};
   let excluded = 0;
   for (const line of lines) {

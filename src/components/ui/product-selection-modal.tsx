@@ -15,12 +15,13 @@ import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessV
 import {
   selectionFromNames,
   type Selection,
+  type DraftSummary,
 } from '@/components/stock/variantAvailabilityModel';
 
 export interface ProductSelectionAvailability {
   targetStatus: 'NEW_ORDER' | 'CONFIRMED';
   quantity: number;
-  draftFor: (productId: number) => Record<string, number>;
+  draftFor: (productId: number) => DraftSummary;
 }
 
 export interface VariantOption {
@@ -136,7 +137,8 @@ function ProductAvailabilityBlock({
       productName={productName}
       targetStatus={availability.targetStatus}
       quantity={availability.quantity}
-      draft={availability.draftFor(productId)}
+      draft={availability.draftFor(productId).draft}
+      excludedLines={availability.draftFor(productId).excluded}
       selection={selection}
       onChange={handleChange}
     />

@@ -132,7 +132,7 @@ export const draftForProductLines = (
   lines: ChangeProductsLine[],
   productId: number,
   excludeKey?: string,
-): Record<string, number> => {
+) => {
   const sameProduct = lines.filter((line) => line.productId === productId && line.key !== excludeKey);
   const attributeCount = lines.find((line) => line.productId === productId)?.variantOptions.length ?? 0;
   return draftFromLines(
@@ -141,7 +141,7 @@ export const draftForProductLines = (
       quantity: line.quantity,
     })),
     attributeCount,
-  ).draft;
+  );
 };
 
 export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
@@ -400,7 +400,8 @@ export default function ChangeProductsModal({
                               productName={line.name}
                               targetStatus="CONFIRMED"
                               quantity={line.quantity}
-                              draft={draftForProduct(line.productId, line.key)}
+                              draft={draftForProduct(line.productId, line.key).draft}
+                              excludedLines={draftForProduct(line.productId, line.key).excluded}
                               selection={line.attributeOptionIds}
                               onChange={(next) => handleSelectionChange(line.key, next)}
                             />

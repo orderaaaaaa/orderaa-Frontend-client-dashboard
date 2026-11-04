@@ -61,7 +61,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
         .filter((line) => line.id === product.id)
         .map((line) => ({ optionIds: line.attributeOptionIds, quantity: line.quantity })),
       product.variantOptions.length,
-    ).draft;
+    );
   const isProductInOrder = (productId: number) => {
     return selectedProducts.some((p) => p.id === productId);
   };

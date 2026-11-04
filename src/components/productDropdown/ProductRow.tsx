@@ -9,6 +9,7 @@ import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessV
 import {
   selectionFromNames,
   type Selection,
+  type DraftSummary,
 } from '@/components/stock/variantAvailabilityModel';
 
 interface SelectedVariantValue {
@@ -27,13 +28,13 @@ interface ProductRowProps {
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
   availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
-  draft: Record<string, number>;
+  draft: DraftSummary;
 }
 
 interface RowAvailabilityPanelProps {
   product: ApiProduct;
   targetStatus: 'NEW_ORDER' | 'CONFIRMED';
-  draft: Record<string, number>;
+  draft: DraftSummary;
   selectedVariants: SelectedVariantValue[];
   onVariantSelect: (productId: number, attribute: string, option: string) => void;
 }
@@ -71,7 +72,8 @@ const RowAvailabilityPanel = ({
       productName={product.name}
       targetStatus={targetStatus}
       quantity={1}
-      draft={draft}
+      draft={draft.draft}
+      excludedLines={draft.excluded}
       selection={selection}
       onChange={handleChange}
     />

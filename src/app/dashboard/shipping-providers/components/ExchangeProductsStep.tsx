@@ -203,7 +203,8 @@ export function ExchangeProductsStep({
                     productName={line.name}
                     targetStatus="CONFIRMED"
                     quantity={line.quantity}
-                    draft={draftForProductLines(lines, line.productId, line.key)}
+                    draft={draftForProductLines(lines, line.productId, line.key).draft}
+                    excludedLines={draftForProductLines(lines, line.productId, line.key).excluded}
                     selection={line.attributeOptionIds}
                     onChange={(next) => onChangeLineSelection(line.key, next)}
                   />
