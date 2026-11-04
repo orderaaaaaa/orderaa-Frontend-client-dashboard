@@ -201,7 +201,7 @@ export default function OrderCard({
                     className="w-6 h-6 text-red-600 cursor-pointer"
                     style={{ strokeWidth: 1.5, color: 'var(--danger-text, rgba(220,38,38,0.7))' }}
                   />
-                  <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
+                  <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 dark:bg-danger-fill dark:text-white rounded-full flex items-center justify-center">
                     {repeatCount}
                   </span>
                 </Button>
