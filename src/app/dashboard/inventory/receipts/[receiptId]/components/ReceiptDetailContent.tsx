@@ -91,6 +91,12 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     isValidId ? numericId : undefined,
   );
 
+  const isPaidRow = apiReceipt?.type === 'PAID';
+
+  useEffect(() => {
+    if (isPaidRow) router.replace(`/dashboard/purchases/all-invoices/${receiptId}`);
+  }, [isPaidRow, receiptId, router]);
+
   const { productVariants } = useReceiptStore(
     useShallow((s) => s.getReceiptState(receiptId)),
   );
@@ -427,6 +433,14 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   if (isError || !apiReceipt) {
     notFound();
+  }
+
+  if (isPaidRow) {
+    return (
+      <div className="w-full max-w-full overflow-x-hidden">
+        <PageLoading message="جاري تحميل تفاصيل الاستلام..." />
+      </div>
+    );
   }
 
   const isReceived = apiReceipt.isApproved;
