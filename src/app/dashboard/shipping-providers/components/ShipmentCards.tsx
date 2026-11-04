@@ -17,6 +17,7 @@ import {
   ShipmentSelectCheckbox,
   StatusCell,
   deliveryWindowTextOf,
+  findTemplate,
   moneyTextOf,
   useInProcessCarrier,
   useIsBulkClosable,
@@ -81,7 +82,11 @@ export function InProcessShipmentCards({
             dueDay={row.lateness?.dueDay ?? null}
             override={row.lateness?.override ?? null}
           />
-          <CustomerCell name={row.customer.name} phones={row.customer.phones} />
+          <CustomerCell
+            name={row.customer.name}
+            phones={row.customer.phones}
+            whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_CUSTOMER')}
+          />
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <CardField label={t('inProcess.table.columns.takenAt')}>{formatDate(row.takenAt)}</CardField>
             <CardField label={t('inProcess.table.columns.window')}>
@@ -92,7 +97,11 @@ export function InProcessShipmentCards({
               {row.city ? ` - ${row.city}` : ''}
             </CardField>
             <CardField label={t('inProcess.table.columns.courier')}>
-              <CourierCell name={row.courierName} phone={row.courierPhone} />
+              <CourierCell
+                name={row.courierName}
+                phone={row.courierPhone}
+                whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_COURIER')}
+              />
             </CardField>
             <CardField label={t('inProcess.table.columns.total')}>{moneyTextOf(row.totalCost)}</CardField>
             <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>

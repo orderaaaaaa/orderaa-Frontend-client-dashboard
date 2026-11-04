@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { LiaWhatsapp } from 'react-icons/lia';
 import { Can } from '@/components/Can';
 import BaseModal from '@/components/ui/base-modal';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,8 @@ import {
   type LatenessOverride,
   type ReturnedShipment,
   type ShipmentRowBase,
+  type ShipmentWhatsAppTemplate,
+  type ShipmentWhatsAppTemplateType,
 } from '@/types/shippingProviders';
 import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import { getTimeAgoCompact } from '@/utils/timeAgo';
@@ -90,6 +93,24 @@ export function CodeCell({ code, shippingCode }: { code: string; shippingCode: s
   );
 }
 
+export function findTemplate(
+  templates: readonly ShipmentWhatsAppTemplate[],
+  type: ShipmentWhatsAppTemplateType,
+): ShipmentWhatsAppTemplate | undefined {
+  return templates.find((template) => template.type === type);
+}
+
+export function WhatsAppLink({ template }: { template: ShipmentWhatsAppTemplate | undefined }) {
+  if (template === undefined) return null;
+  return (
+    <Button asChild variant="ghost" size="icon-xs" className="relative z-[2]">
+      <a href={template.url} target="_blank" rel="noopener noreferrer" aria-label={template.label}>
+        <LiaWhatsapp className="size-4" aria-hidden />
+      </a>
+    </Button>
+  );
+}
+
 export function PhoneCell({ phones }: { phones: string[] }) {
   const { t } = useI18n();
   const [isListOpen, setIsListOpen] = useState(false);
@@ -139,11 +160,22 @@ export function PhoneCell({ phones }: { phones: string[] }) {
   );
 }
 
-export function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
+export function CustomerCell({
+  name,
+  phones,
+  whatsapp,
+}: {
+  name: string | null;
+  phones: string[];
+  whatsapp?: ShipmentWhatsAppTemplate;
+}) {
   return (
     <div className="flex min-w-max flex-col items-start gap-1">
       <span className="block max-w-32 truncate font-medium" title={name ?? undefined}>{name ?? '—'}</span>
-      <PhoneCell phones={phones} />
+      <div className="flex items-center gap-1">
+        <PhoneCell phones={phones} />
+        <WhatsAppLink template={whatsapp} />
+      </div>
     </div>
   );
 }
@@ -202,10 +234,18 @@ export function DueCell({
   );
 }
 
-export function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
+export function CourierCell({
+  name,
+  phone,
+  whatsapp,
+}: {
+  name: string | null;
+  phone: string | null;
+  whatsapp?: ShipmentWhatsAppTemplate;
+}) {
   if (name === null && phone === null) return <span>—</span>;
 
-  return <CustomerCell name={name} phones={phone ? [phone] : []} />;
+  return <CustomerCell name={name} phones={phone ? [phone] : []} whatsapp={whatsapp} />;
 }
 
 export interface ShipmentSelection {
@@ -413,7 +453,11 @@ export function InProcessShipmentsTable({
                 </div>
               </td>
               <td className={CELL_CLASS}>
-                <CustomerCell name={row.customer.name} phones={row.customer.phones} />
+                <CustomerCell
+                  name={row.customer.name}
+                  phones={row.customer.phones}
+                  whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_CUSTOMER')}
+                />
               </td>
               <td className={CELL_CLASS}>
                 <StatusCell status={row.status} closure={row.closure} />
@@ -436,7 +480,11 @@ export function InProcessShipmentsTable({
                 </div>
               </td>
               <td className={CELL_CLASS}>
-                <CourierCell name={row.courierName} phone={row.courierPhone} />
+                <CourierCell
+                  name={row.courierName}
+                  phone={row.courierPhone}
+                  whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_COURIER')}
+                />
               </td>
               <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
                 {moneyTextOf(row.totalCost)}
