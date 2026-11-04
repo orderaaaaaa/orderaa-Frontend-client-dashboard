@@ -1,4 +1,5 @@
 import type { ShippingImplementation } from '@/types/shippingCompanies';
+import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
 
 export type OrderSystemFailureSource =
   | 'CARRIER_WEBHOOK'
@@ -339,7 +340,7 @@ export interface StockTransitionBlockedDetails {
   toStatus: string;
   ruleId: number | null;
   warehouseName: string | null;
-  lines?: FailureStockShortageLine[];
+  lines?: FailureStockShortageLine[] | AvailableStockRefusalLine[];
   errorCode?: string | null;
 }
 
