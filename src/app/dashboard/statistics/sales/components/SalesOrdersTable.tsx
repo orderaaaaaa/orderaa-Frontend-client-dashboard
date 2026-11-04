@@ -18,7 +18,7 @@ import {
   type SalesOrderColumn,
 } from '../constants';
 import type { SalesOrderRow, SalesOrderSet } from '../types';
-import { STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
+import { STICKY_BODY_START, STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesOrdersTableProps {
   set: SalesOrderSet;
@@ -256,13 +256,13 @@ export function SalesOrdersTable({ set, rows }: SalesOrdersTableProps) {
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={row.orderId} className="hover:bg-accent/50">
+              <TableRow key={row.orderId} className="group hover:bg-accent/50">
                 {columns.map((column, index) => (
                   <TableCell
                     key={column}
                     className={cn(
                       'whitespace-nowrap',
-                      index === 0 && 'sticky start-0 z-[1] bg-card',
+                      index === 0 && STICKY_BODY_START,
                       MONEY_COLUMNS.has(column) && 'tabular-nums text-end',
                       wrappingCellClass(column),
                     )}
