@@ -10,9 +10,9 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { useRepairOrderStockMutation } from '@/services/orderStockSync';
 import {
-  formatStockShortageLines,
   getApiErrorMessage,
   getOutOfStockBlock,
+  outOfStockBlockText,
 } from '@/utils/apiError';
 
 interface OrderStockReturnRequiredModalProps {
@@ -42,8 +42,7 @@ export default function OrderStockReturnRequiredModal({
     } catch (err: unknown) {
       const block = getOutOfStockBlock(err);
       if (block) {
-        const rows = formatStockShortageLines(block.lines);
-        toast.error(rows ? `${block.message}\n${rows}` : block.message);
+        toast.error(outOfStockBlockText(block));
         return;
       }
       toast.error(getApiErrorMessage(err, 'تعذرت مزامنة مخزون الطلب'));

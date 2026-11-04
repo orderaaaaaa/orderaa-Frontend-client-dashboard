@@ -14,7 +14,7 @@ import {
 import { useState } from 'react';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
-import { getApiErrorMessage, getOutOfStockBlock, formatStockShortageLines } from '@/utils/apiError';
+import { getApiErrorMessage, getOutOfStockBlock, outOfStockBlockText } from '@/utils/apiError';
 import {
   useOrderStockDriftQuery,
   useRepairOrderStockMutation,
@@ -43,8 +43,7 @@ export default function OrderStockSyncPage() {
       onError: (err: unknown) => {
         const block = getOutOfStockBlock(err);
         if (block) {
-          const rows = formatStockShortageLines(block.lines);
-          toast.error(rows ? `${block.message}\n${rows}` : block.message);
+          toast.error(outOfStockBlockText(block));
           return;
         }
         toast.error(getApiErrorMessage(err, 'تعذرت مزامنة مخزون الطلب'));

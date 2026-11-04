@@ -4,6 +4,8 @@ import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMapp
 import {
   OUTBOUND_INSUFFICIENT_STOCK_CODE,
   AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+  AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
+  type AvailableStockRefusalLine,
   type BatchShortageOrder,
   type OutboundInsufficientStockBody,
   type OutboundShortageLineApi,
@@ -233,20 +235,71 @@ export function getSettleFinalAmountMessage(err: unknown, fallback: string): str
   return getApiErrorMessage(err, fallback);
 }
 
-export function getOutOfStockBlock(
-  err: unknown
-): { message: string; lines: ShortageRenderLine[] } | null {
+export type OutOfStockBlock =
+  | {
+      code: 'OUT_OF_STOCK_CONFIRMATION_BLOCKED' | 'INSUFFICIENT_STOCK_FOR_VARIANT';
+      message: string;
+      lines: ShortageRenderLine[];
+    }
+  | {
+      code: typeof AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE;
+      message: string;
+      lines: AvailableStockRefusalLine[];
+    };
+
+export function formatAvailableStockLines(lines: AvailableStockRefusalLine[]): string {
+  const locale = readStoredLocale();
+  return lines
+    .map((line) =>
+      translate(
+        locale,
+        line.variantLabel ? 'stockShortage.availableLine' : 'stockShortage.availableLineNoVariant',
+        {
+          product: line.productName,
+          variant: line.variantLabel,
+          available: line.available,
+          change: line.change,
+          after: line.after,
+        }
+      )
+    )
+    .join('\n');
+}
+
+function availableStockRefusalText(
+  warehouseName: string,
+  lines: AvailableStockRefusalLine[]
+): string {
+  const locale = readStoredLocale();
+  const heading = translate(locale, 'stockShortage.availableWouldGoNegative', {
+    warehouse: warehouseName,
+  });
+  const rows = formatAvailableStockLines(lines);
+  return rows ? `${heading}\n${rows}` : heading;
+}
+
+export function getOutOfStockBlock(err: unknown): OutOfStockBlock | null {
   const data = (
     err as {
       response?: {
         data?: {
           code?: string;
           message?: string;
-          lines?: ShortageRenderLine[];
+          warehouseName?: string;
+          lines?: ShortageRenderLine[] | AvailableStockRefusalLine[];
         };
       };
     }
   )?.response?.data;
+
+  if (data?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) {
+    const lines = (data.lines ?? []) as AvailableStockRefusalLine[];
+    return {
+      code: AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
+      message: availableStockRefusalText(data.warehouseName ?? '', lines),
+      lines,
+    };
+  }
 
   if (
     data?.code !== 'OUT_OF_STOCK_CONFIRMATION_BLOCKED' &&
@@ -255,23 +308,32 @@ export function getOutOfStockBlock(
     return null;
 
   const locale = readStoredLocale();
+  const lines = (data.lines ?? []) as ShortageRenderLine[];
 
   if (data.code === 'INSUFFICIENT_STOCK_FOR_VARIANT') {
     return {
-      message:
-        data.message ?? translate(locale, 'stockShortage.insufficientFallback'),
-      lines: data.lines ?? [],
+      code: data.code,
+      message: data.message ?? translate(locale, 'stockShortage.insufficientFallback'),
+      lines,
     };
   }
 
   return {
+    code: data.code,
     message: data.message ?? translate(locale, 'stockShortage.confirmBlocked'),
-    lines: data.lines ?? [],
+    lines,
   };
+}
+
+export function outOfStockBlockText(block: OutOfStockBlock): string {
+  if (block.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) return block.message;
+  const rows = formatStockShortageLines(block.lines);
+  return rows ? `${block.message}\n${rows}` : block.message;
 }
 
 const AVAILABILITY_REFUSAL_CODES = [
   AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+  AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
   'OUT_OF_STOCK_CONFIRMATION_BLOCKED',
   'INSUFFICIENT_STOCK_FOR_VARIANT',
 ];
@@ -297,6 +359,10 @@ export function getAvailabilityRefusalMessage(err: unknown, fallback: string): s
 
   if (data?.code === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
     return translate(locale, 'orderDetails.stock.availableWarehouseNotSet');
+  }
+
+  if (data?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) {
+    return getOutOfStockBlock(err)?.message ?? getApiErrorMessage(err, fallback);
   }
 
   if (data?.code === 'OUT_OF_STOCK_CONFIRMATION_BLOCKED') {
