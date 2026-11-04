@@ -37,6 +37,7 @@ export interface VariantAvailabilitySelectorProps {
   excludedLines?: number;
   showWarehouseNote?: boolean;
   blockKey?: string;
+  informationOnly?: boolean;
 }
 
 export function VariantAvailabilitySelector({
@@ -55,11 +56,13 @@ export function VariantAvailabilitySelector({
   excludedLines = 0,
   showWarehouseNote = true,
   blockKey,
+  informationOnly = false,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
   const setBlocked = useBlockedLinesStore((state) => state.setBlocked);
-  const isBlockedNow = exactVariantFor(variants, selection, attributes.length)?.blocked === true;
+  const isBlockedNow =
+    !informationOnly && exactVariantFor(variants, selection, attributes.length)?.blocked === true;
 
   useEffect(() => {
     if (blockKey) setBlocked(blockKey, isBlockedNow);
@@ -98,9 +101,9 @@ export function VariantAvailabilitySelector({
 
   const sorted = sortedCatalog(attributes);
   const exact = exactVariantFor(variants, selection, attributes.length);
-  const refusal = exact?.refusal ?? null;
+  const refusal = informationOnly ? null : (exact?.refusal ?? null);
   const warningText =
-    exact && !refusal ? warningTextFor({ productName, row: exact }) : null;
+    exact && !refusal && !informationOnly ? warningTextFor({ productName, row: exact }) : null;
   const summary = selectionLabel(attributes, selection);
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =

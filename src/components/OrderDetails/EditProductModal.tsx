@@ -91,7 +91,9 @@ export default function EditProductModal({
     );
   }, [selection, seed]);
 
-  const stockBlocked = useAnyBlockedLine('edit:');
+  const anyStockBlocked = useAnyBlockedLine('edit:');
+
+  const stockBlocked = hasChanges && anyStockBlocked;
 
   const missingAttributes = useMemo(
     () =>
@@ -138,6 +140,7 @@ export default function EditProductModal({
           availabilityError={activeAvailability.isError ? activeAvailability.error : null}
           onRetry={() => void activeAvailability.refetch()}
           blockKey="edit:modal"
+          informationOnly={!hasChanges}
         />
       )}
       <StockSubmitBlockedHint visible={stockBlocked} />
