@@ -11,7 +11,7 @@ export default function ProductSpecificationRows({
   return (
     <div className="flex flex-col gap-0.5">
       {rows.map((spec, index) => (
-        <p key={index} className="text-sm text-gray-600">
+        <p key={index} className="text-sm text-muted-foreground">
           {spec.name}: {spec.value}
         </p>
       ))}

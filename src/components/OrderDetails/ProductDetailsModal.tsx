@@ -4,6 +4,7 @@ import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { Button } from '../ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
+import { ORDER_FIELD_LABELS } from '@/constants/orderFieldLabels';
 import { Order, OrderProduct } from '@/types/orders';
 
 interface ProductDetailsModalProps {
@@ -27,9 +28,12 @@ export default function ProductDetailsModal({
   const price = orderProduct?.price ?? product?.price;
   const specRows = (orderProduct?.specifications ?? []).filter((spec) => spec.value);
   const orderRows = [
-    { label: 'الخامة', value: order?.material },
-    { label: 'الوزن', value: order?.weight },
-    { label: 'بلد الصنع', value: order?.countryOfManufacture },
+    { label: ORDER_FIELD_LABELS.material, value: order?.material },
+    { label: ORDER_FIELD_LABELS.weight, value: order?.weight },
+    {
+      label: ORDER_FIELD_LABELS.countryOfManufacture,
+      value: order?.countryOfManufacture,
+    },
   ].filter((row) => row.value);
 
   const DetailRow = ({
@@ -108,16 +112,17 @@ export default function ProductDetailsModal({
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">
-              <DetailRow
-                label="SKU"
-                value={orderProduct?.sku || product.sku}
-                copyValue={orderProduct?.sku || product.sku}
-                copyLabel="نسخ كود المنتج"
-              />
-              <DetailRow
-                label="السعر"
-                value={price != null ? `${price} جنيه` : undefined}
-              />
+              {(orderProduct?.sku || product.sku) && (
+                <DetailRow
+                  label="SKU"
+                  value={orderProduct?.sku || product.sku}
+                  copyValue={orderProduct?.sku || product.sku}
+                  copyLabel="نسخ كود المنتج"
+                />
+              )}
+              {price != null && (
+                <DetailRow label="السعر" value={`${price} جنيه`} />
+              )}
               {specRows.map((spec, index) => (
                 <DetailRow key={index} label={spec.name} value={spec.value} />
               ))}
@@ -132,7 +137,7 @@ export default function ProductDetailsModal({
                 <h4 className="text-base font-bold text-primary-text mb-2 text-center">
                   {t('orderDetails.productDetails.orderData')}
                 </h4>
-                <div className="bg-gray-50/50 rounded-xl px-4 py-2">
+                <div className="bg-muted/50 rounded-xl px-4 py-2">
                   {orderRows.map((row) => (
                     <DetailRow key={row.label} label={row.label} value={row.value} />
                   ))}
