@@ -36,7 +36,7 @@ export function StockAvailabilityBadge({ line }: Props) {
     );
   }
 
-  if (line.safe || (!line.warning && !line.blocked)) {
+  if (line.safe) {
     return (
       <p className="flex items-center gap-1 text-sm text-gray-600">
         <LiaBoxSolid className="size-4 shrink-0" />
