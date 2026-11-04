@@ -25,6 +25,7 @@ export interface ProductSelectionAvailability {
 
 export interface VariantOption {
   attribute: string;
+  attributeId: number;
   options: string[];
   optionDetails: { id: number; name: string }[];
 }
@@ -66,6 +67,7 @@ function mapProductVariantOptions(product: RawApiProduct): SelectableProduct {
     ...product,
     variantOptions: (product.attributes ?? []).map((attribute) => ({
       attribute: attribute.name,
+      attributeId: attribute.id,
       options: (attribute.options ?? []).map((option) => option.name),
       optionDetails: (attribute.options ?? []).map((option) => ({ id: option.id, name: option.name })),
     })),

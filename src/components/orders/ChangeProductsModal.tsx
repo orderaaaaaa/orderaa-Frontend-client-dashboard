@@ -13,7 +13,6 @@ import ProductSelectionModal, {
   type SelectableProduct,
   type VariantOption,
 } from '@/components/ui/product-selection-modal';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type {
   FollowupChangeProductInput,
   FollowupChangeProductsBody,
@@ -25,6 +24,11 @@ import { useFollowupChangeProductsMutation } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
 import { getAvailabilityRefusalMessage } from '@/utils/apiError';
+import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
+import {
+  draftFromLines,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 
 const MAX_TOTAL_COST = 9_999_999;
@@ -35,6 +39,7 @@ export interface ChangeProductsLine {
   name: string;
   variantOptions: VariantOption[];
   variants: FollowupChangeProductVariant[];
+  attributeOptionIds: Selection;
   customVariants: FollowupCustomVariant[];
   quantity: number;
 }
@@ -77,11 +82,11 @@ export const mergeLines = <T extends ChangeProductsLine>(current: T[], incoming:
 };
 
 export const isLineComplete = (line: ChangeProductsLine): boolean =>
-  line.variantOptions.every((option) => line.variants.some((v) => v.name === option.attribute));
+  line.variantOptions.every((option) => line.attributeOptionIds[option.attributeId] !== undefined);
 
 export const missingAttributesOf = (line: ChangeProductsLine): string[] =>
   line.variantOptions
-    .filter((option) => !line.variants.some((v) => v.name === option.attribute))
+    .filter((option) => line.attributeOptionIds[option.attributeId] === undefined)
     .map((option) => option.attribute);
 
 export const incompleteVariantMessageOf = (missing: string[]): string =>
@@ -117,12 +122,20 @@ export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLi
       variantOptions,
       (product.selectedVariants ?? []).map((v) => ({ name: v.attribute, optionName: v.option })),
     );
+    const attributeOptionIds: Selection = {};
+    variantOptions.forEach((option) => {
+      const chosen = (product.selectedVariants ?? []).find((v) => v.attribute === option.attribute);
+      if (chosen?.attributeOptionId !== undefined) {
+        attributeOptionIds[option.attributeId] = chosen.attributeOptionId;
+      }
+    });
     return {
       key: lineKeyOf(product.id, variants, []),
       productId: product.id,
       name: product.name,
       variantOptions,
       variants,
+      attributeOptionIds,
       customVariants: [],
       quantity: 1,
     };
@@ -181,7 +194,7 @@ export default function ChangeProductsModal({
 
   const handleUpdateLine = (
     key: string,
-    patch: Partial<Pick<ChangeProductsLine, 'variants' | 'quantity'>>,
+    patch: Partial<Pick<ChangeProductsLine, 'variants' | 'quantity' | 'attributeOptionIds'>>,
   ) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
@@ -196,14 +209,27 @@ export default function ChangeProductsModal({
     );
   };
 
-  const handleChangeVariant = (key: string, attribute: string, optionName: string) => {
+  const handleSelectionChange = (key: string, next: Selection) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
-    const variants = orderVariants(target.variantOptions, [
-      ...target.variants.filter((v) => v.name !== attribute),
-      { name: attribute, optionName },
-    ]);
-    handleUpdateLine(key, { variants });
+    const chosen = target.variantOptions.flatMap((option) => {
+      const optionId = next[option.attributeId];
+      const name = option.optionDetails.find((detail) => detail.id === optionId)?.name;
+      return optionId !== undefined && name ? [{ name: option.attribute, optionName: name }] : [];
+    });
+    handleUpdateLine(key, { variants: orderVariants(target.variantOptions, chosen), attributeOptionIds: next });
+  };
+
+  const draftForProduct = (productId: number, excludeKey?: string) => {
+    const sameProduct = lines.filter((line) => line.productId === productId && line.key !== excludeKey);
+    const attributeCount = lines.find((line) => line.productId === productId)?.variantOptions.length ?? 0;
+    return draftFromLines(
+      sameProduct.map((line) => ({
+        optionIds: Object.values(line.attributeOptionIds),
+        quantity: line.quantity,
+      })),
+      attributeCount,
+    ).draft;
   };
 
   const handleChangeQuantity = (key: string, quantity: number) => {
@@ -351,34 +377,15 @@ export default function ChangeProductsModal({
 
                         {line.variantOptions.length > 0 && (
                           <div className="flex flex-col gap-2">
-                            {line.variantOptions.map((option) => (
-                              <div key={option.attribute} className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-muted-foreground min-w-16">
-                                  {option.attribute}:
-                                </span>
-                                <Select
-                                  value={
-                                    line.variants.find((v) => v.name === option.attribute)
-                                      ?.optionName ?? ''
-                                  }
-                                  onValueChange={(value) =>
-                                    handleChangeVariant(line.key, option.attribute, value)
-                                  }
-                                  disabled={isPending}
-                                >
-                                  <SelectTrigger size="sm" aria-label={option.attribute}>
-                                    <SelectValue placeholder="اختر" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {option.options.map((value) => (
-                                      <SelectItem key={value} value={value}>
-                                        {value}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            ))}
+                            <OrderlessVariantAvailabilityPanel
+                              productId={line.productId}
+                              productName={line.name}
+                              targetStatus="CONFIRMED"
+                              quantity={line.quantity}
+                              draft={draftForProduct(line.productId, line.key)}
+                              selection={line.attributeOptionIds}
+                              onChange={(next) => handleSelectionChange(line.key, next)}
+                            />
                           </div>
                         )}
 
@@ -418,6 +425,11 @@ export default function ChangeProductsModal({
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
         onConfirm={handleProductsPicked}
+        availability={{
+          targetStatus: 'CONFIRMED',
+          quantity: 1,
+          draftFor: (productId) => draftForProduct(productId),
+        }}
       />
     </>
   );
