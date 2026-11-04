@@ -91,15 +91,15 @@ function RowProblems({ rows }: { rows: RowProblem[] }) {
       {rows.map((row) => (
         <li
           key={row.rowIndex}
-          className="w-full rounded-lg border border-[#FF0004] bg-card"
+          className="w-full rounded-lg border border-[#FF0004] dark:border-danger-border bg-card"
         >
           <div className="flex items-start gap-2 px-3 py-2">
-            <AlertCircle className="mt-0.5 w-5 h-5 flex-shrink-0 text-[#FF0004] [stroke-width:1.5px]" />
+            <AlertCircle className="mt-0.5 w-5 h-5 flex-shrink-0 text-[#FF0004] dark:text-danger-text [stroke-width:1.5px]" />
             <span className="min-w-0 break-words text-base sm:text-lg text-foreground">
               الطلب {row.rowIndex}: في الصف {rowLabel(row.rowIndex)} تم العثور على أخطاء
             </span>
           </div>
-          <div className="bg-red-500/5 px-3 py-2 text-sm leading-6 text-[#FF0004]">
+          <div className="bg-red-500/5 px-3 py-2 text-sm leading-6 text-[#FF0004] dark:text-danger-text">
             <p className="mb-1">نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي:</p>
             <ul className="space-y-1 font-bold">
               {row.messages.map((message, index) => (
@@ -259,7 +259,7 @@ export default function ValidationResultsPage() {
         {carrierUnsentLine}
 
         {failedCount > 0 && (
-          <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004]">
+          <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004] dark:text-danger-text">
             {imported
               ? `تعذر إنشاء ${failedCount} طلب`
               : `يوجد ${failedCount} طلبات بها أخطاء`}

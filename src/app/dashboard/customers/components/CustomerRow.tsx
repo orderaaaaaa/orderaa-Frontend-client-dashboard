@@ -89,7 +89,7 @@ export const CustomerRow = memo(function CustomerRow({
           <div className="flex items-center gap-1">
             {customer.isBlocked && (
               <LiaCircleSolid
-                className="text-[#f61515] w-5 h-5"
+                className="text-[#f61515] dark:text-danger-text w-5 h-5"
                 aria-label="محظور"
               />
             )}

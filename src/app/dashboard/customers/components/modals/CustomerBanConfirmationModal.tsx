@@ -46,7 +46,7 @@ const CustomerBanConfirmationModal: React.FC<
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div
-            className={`p-2 rounded-full ${isUnbanning ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#95071f]'}`}
+            className={`p-2 rounded-full ${isUnbanning ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#95071f] dark:text-danger-text'}`}
           >
             <LiaExclamationTriangleSolid className="w-5 h-5 md:w-6 md:h-6" />
           </div>

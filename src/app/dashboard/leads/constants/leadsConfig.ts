@@ -33,8 +33,8 @@ export const LEADS_STATS_CONFIG: LeadStatConfig[] = [
     title: 'Hot leads',
     icon: VscFlame,
     iconBgColor: 'bg-red-50',
-    iconColor: 'text-[#F44336]',
-    valueColor: 'text-[#F44336]',
+    iconColor: 'text-[#F44336] dark:text-danger-text',
+    valueColor: 'text-[#F44336] dark:text-danger-text',
   },
   {
     key: 'warmLeads',
@@ -65,8 +65,8 @@ export const LEADS_STATS_CONFIG: LeadStatConfig[] = [
     title: 'Lost',
     icon: PiMagnifyingGlass,
     iconBgColor: 'bg-red-50',
-    iconColor: 'text-[#F44336]',
-    valueColor: 'text-[#F44336]',
+    iconColor: 'text-[#F44336] dark:text-danger-text',
+    valueColor: 'text-[#F44336] dark:text-danger-text',
   },
   {
     key: 'experimentEnded',

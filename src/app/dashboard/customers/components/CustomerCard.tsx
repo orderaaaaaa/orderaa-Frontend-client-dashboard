@@ -96,8 +96,8 @@ export function CustomerCard({
             )}
             {customer.isBlocked && (
               <div className="flex items-center gap-1 p-1 px-3 bg-red-50 border-2 border-red-200 rounded-sm">
-                <LiaBanSolid size={18} className="text-[#dc0201]" aria-hidden />
-                <span className="text-[#dc0201] text-sm">محظور</span>
+                <LiaBanSolid size={18} className="text-[#dc0201] dark:text-danger-text" aria-hidden />
+                <span className="text-[#dc0201] dark:text-danger-text text-sm">محظور</span>
               </div>
             )}
           </div>

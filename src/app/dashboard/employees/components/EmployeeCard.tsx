@@ -66,8 +66,8 @@ export const EmployeeCard = memo(function EmployeeCard({
 
   const performance = employee.performanceChange ?? 0;
   const isNegative = performance < 0;
-  const performanceClass = isNegative ? 'text-[#ff0004]' : 'text-[#3cc900]';
-  const performanceBarClass = isNegative ? 'bg-[#ff0004]' : 'bg-[#3cc900]';
+  const performanceClass = isNegative ? 'text-[#ff0004] dark:text-danger-text' : 'text-[#3cc900]';
+  const performanceBarClass = isNegative ? 'bg-[#ff0004] dark:bg-danger-fill' : 'bg-[#3cc900]';
 
   const workDays = employee.workingDaysThisMonth ?? 0;
   const vacationDays = employee.leaveDaysThisMonth ?? 0;

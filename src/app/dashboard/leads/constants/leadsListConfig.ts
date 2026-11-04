@@ -18,8 +18,8 @@ export const DAYS_STATUS_CONFIG = {
   oneDayRemaining: {
     label: 'يوم واحد متبقي',
     bgColor: 'bg-red-50',
-    textColor: 'text-[#ff0004]',
-    borderColor: 'border-[#ff0004]',
+    textColor: 'text-[#ff0004] dark:text-danger-text',
+    borderColor: 'border-[#ff0004] dark:border-danger-border',
   },
   threeDaysRemaining: {
     label: '3 أيام متبقية',

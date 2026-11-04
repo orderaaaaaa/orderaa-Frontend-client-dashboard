@@ -199,7 +199,7 @@ export default function OrderCard({
                 >
                   <TriangleAlert
                     className="w-6 h-6 text-red-600 cursor-pointer"
-                    style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
+                    style={{ strokeWidth: 1.5, color: 'var(--danger-text, rgba(220,38,38,0.7))' }}
                   />
                   <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
                     {repeatCount}
@@ -221,8 +221,8 @@ export default function OrderCard({
                     }}
                     className="flex items-center gap-1 p-1 px-3 h-auto bg-red-50 border-2 border-red-200 rounded-sm hover:bg-red-100 transition-colors"
                   >
-                    <MdBlock size={18} className="text-[#dc0201]" />
-                    <span className="text-[#dc0201] text-xs">محظور</span>
+                    <MdBlock size={18} className="text-[#dc0201] dark:text-danger-text" />
+                    <span className="text-[#dc0201] dark:text-danger-text text-xs">محظور</span>
                   </Button>
                 </Then>
               </If>
@@ -436,7 +436,7 @@ export default function OrderCard({
               <div key={event.id} className="flex items-start gap-2">
                 <FileText
                   className="w-[18px] h-[18px] flex-shrink-0 mt-0.5"
-                  style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
+                  style={{ strokeWidth: 1.5, color: 'var(--danger-text, rgba(220,38,38,0.7))' }}
                 />
                 <span className="text-base font-medium text-red-600 break-words min-w-0">
                   {event.text}

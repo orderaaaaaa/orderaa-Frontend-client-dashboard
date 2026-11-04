@@ -23,7 +23,7 @@ export const CustomersDetailsBlockHistory = ({
     >
       {isBlocked && (
         <div className="rounded-lg border border-red-100 bg-red-50 p-3">
-          <div className="flex items-center gap-2 font-bold text-[#95071f]">
+          <div className="flex items-center gap-2 font-bold text-[#95071f] dark:text-danger-text">
             <LiaBanSolid className="h-5 w-5 shrink-0" aria-hidden />
             <span>سبب الحظر الحالي</span>
           </div>

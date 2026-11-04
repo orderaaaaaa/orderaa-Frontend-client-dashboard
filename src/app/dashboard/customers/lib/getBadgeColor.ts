@@ -25,10 +25,10 @@ const STATUS_COLORS: Record<string, string> = {
   POSTPONED: 'bg-orange-50 text-[#ff9800] border border-orange-200',
   EDIT_REJECTED: 'bg-cyan-50 text-[#0097a7] border border-cyan-200',
 
-  CANCELLED: 'bg-red-50 text-[#ff0004] border border-red-200',
-  STOPPED: 'bg-red-50 text-[#ff0004] border border-red-200',
-  UNCOMPLETED: 'bg-red-50 text-[#ff0004] border border-red-200',
-  MISSING: 'bg-red-50 text-[#ff0004] border border-red-200',
+  CANCELLED: 'bg-red-50 text-[#ff0004] dark:text-danger-text border border-red-200',
+  STOPPED: 'bg-red-50 text-[#ff0004] dark:text-danger-text border border-red-200',
+  UNCOMPLETED: 'bg-red-50 text-[#ff0004] dark:text-danger-text border border-red-200',
+  MISSING: 'bg-red-50 text-[#ff0004] dark:text-danger-text border border-red-200',
 
   // Frontend-only legacy keys — not OrderStatus members.
   PARTIAL_DELIVERY: 'bg-orange-50 text-[#ff9800] border border-orange-200',

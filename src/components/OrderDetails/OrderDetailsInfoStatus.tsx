@@ -46,7 +46,7 @@ interface EventCardProps {
 const getIconColorFromClasses = (classes: string): string => {
   if (classes.includes('text-[#5686e1]')) return 'text-[#5686e1]';
   if (classes.includes('text-[#49c116]')) return 'text-[#49c116]';
-  if (classes.includes('text-[#ff0004]')) return 'text-[#ff0004]';
+  if (classes.includes('text-[#ff0004]')) return 'text-[#ff0004] dark:text-danger-text';
   if (classes.includes('text-[#ff9800]')) return 'text-[#ff9800]';
   if (classes.includes('text-primary')) return 'text-primary';
   if (classes.includes('text-purple-700')) return 'text-purple-700';

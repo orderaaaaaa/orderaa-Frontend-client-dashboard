@@ -61,7 +61,7 @@ const ResultFileUpload = () => {
             </div>
           </div>
           <div className="mt-4 max-sm:text-center">
-            <p className="text-[#F61515] font-bold text-[22px]">
+            <p className="text-[#F61515] dark:text-danger-text font-bold text-[22px]">
               يوجد {Result.failed} طلبات بها أخطاء
             </p>
           </div>
@@ -71,12 +71,12 @@ const ResultFileUpload = () => {
         <div className="space-y-4">
           {Result.orders.map((order) => (
             <div key={order.orderId} className="relative">
-              <div className="bg-card rounded-lg shadow-sm border-2 border-[#FF0004] relative">
+              <div className="bg-card rounded-lg shadow-sm border-2 border-[#FF0004] dark:border-danger-border relative">
                 {/* Outlined Triangle Pointer - POINTING DOWN */}
                 <div className="absolute bottom-0 right-6 translate-y-full z-(--z-raised)">
                   <div className="relative w-0 h-0">
                     {/* Outer red triangle */}
-                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-[#FF0004]"></div>
+                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-[#FF0004] dark:border-t-danger-border"></div>
                     {/* Inner white triangle to create outline */}
                     <div className="absolute -top-[14px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[13px] border-t-white"></div>
                   </div>
@@ -85,7 +85,7 @@ const ResultFileUpload = () => {
                 {/* Order Header */}
                 <div className="p-4 flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex items-start gap-3 flex-1">
-                    <AlertCircle className="w-6 h-6 text-[#FF0004] mt-1 flex-shrink-0" />
+                    <AlertCircle className="w-6 h-6 text-[#FF0004] dark:text-danger-text mt-1 flex-shrink-0" />
                     <div className="flex-1">
                       <h3 className="text-gray-800 text-lg select-none">
                         الطلب {order.orderId}:{' '}
@@ -104,9 +104,9 @@ const ResultFileUpload = () => {
                   {order.errors.map((error) => (
                     <div
                       key={error.errorId}
-                      className="flex items-start gap-2 text-sm text-[#FF0004] select-none"
+                      className="flex items-start gap-2 text-sm text-[#FF0004] dark:text-danger-text select-none"
                     >
-                      <span className="w-2 h-2 bg-[#FF0004] rounded-full mt-1.5 text-base flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-[#FF0004] dark:bg-danger-text rounded-full mt-1.5 text-base flex-shrink-0"></span>
                       {error.errorMessage}
                     </div>
                   ))}

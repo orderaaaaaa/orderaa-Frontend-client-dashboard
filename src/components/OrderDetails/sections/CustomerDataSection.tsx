@@ -106,8 +106,8 @@ export function CustomerDataSection({
               onClick={() => setIsNotesModalOpen(true)}
               className="flex items-center gap-1 p-1 px-3 bg-red-50 border-2 border-red-200 rounded-sm cursor-pointer hover:bg-red-100 transition-colors"
             >
-              <MdBlock size={18} className="text-[#dc0201]" />
-              <span className="text-[#dc0201] text-sm lg:text-base font-medium">
+              <MdBlock size={18} className="text-[#dc0201] dark:text-danger-text" />
+              <span className="text-[#dc0201] dark:text-danger-text text-sm lg:text-base font-medium">
                 العميل محظور
               </span>
             </button>

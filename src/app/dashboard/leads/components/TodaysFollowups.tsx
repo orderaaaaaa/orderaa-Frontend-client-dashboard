@@ -55,7 +55,7 @@ const TodaysFollowups: React.FC<TodaysFollowupsProps> = ({
                     <button className="px-4 py-1 rounded-sm font-semibold text-sm border border-[#3cc900] bg-green-50 text-[#3cc900]">
                       واتساب
                     </button>
-                    <button className="px-8 py-1 rounded-sm font-semibold text-sm border border-[#ff0004] bg-red-50 text-[#ff0004]">
+                    <button className="px-8 py-1 rounded-sm font-semibold text-sm border border-[#ff0004] dark:border-danger-border bg-red-50 dark:bg-danger-tint text-[#ff0004] dark:text-danger-text">
                       متاخر
                     </button>
                   </div>
