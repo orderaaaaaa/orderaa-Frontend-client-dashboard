@@ -6,7 +6,9 @@ import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { useEffect } from 'react';
 import { VariantOptionChip } from './VariantOptionChip';
+import { useBlockedLinesStore } from './blockedLinesStore';
 import {
   exactVariantFor,
   optionStatus,
@@ -34,6 +36,7 @@ export interface VariantAvailabilitySelectorProps {
   className?: string;
   excludedLines?: number;
   showWarehouseNote?: boolean;
+  blockKey?: string;
 }
 
 export function VariantAvailabilitySelector({
@@ -51,9 +54,21 @@ export function VariantAvailabilitySelector({
   className,
   excludedLines = 0,
   showWarehouseNote = true,
+  blockKey,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
+  const setBlocked = useBlockedLinesStore((state) => state.setBlocked);
+  const isBlockedNow = exactVariantFor(variants, selection, attributes.length)?.blocked === true;
+
+  useEffect(() => {
+    if (blockKey) setBlocked(blockKey, isBlockedNow);
+  }, [blockKey, isBlockedNow, setBlocked]);
+
+  useEffect(() => {
+    if (!blockKey) return;
+    return () => setBlocked(blockKey, false);
+  }, [blockKey, setBlocked]);
 
   if (attributes.length === 0 && !isLoading && !isError) return null;
 

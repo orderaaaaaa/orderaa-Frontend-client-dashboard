@@ -22,6 +22,7 @@ export interface ProductSelectionAvailability {
   targetStatus: 'NEW_ORDER' | 'CONFIRMED';
   quantity: number;
   draftFor: (productId: number) => DraftSummary;
+  blockScope?: string;
 }
 
 export interface VariantOption {
@@ -141,6 +142,7 @@ function ProductAvailabilityBlock({
       excludedLines={availability.draftFor(productId).excluded}
       selection={selection}
       onChange={handleChange}
+      blockKey={availability.blockScope ? `${availability.blockScope}:${productId}` : undefined}
     />
   );
 }

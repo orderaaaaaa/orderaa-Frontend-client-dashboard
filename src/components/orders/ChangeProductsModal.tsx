@@ -24,6 +24,8 @@ import { useFollowupChangeProductsMutation } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
 import { getAvailabilityRefusalMessage } from '@/utils/apiError';
+import { useI18n } from '@/i18n/I18nProvider';
+import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
   draftFromLines,
@@ -203,11 +205,14 @@ export default function ChangeProductsModal({
   const isTotalCostInvalid =
     totalCost !== undefined &&
     (!Number.isFinite(totalCost) || totalCost < 0 || totalCost > MAX_TOTAL_COST);
+  const { t } = useI18n();
+  const stockBlocked = useAnyBlockedLine('change:');
   const canConfirm =
     orderQuery.isSuccess &&
     lines.length > 0 &&
     lines.every(isLineComplete) &&
     !isTotalCostInvalid &&
+    !stockBlocked &&
     !isPending;
 
   const resetForm = () => {
@@ -347,6 +352,11 @@ export default function ChangeProductsModal({
                     إضافة منتج
                   </Button>
                 </div>
+                {stockBlocked && (
+                  <p role="alert" className="text-sm font-semibold text-destructive">
+                    {t('stockShortage.submitBlocked')}
+                  </p>
+                )}
                 {lines.length === 0 ? (
                   <EmptyState
                     icon={
@@ -415,6 +425,7 @@ export default function ChangeProductsModal({
                               excludedLines={draftForProduct(line.productId, line.key).excluded}
                               selection={line.attributeOptionIds}
                               onChange={isPending ? undefined : (next) => handleSelectionChange(line.key, next)}
+                              blockKey={`change:${line.key}`}
                             />
                           </div>
                         )}
@@ -459,6 +470,7 @@ export default function ChangeProductsModal({
           targetStatus: 'CONFIRMED',
           quantity: 1,
           draftFor: (productId) => draftForProduct(productId),
+          blockScope: 'change:picker',
         }}
       />
     </>

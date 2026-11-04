@@ -29,6 +29,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import ToggleGroup from '@/components/ui/toggle-group';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
 import CustomerReturnForm from './return/CustomerReturnForm';
 
 const DIRTY = { shouldDirty: true } as const;
@@ -36,6 +37,8 @@ const DIRTY = { shouldDirty: true } as const;
 type ManualOrderMode = 'new' | 'return';
 
 function NewOrderForm() {
+  const { t } = useI18n();
+  const stockBlocked = useAnyBlockedLine('dropdown:');
   const queryClient = useQueryClient();
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -330,6 +333,8 @@ function NewOrderForm() {
           status={
             isSubmitting
               ? 'جاري إنشاء الطلب...'
+              : stockBlocked
+                ? t('stockShortage.submitBlocked')
               : hasUnsavedChanges
                 ? 'الطلب لم يُضف بعد'
                 : 'املأ بيانات الطلب ثم اضغط إضافة طلب'
@@ -337,7 +342,8 @@ function NewOrderForm() {
         >
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || stockBlocked}
+            title={stockBlocked ? t('stockShortage.submitBlocked') : undefined}
             loading={isSubmitting}
             loadingText="جاري الإرسال..."
             className="min-h-10 min-w-40 rounded-full font-bold"

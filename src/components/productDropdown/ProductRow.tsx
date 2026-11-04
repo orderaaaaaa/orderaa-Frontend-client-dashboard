@@ -76,6 +76,7 @@ const RowAvailabilityPanel = ({
       excludedLines={draft.excluded}
       selection={selection}
       onChange={handleChange}
+      blockKey={`dropdown:${product.id}`}
     />
   );
 };

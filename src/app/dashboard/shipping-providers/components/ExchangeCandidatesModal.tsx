@@ -18,6 +18,7 @@ import ProductSelectionModal, { type SelectableProduct } from '@/components/ui/p
 import { Stepper } from '@/components/ui/stepper';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
 import type {
   FollowupChangeProductInput,
   FollowupExchangeBody,
@@ -115,7 +116,8 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
           ? t('exchange.create.step2.incompleteVariants')
           : null;
   const navHint = step === 1 && !isProductsValid ? productsHint : null;
-  const canConfirm = canManage && stepValid.every(Boolean) && !isPending;
+  const stockBlocked = useAnyBlockedLine('exchange:');
+  const canConfirm = canManage && stepValid.every(Boolean) && !stockBlocked && !isPending;
 
   const handleClose = () => {
     if (isPending) return;
@@ -255,6 +257,11 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       )}
       {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
       {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
+      {stockBlocked && (
+        <p role="alert" className="text-sm font-semibold text-destructive">
+          {t('stockShortage.submitBlocked')}
+        </p>
+      )}
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0 || isPending}>
           {t('exchange.create.nav.back')}
@@ -264,7 +271,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
             {t('exchange.create.nav.next')}
           </Button>
         ) : (
-          <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending}>
+          <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending} title={stockBlocked ? t('stockShortage.submitBlocked') : undefined}>
             {t('exchange.create.nav.confirm')}
           </Button>
         )}
@@ -355,6 +362,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
           targetStatus: 'CONFIRMED',
           quantity: 1,
           draftFor: (productId) => draftForProduct(productId),
+          blockScope: 'exchange:picker',
         }}
       />
     </>
