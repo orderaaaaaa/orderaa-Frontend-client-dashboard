@@ -96,7 +96,7 @@ export function VariantOptionChip({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{element}</TooltipTrigger>
-      <TooltipContent>{stateText ? `${attributeName}: ${optionName} — ${stateText}` : `${attributeName}: ${optionName}`}</TooltipContent>
+      <TooltipContent collisionPadding={16} className="max-w-[min(20rem,calc(100vw-2rem))]">{stateText ? `${attributeName}: ${optionName} — ${stateText}` : `${attributeName}: ${optionName}`}</TooltipContent>
     </Tooltip>
   );
 }
