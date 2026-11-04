@@ -289,7 +289,7 @@ export function formatBulkStockWarnings(
   return [title, ...rows].join('\n');
 }
 
-function availableStockRefusalText(
+export function availableStockRefusalText(
   warehouseName: string,
   lines: AvailableStockRefusalLine[]
 ): string {

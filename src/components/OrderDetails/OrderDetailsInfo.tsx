@@ -8,7 +8,12 @@ import { useOrderNavigation } from '@/hooks/OrderDetails/useOrderNavigation';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import type { AvailabilityLine } from '@/lib/api/warehouses';
 import { toast } from 'react-toastify';
-import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
+import {
+  availableStockRefusalText,
+  formatAvailableStockLines,
+  getApiErrorMessage,
+} from '@/utils/apiError';
+import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { CustomerDataSection } from './sections/CustomerDataSection';
@@ -168,12 +173,19 @@ function OrderDetailsInfoComponent({
     );
     // Undefined while loading — do NOT block on that, or the confirm button is
     // dead on every first paint.
-    const warned = notSet
-      ? []
-      : settled.filter((line) => !line.safe || line.blocked);
+    const warehouseName = stockAvailability?.availableWarehouse?.name ?? '';
+    const toRefusalLine = (line: SettledAvailabilityLine): AvailableStockRefusalLine => ({
+      variantId: line.variantId,
+      productName: line.productName,
+      variantLabel: line.variantLabel,
+      available: line.available,
+      change: line.change,
+      after: line.after ?? line.available + line.change,
+    });
+    const warned = notSet ? [] : settled.filter((line) => line.warning && !line.blocked);
     const warning =
       warned.length > 0
-        ? `${translate(readStoredLocale(), 'stockShortage.confirmWarning')}\n${formatStockShortageLines(warned)}`
+        ? `${translate(readStoredLocale(), 'stockShortage.availableWarning', { warehouse: warehouseName })}\n${formatAvailableStockLines(warned.map(toRefusalLine))}`
         : undefined;
     if (notSet) {
       return {
@@ -185,7 +197,10 @@ function OrderDetailsInfoComponent({
         warning,
       };
     }
-    if (!stockAvailability || stockAvailability.canConfirm) {
+    if (
+      !stockAvailability ||
+      (stockAvailability.canConfirm && !settled.some((line) => line.blocked))
+    ) {
       return {
         canConfirm: true,
         reason: undefined as string | undefined,
@@ -195,7 +210,7 @@ function OrderDetailsInfoComponent({
     const blocking = settled.filter((line) => line.blocked);
     return {
       canConfirm: false,
-      reason: `${translate(readStoredLocale(), 'stockShortage.confirmBlocked')}\n${formatStockShortageLines(blocking)}`,
+      reason: availableStockRefusalText(warehouseName, blocking.map(toRefusalLine)),
       warning,
     };
   }, [stockAvailability]);
