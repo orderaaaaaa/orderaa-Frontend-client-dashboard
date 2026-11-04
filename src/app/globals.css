@@ -441,16 +441,20 @@
     box-shadow: var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
       var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--aurora-glow);
   }
-  .dark :is(button, a, [role='button'], div.cursor-pointer).bg-primary:not(.text-xs, .aurora-off, :disabled, [aria-disabled='true']):hover {
-    box-shadow: var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
-      var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--aurora-glow-hover);
+  @media (hover: hover) {
+    .dark :is(button, a, [role='button'], div.cursor-pointer).bg-primary:not(.text-xs, .aurora-off, :disabled, [aria-disabled='true']):hover {
+      box-shadow: var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
+        var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--aurora-glow-hover);
+    }
   }
 }
 @media screen {
   .dark :is(.bg-red-500, .bg-red-600, :is(button, a, [role='button']).bg-destructive):not(:disabled[class*='disabled:bg-']) { background-color: var(--danger-fill); }
   .dark :is(.bg-red-500, .bg-red-600, :is(button, a, [role='button']).bg-destructive):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled[class*='disabled:bg-']) { border-color: var(--danger-fill); }
-  .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):not(:disabled):hover { background-color: var(--danger-fill-hover); }
-  .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled):hover { border-color: var(--danger-fill-hover); }
+  @media (hover: hover) {
+    .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):not(:disabled):hover { background-color: var(--danger-fill-hover); }
+    .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled):hover { border-color: var(--danger-fill-hover); }
+  }
   .dark .Toastify { --toastify-color-error: var(--danger-fill); }
 }
 input[type='date']::-webkit-datetime-edit-text,
