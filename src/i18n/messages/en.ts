@@ -382,6 +382,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.table.captionReturned': 'Orders returned to us by the carrier',
   'inProcess.table.actions': 'Actions',
   'inProcess.table.copyPhone': 'Copy phone number',
+  'inProcess.table.copyShippingCode': 'Copy shipping code',
   'inProcess.table.morePhones': 'Show all numbers ({n})',
   'inProcess.table.columns.code': 'Code',
   'inProcess.table.columns.customer': 'Customer',

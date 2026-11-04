@@ -82,9 +82,18 @@ export interface ShipmentCustomer {
   phones: string[];
 }
 
+export type ShipmentWhatsAppTemplateType = 'SHIPMENT_CUSTOMER' | 'SHIPMENT_COURIER';
+
+export interface ShipmentWhatsAppTemplate {
+  type: ShipmentWhatsAppTemplateType;
+  label: string;
+  url: string;
+}
+
 export interface ShipmentRowBase {
   id: number;
   code: string;
+  shippingCode: string | null;
   status: OrderStatus;
   governorate: string | null;
   city: string | null;
@@ -94,6 +103,7 @@ export interface ShipmentRowBase {
   availableFrom: string | null;
   availableTo: string | null;
   customer: ShipmentCustomer;
+  whatsappTemplates: ShipmentWhatsAppTemplate[];
   closure: FollowupClosure | null;
   governorateOption: string | null;
   cityOption: string | null;

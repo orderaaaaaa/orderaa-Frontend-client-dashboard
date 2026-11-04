@@ -76,11 +76,17 @@ export function useIsBulkClosable(): (row: ShipmentRowBase) => boolean {
   return (row) => row.closure === null && canCloseToday;
 }
 
-export function CodeCell({ code }: { code: string }) {
+export function CodeCell({ code, shippingCode }: { code: string; shippingCode: string | null }) {
+  const { t } = useI18n();
   return (
-    <CopyableCode value={code} label="نسخ كود الطلب">
-      <span className="font-mono font-semibold text-foreground">{code}</span>
-    </CopyableCode>
+    <div className="flex flex-col items-start gap-1">
+      <CopyableCode value={code} label="نسخ كود الطلب">
+        <span className="font-mono font-semibold text-foreground">{code}</span>
+      </CopyableCode>
+      <CopyableCode value={shippingCode} label={t('inProcess.table.copyShippingCode')}>
+        <span className={cn('font-mono', SECONDARY_TEXT_CLASS)}>{shippingCode ?? '—'}</span>
+      </CopyableCode>
+    </div>
   );
 }
 
@@ -403,7 +409,7 @@ export function InProcessShipmentsTable({
                     ) : (
                       <span aria-hidden className="size-5 shrink-0" />
                     ))}
-                  <CodeCell code={row.code} />
+                  <CodeCell code={row.code} shippingCode={row.shippingCode} />
                 </div>
               </td>
               <td className={CELL_CLASS}>
@@ -506,7 +512,7 @@ export function ReturnedShipmentsTable({
         {shipments.map((row) => (
           <tr key={row.id} className={ROW_CLASS}>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 whitespace-nowrap')}>
-              <CodeCell code={row.code} />
+              <CodeCell code={row.code} shippingCode={row.shippingCode} />
             </td>
             <td className={CELL_CLASS}>
               <CustomerCell name={row.customer.name} phones={row.customer.phones} />

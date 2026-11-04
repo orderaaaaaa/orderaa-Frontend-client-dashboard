@@ -64,7 +64,7 @@ export function InProcessShipmentCards({
                   onCheckedChange={() => selection.onToggle(row.id)}
                 />
               )}
-              <CodeCell code={row.code} />
+              <CodeCell code={row.code} shippingCode={row.shippingCode} />
             </div>
             <InProcessRowActions
               row={row}
@@ -119,7 +119,7 @@ export function ReturnedShipmentCards({
       {shipments.map((row: ReturnedShipment) => (
         <li key={row.id} className={CARD_CLASS}>
           <div className="flex items-start justify-between gap-3">
-            <CodeCell code={row.code} />
+            <CodeCell code={row.code} shippingCode={row.shippingCode} />
             <ReturnedRowActions
               row={row}
               carrierResendSupported={carrier.capabilities?.resend.supported}

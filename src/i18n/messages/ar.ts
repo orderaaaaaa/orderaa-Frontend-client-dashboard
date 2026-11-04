@@ -395,6 +395,7 @@ const ar = {
   'inProcess.table.captionReturned': 'الطلبات المرتجعة لدى جهة الشحن',
   'inProcess.table.actions': 'الإجراءات',
   'inProcess.table.copyPhone': 'نسخ رقم الهاتف',
+  'inProcess.table.copyShippingCode': 'نسخ كود الشحن',
   'inProcess.table.morePhones': 'عرض كل الأرقام ({n})',
   'inProcess.table.columns.code': 'الكود',
   'inProcess.table.columns.customer': 'العميل',
