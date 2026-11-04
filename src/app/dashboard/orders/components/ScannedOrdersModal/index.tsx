@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from 'next-themes';
 import Input from '@/components/ui/Input';
 import {
   LiaSearchSolid,
@@ -15,7 +16,7 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   ORDER_STATUS_ARABIC_LABELS,
-  ORDER_STATUS_CHART_COLORS,
+  getOrderStatusChartColor,
 } from '../../../constants/statusMappings';
 import type {
   ScannedOrder,
@@ -104,6 +105,7 @@ function NonConfirmedSection({
   onRemove: (code: string) => void;
   onForceActionable?: (orderId: number) => void;
 }) {
+  const { resolvedTheme } = useTheme();
   if (groups.length === 0) return null;
 
   return (
@@ -116,7 +118,7 @@ function NonConfirmedSection({
           const statusLabel =
             ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
           const statusColor =
-            ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
+            getOrderStatusChartColor(group.status, resolvedTheme === 'dark');
 
           return (
             <div
@@ -224,6 +226,7 @@ export function ScannedOrdersModal({
   onPackagingNoteChange,
   onManualScan,
 }: ScannedOrdersModalProps) {
+  const { resolvedTheme } = useTheme();
   useBodyScrollLock(isOpen);
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -368,7 +371,7 @@ export function ScannedOrdersModal({
                     const statusLabel =
                       ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
                     const statusColor =
-                      ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
+                      getOrderStatusChartColor(group.status, resolvedTheme === 'dark');
 
                     return (
                       <div

@@ -83,3 +83,12 @@ export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {
   RETURN_RESEND_PENDING: '#f59e0b',
   RETURN_WAREHOUSE: '#6366f1',
 };
+
+export const ORDER_STATUS_CHART_COLORS_DARK: Record<string, string> = {
+  CANCELLED: '#f09a9a',
+  MISSING: '#c93b3f',
+};
+
+export function getOrderStatusChartColor(status: string, isDark: boolean): string {
+  return (isDark && ORDER_STATUS_CHART_COLORS_DARK[status]) || ORDER_STATUS_CHART_COLORS[status] || '#9ca3af';
+}

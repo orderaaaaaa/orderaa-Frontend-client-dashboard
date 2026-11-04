@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTheme } from 'next-themes';
 import type {
   DashboardSummary,
   EmployeeStatusRow,
@@ -88,6 +89,7 @@ export function useDashboardData(): UseDashboardDataReturn {
 
   const summaryQuery = useDailySummaryQuery();
   const hourlyChartQuery = useHourlyChartQuery();
+  const { resolvedTheme } = useTheme();
   const byStatusQuery = useByStatusQuery();
   const attemptConversionQuery = useAttemptConversionQuery();
   const editRejectedQuery = useEditRejectedProductsQuery();
@@ -111,9 +113,9 @@ export function useDashboardData(): UseDashboardDataReturn {
   const orderStatusDistribution = useMemo(
     () =>
       byStatusQuery.data
-        ? transformByStatus(byStatusQuery.data, getStatusLabel)
+        ? transformByStatus(byStatusQuery.data, getStatusLabel, resolvedTheme === 'dark')
         : [],
-    [byStatusQuery.data, getStatusLabel],
+    [byStatusQuery.data, getStatusLabel, resolvedTheme],
   );
 
   const confirmationAttempts = useMemo(

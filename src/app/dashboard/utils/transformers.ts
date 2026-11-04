@@ -27,7 +27,7 @@ import type {
 } from '../types';
 import {
   ORDER_STATUS_ARABIC_LABELS,
-  ORDER_STATUS_CHART_COLORS,
+  getOrderStatusChartColor,
 } from '../constants/statusMappings';
 
 export function transformSummary(
@@ -144,13 +144,14 @@ export function transformHourlyChart(
 export function transformByStatus(
   raw: ByStatusResponse,
   getStatusLabel?: (key: string) => string,
+  isDark = false,
 ): OrderStatusDistributionItem[] {
   return raw.statuses.map((item) => ({
     label: getStatusLabel
       ? getStatusLabel(item.status)
       : (ORDER_STATUS_ARABIC_LABELS[item.status] ?? item.status),
     value: item.count,
-    color: ORDER_STATUS_CHART_COLORS[item.status] ?? '#9ca3af',
+    color: getOrderStatusChartColor(item.status, isDark),
   }));
 }
 
