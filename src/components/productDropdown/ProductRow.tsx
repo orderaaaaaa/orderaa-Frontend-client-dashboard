@@ -105,6 +105,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         )
       : [];
 
+  const priceLabel = product.price != null ? `${product.price} ج.م` : null;
+
   const getSelectedValue = (attribute: string): string | undefined => {
     return selectedVariants.find((v) => v.attribute === attribute)?.option;
   };
@@ -126,7 +128,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         className="flex w-full min-h-14 items-center p-3 text-right cursor-pointer hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         onClick={() => onProductClick(product)}
         aria-expanded={isExpanded}
-        aria-label={`${product.name}، ${product.price} ج.م${isAlreadyInOrder ? '، في الطلب' : ''}`}
+        aria-label={`${product.name}${priceLabel ? `، ${priceLabel}` : ''}${isAlreadyInOrder ? '، في الطلب' : ''}`}
       >
         <div className="w-1/4 flex justify-center">
           <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
@@ -160,7 +162,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           )}
         </div>
 
-        <div className="w-1/4 text-center text-gray-700">{product.price} ج.م</div>
+        <div className="w-1/4 text-center text-gray-700">{priceLabel}</div>
       </button>
 
       {isExpanded && hasVariants && (

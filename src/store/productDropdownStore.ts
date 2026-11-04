@@ -15,7 +15,7 @@ interface ProductAttribute {
 interface ApiProduct {
   id: number;
   name: string;
-  price: number;
+  price?: number | null;
   image?: string;
   variantOptions: VariantOption[];
   attributes?: ProductAttribute[];
@@ -259,7 +259,7 @@ export const useProductDropdownStore = create<ProductDropdownState>(
         (selection) => ({
           id: selection.product.id,
           name: selection.product.name,
-          price: String(selection.product.price),
+          price: String(selection.product.price ?? ''),
           image: selection.product.image || '',
           quantity: 1,
           selectedVariants: selection.selectedVariants,

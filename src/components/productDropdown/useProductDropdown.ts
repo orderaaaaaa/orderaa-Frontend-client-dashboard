@@ -17,7 +17,7 @@ export interface ProductAttribute {
 export interface ApiProduct {
   id: number;
   name: string;
-  price: number;
+  price?: number | null;
   image?: string;
   images: string[];
   variantOptions: VariantOption[];
