@@ -103,7 +103,7 @@ export function findTemplate(
 export function WhatsAppLink({ template }: { template: ShipmentWhatsAppTemplate | undefined }) {
   if (template === undefined) return null;
   return (
-    <Button asChild variant="ghost" size="icon-xs" className={'relative z-[2] max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}>
+    <Button asChild variant="ghost" size="icon-xs" className={'relative z-(--z-inpage-control) max-sm:before:absolute max-sm:before:-inset-2 max-sm:before:content-[""]'}>
       <a href={template.url} target="_blank" rel="noopener noreferrer" aria-label={template.label}>
         <LiaWhatsapp className="size-4" aria-hidden />
       </a>

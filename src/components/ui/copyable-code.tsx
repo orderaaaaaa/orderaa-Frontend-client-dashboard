@@ -14,7 +14,7 @@ export default function CopyableCode({ children, value, label, className }: Copy
   return (
     <span className={cn('inline-flex items-center gap-1', className)}>
       {children}
-      <CopyButton value={value} label={`${label} ${value}`} className="relative z-[2] p-1.5" />
+      <CopyButton value={value} label={`${label} ${value}`} className="relative z-(--z-inpage-control) p-1.5" />
     </span>
   );
 }

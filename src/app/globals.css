@@ -5,6 +5,7 @@
 
 :root {
   --z-raised: 1;
+  --z-inpage-control: 2;
   --z-inpage-pinned: 3;
   --z-inpage-sticky: 5;
   --z-inpage-sticky-corner: 6;
