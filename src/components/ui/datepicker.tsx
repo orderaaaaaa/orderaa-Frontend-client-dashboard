@@ -280,7 +280,7 @@ function TimePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-48 p-0 overflow-auto"
+        className="w-48 p-0"
         align="start"
         sideOffset={4}
       >
