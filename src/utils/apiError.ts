@@ -152,6 +152,12 @@ export function formatStockShortageLines(
 
 function formatBatchShortageRow(order: BatchShortageOrder): string {
   const locale = readStoredLocale();
+  if (order.reason === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) {
+    return [
+      order.orderCode,
+      availableStockRefusalText(order.warehouseName, order.lines),
+    ].join(' - ');
+  }
   if (order.reason === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
     return [
       order.orderCode,

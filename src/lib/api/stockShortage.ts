@@ -50,12 +50,19 @@ export interface OutboundInsufficientStockBody {
   orderCode?: string;
 }
 
-export interface BatchShortageOrder {
-  orderCode: string;
-  reason: 'SHORTAGE' | 'CONFIRMATION_BLOCKED' | typeof AVAILABLE_WAREHOUSE_NOT_SET_CODE;
-  warehouseName?: string;
-  lines: ShortageRenderLine[];
-}
+export type BatchShortageOrder =
+  | {
+      orderCode: string;
+      reason: 'SHORTAGE' | 'CONFIRMATION_BLOCKED' | typeof AVAILABLE_WAREHOUSE_NOT_SET_CODE;
+      warehouseName?: string;
+      lines: ShortageRenderLine[];
+    }
+  | {
+      orderCode: string;
+      reason: typeof AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE;
+      warehouseName: string;
+      lines: AvailableStockRefusalLine[];
+    };
 
 export interface BatchInsufficientStockBody {
   statusCode: number;
