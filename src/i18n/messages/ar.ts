@@ -143,7 +143,7 @@ const ar = {
   'receipts.noInboundWarning':
     'لم يتم تحديد وجهة استلام عامة من الموردين — الإيصالات التي لا تغطيها قواعد استلام أخرى سيتعذر اعتمادها حتى يتم تحديد وجهة.',
 
-  'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
+  'products.confirmOutOfStock.inherit': 'اتبع المتجر \u200F({value})',
   'products.confirmOutOfStock.followWorkflow': 'اتبع النظام',
   'products.confirmOutOfStock.followWorkflowHint':
     'يمنع أي إجراء يجعل رصيد «المخزن المتاح» أقل من صفر لهذا المنتج، مهما كان إعداد المتجر.',
