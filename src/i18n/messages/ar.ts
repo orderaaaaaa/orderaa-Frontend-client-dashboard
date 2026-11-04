@@ -219,6 +219,7 @@ const ar = {
     'لا يمكن تأكيد الطلب لأن المنتجات التالية غير متوفرة بالمخزون وإعداداتها تمنع التأكيد، اختر منتجًا آخر:',
   'stockShortage.insufficientFallback': 'المخزون غير كافٍ لإتمام هذه العملية.',
   'stockShortage.batchFallback': 'لم تُحفظ العملية لأن بعض الطلبات لا يكفيها المخزون.',
+  'stockShortage.batchNotSetFallback': 'لم تُحفظ العملية لأن بعض الطلبات لم يتم تحديد المخزن المتاح لها.',
   'stockShortage.transferOverAvailable':
     'الكمية المنقولة أكبر من المتاح في المخزن:',
   'stockShortage.confirmWarning':

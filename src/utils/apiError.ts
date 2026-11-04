@@ -193,11 +193,14 @@ function getBatchShortageMessage(err: unknown): string | null {
   if (data?.code !== 'BATCH_INSUFFICIENT_STOCK') return null;
 
   const locale = readStoredLocale();
-  const rows = (data.orders ?? []).map(formatBatchShortageRow);
+  const orders = data.orders ?? [];
+  const rows = orders.map(formatBatchShortageRow);
   if (rows.length === 0) {
     return data.message ?? translate(locale, 'stockShortage.batchFallback');
   }
-  return [translate(locale, 'stockShortage.batchFallback'), ...rows].join('\n');
+  const allNotSet = orders.every((order) => order.reason === AVAILABLE_WAREHOUSE_NOT_SET_CODE);
+  const header = allNotSet ? 'stockShortage.batchNotSetFallback' : 'stockShortage.batchFallback';
+  return [translate(locale, header), ...rows].join('\n');
 }
 
 export function getBatchErrorMessage(err: unknown, fallback: string): string {
