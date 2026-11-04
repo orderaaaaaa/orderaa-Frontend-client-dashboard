@@ -9,6 +9,7 @@ import { Product } from '../types/products';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
+import { useI18n } from '@/i18n/I18nProvider';
 import { ProductThumbnailButton } from './ProductThumbnailButton';
 import { productEditHref } from '../utils/productLinks';
 import {
@@ -54,6 +55,7 @@ function ProductsTableMobile({
   openGallery,
   emptyContent,
 }: ProductsTableMobileProps) {
+  const { t } = useI18n();
   const storeConfirmMode = useStoreConfirmOutOfStock();
   const { mutate: saveConfirmOutOfStock } = useUpdateProductConfirmOutOfStock();
   const pendingConfirmIds = usePendingConfirmOutOfStockIds();
@@ -191,7 +193,7 @@ function ProductsTableMobile({
                     }
                   >
                     <p className="mb-1 text-xs text-gray-500">
-                      تأكيد بدون مخزون
+                      {t('products.confirmOutOfStock.placeholder')}
                     </p>
                     <ConfirmOutOfStockControl
                       value={product.confirmOutOfStockMode}

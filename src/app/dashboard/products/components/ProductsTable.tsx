@@ -30,6 +30,7 @@ import ProductsTableMobile from './ProductsTableMobile';
 import { ProductThumbnailButton } from './ProductThumbnailButton';
 import { productEditHref, productGalleryImages } from '../utils/productLinks';
 import { getTimeAgo } from '@/utils';
+import { useI18n } from '@/i18n/I18nProvider';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 type ProductRow = Product & Record<string, unknown>;
@@ -142,6 +143,7 @@ function ProductsTable() {
     setSoldProductId(null);
   };
 
+  const { t } = useI18n();
   const columns = useMemo<DataTableColumn<ProductRow>[]>(
     () => [
       {
@@ -198,7 +200,7 @@ function ProductsTable() {
       },
       {
         key: 'confirmOutOfStock',
-        header: 'تأكيد بدون مخزون',
+        header: t('products.confirmOutOfStock.placeholder'),
         className: 'text-center',
         render: (_val, row) => (
           <div
@@ -248,7 +250,7 @@ function ProductsTable() {
         ),
       },
     ],
-    [storeConfirmMode, pendingConfirmIds, saveConfirmOutOfStock],
+    [storeConfirmMode, pendingConfirmIds, saveConfirmOutOfStock, t],
   );
 
   const selectedArray = useMemo(() => Array.from(selectedIds) as number[], [selectedIds]);

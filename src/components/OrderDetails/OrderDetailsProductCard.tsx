@@ -56,9 +56,6 @@ function OrderDetailsProductCard({
   const { hasPermission } = usePermissionCheck();
   const canManageProducts = hasPermission(PERMISSION_CODES.ORDERS_PRODUCTS_MANAGE);
 
-  // T27: availability against CONFIRMED — the transition an agent on this
-  // screen is about to make. Keyed by orderProductId because each LINE resolves
-  // its own rule and therefore its own source warehouse.
   const { data: availability } = useOrderStockAvailabilityQuery(
     order.id,
     NEXT_STOCK_TARGET
