@@ -1,27 +1,27 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
 import { LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import { useQuery } from '@tanstack/react-query';
 import http from '@/lib/api/http';
 import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import {
-  useProductVariantsOptions,
-  resolveAttributeOptionIds,
-} from '@/services/orders';
+import { useProductVariantsOptions } from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
 import {
   useOrderStockAvailabilityQuery,
   useProductVariantAvailabilityQuery,
 } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage } from '@/utils/apiError';
+import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  VariantAvailabilityList,
-  matchVariant,
-} from './VariantAvailabilityList';
+  catalogAttributesOf,
+  exactVariantFor,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
@@ -47,13 +47,12 @@ export default function AddNewProductModal({
   onSave,
 }: AddNewProductModalProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariants, setSelectedVariants] = useState<
-    Record<string, string>
-  >({});
+  const [selection, setSelection] = useState<Selection>({});
   const [quantity, setQuantity] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   const debouncedProductSearch = useDebounce(productSearch, 300);
+  const { t } = useI18n();
 
   const { data: productsData = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['add-product-search', debouncedProductSearch],
@@ -81,8 +80,8 @@ export default function AddNewProductModal({
     { quantity }
   );
   const selectedVariantAvailability = useMemo(
-    () => matchVariant(variantAvailability, selectedVariants),
-    [variantAvailability, selectedVariants]
+    () => exactVariantFor(variantAvailability, selection, variantOptions.length),
+    [variantAvailability, selection, variantOptions.length]
   );
 
   const { data: orderAvailability } = useOrderStockAvailabilityQuery(orderId);
@@ -101,22 +100,24 @@ export default function AddNewProductModal({
   useEffect(() => {
     if (isOpen) {
       setSelectedProduct(null);
-      setSelectedVariants({});
+      setSelection({});
       setQuantity(1);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    setSelectedVariants({});
+    setSelection({});
   }, [selectedProduct?.id]);
 
   const missingAttributes = useMemo(
     () =>
       missingAttributesOf(
         variantOptions.map((option) => option.attribute),
-        Object.keys(selectedVariants)
+        variantOptions
+          .filter((option) => selection[option.attributeId] !== undefined)
+          .map((option) => option.attribute)
       ),
-    [variantOptions, selectedVariants]
+    [variantOptions, selection]
   );
 
   const isFormValid = useMemo(() => {
@@ -124,7 +125,7 @@ export default function AddNewProductModal({
     const variantsReady = !isLoadingVariants;
     const allVariantsSelected =
       variantOptions.length === 0 ||
-      Object.keys(selectedVariants).length === variantOptions.length;
+      Object.keys(selection).length === variantOptions.length;
 
     // T27: a variant the product's settings refuse cannot be added. `!== false`
     // so an unresolved or still-loading match never blocks the form.
@@ -141,7 +142,7 @@ export default function AddNewProductModal({
   }, [
     selectedProduct,
     variantOptions,
-    selectedVariants,
+    selection,
     isLoadingVariants,
     selectedVariantAvailability,
     availableWarehouseNotSet,
@@ -153,21 +154,11 @@ export default function AddNewProductModal({
     setSelectedProduct(product);
   };
 
-  const handleVariantChange = (attribute: string, optionValue: string) => {
-    setSelectedVariants((prev) => ({
-      ...prev,
-      [attribute]: optionValue,
-    }));
-  };
-
   const handleSave = async () => {
     if (!selectedProduct || isSaving) return;
     setIsSaving(true);
     try {
-      const attributeOptionIds = resolveAttributeOptionIds(
-        variantOptions,
-        selectedVariants
-      );
+      const attributeOptionIds = Object.values(selection);
 
       const applied = await onSave(
         selectedProduct.id,
@@ -180,7 +171,7 @@ export default function AddNewProductModal({
     } catch (error: any) {
       console.error('Failed to add product:', error);
       toast.error(
-        getApiErrorMessage(error, 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.')
+        getAvailabilityRefusalMessage(error, 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.')
       );
     } finally {
       setIsSaving(false);
@@ -276,28 +267,7 @@ export default function AddNewProductModal({
                 </span>
               </div>
             ) : (
-              variantOptions.map((option) => (
-                <div key={option.attribute} className="flex-1 min-w-[200px]">
-                  <label className="block text-lg font-bold text-foreground mb-3 text-right">
-                    {option.attribute}
-                  </label>
-                  <SearchableSelect
-                    value={selectedVariants[option.attribute] || ''}
-                    onValueChange={(value) =>
-                      handleVariantChange(option.attribute, value)
-                    }
-                    options={option.options.map((o) => o.name)}
-                    placeholder={`اختر ${option.attribute}`}
-                    searchPlaceholder={`بحث عن ${option.attribute}...`}
-                    emptyMessage="لا توجد خيارات متاحة"
-                    noResultsMessage="لا توجد نتائج للبحث"
-                    triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
-                    className="rounded-2xl border-border"
-                    disabled={option.options.length === 0}
-                    searchThreshold={5}
-                  />
-                </div>
-              ))
+              null
             ))}
         </div>
 
@@ -305,13 +275,28 @@ export default function AddNewProductModal({
           <MissingAttributesHint missing={missingAttributes} />
         )}
 
-        {/* T27 — availability beside each size and colour, resolved through
-            THIS order so the numbers match the order cards'. */}
-        <VariantAvailabilityList
-          variants={variantAvailability}
-          selected={selectedVariantAvailability}
-          availableWarehouseNotSet={availableWarehouseNotSet}
-        />
+        {selectedProduct && !isLoadingVariants && variantOptions.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <VariantAvailabilitySelector
+              productName={selectedProduct.name}
+              attributes={catalogAttributesOf(variantOptions)}
+              variants={variantAvailability}
+              selection={selection}
+              onChange={setSelection}
+            />
+            {availableWarehouseNotSet ? (
+              <p className="text-sm font-semibold text-destructive">
+                {t('orderDetails.stock.availableWarehouseNotSet')}
+              </p>
+            ) : (
+              selectedVariantAvailability?.selectable === false && (
+                <p className="text-sm font-semibold text-destructive">
+                  {t('orderDetails.variants.blockedSelection')}
+                </p>
+              )
+            )}
+          </div>
+        )}
       </div>
     </BaseModal>
   );

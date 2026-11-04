@@ -1,4 +1,5 @@
 import type { AvailabilityRefusal, VariantAvailability } from '@/lib/api/warehouses';
+import type { VariantOption } from '@/services/orders';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { formatStockShortageLines } from '@/utils/apiError';
@@ -15,6 +16,17 @@ export interface CatalogAttribute {
 }
 
 export type Selection = Record<number, number>;
+
+export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[] {
+  return groups.map((group) => ({
+    attributeId: group.attributeId,
+    attributeName: group.displayName || group.attribute,
+    options: group.options.map((option) => ({
+      optionId: option.id,
+      optionName: option.displayName || option.name,
+    })),
+  }));
+}
 
 export type OptionState = 'ok' | 'low' | 'out' | 'notSet';
 

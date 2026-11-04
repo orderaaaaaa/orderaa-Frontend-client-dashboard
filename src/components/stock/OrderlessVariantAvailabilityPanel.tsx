@@ -2,7 +2,7 @@ import { useOrderlessVariantAvailabilityQuery } from '@/services/warehouses';
 import { useProductVariantsOptions } from '@/services/orders';
 import type { OrderlessAvailabilityTarget } from '@/lib/api/warehouses';
 import { VariantAvailabilitySelector } from './VariantAvailabilitySelector';
-import type { CatalogAttribute, Selection } from './variantAvailabilityModel';
+import { catalogAttributesOf, type Selection } from './variantAvailabilityModel';
 
 interface OrderlessVariantAvailabilityPanelProps {
   productId: number;
@@ -35,14 +35,7 @@ export function OrderlessVariantAvailabilityPanel({
     draft,
   );
 
-  const attributes: CatalogAttribute[] = (catalog.data ?? []).map((group) => ({
-    attributeId: group.attributeId,
-    attributeName: group.displayName || group.attribute,
-    options: group.options.map((option) => ({
-      optionId: option.id,
-      optionName: option.displayName || option.name,
-    })),
-  }));
+  const attributes = catalogAttributesOf(catalog.data ?? []);
 
   return (
     <VariantAvailabilitySelector
