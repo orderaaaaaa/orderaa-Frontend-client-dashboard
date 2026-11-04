@@ -7,7 +7,7 @@ import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { moneyCents } from '@/utils/money';
 import { BREAKDOWN_COST_HEADER, BREAKDOWN_GROUP_HEADINGS, SALES_COPY } from '../constants';
 import type { SalesBreakdownDimension, SalesBreakdownRow, SalesMetrics } from '../types';
-import { STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
+import { STICKY_BODY_START, STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesBreakdownTableProps {
   breakdown: SalesBreakdownRow[];
@@ -91,10 +91,10 @@ export function SalesBreakdownTable({ breakdown, totals }: SalesBreakdownTablePr
                   </TableCell>
                 </TableRow>
                 {rows.map((row) => (
-                  <TableRow key={`${row.dimension}-${row.key}`} className="hover:bg-accent/50">
+                  <TableRow key={`${row.dimension}-${row.key}`} className="group hover:bg-accent/50">
                     <TableHead
                       scope="row"
-                      className={cn('font-normal whitespace-nowrap', STICKY_FIRST_COLUMN)}
+                      className={cn('font-normal whitespace-nowrap', STICKY_BODY_START)}
                     >
                       {row.label}
                     </TableHead>
