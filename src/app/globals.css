@@ -636,6 +636,11 @@ html {
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
+    --danger-fill: var(--destructive);
+    --danger-fill-hover: var(--destructive);
+    --danger-text: var(--destructive);
+    --danger-border: var(--destructive);
+    --danger-tint: var(--color-red-50);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
