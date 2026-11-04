@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage, getOutOfStockBlock } from '@/utils/apiError';
+import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
@@ -248,8 +249,12 @@ export function useOrderActions({
           outOfStock?.message ??
           getApiErrorMessage(error, UPDATE_FAILED_MESSAGE);
         if (!options.skipToast) {
+          const toastMessage =
+            outOfStock?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE
+              ? outOfStock.message.split('\n')[0].replace(/:$/, '')
+              : apiErrorMessage;
           toast.error(
-            apiErrorMessage,
+            toastMessage,
             outOfStock ? { autoClose: 8000 } : undefined
           );
         }
