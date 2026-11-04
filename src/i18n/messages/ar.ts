@@ -346,7 +346,7 @@ const ar = {
   'timeAgo.pair': '{first} و {second}',
   'timeAgo.amount': '{count} {unit}',
   'timeAgo.unit.day.one': 'يوم',
-  'timeAgo.unit.day.other': 'ايام',
+  'timeAgo.unit.day.other': 'أيام',
   'timeAgo.unit.hour.one': 'ساعة',
   'timeAgo.unit.hour.other': 'ساعات',
   'timeAgo.unit.minute.one': 'دقيقة',
