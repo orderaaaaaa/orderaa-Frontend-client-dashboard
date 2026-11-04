@@ -73,7 +73,7 @@ const ResultFileUpload = () => {
             <div key={order.orderId} className="relative">
               <div className="bg-card rounded-lg shadow-sm border-2 border-[#FF0004] relative">
                 {/* Outlined Triangle Pointer - POINTING DOWN */}
-                <div className="absolute bottom-0 right-6 translate-y-full z-10">
+                <div className="absolute bottom-0 right-6 translate-y-full z-(--z-raised)">
                   <div className="relative w-0 h-0">
                     {/* Outer red triangle */}
                     <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-[#FF0004]"></div>

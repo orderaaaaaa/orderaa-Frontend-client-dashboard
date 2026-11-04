@@ -257,7 +257,7 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
           {!isLoading && !isError && !isEmpty && (
             <div className="relative">
               {isRefetching && (
-                <div aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/15">
+                <div aria-hidden="true" className="absolute inset-x-0 top-0 z-(--z-raised) h-0.5 overflow-hidden bg-primary/15">
                   <div className="h-full w-1/3 animate-pulse bg-primary motion-reduce:animate-none" />
                 </div>
               )}

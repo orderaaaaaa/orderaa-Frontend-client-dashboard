@@ -137,7 +137,7 @@ function SubscriptionPlans() {
               `}
             >
               {isActive && (
-                <div className="absolute top-3 end-3 z-10">
+                <div className="absolute top-3 end-3 z-(--z-raised)">
                   <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                     مشترك حالياً
                   </Badge>
@@ -145,7 +145,7 @@ function SubscriptionPlans() {
               )}
 
               {isEconomical && !isActive && (
-                <div className="absolute top-3 end-3 z-10">
+                <div className="absolute top-3 end-3 z-(--z-raised)">
                   <Badge className="bg-yellow-300 text-yellow-900 border-yellow-400">
                     <LiaGem className="w-3 h-3 ml-1" />
                     الأفضل قيمة
@@ -160,7 +160,7 @@ function SubscriptionPlans() {
                 <h3 className={`text-2xl font-medium ${isEconomical ? 'text-white' : 'text-gray-800'}`}>{plan.title}</h3>
               </div>
 
-              <div className="relative z-10 flex flex-col gap-6 flex-1">
+              <div className="relative z-(--z-raised) flex flex-col gap-6 flex-1">
                 <div className="flex items-baseline gap-4 mb-4">
                   <span
                     className={`

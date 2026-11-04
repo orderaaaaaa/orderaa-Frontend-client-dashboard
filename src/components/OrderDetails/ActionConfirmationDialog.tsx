@@ -56,7 +56,7 @@ export default function ActionConfirmationDialog({
     >
       <div className="relative">
         {showSuccess && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-(--z-inpage-sticky)">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <LiaCheckCircle

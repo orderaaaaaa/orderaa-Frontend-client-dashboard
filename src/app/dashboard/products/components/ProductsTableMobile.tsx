@@ -97,7 +97,7 @@ function ProductsTableMobile({
       <div className="relative">
         {/* Loading Overlay */}
         {isRefetching && (
-          <div className="absolute inset-0 bg-card/70 backdrop-blur-sm z-20 flex justify-center rounded-lg min-h-[200px]">
+          <div className="absolute inset-0 bg-card/70 backdrop-blur-sm z-(--z-inpage-sticky) flex justify-center rounded-lg min-h-[200px]">
             <LoadingAnimation />
           </div>
         )}

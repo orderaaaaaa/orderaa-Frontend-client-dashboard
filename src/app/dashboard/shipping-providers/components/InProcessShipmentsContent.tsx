@@ -318,7 +318,7 @@ function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }
       {busy && (
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 z-20 h-0.5 overflow-hidden rounded-t-xl bg-primary/20"
+          className="absolute inset-x-0 top-0 z-(--z-raised) h-0.5 overflow-hidden rounded-t-xl bg-primary/20"
         >
           <div className="h-full w-full animate-pulse bg-primary motion-reduce:animate-none" />
         </div>
@@ -849,7 +849,7 @@ function InProcessList({
               </div>
             </ResultsFrame>
             {selection && selectedIds.size > 0 && (
-              <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-lg">
+              <div className="sticky bottom-0 z-(--z-inpage-sticky) flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-lg">
                 <span className="text-sm font-medium text-foreground">
                   {t('inProcess.bulk.selected', { count: selectedIds.size })}
                 </span>

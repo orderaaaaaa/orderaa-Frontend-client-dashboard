@@ -55,8 +55,8 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
 
   const positionClasses = {
     fixed: FIXED_BOTTOM_BAR_CLASS,
-    sticky: 'sticky bottom-0 z-10',
-    absolute: 'absolute bottom-0 left-0 right-0 z-10',
+    sticky: 'sticky bottom-0 z-(--z-inpage-sticky)',
+    absolute: 'absolute bottom-0 left-0 right-0 z-(--z-inpage-sticky)',
     static: '',
   }[position];
 

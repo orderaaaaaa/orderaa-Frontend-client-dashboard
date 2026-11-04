@@ -66,7 +66,7 @@ function BulkBar({
   const { t } = useI18n();
 
   return (
-    <div className="sticky bottom-0 z-10 flex flex-col gap-2 rounded-xl border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-sm sm:top-0 sm:bottom-auto sm:p-4">
+    <div className="sticky bottom-0 z-(--z-inpage-sticky) flex flex-col gap-2 rounded-xl border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-sm sm:top-0 sm:bottom-auto sm:p-4">
       <div className="flex flex-wrap items-center gap-2">
         <p
           aria-hidden="true"

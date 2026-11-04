@@ -31,7 +31,7 @@ export default function GuideStepList({ steps }: { steps: GuideStep[] }) {
     <>
       {steps.map((step, i) => (
         <div key={i} className="relative flex items-start gap-3 pb-4 last:pb-0">
-          <span className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+          <span className="relative z-(--z-raised) flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
             {i + 1}
           </span>
           <p className="text-sm text-gray-600 leading-relaxed pt-0.5">
