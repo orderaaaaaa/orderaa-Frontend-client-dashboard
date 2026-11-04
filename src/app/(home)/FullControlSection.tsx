@@ -115,7 +115,7 @@ export default function FullControlSection() {
       {/* CTA Button */}
       <div className="md:mt-16 relative z-10">
         <button className="bg-gradient-to-r from-[#9716EF] to-[#260A46] text-white px-10 py-3 rounded-[7px] text-lg font-semibold hover:opacity-90 transition cursor-pointer">
-          جرب سجل الان
+          جرب سجل الآن
         </button>
       </div>
     </section>

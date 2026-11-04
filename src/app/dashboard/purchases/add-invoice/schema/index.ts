@@ -34,7 +34,7 @@ const invoiceItemSchema = z.object({
   ),
   unitPrice: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
-    z.number().min(0, 'السعر يجب ان يكون 0 او اكبر'),
+    z.number().min(0, 'السعر يجب أن يكون 0 أو أكبر'),
   ),
   total: z.number(),
   piecesPerPackage: z.preprocess(
@@ -73,9 +73,9 @@ export const addInvoiceSchema = z.object({
   externalInvoiceNumber: z.string().optional(),
   items: z
     .array(invoiceItemSchema)
-    .min(1, 'يجب اضافة صنف واحد على الاقل')
+    .min(1, 'يجب إضافة صنف واحد على الأقل')
     .refine((items) => items.some((item) => (item.count ?? 0) > 0), {
-      message: 'يجب ادخال كمية لصنف واحد على الاقل',
+      message: 'يجب إدخال كمية لصنف واحد على الأقل',
     }),
   invoiceImage: z
     .any()

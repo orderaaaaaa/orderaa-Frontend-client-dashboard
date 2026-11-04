@@ -6,8 +6,8 @@ export const allDepartments = [
 ];
 
 export const topSellers = [
-  { key: 'top1', value: 'اكثر مبيعاً' },
-  { key: 'top2', value: 'اقل مبيعاً' },
+  { key: 'top1', value: 'أكثر مبيعاً' },
+  { key: 'top2', value: 'أقل مبيعاً' },
 ];
 
 export const activities = [

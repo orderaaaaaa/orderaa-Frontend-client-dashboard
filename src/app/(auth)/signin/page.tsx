@@ -74,7 +74,7 @@ export default function LoginPage() {
       <Input
         label="الهاتف/البريد الالكتروني"
         name="emailOrPhoneNumber"
-        placeholder="أدخل هاتفك او بريدك الالكتروني..."
+        placeholder="أدخل هاتفك أو بريدك الإلكتروني..."
         error={errors.emailOrPhoneNumber?.message}
         register={register}
         icon={User}
