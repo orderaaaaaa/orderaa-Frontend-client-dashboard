@@ -56,8 +56,29 @@ const WRAPPING_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn
 
 function wrappingCellClass(column: SalesOrderColumn): string | false {
   if (!WRAPPING_COLUMNS.has(column)) return false;
-  const breakClass = column === 'customerPhone' ? 'break-all' : 'break-words';
-  return cn('whitespace-normal min-w-[7rem] max-w-[14rem]', breakClass);
+  const minWidth = column === 'customerPhone' ? 'min-w-[8.5rem]' : 'min-w-[7rem]';
+  return cn('whitespace-normal max-w-[14rem] break-words', minWidth);
+}
+
+function renderPhoneNumbers(phoneList: string) {
+  const numbers = phoneList
+    .split(',')
+    .map((number) => number.trim())
+    .filter((number) => number !== '');
+  return (
+    <div className="flex flex-col gap-1">
+      {numbers.map((number) => (
+        <span key={number} className="inline-flex items-center gap-2 whitespace-nowrap">
+          <span dir="ltr">{number}</span>
+          <CopyButton
+            value={number}
+            label="نسخ رقم الهاتف"
+            successMessage="تم نسخ رقم الهاتف"
+          />
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function joinStoreAndPage(row: SalesOrderRow): string | null {
@@ -170,6 +191,7 @@ function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: Sale
   const text = salesOrderText(row, column);
   if (MONEY_COLUMNS.has(column)) return formatMoney(text);
   if (text === null || text === '') return '—';
+  if (column === 'customerPhone') return renderPhoneNumbers(text);
 
   const copyLabel = plainCopyLabelOf(set, column);
   if (copyLabel) {

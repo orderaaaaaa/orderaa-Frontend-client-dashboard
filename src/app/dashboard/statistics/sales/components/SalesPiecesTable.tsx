@@ -106,12 +106,12 @@ export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) 
               return (
                 <Fragment key={product.productId}>
                   <TableRow className="hover:bg-accent/50">
-                    <TableCell className="whitespace-nowrap sticky start-0 z-[1] bg-card">
+                    <TableCell className="whitespace-normal sticky start-0 z-[1] bg-card">
                       <button
                         type="button"
                         aria-expanded={isExpanded}
                         onClick={() => toggleProduct(product.productId)}
-                        className="inline-flex items-center gap-2 font-medium"
+                        className="inline-flex items-center gap-2 font-medium text-start"
                       >
                         <ChevronDown
                           className={cn('size-4 transition-transform', isExpanded && 'rotate-180')}
