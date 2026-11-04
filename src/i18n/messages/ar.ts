@@ -146,7 +146,7 @@ const ar = {
   'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
   'products.confirmOutOfStock.followWorkflow': 'اتبع النظام',
   'products.confirmOutOfStock.followWorkflowHint':
-    'قواعد حركة المخزون تحدد ما يحدث لهذا المنتج مهما كان إعداد المتجر.',
+    'يمنع أي إجراء يجعل رصيد «المخزن المتاح» أقل من صفر لهذا المنتج، مهما كان إعداد المتجر.',
   'products.confirmOutOfStock.allowNegative': 'السماح بالسالب',
   'products.confirmOutOfStock.forbid': 'منع',
   'products.confirmOutOfStock.placeholder': 'تأكيد بدون مخزون',
@@ -184,13 +184,22 @@ const ar = {
   'storeSettings.confirmOutOfStock.allowNegative': 'السماح بالسالب',
   'storeSettings.confirmOutOfStock.forbid': 'منع',
   'storeSettings.confirmOutOfStock.followWorkflowDescription':
-    'قواعد حركة المخزون تحدد ما يحدث عند تأكيد طلب غير متوفر.',
+    'يمنع أي إجراء يجعل رصيد «المخزن المتاح» أقل من صفر، كما يفعل خيار «منع».',
   'storeSettings.confirmOutOfStock.allowNegativeDescription':
-    'يتم تأكيد الطلب ويصبح رصيد المخزن سالبًا عند عدم التوفر.',
+    'يسمح بالإجراء مع إظهار تنبيه، وقد ينخفض رصيد «المخزن المتاح» إلى ما دون الصفر، وتتبع حركات المخزون اللاحقة قواعد مخازنها.',
   'storeSettings.confirmOutOfStock.forbidDescription':
-    'لا يمكن تأكيد طلب يحتوي على منتج غير متوفر.',
+    'يمنع أي إجراء يجعل رصيد «المخزن المتاح» أقل من صفر، مثل تأكيد الطلب أو إضافة منتج إليه.',
   'stockShortage.line': '{product} - {variant}: المطلوب {required}، المتاح {available}',
   'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
+  'stockShortage.availableWouldGoNegative':
+    'لا يمكن تنفيذ هذا الإجراء لأن رصيد «{warehouse}» (المخزن المتاح) سيصبح أقل من صفر:',
+  'stockShortage.availableLine': '{product} - {variant}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
+  'stockShortage.availableLineNoVariant': '{product}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
+  'stockShortage.availableWarning':
+    'هذا الإجراء سيجعل رصيد «{warehouse}» (المخزن المتاح) سالبًا، لأن السماح بالسالب مفعّل لهذا المنتج:',
+  'stockShortage.bulkWarningTitle':
+    'تم التأكيد، لكن رصيد «{warehouse}» (المخزن المتاح) أصبح سالبًا لهذه الطلبات:',
+  'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
   'stockShortage.returnLine': '{label}: مطلوب {required}، المتاح {available} في {warehouse}',
   'returnStock.exceedsAvailable': 'الكمية أكبر من المتاح',
   'returnStock.variantNotStocked': 'لا يوجد مخزون لهذا المتغير، لا يمكن إرجاعه',

@@ -131,7 +131,7 @@ const en: Record<keyof typeof ar, string> = {
   'products.confirmOutOfStock.inherit': 'Follow the store ({value})',
   'products.confirmOutOfStock.followWorkflow': 'Follow the system',
   'products.confirmOutOfStock.followWorkflowHint':
-    'The stock movement rules decide what happens to this product, whatever the store setting.',
+    'Blocks any action that would take the available-stock warehouse below zero for this product, whatever the store setting.',
   'products.confirmOutOfStock.allowNegative': 'Allow negative stock',
   'products.confirmOutOfStock.forbid': 'Forbid',
   'products.confirmOutOfStock.placeholder': 'Confirm without stock',
@@ -171,13 +171,22 @@ const en: Record<keyof typeof ar, string> = {
   'storeSettings.confirmOutOfStock.allowNegative': 'Allow negative stock',
   'storeSettings.confirmOutOfStock.forbid': 'Forbid',
   'storeSettings.confirmOutOfStock.followWorkflowDescription':
-    'The stock movement rules decide what happens when an out-of-stock order is confirmed.',
+    'Blocks any action that would take the available-stock warehouse below zero, the same as Forbid.',
   'storeSettings.confirmOutOfStock.allowNegativeDescription':
-    'The order is confirmed and the warehouse balance goes negative when stock is short.',
+    'The action goes through with a warning. The available-stock warehouse balance may go below zero, and later stock moves follow their warehouse rules.',
   'storeSettings.confirmOutOfStock.forbidDescription':
-    'An order containing an out-of-stock product cannot be confirmed.',
+    'Blocks any action that would take the available-stock warehouse below zero, such as confirming an order or adding a product to it.',
   'stockShortage.line': '{product} - {variant}: required {required}, available {available}',
   'stockShortage.lineNoVariant': '{product}: required {required}, available {available}',
+  'stockShortage.availableWouldGoNegative':
+    'This action cannot be completed because the balance of "{warehouse}" (available-stock warehouse) would drop below zero:',
+  'stockShortage.availableLine': '{product} - {variant}: available {available}, change {change}, after {after}',
+  'stockShortage.availableLineNoVariant': '{product}: available {available}, change {change}, after {after}',
+  'stockShortage.availableWarning':
+    'This action will make the balance of "{warehouse}" (available-stock warehouse) negative, because negative stock is allowed for this product:',
+  'stockShortage.bulkWarningTitle':
+    'Confirmed, but the balance of "{warehouse}" (available-stock warehouse) went negative for these orders:',
+  'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: available {available}, change {change}, after {after}',
   'stockShortage.returnLine': '{label}: required {required}, available {available} in {warehouse}',
   'returnStock.exceedsAvailable': 'Quantity exceeds available stock',
   'returnStock.variantNotStocked': 'This variant has no stock, so it cannot be returned',
