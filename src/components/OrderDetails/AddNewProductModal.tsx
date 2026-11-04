@@ -137,7 +137,7 @@ export default function AddNewProductModal({
     // T27: a variant the product's settings refuse cannot be added. `!== false`
     // so an unresolved or still-loading match never blocks the form.
     const stockAllows =
-      !availableWarehouseNotSet && selectedVariantAvailability?.selectable !== false;
+      !availableWarehouseNotSet && selectedVariantAvailability?.blocked !== true;
 
     return (
       hasProduct &&
@@ -302,7 +302,7 @@ export default function AddNewProductModal({
                 {t('orderDetails.stock.availableWarehouseNotSet')}
               </p>
             ) : (
-              selectedVariantAvailability?.selectable === false && (
+              selectedVariantAvailability?.blocked === true && (
                 <p className="text-sm font-semibold text-destructive">
                   {t('orderDetails.variants.blockedSelection')}
                 </p>

@@ -5,6 +5,7 @@ import { LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { useProductVariantsOptions } from '@/services/orders';
 import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
+import { exactVariantFor } from '@/components/stock/variantAvailabilityModel';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
   catalogAttributesOf,
@@ -60,10 +61,15 @@ export default function AddSameTypeProductModal({
     }
   }, [isOpen]);
 
+  const selectedVariantAvailability = useMemo(
+    () => exactVariantFor(variantAvailability, selection, variantOptions.length),
+    [variantAvailability, selection, variantOptions.length]
+  );
+
   const isFormValid = useMemo(() => {
     const hasVariants = variantOptions.length === 0 || Object.keys(selection).length === variantOptions.length;
-    return hasVariants && quantity > 0;
-  }, [selection, quantity, variantOptions.length]);
+    return hasVariants && quantity > 0 && selectedVariantAvailability?.blocked !== true;
+  }, [selection, quantity, variantOptions.length, selectedVariantAvailability]);
 
   const missingAttributes = useMemo(
     () =>
