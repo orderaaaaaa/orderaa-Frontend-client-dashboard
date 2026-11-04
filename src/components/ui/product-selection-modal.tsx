@@ -10,6 +10,18 @@ import { Button } from './button';
 import { Checkbox } from './checkbox';
 import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
+import { useProductVariantsOptions } from '@/services/orders';
+import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
+import {
+  selectionFromNames,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
+
+export interface ProductSelectionAvailability {
+  targetStatus: 'NEW_ORDER' | 'CONFIRMED';
+  quantity: number;
+  draftFor: (productId: number) => Record<string, number>;
+}
 
 export interface VariantOption {
   attribute: string;
@@ -67,6 +79,66 @@ interface ProductSelectionModalProps {
   existingProductIds?: string[];
   existingVariantCombos?: Map<number, SelectedVariant[][]>;
   allowVariants?: boolean;
+  availability?: ProductSelectionAvailability;
+}
+
+function resolveCombo(
+  product: SelectableProduct | undefined,
+  attributes: string[],
+  selection: Record<string, string>,
+): SelectedVariant[] | null {
+  if (attributes.length === 0) return null;
+  const combo: SelectedVariant[] = [];
+  for (const attribute of attributes) {
+    const option = selection[attribute];
+    if (!option) return null;
+    const group = product?.variantOptions?.find((o) => o.attribute === attribute);
+    const detail = group?.optionDetails.find((o) => o.name === option);
+    if (!detail) return null;
+    combo.push({ attribute, option, attributeOptionId: detail.id });
+  }
+  return combo;
+}
+
+function ProductAvailabilityBlock({
+  productId,
+  productName,
+  availability,
+  names,
+  onVariantSelect,
+}: {
+  productId: number;
+  productName: string;
+  availability: ProductSelectionAvailability;
+  names: Record<string, string>;
+  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+}) {
+  const catalog = useProductVariantsOptions(productId);
+  const groups = catalog.data ?? [];
+  const selection = selectionFromNames(groups, names);
+
+  const handleChange = (next: Selection) => {
+    for (const group of groups) {
+      const previousId = selection[group.attributeId];
+      const nextId = next[group.attributeId];
+      if (previousId === nextId) continue;
+      const optionId = nextId === undefined ? previousId : nextId;
+      const name = group.options.find((option) => option.id === optionId)?.name;
+      if (name) onVariantSelect(productId, group.attribute, name);
+    }
+  };
+
+  return (
+    <OrderlessVariantAvailabilityPanel
+      productId={productId}
+      productName={productName}
+      targetStatus={availability.targetStatus}
+      quantity={availability.quantity}
+      draft={availability.draftFor(productId)}
+      selection={selection}
+      onChange={handleChange}
+    />
+  );
 }
 
 function isValueDisabled(
@@ -95,6 +167,7 @@ export default function ProductSelectionModal({
   existingProductIds = [],
   existingVariantCombos,
   allowVariants = true,
+  availability,
 }: ProductSelectionModalProps) {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState<SelectableProduct[]>([]);
@@ -195,15 +268,8 @@ export default function ProductSelectionModal({
 
       const product = products.find((p) => p.id === productId);
 
-      const combo: SelectedVariant[] = attributes
-        .filter((l) => selection[l])
-        .map((l) => {
-          const group = product?.variantOptions?.find((o) => o.attribute === l);
-          const opt = group?.optionDetails.find((o) => o.name === selection[l]);
-          return { attribute: l, option: selection[l], attributeOptionId: opt?.id ?? 0 };
-        });
-
-      if (combo.length !== attributes.length) return;
+      const combo = resolveCombo(product, attributes, selection);
+      if (!combo) return;
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -396,7 +462,7 @@ export default function ProductSelectionModal({
                 const productCombos = addedCombos.get(product.id) ?? [];
                 const selection = currentSelection.get(product.id) ?? {};
                 const allAttributes = (product.variantOptions ?? []).map((o) => o.attribute);
-                const allAttributesFilled = allAttributes.length > 0 && allAttributes.every((l) => selection[l]);
+                const readyCombo = resolveCombo(product, allAttributes, selection);
 
                 return (
                   <div
@@ -452,7 +518,15 @@ export default function ProductSelectionModal({
 
                     {isChecked && hasVariants && (
                       <div className="px-4 pb-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                        {product.variantOptions!.map((option) => (
+                        {availability ? (
+                          <ProductAvailabilityBlock
+                            productId={product.id}
+                            productName={product.name}
+                            availability={availability}
+                            names={selection}
+                            onVariantSelect={handleVariantSelect}
+                          />
+                        ) : product.variantOptions!.map((option) => (
                           <div key={option.attribute} className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-semibold text-muted-foreground min-w-16">
                               {option.attribute}:
@@ -504,7 +578,7 @@ export default function ProductSelectionModal({
                             type="button"
                             variant="default"
                             size="sm"
-                            disabled={!allAttributesFilled}
+                            disabled={!readyCombo}
                             className="rounded-full text-xs h-7 px-4 max-sm:h-10"
                             onClick={() => handleAddCombo(product.id, allAttributes)}
                           >
