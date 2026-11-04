@@ -14,6 +14,7 @@ import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabil
 import {
   catalogAttributesOf,
   namesFromSelection,
+  probeQuantityOf,
   selectionFromNames,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
@@ -64,13 +65,12 @@ export default function EditProductModal({
   const orderlessAvailability = useOrderlessVariantAvailabilityQuery(
     availability.kind === 'orderless' ? productId : undefined,
     availability.kind === 'orderless' ? availability.targetStatus : 'CONFIRMED',
-    availability.kind === 'orderless' ? availability.quantity : 1,
+    availability.kind === 'orderless' ? probeQuantityOf(availability.quantity) : 1,
     availability.kind === 'orderless' ? availability.draft : {}
   );
-  const variantAvailability =
-    (availability.kind === 'order'
-      ? orderAvailability.data
-      : orderlessAvailability.data) ?? [];
+  const activeAvailability =
+    availability.kind === 'order' ? orderAvailability : orderlessAvailability;
+  const variantAvailability = activeAvailability.data ?? [];
 
   useEffect(() => {
     if (isOpen) setDraft(null);
@@ -130,6 +130,8 @@ export default function EditProductModal({
           variants={variantAvailability}
           selection={selection}
           onChange={setDraft}
+          isLoading={activeAvailability.isLoading}
+          isError={activeAvailability.isError}
         />
       )}
       {!isLoading && (

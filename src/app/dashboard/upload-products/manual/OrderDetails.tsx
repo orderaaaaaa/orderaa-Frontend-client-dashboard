@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import ProductDropdown from '@/components/productDropdown';
 import EditProductModal from '@/components/OrderDetails/EditProductModal';
-import { draftFromLines } from '@/components/stock/variantAvailabilityModel';
+import { draftFromLines, probeQuantityOf } from '@/components/stock/variantAvailabilityModel';
 import { useProductVariantsOptions } from '@/services/orders';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
@@ -421,7 +421,7 @@ function OrderDetails({
             availability={{
               kind: 'orderless',
               targetStatus: availabilityTarget,
-              quantity: editingProduct.quantity || 1,
+              quantity: probeQuantityOf(editingProduct.quantity),
               draft: editingDraft,
             }}
             currentVariants={editingVariants}

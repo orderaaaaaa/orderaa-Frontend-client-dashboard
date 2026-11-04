@@ -8,6 +8,7 @@ import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
   catalogAttributesOf,
+  probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
 import { Button } from '../ui/button';
@@ -39,11 +40,15 @@ export default function AddSameTypeProductModal({
     isOpen ? productId : null
   );
 
-  const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
-    productId ?? undefined,
+  const {
+    data: variantAvailability = [],
+    isLoading: isLoadingAvailability,
+    isError: isErrorAvailability,
+  } = useProductVariantAvailabilityQuery(
+    isOpen ? (productId ?? undefined) : undefined,
     orderId,
     NEXT_STOCK_TARGET,
-    { quantity }
+    { quantity: probeQuantityOf(quantity) }
   );
 
   useEffect(() => {
@@ -156,6 +161,8 @@ export default function AddSameTypeProductModal({
             variants={variantAvailability}
             selection={selection}
             onChange={setSelection}
+            isLoading={isLoadingAvailability}
+            isError={isErrorAvailability}
           />
         )}
         {!isLoading && <MissingAttributesHint missing={missingAttributes} />}

@@ -27,6 +27,7 @@ import { getAvailabilityRefusalMessage } from '@/utils/apiError';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
   draftFromLines,
+  probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
@@ -35,6 +36,7 @@ const MAX_TOTAL_COST = 9_999_999;
 
 export interface ChangeProductsLine {
   key: string;
+  rowId: number;
   productId: number;
   name: string;
   variantOptions: VariantOption[];
@@ -144,6 +146,14 @@ export const draftForProductLines = (
   );
 };
 
+const nextLineRowId = (() => {
+  let sequence = 0;
+  return () => {
+    sequence += 1;
+    return sequence;
+  };
+})();
+
 export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
   products.map((product) => {
     const variantOptions = product.variantOptions ?? [];
@@ -160,6 +170,7 @@ export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLi
     });
     return {
       key: lineKeyOf(product.id, variants, []),
+      rowId: nextLineRowId(),
       productId: product.id,
       name: product.name,
       variantOptions,
@@ -350,7 +361,7 @@ export default function ChangeProductsModal({
                   <div className="flex flex-col gap-2">
                     {lines.map((line) => (
                       <div
-                        key={line.key}
+                        key={line.rowId}
                         className="flex flex-col gap-3 p-3 rounded-lg border border-border"
                       >
                         <div className="flex items-center gap-3">
@@ -399,11 +410,11 @@ export default function ChangeProductsModal({
                               productId={line.productId}
                               productName={line.name}
                               targetStatus="CONFIRMED"
-                              quantity={line.quantity}
+                              quantity={probeQuantityOf(line.quantity)}
                               draft={draftForProduct(line.productId, line.key).draft}
                               excludedLines={draftForProduct(line.productId, line.key).excluded}
                               selection={line.attributeOptionIds}
-                              onChange={(next) => handleSelectionChange(line.key, next)}
+                              onChange={isPending ? undefined : (next) => handleSelectionChange(line.key, next)}
                             />
                           </div>
                         )}

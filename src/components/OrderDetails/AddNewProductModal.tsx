@@ -20,6 +20,7 @@ import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabil
 import {
   catalogAttributesOf,
   exactVariantFor,
+  probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
 import { Button } from '../ui/button';
@@ -73,11 +74,15 @@ export default function AddNewProductModal({
     useProductVariantsOptions(selectedProduct?.id ?? null);
 
   // T27 — availability beside each size and colour.
-  const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
+  const {
+    data: variantAvailability = [],
+    isLoading: isLoadingAvailability,
+    isError: isErrorAvailability,
+  } = useProductVariantAvailabilityQuery(
     selectedProduct?.id,
     orderId,
     NEXT_STOCK_TARGET,
-    { quantity }
+    { quantity: probeQuantityOf(quantity) }
   );
   const selectedVariantAvailability = useMemo(
     () => exactVariantFor(variantAvailability, selection, variantOptions.length),
@@ -275,15 +280,19 @@ export default function AddNewProductModal({
           <MissingAttributesHint missing={missingAttributes} />
         )}
 
-        {selectedProduct && !isLoadingVariants && variantOptions.length > 0 && (
+        {selectedProduct && !isLoadingVariants && (
           <div className="flex flex-col gap-2">
-            <VariantAvailabilitySelector
-              productName={selectedProduct.name}
-              attributes={catalogAttributesOf(variantOptions)}
-              variants={variantAvailability}
-              selection={selection}
-              onChange={setSelection}
-            />
+            {variantOptions.length > 0 && (
+              <VariantAvailabilitySelector
+                productName={selectedProduct.name}
+                attributes={catalogAttributesOf(variantOptions)}
+                variants={variantAvailability}
+                selection={selection}
+                onChange={setSelection}
+                isLoading={isLoadingAvailability}
+                isError={isErrorAvailability}
+              />
+            )}
             {availableWarehouseNotSet ? (
               <p className="text-sm font-semibold text-destructive">
                 {t('orderDetails.stock.availableWarehouseNotSet')}

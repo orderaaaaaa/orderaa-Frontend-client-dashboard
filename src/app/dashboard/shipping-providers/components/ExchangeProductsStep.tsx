@@ -8,7 +8,7 @@ import {
   isLineComplete,
 } from '@/components/orders/ChangeProductsModal';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
-import type { Selection } from '@/components/stock/variantAvailabilityModel';
+import { probeQuantityOf, type Selection } from '@/components/stock/variantAvailabilityModel';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/state-panels';
@@ -159,7 +159,7 @@ export function ExchangeProductsStep({
         ) : (
           <div className="flex flex-col gap-2">
             {lines.map((line) => (
-              <div key={line.key} className="flex flex-col gap-3 rounded-lg border border-border p-3">
+              <div key={line.rowId} className="flex flex-col gap-3 rounded-lg border border-border p-3">
                 <div className="flex items-center gap-3">
                   <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{line.name}</span>
                   <div className="flex shrink-0 items-center gap-1">
@@ -202,11 +202,11 @@ export function ExchangeProductsStep({
                     productId={line.productId}
                     productName={line.name}
                     targetStatus="CONFIRMED"
-                    quantity={line.quantity}
+                    quantity={probeQuantityOf(line.quantity)}
                     draft={draftForProductLines(lines, line.productId, line.key).draft}
                     excludedLines={draftForProductLines(lines, line.productId, line.key).excluded}
                     selection={line.attributeOptionIds}
-                    onChange={(next) => onChangeLineSelection(line.key, next)}
+                    onChange={disabled ? undefined : (next) => onChangeLineSelection(line.key, next)}
                   />
                 )}
                 {!isLineComplete(line) && (

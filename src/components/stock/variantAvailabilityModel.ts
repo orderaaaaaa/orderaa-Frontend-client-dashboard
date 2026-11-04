@@ -133,7 +133,7 @@ export function exactVariantFor(
   attributeCount: number,
 ): VariantAvailability | null {
   const selectedIds = Object.values(selection);
-  if (selectedIds.length !== attributeCount) return null;
+  if (selectedIds.length === 0 || selectedIds.length !== attributeCount) return null;
   return (
     variants.find(
       (variant) =>
@@ -161,6 +161,8 @@ export function selectionLabel(
   return names.join(' / ');
 }
 
+export const probeQuantityOf = (quantity: number) => Math.min(Math.max(quantity, 1), 99);
+
 export interface DraftSummary {
   draft: Record<string, number>;
   excluded: number;
@@ -173,7 +175,7 @@ export function draftFromLines(
   const draft: Record<string, number> = {};
   let excluded = 0;
   for (const line of lines) {
-    if (line.optionIds.length !== attributeCount) {
+    if (line.optionIds.length === 0 || line.optionIds.length !== attributeCount) {
       excluded += 1;
       continue;
     }
