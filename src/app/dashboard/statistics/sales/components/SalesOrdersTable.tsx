@@ -66,9 +66,9 @@ function renderPhoneNumbers(phoneList: string) {
     .map((number) => number.trim())
     .filter((number) => number !== '');
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 pe-[13px]">
       {numbers.map((number) => (
-        <span key={number} className="inline-flex items-center gap-2 whitespace-nowrap">
+        <span key={number} className="inline-flex items-center gap-2 [overflow-wrap:anywhere]">
           <span dir="ltr">{number}</span>
           <CopyButton
             value={number}
