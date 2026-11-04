@@ -137,6 +137,7 @@ export const QUERY_KEYS = {
   SALES_STATISTICS_FILTER_OPTIONS: 'sales-statistics-filter-options',
   SALES_STATISTICS_ORDERS: 'sales-statistics-orders',
   SALES_STATISTICS_PIECES: 'sales-statistics-pieces',
+  SALES_STATISTICS_LIFETIME_PIECES: 'sales-statistics-lifetime-pieces',
 
   CANONICAL_NAMES: 'canonical-names',
   CANONICAL_NAME_GROUPS: 'canonical-name-groups',

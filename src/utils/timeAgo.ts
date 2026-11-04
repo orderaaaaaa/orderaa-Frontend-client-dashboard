@@ -104,6 +104,13 @@ export function getTimeAgoCompact(
   return ahead ? `بعد ${days} يوماً` : `منذ ${days} يوماً`;
 }
 
+export function toCairoDayKey(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return cairoDayKey(date);
+}
+
 export function getTimeAgoShort(dateInput?: string | Date | null): string {
   if (!dateInput) return '';
 

@@ -16,8 +16,10 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { KpiAccent, KpiChipTone } from '@/components/ui/kpi-card';
+import { formatPercent } from '@/utils/formatMoney';
 import type {
   SalesDerivedKind,
+  SalesExclusionReason,
   SalesMetrics,
   SalesOrderSet,
   SalesSubPageSet,
@@ -37,15 +39,22 @@ export type SalesCardField =
   | 'purchasesTotal'
   | 'returnsExpense'
   | 'expenses'
-  | 'netProfit';
+  | 'netProfit'
+  | 'pendingCollectionAmount'
+  | 'deliveredProductsCost'
+  | 'pendingProfit';
 
-export type SalesTrendMode = 'standard' | 'neutral' | 'amberOnUp';
+export type SalesTrendMode = 'standard' | 'neutral' | 'amberOnUp' | 'hidden';
+
+export type SalesCardSection = 'statuses' | 'sales' | 'collection' | 'costAndProfit';
 
 export interface SalesCardDefinition {
   field: SalesCardField;
   kind: 'count' | 'money';
   label: string;
   hint: string;
+  approvedHint?: string;
+  section: SalesCardSection;
   accent: KpiAccent;
   icon: LucideIcon;
   trend: SalesTrendMode;
@@ -53,9 +62,17 @@ export interface SalesCardDefinition {
   placeholder?: boolean;
 }
 
+export interface SalesCardChip {
+  tone: KpiChipTone;
+  text: string;
+  note?: string;
+  tooltip?: string;
+}
+
 export const SALES_CARDS: SalesCardDefinition[] = [
   {
     field: 'totalOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'إجمالي الطلبات',
     hint: 'كل الحالات',
@@ -66,9 +83,10 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'runningOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'جاري تشغيل',
-    hint: 'قيد التنفيذ، بدون الملغاة والموقوفة',
+    hint: 'قيد التنفيذ، بدون الملغاة',
     accent: 'chart3',
     icon: Truck,
     trend: 'neutral',
@@ -76,6 +94,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'deliveredOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'تم التسليم',
     hint: 'حالة تم التسليم',
@@ -86,6 +105,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'collectedOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'الطلبات المحصلة',
     hint: 'حالة تم التحصيل',
@@ -96,6 +116,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'cancelledOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'تم الالغاء',
     hint: 'حالة تم الالغاء',
@@ -106,6 +127,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'returnedOrders',
+    section: 'statuses',
     kind: 'count',
     label: 'المرتجعات',
     hint: 'كل حالات المرتجع',
@@ -115,7 +137,41 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     link: 'RETURNS',
   },
   {
+    field: 'pendingCollectionAmount',
+    kind: 'money',
+    label: 'مبلغ جاري تحصيله',
+    hint: 'طلبات مسلّمة لم تُحصّل بعد، بعد رسوم الشحن',
+    section: 'collection',
+    accent: 'chart3',
+    icon: Banknote,
+    trend: 'standard',
+  },
+  {
+    field: 'deliveredProductsCost',
+    kind: 'money',
+    label: 'تكلفة منتجات تم التسليم',
+    hint: 'متوسط سعر الشراء × القطع المسلّمة، كل الفواتير غير المحذوفة',
+    approvedHint: 'متوسط تكلفة الفواتير المغلقة × القطع المسلّمة',
+    section: 'collection',
+    accent: 'chart4',
+    icon: Tags,
+    trend: 'standard',
+    link: 'DELIVERED_COST',
+  },
+  {
+    field: 'pendingProfit',
+    kind: 'money',
+    label: 'أرباح جاري تحصيلها',
+    hint: 'المبلغ − رسوم الشحن − تكلفة المنتجات، للطلبات المسلّمة غير المحصلة',
+    section: 'collection',
+    accent: 'chart2',
+    icon: TrendingUp,
+    trend: 'standard',
+    link: 'PENDING_PROFIT',
+  },
+  {
     field: 'suppliedAmount',
+    section: 'sales',
     kind: 'money',
     label: 'إجمالي المبلغ المورد',
     hint: 'للطلبات المحصلة',
@@ -125,6 +181,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'averageOrderPrice',
+    section: 'sales',
     kind: 'money',
     label: 'متوسط سعر الطلب',
     hint: 'للطلبات المحصلة',
@@ -134,6 +191,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'piecesSold',
+    section: 'sales',
     kind: 'count',
     label: 'القطع المباعة',
     hint: 'في الطلبات المحصلة',
@@ -144,16 +202,19 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'soldPiecesCost',
+    section: 'costAndProfit',
     kind: 'money',
     label: 'تكلفة القطع المباعة',
-    hint: 'متوسط سعر الشراء × القطع',
+    hint: 'متوسط سعر الشراء × كل القطع المباعة، كل الفترات، كل المتاجر، كل الفواتير غير المحذوفة',
+    approvedHint: 'متوسط تكلفة الفواتير المغلقة × كل القطع المباعة، كل الفترات، كل المتاجر',
     accent: 'chart1',
     icon: Tags,
-    trend: 'neutral',
+    trend: 'hidden',
     link: 'PIECES_COST',
   },
   {
     field: 'purchasesTotal',
+    section: 'costAndProfit',
     kind: 'money',
     label: 'إجمالي المشتريات',
     hint: 'فواتير المشتريات، كل المتاجر',
@@ -163,6 +224,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'returnsExpense',
+    section: 'costAndProfit',
     kind: 'money',
     label: 'مصاريف المرتجعات',
     hint: 'المرتجعات بالصافي؛ القيمة الموجبة تعني تكلفة',
@@ -173,6 +235,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'expenses',
+    section: 'costAndProfit',
     kind: 'money',
     label: 'المصروفات',
     hint: 'قريباً',
@@ -183,14 +246,17 @@ export const SALES_CARDS: SalesCardDefinition[] = [
   },
   {
     field: 'netProfit',
+    section: 'costAndProfit',
     kind: 'money',
     label: 'صافي الربح',
-    hint: 'المبلغ المورد − تكلفة القطع − مصاريف المرتجعات − المصروفات',
+    hint: 'المبلغ المورد − تكلفة القطع للفترة − مصاريف المرتجعات − المصروفات',
     accent: 'chart2',
     icon: TrendingUp,
     trend: 'standard',
   },
 ];
+
+export const BREAKDOWN_COST_HEADER = 'تكلفة القطع المباعة';
 
 export const SALES_COPY = {
   pageTitle: 'إحصائيات المبيعات',
@@ -199,24 +265,31 @@ export const SALES_COPY = {
   carrierPlaceholder: 'شركات الشحن',
   pagePlaceholder: 'الصفحات',
   filterOptionsErrorMessage: 'تعذر تحميل الخيارات',
-  approvedOnlyLabel: 'الفواتير المستلمة فقط',
+  approvedOnlyLabel: 'الفواتير المغلقة فقط',
+  purchasesClosedChip: 'المغلقة فقط',
+  excludedFromAmountNote: 'لم تُحتسب هذه الطلبات في المبلغ',
+  excludedFromProfitNote: 'لم تُحتسب هذه الطلبات في الربح',
+  missingFeeTooltip: 'حدّد تكلفة الشحن للمحافظة من إعدادات المتجر ← اللوجستيك والمحافظات',
   clearAll: 'مسح الكل',
   breakdownTitle: 'التفصيل حسب النطاق',
+  breakdownCostScopeNote: 'كل الفترات',
   breakdownColumns: [
     'النطاق',
     'الطلبات',
     'المحصلة',
     'المبلغ المورد',
     'القطع',
-    'تكلفة القطع',
+    BREAKDOWN_COST_HEADER,
     'متوسط الطلب',
     'مصاريف المرتجعات',
     'المصروفات',
     'صافي الربح',
   ],
   totalsRowLabel: 'الإجمالي',
+  groupTotalPrefix: 'إجمالي',
   sectionLabels: {
     statuses: 'حالات الطلبات',
+    collection: 'قيد التحصيل',
     sales: 'المبيعات',
     costAndProfit: 'التكلفة والربح',
   },
@@ -230,6 +303,10 @@ export const SALES_COPY = {
   includesDerivedNote: 'يشمل طلبات مشتقة',
   exportLabel: 'تصدير Excel',
   ordersCountLabel: 'عدد الطلبات',
+  eligibleCountLabel: 'طلبات مؤهلة',
+  excludedCountLabel: 'طلبات مستبعدة',
+  feeMissingReasonLabel: 'بدون رسوم شحن',
+  costMissingReasonLabel: 'بدون متوسط تكلفة',
   amountLabel: 'إجمالي المبلغ',
   piecesCountLabel: 'عدد القطع',
 } as const;
@@ -258,7 +335,20 @@ export type SalesOrderColumn =
   | 'settlementCode'
   | 'settlementRecordedAt'
   | 'cancelReason'
-  | 'cancelNotes';
+  | 'cancelNotes'
+  | 'customerPhone'
+  | 'deliveredAt'
+  | 'collectedAmount'
+  | 'isCollected'
+  | 'confirmedBy'
+  | 'returnReason'
+  | 'returnNotes'
+  | 'shippingCancelReason'
+  | 'shippingCancelNotes'
+  | 'governorateFee'
+  | 'productsCost'
+  | 'pendingProfit'
+  | 'exclusionReason';
 
 export const SALES_ORDER_COLUMN_LABELS: Record<SalesOrderColumn, string> = {
   code: 'كود الطلب',
@@ -279,6 +369,25 @@ export const SALES_ORDER_COLUMN_LABELS: Record<SalesOrderColumn, string> = {
   settlementRecordedAt: 'تاريخ التحصيل',
   cancelReason: 'سبب الإلغاء',
   cancelNotes: 'ملاحظات الإلغاء',
+  customerPhone: 'رقم الهاتف',
+  deliveredAt: 'تاريخ التسليم',
+  collectedAmount: 'مبلغ التحصيل',
+  isCollected: 'محصل',
+  confirmedBy: 'موظف التأكيد',
+  returnReason: 'سبب المرتجع',
+  returnNotes: 'ملاحظات المرتجع',
+  shippingCancelReason: 'سبب إلغاء الشحن',
+  shippingCancelNotes: 'ملاحظات إلغاء الشحن',
+  governorateFee: 'رسوم الشحن',
+  productsCost: 'تكلفة المنتجات',
+  pendingProfit: 'الربح الجاري',
+  exclusionReason: 'سبب الاستبعاد',
+};
+
+export const SALES_EXCLUSION_REASON_LABELS: Record<SalesExclusionReason, string> = {
+  NO_FEE: 'بدون رسوم شحن للمحافظة',
+  NO_COST: 'منتج بدون فاتورة شراء',
+  NO_FEE_NO_COST: 'بدون رسوم شحن ومنتج بدون فاتورة شراء',
 };
 
 export const SALES_DERIVED_KIND_LABELS: Record<SalesDerivedKind, string> = {
@@ -290,12 +399,23 @@ export const SALES_DERIVED_KIND_LABELS: Record<SalesDerivedKind, string> = {
 const COMMON_ORDER_COLUMNS: readonly SalesOrderColumn[] = [
   'code',
   'customerName',
+  'customerPhone',
   'governorate',
   'city',
+  'deliveredAt',
   'totalCost',
   'carrierName',
   'storeOrPage',
   'createdAt',
+  'collectedAmount',
+  'isCollected',
+  'confirmedBy',
+  'cancelReason',
+  'cancelNotes',
+  'returnReason',
+  'returnNotes',
+  'shippingCancelReason',
+  'shippingCancelNotes',
 ];
 
 export interface SalesSubPageDefinition {
@@ -303,6 +423,7 @@ export interface SalesSubPageDefinition {
   includesDerived: boolean;
   columns: readonly SalesOrderColumn[];
   withCost: boolean;
+  scopeNote?: string;
 }
 
 export const SALES_ORDER_SETS: readonly SalesOrderSet[] = [
@@ -313,6 +434,8 @@ export const SALES_ORDER_SETS: readonly SalesOrderSet[] = [
   'CANCELLED',
   'RETURNS',
   'RETURNS_EXPENSES',
+  'DELIVERED_COST',
+  'PENDING_PROFIT',
 ];
 
 export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition> = {
@@ -349,7 +472,7 @@ export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition>
   CANCELLED: {
     title: 'تم الالغاء',
     includesDerived: false,
-    columns: [...COMMON_ORDER_COLUMNS, 'cancelReason', 'cancelNotes'],
+    columns: [...COMMON_ORDER_COLUMNS],
     withCost: false,
   },
   RETURNS: {
@@ -378,6 +501,24 @@ export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition>
     ],
     withCost: false,
   },
+  DELIVERED_COST: {
+    title: 'تكلفة منتجات تم التسليم',
+    includesDerived: false,
+    columns: [...COMMON_ORDER_COLUMNS, 'productsCost', 'exclusionReason'],
+    withCost: true,
+  },
+  PENDING_PROFIT: {
+    title: 'أرباح جاري تحصيلها',
+    includesDerived: false,
+    columns: [
+      ...COMMON_ORDER_COLUMNS,
+      'governorateFee',
+      'productsCost',
+      'pendingProfit',
+      'exclusionReason',
+    ],
+    withCost: true,
+  },
   PIECES_SOLD: {
     title: 'القطع المباعة',
     includesDerived: false,
@@ -389,6 +530,7 @@ export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition>
     includesDerived: false,
     columns: [],
     withCost: true,
+    scopeNote: 'كل الفترات، كل المتاجر',
   },
 };
 
@@ -400,19 +542,60 @@ export function isSalesOrderSet(set: SalesSubPageSet): set is SalesOrderSet {
   return (SALES_ORDER_SETS as readonly string[]).includes(set);
 }
 
+export function resolveCardHint(card: SalesCardDefinition, approvedOnly: boolean): string {
+  return approvedOnly && card.approvedHint ? card.approvedHint : card.hint;
+}
+
 export function resolveCardContextChip(
   field: SalesCardField,
   totals: SalesMetrics,
   approvedOnly: boolean,
-): { tone: KpiChipTone; text: string } | undefined {
+): SalesCardChip | undefined {
   if (field === 'collectedOrders') {
     if (totals.totalOrders === 0) return undefined;
     const percent = Math.round((totals.collectedOrders / totals.totalOrders) * 100);
     return { tone: 'neutral', text: `${percent}% من الطلبات` };
   }
+  if (field === 'runningOrders') {
+    return shareChip(totals.runningNormalOrders, totals.totalOrders);
+  }
+  if (field === 'deliveredOrders') {
+    return shareChip(totals.deliveredOrders, totals.totalOrders);
+  }
+  if (field === 'cancelledOrders') {
+    return shareChip(totals.cancelledOrders, totals.totalOrders);
+  }
+  if (field === 'returnedOrders') {
+    return shareChip(totals.returnedNormalOrders, totals.totalOrders);
+  }
   if (field === 'suppliedAmount') {
     if (totals.collectedWithoutSettlement <= 0) return undefined;
     return { tone: 'warning', text: `${totals.collectedWithoutSettlement} طلبات بدون مبلغ مورد` };
+  }
+  if (field === 'pendingCollectionAmount') {
+    if (totals.ordersWithoutFee <= 0) return undefined;
+    return {
+      tone: 'warning',
+      text: `${totals.ordersWithoutFee} طلبات بدون رسوم شحن`,
+      note: SALES_COPY.excludedFromAmountNote,
+      tooltip: SALES_COPY.missingFeeTooltip,
+    };
+  }
+  if (field === 'deliveredProductsCost') {
+    if (totals.ordersWithoutCost <= 0) return undefined;
+    return {
+      tone: 'warning',
+      text: `${totals.ordersWithoutCost} طلبات بدون تكلفة`,
+      note: SALES_COPY.excludedFromAmountNote,
+    };
+  }
+  if (field === 'pendingProfit') {
+    if (totals.pendingProfitExcludedOrders <= 0) return undefined;
+    return {
+      tone: 'warning',
+      text: `${totals.pendingProfitExcludedOrders} طلبات مستبعدة: ${totals.ordersWithoutFee} بدون رسوم شحن، ${totals.ordersWithoutCost} بدون تكلفة`,
+      note: SALES_COPY.excludedFromProfitNote,
+    };
   }
   if (field === 'soldPiecesCost') {
     if (totals.uncostedPieces <= 0) return undefined;
@@ -420,13 +603,19 @@ export function resolveCardContextChip(
   }
   if (field === 'purchasesTotal') {
     if (!approvedOnly) return undefined;
-    return { tone: 'neutral', text: 'المستلمة فقط' };
+    return { tone: 'neutral', text: SALES_COPY.purchasesClosedChip };
   }
   if (field === 'returnsExpense') {
     if (totals.returnsWithoutSettlement <= 0) return undefined;
     return { tone: 'warning', text: `${totals.returnsWithoutSettlement} طلبات بدون مبلغ` };
   }
   return undefined;
+}
+
+function shareChip(part: number, whole: number): SalesCardChip | undefined {
+  const percent = formatPercent(part, whole);
+  if (percent === null) return undefined;
+  return { tone: 'neutral', text: `${percent} من الطلبات` };
 }
 
 function formatDayMonth(isoDate: string): string {
@@ -448,7 +637,7 @@ export function resolveTrendTone(
   mode: SalesTrendMode,
   direction: 'up' | 'down' | 'flat',
 ): KpiChipTone {
-  if (mode === 'neutral' || direction === 'flat') return 'neutral';
+  if (mode === 'neutral' || mode === 'hidden' || direction === 'flat') return 'neutral';
   if (mode === 'amberOnUp') return direction === 'up' ? 'warning' : 'neutral';
   return direction === 'up' ? 'success' : 'warning';
 }

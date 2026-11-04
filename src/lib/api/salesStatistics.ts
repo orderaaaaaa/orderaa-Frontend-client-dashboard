@@ -1,5 +1,6 @@
 import api from './index';
 import type {
+  SalesLifetimePiecesResponse,
   SalesOrderSet,
   SalesOrdersResponse,
   SalesPiecesResponse,
@@ -52,5 +53,15 @@ export async function fetchSalesStatisticsPieces(
   const { data } = await api.get<SalesPiecesResponse>('/reports/sales-statistics/pieces', {
     params: buildQueryParams(params),
   });
+  return data;
+}
+
+export async function fetchSalesStatisticsLifetimePieces(
+  approvedOnly: boolean,
+): Promise<SalesLifetimePiecesResponse> {
+  const { data } = await api.get<SalesLifetimePiecesResponse>(
+    '/reports/sales-statistics/lifetime-pieces',
+    { params: { approvedOnly } },
+  );
   return data;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AlertCircle, Inbox } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -18,13 +18,15 @@ import {
   formatTrendAriaLabel,
   formatTrendTooltip,
   resolveCardContextChip,
+  resolveCardHint,
   resolveSalesViewState,
   resolveTrendTone,
   type SalesCardDefinition,
+  type SalesCardSection,
 } from '../constants';
 import {
   buildSalesSubPageHref,
-  useSalesStatisticsFilters,
+  useSalesStatisticsUrlFilters,
 } from '../hooks/useSalesStatisticsFilters';
 import { SalesHeroBar } from './SalesHeroBar';
 import { SalesBreakdownTable } from './SalesBreakdownTable';
@@ -33,9 +35,14 @@ import type { SalesStatisticsParams, SalesStatisticsResponse } from '../types';
 
 const EMPTY_PARAMS: SalesStatisticsParams = { from: '', to: '', approvedOnly: true };
 
-const STATUS_SECTION_CARDS = SALES_CARDS.slice(0, 6);
-const SALES_SECTION_CARDS = SALES_CARDS.slice(6, 9);
-const COST_SECTION_CARDS = SALES_CARDS.slice(9);
+function cardsIn(section: SalesCardSection): SalesCardDefinition[] {
+  return SALES_CARDS.filter((card) => card.section === section);
+}
+
+const STATUS_SECTION_CARDS = cardsIn('statuses');
+const COLLECTION_SECTION_CARDS = cardsIn('collection');
+const SALES_SECTION_CARDS = cardsIn('sales');
+const COST_SECTION_CARDS = cardsIn('costAndProfit');
 
 const CARD_LINK_CLASS =
   'rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
@@ -55,7 +62,30 @@ function BreakdownTableSkeleton() {
   );
 }
 
+function StatisticsPageSkeleton() {
+  return (
+    <div className={PAGE_CONTAINER}>
+      <div className="h-12 bg-muted animate-pulse rounded-xl" />
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="h-8 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SalesStatisticsContent() {
+  return (
+    <Suspense fallback={<StatisticsPageSkeleton />}>
+      <SalesStatisticsView />
+    </Suspense>
+  );
+}
+
+function SalesStatisticsView() {
   const {
     params,
     fromDate,
@@ -74,7 +104,7 @@ export function SalesStatisticsContent() {
     setPageNames,
     setApprovedOnly,
     clearScope,
-  } = useSalesStatisticsFilters();
+  } = useSalesStatisticsUrlFilters();
 
   const statsQuery = useSalesStatisticsQuery(params ?? EMPTY_PARAMS, params !== null);
   const filterOptionsQuery = useSalesStatisticsFilterOptionsQuery(true);
@@ -163,6 +193,11 @@ export function SalesStatisticsContent() {
             <KpiCardSkeleton key={card.field} />
           ))}
         </KpiSection>
+        <KpiSection title={SALES_COPY.sectionLabels.collection} columns={3}>
+          {COLLECTION_SECTION_CARDS.map((card) => (
+            <KpiCardSkeleton key={card.field} />
+          ))}
+        </KpiSection>
         <KpiSection title={SALES_COPY.sectionLabels.sales} columns={3}>
           {SALES_SECTION_CARDS.map((card) => (
             <KpiCardSkeleton key={card.field} />
@@ -192,15 +227,16 @@ export function SalesStatisticsContent() {
     const value = card.placeholder ? '0.00' : totals[card.field];
     const previousValue = previousTotals[card.field];
     const trendResult = card.placeholder ? null : computeTrend(value, previousValue);
-    const trend = trendResult
-      ? {
-          direction: trendResult.direction,
-          percent: trendResult.percent,
-          tone: resolveTrendTone(card.trend, trendResult.direction),
-          tooltip: formatTrendTooltip(previousRange),
-          ariaLabel: formatTrendAriaLabel(trendResult.direction, trendResult.percent),
-        }
-      : undefined;
+    const trend =
+      trendResult && card.trend !== 'hidden'
+        ? {
+            direction: trendResult.direction,
+            percent: trendResult.percent,
+            tone: resolveTrendTone(card.trend, trendResult.direction),
+            tooltip: formatTrendTooltip(previousRange),
+            ariaLabel: formatTrendAriaLabel(trendResult.direction, trendResult.percent),
+          }
+        : undefined;
     const chip = card.placeholder
       ? undefined
       : resolveCardContextChip(card.field, totals, dataApprovedOnly);
@@ -215,7 +251,7 @@ export function SalesStatisticsContent() {
             ? formatCount(value as number)
             : formatMoney(value as string | null)
         }
-        hint={card.hint}
+        hint={resolveCardHint(card, dataApprovedOnly)}
         icon={<Icon size={20} aria-hidden="true" />}
         accent={card.accent}
         chip={chip}
@@ -242,6 +278,9 @@ export function SalesStatisticsContent() {
       {heroBar}
       <KpiSection title={SALES_COPY.sectionLabels.statuses} columns={3}>
         {STATUS_SECTION_CARDS.map(renderCard)}
+      </KpiSection>
+      <KpiSection title={SALES_COPY.sectionLabels.collection} columns={3}>
+        {COLLECTION_SECTION_CARDS.map(renderCard)}
       </KpiSection>
       <KpiSection title={SALES_COPY.sectionLabels.sales} columns={3}>
         {SALES_SECTION_CARDS.map(renderCard)}

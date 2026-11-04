@@ -7,9 +7,12 @@ import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMapp
 import type { SalesExportCell } from '@/lib/excel/export-sales-statistics';
 import { cn } from '@/lib/utils';
 import { formatDate, formatDateTime } from '@/utils/format';
+import { OrderStatus } from '@/types/orders';
 import { formatMoney } from '@/utils/formatMoney';
+import { getTimeAgoCompact, toCairoDayKey } from '@/utils/timeAgo';
 import {
   SALES_DERIVED_KIND_LABELS,
+  SALES_EXCLUSION_REASON_LABELS,
   SALES_ORDER_COLUMN_LABELS,
   SALES_SUBPAGE_SETS,
   type SalesOrderColumn,
@@ -27,6 +30,10 @@ const MONEY_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
   'settlementAmount',
   'amount',
   'shippingCost',
+  'collectedAmount',
+  'governorateFee',
+  'productsCost',
+  'pendingProfit',
 ]);
 
 
@@ -39,12 +46,49 @@ function negateMoney(value: string | null): string | null {
   return value === null ? null : (-Number(value)).toFixed(2);
 }
 
+function deliveredAtText(row: SalesOrderRow): string | null {
+  if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
+  if (!row.deliveredAt) return null;
+  return getTimeAgoCompact(toCairoDayKey(row.deliveredAt)) || null;
+}
+
+function deliveredAtExportText(row: SalesOrderRow): string | null {
+  if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
+  return toCairoDayKey(row.deliveredAt);
+}
+
 function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | null {
   switch (column) {
     case 'code':
       return row.code;
     case 'customerName':
       return row.customerName;
+    case 'customerPhone':
+      return row.customerPhone;
+    case 'deliveredAt':
+      return deliveredAtText(row);
+    case 'collectedAmount':
+      return row.collectedAmount;
+    case 'isCollected':
+      return row.isCollected ? 'نعم' : 'لا';
+    case 'confirmedBy':
+      return row.confirmedByName;
+    case 'returnReason':
+      return row.returnReason;
+    case 'returnNotes':
+      return row.returnNotes;
+    case 'shippingCancelReason':
+      return row.shippingCancelReason;
+    case 'shippingCancelNotes':
+      return row.shippingCancelNotes;
+    case 'governorateFee':
+      return row.governorateFee;
+    case 'productsCost':
+      return row.productsCost;
+    case 'pendingProfit':
+      return row.pendingProfit;
+    case 'exclusionReason':
+      return row.exclusionReason ? SALES_EXCLUSION_REASON_LABELS[row.exclusionReason] : null;
     case 'governorate':
       return row.governorate;
     case 'city':
@@ -81,13 +125,14 @@ function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | 
 }
 
 export function salesOrderExportValue(row: SalesOrderRow, column: SalesOrderColumn): SalesExportCell {
+  if (column === 'deliveredAt') return deliveredAtExportText(row) || '—';
   const text = salesOrderText(row, column);
-  if (MONEY_COLUMNS.has(column)) return text === null ? null : Number(text);
-  return text;
+  if (MONEY_COLUMNS.has(column)) return text ? Number(text) : '—';
+  return text || '—';
 }
 
 function isCopyableColumn(set: SalesOrderSet, column: SalesOrderColumn): boolean {
-  if (column === 'code' || column === 'settlementCode') return true;
+  if (column === 'code' || column === 'settlementCode' || column === 'customerPhone') return true;
   if (column === 'shippingCode') return set !== 'RETURNS';
   return false;
 }

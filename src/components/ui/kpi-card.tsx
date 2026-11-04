@@ -14,7 +14,7 @@ export interface KpiCardProps {
   hint?: ReactNode;
   icon: ReactNode;
   accent?: KpiAccent;
-  chip?: { tone: KpiChipTone; text: string };
+  chip?: { tone: KpiChipTone; text: string; note?: string; tooltip?: ReactNode };
   trend?: {
     direction: 'up' | 'down' | 'flat';
     percent: number;
@@ -69,8 +69,13 @@ const SECTION_GRID_CLASSES: Record<3 | 4, string> = {
   4: 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4',
 };
 
-function KpiChip({ tone, text }: { tone: KpiChipTone; text: string }) {
-  return (
+function KpiChip({
+  tone,
+  text,
+  note,
+  tooltip,
+}: NonNullable<KpiCardProps['chip']>) {
+  const chipBody = (
     <span
       role={tone === 'warning' ? 'status' : undefined}
       className={cn(
@@ -83,6 +88,28 @@ function KpiChip({ tone, text }: { tone: KpiChipTone; text: string }) {
       )}
       {text}
     </span>
+  );
+  const chipWithTooltip = tooltip ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          tabIndex={0}
+          className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          {chipBody}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  ) : (
+    chipBody
+  );
+  if (!note) return chipWithTooltip;
+  return (
+    <div className="flex flex-col gap-1">
+      {chipWithTooltip}
+      <span className="text-xs text-muted-foreground">{note}</span>
+    </div>
   );
 }
 
@@ -154,7 +181,7 @@ export function KpiCard({
       </div>
       <div className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums">{value}</div>
       {hint && <div className="text-sm text-muted-foreground">{hint}</div>}
-      {chip && <KpiChip tone={chip.tone} text={chip.text} />}
+      {chip && <KpiChip {...chip} />}
     </section>
   );
 }

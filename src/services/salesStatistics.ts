@@ -3,6 +3,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   fetchSalesStatistics,
   fetchSalesStatisticsFilterOptions,
+  fetchSalesStatisticsLifetimePieces,
   fetchSalesStatisticsOrders,
   fetchSalesStatisticsPieces,
 } from '@/lib/api/salesStatistics';
@@ -49,6 +50,16 @@ export const useSalesStatisticsPiecesQuery = (params: SalesStatisticsParams, ena
     queryKey: [QUERY_KEYS.SALES_STATISTICS_PIECES, params] as QueryKey,
     enabled,
     queryFn: () => fetchSalesStatisticsPieces(params),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+};
+
+export const useSalesStatisticsLifetimePiecesQuery = (approvedOnly: boolean, enabled: boolean) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SALES_STATISTICS_LIFETIME_PIECES, approvedOnly] as QueryKey,
+    enabled,
+    queryFn: () => fetchSalesStatisticsLifetimePieces(approvedOnly),
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });

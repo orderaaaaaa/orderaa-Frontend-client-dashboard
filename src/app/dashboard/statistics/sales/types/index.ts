@@ -24,6 +24,14 @@ export interface SalesMetrics {
   returnsWithoutSettlement: number;
   expenses: string;
   netProfit: string;
+  runningNormalOrders: number;
+  returnedNormalOrders: number;
+  pendingCollectionAmount: string;
+  ordersWithoutFee: number;
+  deliveredProductsCost: string;
+  ordersWithoutCost: number;
+  pendingProfit: string;
+  pendingProfitExcludedOrders: number;
 }
 
 export interface SalesBreakdownRow {
@@ -49,13 +57,17 @@ export type SalesOrderSet =
   | 'COLLECTED'
   | 'CANCELLED'
   | 'RETURNS'
-  | 'RETURNS_EXPENSES';
+  | 'RETURNS_EXPENSES'
+  | 'DELIVERED_COST'
+  | 'PENDING_PROFIT';
 
 export type SalesPieceSet = 'PIECES_SOLD' | 'PIECES_COST';
 
 export type SalesSubPageSet = SalesOrderSet | SalesPieceSet;
 
 export type SalesDerivedKind = 'PARTIAL_REMAINDER' | 'REPLACEMENT' | 'EXCHANGE_RETURN';
+
+export type SalesExclusionReason = 'NO_FEE' | 'NO_COST' | 'NO_FEE_NO_COST';
 
 export interface SalesOrderRow {
   orderId: number;
@@ -64,6 +76,7 @@ export interface SalesOrderRow {
   derivedKind: SalesDerivedKind | null;
   createdAt: string;
   customerName: string;
+  customerPhone: string | null;
   governorate: string | null;
   city: string | null;
   totalCost: string;
@@ -79,12 +92,31 @@ export interface SalesOrderRow {
   settlementAmount: string | null;
   settlementRecordedAt: string | null;
   settlementCode: string | null;
+  collectedAmount: string | null;
+  isCollected: boolean;
+  confirmedByName: string | null;
+  deliveredAt: string | null;
+  returnReason: string | null;
+  returnNotes: string | null;
+  shippingCancelReason: string | null;
+  shippingCancelNotes: string | null;
+  governorateFee: string | null;
+  productsCost: string | null;
+  pendingProfit: string | null;
+  uncostedPieces: number | null;
+  feeMissing: boolean | null;
+  costMissing: boolean | null;
+  exclusionReason: SalesExclusionReason | null;
 }
 
 export interface SalesOrdersSummary {
   count: number;
   amount: string | null;
   withoutAmount: number;
+  eligibleCount: number | null;
+  excludedCount: number | null;
+  feeMissingCount: number | null;
+  costMissingCount: number | null;
 }
 
 export interface SalesOrdersResponse {
@@ -127,6 +159,8 @@ export interface SalesPiecesResponse {
   totals: SalesPiecesTotals;
   products: SalesPieceProduct[];
 }
+
+export type SalesLifetimePiecesResponse = Omit<SalesPiecesResponse, 'range'>;
 
 export interface FilterOption {
   key: string;
