@@ -456,6 +456,7 @@
     .dark :is(.hover\:bg-red-600, .hover\:bg-red-700, .bg-red-500, .bg-red-600, .bg-destructive):is(button, a, [role='button']):is(.border-red-500, .border-red-600, .border-destructive):not(:disabled):hover { border-color: var(--danger-fill-hover); }
   }
   .dark .Toastify { --toastify-color-error: var(--danger-fill); }
+  .dark .rdp-root { --rdp-accent-color: var(--primary-text); --rdp-accent-background-color: var(--accent); }
 }
 input[type='date']::-webkit-datetime-edit-text,
 input[type='date']::-webkit-datetime-edit-month-field,
