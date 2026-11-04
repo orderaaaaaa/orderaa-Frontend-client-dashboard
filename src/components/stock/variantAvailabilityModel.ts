@@ -138,7 +138,7 @@ export function draftFromLines(
     }
     if (line.quantity < 1) continue;
     const key = comboKeyOf(line.optionIds);
-    draft[key] = (draft[key] ?? 0) + line.quantity;
+    draft[key] = Math.min((draft[key] ?? 0) + line.quantity, 99);
   }
   return { draft, excluded };
 }
