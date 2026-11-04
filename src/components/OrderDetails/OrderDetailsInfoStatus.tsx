@@ -3,7 +3,7 @@
 import { formatDate, formatWeekdayDate } from '@/utils/format';
 import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { cairoDayKey, getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import {
   orderEventTitle,
@@ -13,6 +13,7 @@ import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
+import { ORDER_STATUSES } from '@/lib/generated/permission-codes';
 import { LiaTruckSolid, LiaHeadsetSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
 import clsx from 'clsx';
 import {
@@ -148,11 +149,15 @@ interface DayGroup {
   isToday: boolean;
 }
 
-function buildFullTimeline(events: MappedEvent[]): DayGroup[] {
+const statusRank = (status: string): number =>
+  (ORDER_STATUSES as readonly string[]).indexOf(status);
+
+function buildFullTimeline(events: MappedEvent[], status: string): DayGroup[] {
   if (events.length === 0) return [];
 
-  const todayKey = new Date().toISOString().split('T')[0];
-  const yesterdayKey = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const todayKey = cairoDayKey(new Date());
+  const yesterdayKey = cairoDayKey(new Date(new Date(todayKey + 'T12:00:00Z').getTime() - 86400000));
+  const reachedDelivered = statusRank(status) >= statusRank('DELIVERED');
 
   const groups = new Map<string, MappedEvent[]>();
   events.forEach((event) => {
@@ -168,7 +173,8 @@ function buildFullTimeline(events: MappedEvent[]): DayGroup[] {
   const allDates = events.map((e) => e.rawDate).sort();
   const result: DayGroup[] = [];
   const current = new Date(allDates[0] + 'T12:00:00Z');
-  const endDate = new Date(todayKey + 'T12:00:00Z');
+  const endKey = reachedDelivered ? allDates[allDates.length - 1] : todayKey;
+  const endDate = new Date(endKey + 'T12:00:00Z');
 
   while (current <= endDate) {
     const key = current.toISOString().split('T')[0];
@@ -230,9 +236,9 @@ function ChatBubble({
   );
 }
 
-function LogisticsChat({ events, scrollToEnd }: { events: MappedEvent[]; scrollToEnd?: boolean }) {
+function LogisticsChat({ events, status, scrollToEnd }: { events: MappedEvent[]; status: string; scrollToEnd?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const timeline = buildFullTimeline(events);
+  const timeline = buildFullTimeline(events, status);
 
   useEffect(() => {
     if (scrollToEnd) {
@@ -246,7 +252,7 @@ function LogisticsChat({ events, scrollToEnd }: { events: MappedEvent[]; scrollT
   if (events.length === 0) {
     return (
       <p className="text-sm text-gray-400 text-center py-4">
-        لا توجد تحديثات
+        لا توجد تحديثات شحن بعد
       </p>
     );
   }
@@ -301,7 +307,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       id: event.id || index + 1,
       status: statusLabel,
       date: formatDate(createdDate),
-      rawDate: createdDate.toISOString().split('T')[0],
+      rawDate: cairoDayKey(createdDate),
       time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',
       note: renderOrderEventNote(event.name, event.note),
@@ -324,31 +330,8 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     ? events.filter((e) => !isLogisticsEvent(e))
     : [];
 
-  const todayISO = new Date().toISOString().split('T')[0];
-  const yesterdayISO = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  const twoDaysAgoISO = new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0];
-
-  // TODO: Remove mock data when backend provides real logistics events
-  const mockLogisticsEvents: MappedEvent[] = isPostShipping
-    ? [
-      { id: 9001, status: 'شحن', rawDate: twoDaysAgoISO, date: '', time: 'منذ يومين', eventType: 'SHIPPING', note: 'تم استلام الشحنة من المخزن', employee: { name: 'المندوب', department: 'COURIER' } },
-      { id: 9002, status: 'متابعة', rawDate: twoDaysAgoISO, date: '', time: 'منذ يومين', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'أحمد', department: 'CALL_CENTER' } },
-      { id: 9003, status: 'شحن', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'WITH_DRIVER', note: 'العميل لا يرد', employee: { name: 'المندوب', department: 'COURIER' } },
-      { id: 9004, status: 'متابعة', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'سارة', department: 'CALL_CENTER' } },
-      { id: 9005, status: 'متابعة', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'ATTEMPTED', note: 'تاجيل لامتي', employee: { name: 'سارة', department: 'CALL_CENTER' } },
-      { id: 9006, status: 'شحن', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'WITH_DRIVER', note: 'تأجيل إلى (2026-4-7) والسبب هو (الرقم لا يرد)', employee: { name: 'المندوب', department: 'COURIER' } },
-      { id: 9007, status: 'متابعة', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'أحمد', department: 'CALL_CENTER' } },
-      { id: 9008, status: 'متابعة', rawDate: yesterdayISO, date: '', time: 'أمس', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'أحمد', department: 'CALL_CENTER' } },
-      // { id: 9009, status: 'شحن', rawDate: todayISO, date: '', time: 'منذ ساعة', eventType: 'WITH_DRIVER', note: 'تأجيل إلى (2026-4-9) والسبب هو (الرقم لا يرد)', employee: { name: 'المندوب', department: 'COURIER' } },
-      // { id: 9010, status: 'متابعة', rawDate: todayISO, date: '', time: 'منذ 30 دقيقة', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'سارة', department: 'CALL_CENTER' } },
-      // { id: 9011, status: 'متابعة', rawDate: todayISO, date: '', time: 'منذ 15 دقيقة', eventType: 'ATTEMPTED', note: 'هتابع', employee: { name: 'أحمد', department: 'CALL_CENTER' } },
-    ]
-    : [];
-
   const realLogisticsEvents = events.filter((e) => isLogisticsEvent(e));
-  const logisticsEvents = isPostShipping
-    ? (realLogisticsEvents.length > 0 ? realLogisticsEvents : mockLogisticsEvents)
-    : [];
+  const logisticsEvents = isPostShipping ? realLogisticsEvents : [];
 
   return (
     <div>
@@ -357,7 +340,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg text-primary-text font-bold">سجل الأحداث</h2>
             <p className="border-1 border-primary text-primary-text w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
-              {events.length - 1}
+              {events.length}
             </p>
           </div>
         </div>
@@ -409,7 +392,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
-                <LogisticsChat events={logisticsEvents} scrollToEnd={logisticsOpen} />
+                <LogisticsChat events={logisticsEvents} status={order.status} scrollToEnd={logisticsOpen} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
