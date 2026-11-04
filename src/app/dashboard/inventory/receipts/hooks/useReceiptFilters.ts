@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import { ReceiptFilters } from '../types';
-import { DEFAULT_RECEIVING_STATUS, ReceivingStatus } from '@/components/purchases/receivingStatus';
+import { DEFAULT_RECEIVING_STATUS, InvoiceListTab } from '@/components/purchases/receivingStatus';
 
 const INITIAL_FILTERS: ReceiptFilters = {
   searchQuery: '',
@@ -49,7 +49,7 @@ export function useReceiptFilters() {
     }));
   }, []);
 
-  const setReceivingStatus = useCallback((status: ReceivingStatus) => {
+  const setReceivingStatus = useCallback((status: InvoiceListTab) => {
     setFilters((prev) => ({ ...prev, receivingStatus: status }));
   }, []);
 

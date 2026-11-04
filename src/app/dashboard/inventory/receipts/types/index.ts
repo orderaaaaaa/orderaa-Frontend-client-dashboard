@@ -1,5 +1,5 @@
-import { ReceivingStatus } from '@/components/purchases/receivingStatus';
-import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
+import { InvoiceListTab } from '@/components/purchases/receivingStatus';
+import type { InvoiceLifecycle, InvoicePaymentStatus } from '@/lib/api/suppliers';
 
 export interface ReceiptProduct {
   id: number;
@@ -30,13 +30,14 @@ export interface Receipt {
   updatedAt: string;
   isApproved: boolean;
   approvedAt: string | null;
+  lifecycle: InvoiceLifecycle;
 }
 
 export interface ReceiptFilters {
   searchQuery: string;
   supplierName: string;
   transactionType: string;
-  receivingStatus: ReceivingStatus;
+  receivingStatus: InvoiceListTab;
   totalAmountFrom: string;
   totalAmountTo: string;
   employeeName: string;

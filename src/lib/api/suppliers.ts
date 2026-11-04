@@ -22,6 +22,7 @@ export interface SupplierApiItem {
   invoiceCount: number;
   paidAmount: number;
   remaining: number;
+  held: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +30,7 @@ export interface SupplierApiItem {
 export interface SupplierBalancesSummaryApiItem {
   owedToSuppliers: number;
   owedBySuppliers: number;
+  heldTotal: number;
   supplierCount: number;
   asOf: string;
 }
@@ -66,6 +68,22 @@ export interface InvoiceProductVariantDetail {
   options?: InvoiceProductVariantOption[];
 }
 
+export const INVOICE_LIFECYCLE = {
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  CLOSED: 'CLOSED',
+} as const;
+
+export type InvoiceLifecycle = (typeof INVOICE_LIFECYCLE)[keyof typeof INVOICE_LIFECYCLE];
+
+export interface InvoiceLineVariantCount {
+  variantId: number;
+  warehouseId: number | null;
+  approvedCount: number;
+  rejectedCount: number;
+  variant: InvoiceProductVariantDetail | null;
+}
+
 export interface InvoiceProductApiItem {
   id: number;
   invoiceId: number;
@@ -73,6 +91,7 @@ export interface InvoiceProductApiItem {
   variantId?: number | null;
   attributeOptionIds?: number[];
   variant?: InvoiceProductVariantDetail | null;
+  variantCounts: InvoiceLineVariantCount[] | null;
   quantity: number;
   price: number;
   packageCount?: number;
@@ -93,6 +112,14 @@ export interface SupplierEmployeeRef {
 }
 
 export type SupplierInvoiceEntryMode = 'SINGULAR' | 'PACKAGE';
+
+export interface SupplierInvoiceSettlement {
+  id: number;
+  code: string;
+  paymentAmount: number;
+  createdAt: string;
+  isReversal: boolean;
+}
 
 export interface SupplierInvoiceApiItem {
   id: number;
@@ -116,9 +143,27 @@ export interface SupplierInvoiceApiItem {
   products: InvoiceProductApiItem[];
   isApproved: boolean;
   approvedAt: string | null;
+  lifecycle: InvoiceLifecycle;
+  approvedWithCountChange: boolean;
+  closedAt: string | null;
+  closedByEmployeeId: number | null;
+  closedByEmployee: SupplierEmployeeRef | null;
+  settlesInvoiceId: number | null;
+  reversesInvoiceId: number | null;
+  reversedByInvoiceId: number | null;
+  settledAmount?: number;
+  outstandingAmount?: number;
+  settlements?: SupplierInvoiceSettlement[];
 }
 
-export type SupplierInvoiceEventAction = 'CREATED' | 'UPDATED' | 'ATTRIBUTED' | 'APPROVED' | 'DELETED';
+export type SupplierInvoiceEventAction =
+  | 'CREATED'
+  | 'UPDATED'
+  | 'ATTRIBUTED'
+  | 'APPROVED'
+  | 'CLOSED'
+  | 'REVERSED'
+  | 'DELETED';
 
 export interface SupplierInvoiceEvent {
   id: number;
@@ -160,6 +205,9 @@ export interface GetSupplierInvoicesParams {
   createdByEmployeeId?: number;
   approved?: boolean;
   receivable?: boolean;
+  lifecycle?: InvoiceLifecycle;
+  countChanged?: boolean;
+  outstanding?: boolean;
 }
 
 export interface CreateSupplierDto {
@@ -196,6 +244,7 @@ export interface CreateSupplierInvoiceDto {
   entryMode?: 'SINGULAR' | 'PACKAGE';
   products?: CreateInvoiceProductDto[];
   images?: string[];
+  settlesInvoiceId?: number;
 }
 
 export interface UpdateSupplierInvoiceDto {
@@ -215,6 +264,21 @@ export interface ApproveSupplierInvoiceVariantDto {
 export interface ApproveSupplierInvoiceProductDto {
   invoiceProductId: number;
   variants: ApproveSupplierInvoiceVariantDto[];
+}
+
+export interface OpenInvoiceProductDto {
+  invoiceProductId?: number;
+  productId: number;
+  price: number;
+  variants: ApproveSupplierInvoiceVariantDto[];
+}
+
+export interface OpenInvoiceEditDto {
+  products?: OpenInvoiceProductDto[];
+  paymentAmount?: number;
+  externalInvoiceNumber?: string;
+  images?: string[];
+  createdByEmployeeId?: number;
 }
 
 export interface ReturnStockLineRequest {
@@ -345,4 +409,19 @@ export async function approveSupplierInvoice(
 export async function getReturnStock(body: ReturnStockRequestBody): Promise<ReturnStockResponse> {
   const response = await api.post('/supplier-invoices/return-stock', body);
   return response.data as ReturnStockResponse;
+}
+
+export async function closeSupplierInvoice(id: number): Promise<SupplierInvoiceApiItem> {
+  const response = await api.post(`/supplier-invoices/${id}/close`);
+  return response.data as SupplierInvoiceApiItem;
+}
+
+export async function reverseSupplierInvoice(id: number): Promise<SupplierInvoiceApiItem> {
+  const response = await api.post(`/supplier-invoices/${id}/reverse`, {});
+  return response.data as SupplierInvoiceApiItem;
+}
+
+export async function editOpenSupplierInvoice(id: number, body: OpenInvoiceEditDto): Promise<SupplierInvoiceApiItem> {
+  const response = await api.patch(`/supplier-invoices/${id}/open-lines`, body);
+  return response.data as SupplierInvoiceApiItem;
 }

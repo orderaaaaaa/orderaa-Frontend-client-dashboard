@@ -10,6 +10,7 @@ export interface Supplier {
   invoiceCount: number;
   paidAmount: number;
   remaining: number;
+  held: number;
   createdAt: string;
   updatedAt: string;
 }

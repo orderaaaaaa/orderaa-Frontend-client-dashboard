@@ -23,7 +23,7 @@ import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
 import { formatDate } from '@/utils/format';
 import { employeeActor } from '@/components/audit/actors';
-import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
+import { INVOICE_LIST_TAB_OPTIONS, invoiceListTabToQuery } from '@/components/purchases/receivingStatus';
 
 function toCardData(receipt: Receipt): InvoiceCardData {
   return {
@@ -45,7 +45,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
     invoiceType: receipt.type,
     paymentStatus: receipt.paymentStatus,
     transactionType: INVOICE_TYPE_LABEL[receipt.type] ?? receipt.type,
-    isApproved: receipt.isApproved,
+    lifecycle: receipt.lifecycle,
     imageUrl: receipt.images?.[0] ?? undefined,
   };
 }
@@ -104,7 +104,7 @@ export function ReceiptsContent() {
     error,
     refetch,
   } = useSupplierInvoicesQuery({
-    approved: receivingStatusToApproved(filters.receivingStatus),
+    ...invoiceListTabToQuery(filters.receivingStatus),
     receivable: true,
     page: currentPage,
     limit: pageSize,
@@ -236,7 +236,7 @@ export function ReceiptsContent() {
         </div>
         <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <ToggleGroup
-            options={RECEIVING_STATUS_OPTIONS}
+            options={INVOICE_LIST_TAB_OPTIONS}
             value={filters.receivingStatus}
             onChange={setReceivingStatus}
           />
@@ -304,7 +304,9 @@ export function ReceiptsContent() {
                     ? 'لا توجد استلامات قيد الانتظار'
                     : filters.receivingStatus === 'received'
                       ? 'لا توجد استلامات مستلمة'
-                      : 'لا توجد استلامات'}
+                      : filters.receivingStatus === 'open-changed'
+                        ? 'لا توجد استلامات مفتوحة بعدد مختلف'
+                        : 'لا توجد استلامات'}
                 </p>
                 <p className="text-sm text-gray-400">
                   لا توجد استلامات حالياً

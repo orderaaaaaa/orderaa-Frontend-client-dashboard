@@ -14,6 +14,7 @@ import {
   LiaUndoAltSolid,
   LiaBoxesSolid,
   LiaEditSolid,
+  LiaHourglassHalfSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -150,6 +151,18 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
             <LiaBalanceScaleSolid className={clsx('w-4 h-4', remainingLabel.color)} />
             <span className={clsx('text-base font-semibold', remainingLabel.color)}>
               {remainingLabel.text}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-sm sm:text-base text-gray-600">معلّق</span>
+          <div className="flex items-center gap-1.5">
+            <LiaHourglassHalfSolid
+              className={clsx('w-4 h-4', supplier.held > 0 ? 'text-warning' : 'text-primary')}
+            />
+            <span className="text-base font-semibold text-gray-800">
+              {formatCurrency(supplier.held)}
             </span>
           </div>
         </div>

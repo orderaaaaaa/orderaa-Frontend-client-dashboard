@@ -20,7 +20,7 @@ import { Invoice } from '../types';
 import { useInvoiceFilters } from '../hooks';
 import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
-import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
+import { INVOICE_LIST_TAB_OPTIONS, invoiceListTabToQuery } from '@/components/purchases/receivingStatus';
 
 export function AllInvoicesContent() {
   const [select, setSelect] = useState(false);
@@ -84,8 +84,7 @@ export function AllInvoicesContent() {
     type: apiType,
     dateFrom: formatDateToLocalDate(filters.fromDate),
     dateTo: formatDateToLocalDate(filters.toDate),
-    approved: receivingStatusToApproved(filters.receivingStatus),
-    receivable: filters.receivingStatus !== 'all' || undefined,
+    ...invoiceListTabToQuery(filters.receivingStatus),
     search: debouncedSearchQuery || undefined,
     totalAmountMin: !isNaN(totalAmountMin as number) ? totalAmountMin : undefined,
     totalAmountMax: !isNaN(totalAmountMax as number) ? totalAmountMax : undefined,
@@ -220,7 +219,7 @@ export function AllInvoicesContent() {
         </div>
         <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <ToggleGroup
-            options={RECEIVING_STATUS_OPTIONS}
+            options={INVOICE_LIST_TAB_OPTIONS}
             value={filters.receivingStatus}
             onChange={setReceivingStatus}
           />
@@ -288,7 +287,9 @@ export function AllInvoicesContent() {
                     ? 'لا توجد فواتير قيد الاستلام'
                     : filters.receivingStatus === 'received'
                       ? 'لا توجد فواتير مستلمة'
-                      : 'لا توجد فواتير'}
+                      : filters.receivingStatus === 'open-changed'
+                        ? 'لا توجد فواتير مفتوحة بعدد مختلف'
+                        : 'لا توجد فواتير'}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   قم بانشاء فاتورة جديدة للبدء

@@ -21,7 +21,7 @@ import { KpiCard } from '@/components/ui/kpi-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
-import { receivedBadgeLabel } from '@/components/purchases/receivingStatus';
+import { INVOICE_LIFECYCLE_BADGE } from '@/components/purchases/receivingStatus';
 import { DeleteInvoiceModal } from '@/app/dashboard/purchases/all-invoices/components/DeleteInvoiceModal';
 import { PaymentInvoiceEditModal } from '@/app/dashboard/purchases/all-invoices/components/PaymentInvoiceEditModal';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
@@ -260,16 +260,11 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
       />
 
       <div className="flex flex-wrap items-center gap-2">
-        <Badge
-          variant="outline"
-          className={
-            invoice.isApproved
-              ? 'border-primary/30 bg-primary/10 text-primary'
-              : 'border-border bg-muted text-muted-foreground'
-          }
-        >
-          {receivedBadgeLabel(invoice.isApproved)}
-        </Badge>
+        {invoice.type !== 'PAID' && (
+          <Badge variant="outline" className={INVOICE_LIFECYCLE_BADGE[invoice.lifecycle].className}>
+            {INVOICE_LIFECYCLE_BADGE[invoice.lifecycle].label}
+          </Badge>
+        )}
         <Badge variant="outline" className={PAYMENT_STATUS_TONE[invoice.paymentStatus]}>
           {INVOICE_PAYMENT_STATUS_LABEL[invoice.paymentStatus]}
         </Badge>

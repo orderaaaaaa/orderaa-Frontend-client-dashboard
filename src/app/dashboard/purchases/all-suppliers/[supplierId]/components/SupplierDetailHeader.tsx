@@ -9,6 +9,7 @@ import {
   LiaBalanceScaleSolid,
   LiaUndoAltSolid,
   LiaFileInvoiceSolid,
+  LiaHourglassHalfSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Supplier } from '../../types';
@@ -24,6 +25,7 @@ interface StatCard {
   value: string;
   icon: React.ComponentType<{ className?: string }>;
   className?: string;
+  iconClassName?: string;
 }
 
 const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
@@ -45,6 +47,12 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
         value: formatSupplierBalance(supplier.remaining).text,
         icon: LiaBalanceScaleSolid,
         className: formatSupplierBalance(supplier.remaining).color,
+      },
+      {
+        label: 'معلّق',
+        value: formatCurrency(supplier.held),
+        icon: LiaHourglassHalfSolid,
+        iconClassName: supplier.held > 0 ? 'text-warning' : undefined,
       },
       {
         label: 'إجمالي المرتجعات',
@@ -88,7 +96,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
         remaining={supplier.remaining}
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {stats.map((stat, idx) => (
           <div
             key={stat.label}
@@ -99,7 +107,12 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
           >
             <span className="text-xs sm:text-sm text-gray-600 text-center">{stat.label}</span>
             <div className="flex min-w-0 flex-wrap items-center justify-center gap-1.5">
-              <stat.icon className={clsx('w-4 h-4 sm:w-5 sm:h-5', stat.className ?? 'text-primary')} />
+              <stat.icon
+                className={clsx(
+                  'w-4 h-4 sm:w-5 sm:h-5',
+                  stat.iconClassName ?? stat.className ?? 'text-primary',
+                )}
+              />
               <span className={clsx('text-base sm:text-lg font-bold text-center break-words', stat.className ?? 'text-gray-800')}>{stat.value}</span>
             </div>
           </div>

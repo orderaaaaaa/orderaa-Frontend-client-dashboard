@@ -17,6 +17,9 @@ import {
   updateSupplierInvoice,
   deleteSupplierInvoice,
   approveSupplierInvoice,
+  closeSupplierInvoice,
+  reverseSupplierInvoice,
+  editOpenSupplierInvoice,
   getReturnStock,
   getSupplierInvoiceHistory,
   ReturnStockRequestBody,
@@ -27,6 +30,7 @@ import {
   CreateSupplierInvoiceDto,
   UpdateSupplierInvoiceDto,
   ApproveSupplierInvoiceDto,
+  OpenInvoiceEditDto,
 } from '@/lib/api/suppliers';
 
 export const useSuppliersQuery = (params?: GetSuppliersParams) => {
@@ -174,6 +178,7 @@ export const useCreateSupplierInvoiceMutation = () => {
         [QUERY_KEYS.SUPPLIER_INVOICES],
         [QUERY_KEYS.SUPPLIERS],
         [QUERY_KEYS.SUPPLIER_DETAIL],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL],
       ]),
   });
 };
@@ -212,6 +217,43 @@ export const useApproveSupplierInvoiceMutation = () => {
         [QUERY_KEYS.SUPPLIER_INVOICES],
         [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id],
         // Approval records INBOUND stock movements into the chosen warehouse.
+        ...STOCK_VIEW_KEYS,
+      ]),
+  });
+};
+
+export const useCloseSupplierInvoiceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => closeSupplierInvoice(id),
+    onSuccess: (_data, id) =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id],
+      ]),
+  });
+};
+
+export const useReverseSupplierInvoiceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => reverseSupplierInvoice(id),
+    onSuccess: () =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL],
+      ]),
+  });
+};
+
+export const useEditOpenSupplierInvoiceMutation = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: OpenInvoiceEditDto) => editOpenSupplierInvoice(id, body),
+    onSuccess: () =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id],
         ...STOCK_VIEW_KEYS,
       ]),
   });

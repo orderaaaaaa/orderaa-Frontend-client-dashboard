@@ -11,6 +11,8 @@ const ACTION_LABEL: Record<SupplierInvoiceEvent['action'], string> = {
   UPDATED: 'تعديل الفاتورة',
   ATTRIBUTED: 'تغيير المنشئ',
   APPROVED: 'اعتماد الفاتورة',
+  CLOSED: 'إغلاق الفاتورة',
+  REVERSED: 'عكس الدفعة',
   DELETED: 'حذف الفاتورة',
 };
 

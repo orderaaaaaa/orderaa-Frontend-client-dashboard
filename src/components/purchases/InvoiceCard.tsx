@@ -21,10 +21,10 @@ import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
-import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
+import type { InvoiceLifecycle, InvoicePaymentStatus } from '@/lib/api/suppliers';
 import { formatMoney } from '@/utils/formatMoney';
 import { formatStockNumber } from '@/utils/format';
-import { receivedBadgeLabel } from './receivingStatus';
+import { INVOICE_LIFECYCLE_BADGE } from './receivingStatus';
 import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
@@ -61,7 +61,7 @@ export interface InvoiceCardData {
   invoiceType: 'PURCHASE' | 'PAID' | 'RETURN';
   paymentStatus: InvoicePaymentStatus;
   transactionType: string;
-  isApproved: boolean;
+  lifecycle: InvoiceLifecycle;
   imageUrl?: string;
 }
 
@@ -266,8 +266,13 @@ const InvoiceCard = memo(
             <div className="ps-8 flex flex-wrap items-center gap-2 min-w-0">
               <span className="text-lg font-bold break-words min-w-0">{invoice.companyName}</span>
               {invoice.invoiceType !== 'PAID' && (
-                <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', invoice.isApproved ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
-                  {receivedBadgeLabel(invoice.isApproved)}
+                <span
+                  className={clsx(
+                    'rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+                    INVOICE_LIFECYCLE_BADGE[invoice.lifecycle].className,
+                  )}
+                >
+                  {INVOICE_LIFECYCLE_BADGE[invoice.lifecycle].label}
                 </span>
               )}
             </div>

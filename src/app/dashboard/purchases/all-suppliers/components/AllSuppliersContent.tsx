@@ -2,7 +2,13 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
-import { LiaUsersSolid, LiaSlidersHSolid, LiaArrowUpSolid, LiaArrowDownSolid } from 'react-icons/lia';
+import {
+  LiaUsersSolid,
+  LiaSlidersHSolid,
+  LiaArrowUpSolid,
+  LiaArrowDownSolid,
+  LiaHourglassHalfSolid,
+} from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
 import { SummaryStatCard } from '@/components/ui/summary-stat-card';
@@ -130,7 +136,7 @@ export function AllSuppliersContent() {
       <SuppliersHeader />
 
       {canReadSupplierSummary && (
-        <div className="sm:px-8 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="sm:px-8 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <SummaryStatCard
             icon={<LiaArrowUpSolid className="w-6 h-6 text-red-600" />}
             iconBgClassName="bg-red-100"
@@ -142,6 +148,12 @@ export function AllSuppliersContent() {
             iconBgClassName="bg-green-100"
             label="ليّ فلوس (إجمالي)"
             value={supplierSummary ? formatCurrency(supplierSummary.owedBySuppliers) : '—'}
+          />
+          <SummaryStatCard
+            icon={<LiaHourglassHalfSolid className="w-6 h-6 text-warning" />}
+            iconBgClassName="bg-warning/10"
+            label="معلّق"
+            value={supplierSummary ? formatCurrency(supplierSummary.heldTotal) : '—'}
           />
         </div>
       )}
