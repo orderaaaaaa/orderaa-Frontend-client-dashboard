@@ -13,6 +13,7 @@ export default function PageTab({ label, count, icon, active, onClick }: PageTab
     <Button
       variant="ghost"
       size="lg"
+      data-active={active}
       onClick={onClick}
       title={label}
       className={`group flex items-center justify-between gap-2 px-3 py-2 border text-base rounded-[8px] transition min-w-[120px] max-w-full

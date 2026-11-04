@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Truck,
   Boxes,
@@ -104,7 +104,11 @@ function PageTaps({
     currentStatus !== undefined ? currentStatus : storeSelectedStatus;
 
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
-  const { ref: tabsRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>();
+  const {
+    ref: tabsRef,
+    element: tabsElement,
+    hasMoreAtEnd,
+  } = useScrollEndFade<HTMLDivElement>();
   // Tabs must stay permission-scoped — never the full `allStatuses` dictionary,
   // which would show tabs for statuses this employee cannot work with.
   const permittedStatuses = statusesData?.statuses ?? [];
@@ -120,6 +124,14 @@ function PageTaps({
       setSelectedStatus(status);
     }
   };
+
+  const statusKey = statuses.map((status) => status.key).join('|');
+
+  useEffect(() => {
+    tabsElement
+      ?.querySelector<HTMLElement>('[data-active="true"]')
+      ?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  }, [tabsElement, selectedStatus, statusKey]);
 
   if (loading || isLoadingAllowedStatuses) {
     return (
@@ -137,7 +149,7 @@ function PageTaps({
     <div className="w-full relative">
       <div
         ref={tabsRef}
-        className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1"
+        className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1 scroll-px-10"
       >
         {showAllOrdersTab && (
           <PageTab
@@ -159,7 +171,11 @@ function PageTaps({
           />
         ))}
       </div>
-      <ScrollEndFade visible={hasMoreAtEnd} className="md:hidden" />
+      <ScrollEndFade
+        visible={hasMoreAtEnd}
+        className="md:hidden"
+        fromClassName="from-surface-subtle"
+      />
     </div>
   );
 }

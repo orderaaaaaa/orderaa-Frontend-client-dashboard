@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export function useScrollEndFade<T extends HTMLElement>() {
+export function useScrollEndFade<T extends HTMLElement>(axis: 'x' | 'y' = 'x') {
   const [element, setElement] = useState<T | null>(null);
   const [hasMoreAtEnd, setHasMoreAtEnd] = useState(false);
 
@@ -13,7 +13,9 @@ export function useScrollEndFade<T extends HTMLElement>() {
     }
     const update = () => {
       const remaining =
-        element.scrollWidth - element.clientWidth - Math.abs(element.scrollLeft);
+        axis === 'y'
+          ? element.scrollHeight - element.clientHeight - element.scrollTop
+          : element.scrollWidth - element.clientWidth - Math.abs(element.scrollLeft);
       setHasMoreAtEnd(remaining > 1);
     };
     const resize = new ResizeObserver(update);
@@ -33,7 +35,7 @@ export function useScrollEndFade<T extends HTMLElement>() {
       resize.disconnect();
       mutations.disconnect();
     };
-  }, [element]);
+  }, [element, axis]);
 
-  return { ref: setElement, hasMoreAtEnd };
+  return { ref: setElement, element, hasMoreAtEnd };
 }
