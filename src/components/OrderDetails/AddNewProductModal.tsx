@@ -294,13 +294,7 @@ export default function AddNewProductModal({
                 availabilityLoading={isLoadingAvailability}
                 availabilityError={isErrorAvailability ? errorAvailability : null}
                 onRetry={() => void refetchAvailability()}
-                showWarehouseNote={false}
               />
-            )}
-            {availableWarehouseNotSet && (
-              <p className="text-sm font-semibold text-destructive">
-                {t('orderDetails.stock.availableWarehouseNotSet')}
-              </p>
             )}
           </div>
         )}
