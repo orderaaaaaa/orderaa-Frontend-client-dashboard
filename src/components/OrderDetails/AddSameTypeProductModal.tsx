@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { useProductVariantsOptions } from '@/services/orders';
+import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
+import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
+import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  useProductVariantsOptions,
-  resolveAttributeOptionIds,
-} from '@/services/orders';
+  catalogAttributesOf,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
@@ -18,6 +21,7 @@ interface AddSameTypeProductModalProps {
   onSave: (attributeOptionIds: number[], quantity: number) => Promise<boolean>;
   productType: string;
   productId: number | null;
+  orderId: number;
 }
 
 export default function AddSameTypeProductModal({
@@ -26,49 +30,49 @@ export default function AddSameTypeProductModal({
   onSave,
   productType,
   productId,
+  orderId,
 }: AddSameTypeProductModalProps) {
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selection, setSelection] = useState<Selection>({});
   const [quantity, setQuantity] = useState(1);
 
   const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
     isOpen ? productId : null
   );
 
+  const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
+    productId ?? undefined,
+    orderId,
+    NEXT_STOCK_TARGET,
+    { quantity }
+  );
+
   useEffect(() => {
     if (isOpen) {
-      setSelectedVariants({});
+      setSelection({});
       setQuantity(1);
     }
   }, [isOpen]);
 
   const isFormValid = useMemo(() => {
-    const hasVariants = variantOptions.length === 0 || Object.keys(selectedVariants).length === variantOptions.length;
+    const hasVariants = variantOptions.length === 0 || Object.keys(selection).length === variantOptions.length;
     return hasVariants && quantity > 0;
-  }, [selectedVariants, quantity, variantOptions.length]);
+  }, [selection, quantity, variantOptions.length]);
 
   const missingAttributes = useMemo(
     () =>
       missingAttributesOf(
         variantOptions.map((option) => option.attribute),
-        Object.keys(selectedVariants)
+        variantOptions
+          .filter((option) => selection[option.attributeId] !== undefined)
+          .map((option) => option.attribute)
       ),
-    [variantOptions, selectedVariants]
+    [variantOptions, selection]
   );
-
-  const handleVariantChange = (attribute: string, optionValue: string) => {
-    setSelectedVariants((prev) => ({
-      ...prev,
-      [attribute]: optionValue,
-    }));
-  };
 
   const handleSave = async () => {
     if (!isFormValid) return;
 
-    const attributeOptionIds = resolveAttributeOptionIds(
-      variantOptions,
-      selectedVariants
-    );
+    const attributeOptionIds = Object.values(selection);
 
     const applied = await onSave(attributeOptionIds, quantity);
     if (applied) onClose();
@@ -143,29 +147,17 @@ export default function AddSameTypeProductModal({
             <div className="flex-1 min-w-[200px] flex items-center justify-center">
               <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
             </div>
-          ) : (
-            variantOptions.map((option) => (
-              <div key={option.attribute} className="flex-1 min-w-[200px]">
-                <label className="block text-lg font-bold text-foreground mb-3 text-right">
-                  {option.attribute}
-                </label>
-                <SearchableSelect
-                  value={selectedVariants[option.attribute] || ''}
-                  onValueChange={(value) => handleVariantChange(option.attribute, value)}
-                  options={option.options.map((o) => o.name)}
-                  placeholder={`اختر ${option.attribute}`}
-                  searchPlaceholder={`بحث عن ${option.attribute}...`}
-                  emptyMessage="لا توجد خيارات متاحة"
-                  noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
-                  className="rounded-2xl border-border"
-                  disabled={option.options.length === 0}
-                  searchThreshold={5}
-                />
-              </div>
-            ))
-          )}
+          ) : null}
         </div>
+        {!isLoading && variantOptions.length > 0 && (
+          <VariantAvailabilitySelector
+            productName={productType}
+            attributes={catalogAttributesOf(variantOptions)}
+            variants={variantAvailability}
+            selection={selection}
+            onChange={setSelection}
+          />
+        )}
         {!isLoading && <MissingAttributesHint missing={missingAttributes} />}
       </div>
     </BaseModal>

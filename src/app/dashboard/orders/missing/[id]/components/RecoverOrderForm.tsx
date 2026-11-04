@@ -15,7 +15,10 @@ import ConfirmationSection from '@/app/dashboard/upload-products/manual/Confirma
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { useIncompleteVariantLines } from '@/hooks/useIncompleteVariantLines';
 import { incompleteLinesMessage } from '@/utils/variantSelection';
-import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
+import {
+  buildManualOrderPayload,
+  orderlessAvailabilityTargetOf,
+} from '@/utils/manualOrder/payload';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { getAvailabilityRefusalMessage, isAvailabilityRefusal } from '@/utils/apiError';
@@ -283,6 +286,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         />
 
         <OrderDetails
+          availabilityTarget={orderlessAvailabilityTargetOf(formValues.needsConfirmation)}
           total={formValues.total || ''}
           packagingNotes={formValues.packagingNotes || ''}
           onTotalChange={(v) => {

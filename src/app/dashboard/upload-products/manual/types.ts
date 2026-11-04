@@ -16,6 +16,7 @@ export type OrderDetailsProps = {
   errors?: { products?: string; total?: string };
   failingProductIndex?: number | null;
   incompleteLines?: ReadonlyMap<number, readonly string[]>;
+  availabilityTarget: 'NEW_ORDER' | 'CONFIRMED';
 };
 
 export type ClientInformationProps = {

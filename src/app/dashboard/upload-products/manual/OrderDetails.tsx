@@ -3,6 +3,8 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import ProductDropdown from '@/components/productDropdown';
 import EditProductModal from '@/components/OrderDetails/EditProductModal';
+import { draftFromLines } from '@/components/stock/variantAvailabilityModel';
+import { useProductVariantsOptions } from '@/services/orders';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import {
@@ -36,6 +38,7 @@ interface ProductTableRow {
 }
 
 function OrderDetails({
+  availabilityTarget,
   total,
   packagingNotes,
   onTotalChange,
@@ -129,6 +132,18 @@ function OrderDetails({
 
   const editingProduct =
     editingIndex === null ? undefined : selectedProducts[editingIndex];
+  const { data: editingCatalog = [] } = useProductVariantsOptions(
+    editingProduct?.id ?? null
+  );
+
+  const editingDraft = useMemo(() => {
+    if (!editingProduct || editingIndex === null) return {};
+    const otherLines = selectedProducts
+      .filter((p, i) => i !== editingIndex && p.id === editingProduct.id)
+      .map((p) => ({ optionIds: p.attributeOptionIds, quantity: p.quantity || 1 }));
+    return draftFromLines(otherLines, editingCatalog.length).draft;
+  }, [editingProduct, editingIndex, selectedProducts, editingCatalog.length]);
+
   const editingVariants = useMemo(
     () =>
       Object.fromEntries(
@@ -401,6 +416,13 @@ function OrderDetails({
               return true;
             }}
             productId={editingProduct.id}
+            productName={editingProduct.name}
+            availability={{
+              kind: 'orderless',
+              targetStatus: availabilityTarget,
+              quantity: editingProduct.quantity || 1,
+              draft: editingDraft,
+            }}
             currentVariants={editingVariants}
           />
         )}

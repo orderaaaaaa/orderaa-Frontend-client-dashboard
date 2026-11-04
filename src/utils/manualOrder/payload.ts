@@ -8,6 +8,12 @@ interface SelectedProductWithVariants {
   sourceIndex?: number;
 }
 
+export function orderlessAvailabilityTargetOf(
+  needsConfirmation: boolean,
+): 'NEW_ORDER' | 'CONFIRMED' {
+  return needsConfirmation ? 'NEW_ORDER' : 'CONFIRMED';
+}
+
 export function buildManualOrderPayload(args: {
   utmSource: string;
   pageName: string;
@@ -64,7 +70,7 @@ export function buildManualOrderPayload(args: {
       returnShippingCost: Number(shipping.returnShippingCost),
     }),
     paymentMethod,
-    status: needsConfirmation ? 'NEW_ORDER' : 'CONFIRMED',
+    status: orderlessAvailabilityTargetOf(needsConfirmation),
     shippingCompanyId: shippingCompanyIdOf(shipping.shippingCompanyId),
     governorateOption: shipping.governorateOption,
     cityOption: shipping.cityOption,

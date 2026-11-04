@@ -17,6 +17,30 @@ export interface CatalogAttribute {
 
 export type Selection = Record<number, number>;
 
+export function selectionFromNames(
+  groups: VariantOption[],
+  values: Readonly<Record<string, string>>,
+): Selection {
+  const selection: Selection = {};
+  for (const group of groups) {
+    const option = group.options.find((item) => item.name === values[group.attribute]);
+    if (option) selection[group.attributeId] = option.id;
+  }
+  return selection;
+}
+
+export function namesFromSelection(
+  groups: VariantOption[],
+  selection: Selection,
+): Record<string, string> {
+  const names: Record<string, string> = {};
+  for (const group of groups) {
+    const option = group.options.find((item) => item.id === selection[group.attributeId]);
+    if (option) names[group.attribute] = option.name;
+  }
+  return names;
+}
+
 export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[] {
   return groups.map((group) => ({
     attributeId: group.attributeId,

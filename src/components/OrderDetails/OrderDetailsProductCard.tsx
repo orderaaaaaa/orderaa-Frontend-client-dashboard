@@ -430,6 +430,8 @@ function OrderDetailsProductCard({
             handleSaveEdit(editingProduct.id, attributeOptionIds)
           }
           productId={editingProduct.productId}
+          productName={editingProduct.product}
+          availability={{ kind: 'order', orderId: order.id }}
           currentVariants={editingCurrentVariants}
         />
       )}
@@ -449,6 +451,7 @@ function OrderDetailsProductCard({
         onSave={handleAddSameTypeProduct}
         productType={productsData[0]?.product || ''}
         productId={productsData[0]?.productId || null}
+        orderId={order.id}
       />
 
       <AddNewProductModal

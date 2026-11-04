@@ -1,18 +1,31 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LiaCheckSolid } from 'react-icons/lia';
+import { useProductVariantsOptions } from '@/services/orders';
 import {
-  useProductVariantsOptions,
-  resolveAttributeOptionIds,
-} from '@/services/orders';
-import { SearchableSelect } from '@/components/ui/SearchableSelect';
+  useOrderlessVariantAvailabilityQuery,
+  useProductVariantAvailabilityQuery,
+} from '@/services/warehouses';
+import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
+import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  chosenCatalogValues,
-  missingCatalogAttributesOf,
-} from '@/utils/variantSelection';
+  catalogAttributesOf,
+  namesFromSelection,
+  selectionFromNames,
+  type Selection,
+} from '@/components/stock/variantAvailabilityModel';
+
+export type EditProductAvailability =
+  | { kind: 'order'; orderId: number }
+  | {
+      kind: 'orderless';
+      targetStatus: 'NEW_ORDER' | 'CONFIRMED';
+      quantity: number;
+      draft: Record<string, number>;
+    };
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -22,6 +35,8 @@ interface EditProductModalProps {
     selectedValues: Record<string, string>
   ) => Promise<boolean>;
   productId: number;
+  productName: string;
+  availability: EditProductAvailability;
   currentVariants: Record<string, string>;
 }
 
@@ -30,53 +45,67 @@ export default function EditProductModal({
   onClose,
   onSave,
   productId,
+  productName,
+  availability,
   currentVariants,
 }: EditProductModalProps) {
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(currentVariants);
+  const [draft, setDraft] = useState<Selection | null>(null);
 
   const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
     isOpen ? productId : null
   );
 
-  const wasOpenRef = useRef(false);
+  const orderAvailability = useProductVariantAvailabilityQuery(
+    productId,
+    availability.kind === 'order' ? availability.orderId : undefined,
+    NEXT_STOCK_TARGET,
+    { quantity: 1 }
+  );
+  const orderlessAvailability = useOrderlessVariantAvailabilityQuery(
+    availability.kind === 'orderless' ? productId : undefined,
+    availability.kind === 'orderless' ? availability.targetStatus : 'CONFIRMED',
+    availability.kind === 'orderless' ? availability.quantity : 1,
+    availability.kind === 'orderless' ? availability.draft : {}
+  );
+  const variantAvailability =
+    (availability.kind === 'order'
+      ? orderAvailability.data
+      : orderlessAvailability.data) ?? [];
 
   useEffect(() => {
-    if (isOpen && !wasOpenRef.current) setSelectedValues(currentVariants);
-    wasOpenRef.current = isOpen;
-  }, [isOpen, currentVariants]);
+    if (isOpen) setDraft(null);
+  }, [isOpen]);
+
+  const seed = useMemo(
+    () => selectionFromNames(variantOptions, currentVariants),
+    [variantOptions, currentVariants]
+  );
+  const selection = draft ?? seed;
 
   const hasChanges = useMemo(() => {
-    return Object.keys(selectedValues).some(
-      (key) => selectedValues[key] !== currentVariants[key]
+    const keys = new Set([...Object.keys(selection), ...Object.keys(seed)]);
+    return [...keys].some(
+      (key) => selection[Number(key)] !== seed[Number(key)]
     );
-  }, [selectedValues, currentVariants]);
-
-  const chosenValues = useMemo(
-    () => chosenCatalogValues(variantOptions, selectedValues),
-    [variantOptions, selectedValues]
-  );
+  }, [selection, seed]);
 
   const missingAttributes = useMemo(
-    () => missingCatalogAttributesOf(variantOptions, selectedValues),
-    [variantOptions, selectedValues]
+    () =>
+      variantOptions
+        .filter((group) => selection[group.attributeId] === undefined)
+        .map((group) => group.attribute),
+    [variantOptions, selection]
   );
-
-  const handleValueChange = (attribute: string, optionValue: string) => {
-    setSelectedValues((prev) => ({
-      ...prev,
-      [attribute]: optionValue,
-    }));
-  };
 
   const handleSave = async () => {
     if (!hasChanges || missingAttributes.length > 0) return;
 
-    const attributeOptionIds = resolveAttributeOptionIds(
-      variantOptions,
-      chosenValues
-    );
+    const attributeOptionIds = Object.values(selection);
 
-    const applied = await onSave(attributeOptionIds, chosenValues);
+    const applied = await onSave(
+      attributeOptionIds,
+      namesFromSelection(variantOptions, selection)
+    );
     if (applied) onClose();
   };
 
@@ -90,33 +119,19 @@ export default function EditProductModal({
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
       confirmDisabled={!hasChanges || missingAttributes.length > 0}
     >
-      <div className="flex flex-col md:flex-row gap-4 justify-start flex-wrap">
-        {isLoading ? (
-          <div className="w-full text-center text-gray-500">جاري التحميل...</div>
-        ) : variantOptions.length === 0 ? (
-          <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
-        ) : (
-          variantOptions.map((option) => (
-            <div key={option.attribute} className="w-full md:w-[374px]">
-              <label className="block text-lg font-bold text-foreground mb-3 text-right">
-                {option.attribute}
-              </label>
-              <SearchableSelect
-                value={selectedValues[option.attribute] || ''}
-                onValueChange={(value) => handleValueChange(option.attribute, value)}
-                options={option.options.map((o) => o.name)}
-                placeholder={`اختر ${option.attribute}`}
-                searchPlaceholder={`بحث عن ${option.attribute}...`}
-                disabled={option.options.length === 0}
-                triggerClassName="h-[44px] md:h-[57px] bg-background border border-border rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-muted-foreground"
-                className="rounded-2xl border-border"
-                searchThreshold={5}
-                debounceMs={300}
-              />
-            </div>
-          ))
-        )}
-      </div>
+      {isLoading ? (
+        <div className="w-full text-center text-gray-500">جاري التحميل...</div>
+      ) : variantOptions.length === 0 ? (
+        <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
+      ) : (
+        <VariantAvailabilitySelector
+          productName={productName}
+          attributes={catalogAttributesOf(variantOptions)}
+          variants={variantAvailability}
+          selection={selection}
+          onChange={setDraft}
+        />
+      )}
       {!isLoading && (
         <MissingAttributesHint missing={missingAttributes} className="mt-4" />
       )}

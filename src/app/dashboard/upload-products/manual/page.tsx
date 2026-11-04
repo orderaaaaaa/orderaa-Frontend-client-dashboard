@@ -14,7 +14,10 @@ import ShippingSection from './ShippingSection';
 import PaymentSection from './PaymentSection';
 import ConfirmationSection from './ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
-import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
+import {
+  buildManualOrderPayload,
+  orderlessAvailabilityTargetOf,
+} from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
@@ -213,6 +216,7 @@ function NewOrderForm() {
           }}
         />
         <OrderDetails
+          availabilityTarget={orderlessAvailabilityTargetOf(formValues.needsConfirmation)}
           total={formValues.total || ''}
           packagingNotes={formValues.packagingNotes || ''}
           onTotalChange={(v) => {
