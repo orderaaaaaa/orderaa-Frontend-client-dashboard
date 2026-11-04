@@ -133,6 +133,8 @@ const lineFieldValue = (field: keyof LineFields, value: number | null | undefine
   return ltr(formatStockNumber(value));
 };
 
+const differs = (before: unknown, after: unknown): boolean => JSON.stringify(before) !== JSON.stringify(after);
+
 function ChangeRow({ label, before, after }: { label: string; before: ReactNode; after: ReactNode }) {
   return (
     <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -188,6 +190,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
   const lines = changes?.lines;
 
   changes?.variantCounts?.forEach((entry, index) => {
+    if (entry.from.approvedCount === entry.to.approvedCount && entry.from.rejectedCount === entry.to.rejectedCount) return;
     rows.push(
       <ChangeRow
         key={`variant-${index}`}
@@ -198,7 +201,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
     );
   });
 
-  if (header?.externalInvoiceNumber) {
+  if (header?.externalInvoiceNumber && differs(header.externalInvoiceNumber.before, header.externalInvoiceNumber.after)) {
     rows.push(
       <ChangeRow
         key="externalInvoiceNumber"
@@ -208,7 +211,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
       />,
     );
   }
-  if (header?.paymentAmount) {
+  if (header?.paymentAmount && differs(header.paymentAmount.before, header.paymentAmount.after)) {
     rows.push(
       <ChangeRow
         key="paymentAmount"
@@ -218,7 +221,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
       />,
     );
   }
-  if (header?.images) {
+  if (header?.images && differs(header.images.before, header.images.after)) {
     rows.push(
       <ChangeRow
         key="images"
@@ -228,7 +231,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
       />,
     );
   }
-  if (totals?.totalAmount) {
+  if (totals?.totalAmount && differs(totals.totalAmount.before, totals.totalAmount.after)) {
     rows.push(
       <ChangeRow
         key="totalAmount"
@@ -238,7 +241,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
       />,
     );
   }
-  if (totals?.paymentStatus) {
+  if (totals?.paymentStatus && differs(totals.paymentStatus.before, totals.paymentStatus.after)) {
     rows.push(
       <ChangeRow
         key="paymentStatus"
@@ -258,6 +261,7 @@ function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labe
     lines.changed.forEach((line, index) =>
       Object.keys(line.after).forEach((field) => {
         const key = field as keyof LineFields;
+        if (!differs(line.before[key], line.after[key])) return;
         rows.push(
           <ChangeRow
             key={`changed-${index}-${field}`}
@@ -296,16 +300,20 @@ function ApprovedBody({ changes, labels }: { changes: ApprovedChanges | null; la
       <li>
         عدد الأصناف المعتمدة {ltr(formatCount(approval.lineCount))}
       </li>
-      <ChangeRow
-        label="الإجمالي"
-        before={moneyOf(approval.totalAmount.before)}
-        after={moneyOf(approval.totalAmount.after)}
-      />
-      <ChangeRow
-        label="حالة الدفع"
-        before={paymentStatusOf(approval.paymentStatus.before)}
-        after={paymentStatusOf(approval.paymentStatus.after)}
-      />
+      {differs(approval.totalAmount.before, approval.totalAmount.after) && (
+        <ChangeRow
+          label="الإجمالي"
+          before={moneyOf(approval.totalAmount.before)}
+          after={moneyOf(approval.totalAmount.after)}
+        />
+      )}
+      {differs(approval.paymentStatus.before, approval.paymentStatus.after) && (
+        <ChangeRow
+          label="حالة الدفع"
+          before={paymentStatusOf(approval.paymentStatus.before)}
+          after={paymentStatusOf(approval.paymentStatus.after)}
+        />
+      )}
       {changes?.lines?.map((line) => {
         const invoicedVariant = labels.variantLabel(line.invoiced.variantId);
         return (
