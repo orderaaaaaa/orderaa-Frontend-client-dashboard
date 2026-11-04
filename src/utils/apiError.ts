@@ -275,7 +275,7 @@ export function formatAvailableStockLines(lines: AvailableStockRefusalLine[]): s
 }
 
 export function formatBulkStockWarnings(
-  warnings: { id: number; warehouseName: string; lines: AvailableStockRefusalLine[] }[]
+  warnings: { id: number; code: string; warehouseName: string; lines: AvailableStockRefusalLine[] }[]
 ): string {
   if (warnings.length === 0) return '';
   const locale = readStoredLocale();
@@ -288,7 +288,7 @@ export function formatBulkStockWarnings(
         locale,
         line.variantLabel ? 'stockShortage.bulkWarningLine' : 'stockShortage.bulkWarningLineNoVariant',
         {
-          order: warning.id,
+          order: warning.code,
           product: line.productName,
           variant: line.variantLabel,
           available: line.available,
