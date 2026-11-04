@@ -22,7 +22,7 @@ import {
 } from '@/components/stock/variantAvailabilityModel';
 
 export type EditProductAvailability =
-  | { kind: 'order'; orderId: number }
+  | { kind: 'order'; orderId: number; quantity: number }
   | {
       kind: 'orderless';
       targetStatus: 'NEW_ORDER' | 'CONFIRMED';
@@ -62,7 +62,7 @@ export default function EditProductModal({
     productId,
     availability.kind === 'order' ? availability.orderId : undefined,
     NEXT_STOCK_TARGET,
-    { quantity: 1 }
+    { quantity: probeQuantityOf(availability.kind === 'order' ? availability.quantity : 1) }
   );
   const orderlessAvailability = useOrderlessVariantAvailabilityQuery(
     availability.kind === 'orderless' ? productId : undefined,

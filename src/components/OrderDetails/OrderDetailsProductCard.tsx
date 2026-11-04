@@ -96,6 +96,7 @@ function OrderDetailsProductCard({
       return {
         id: orderProduct.id,
         productId: orderProduct.productId,
+        quantity: orderProduct.quantity ?? 1,
         product: orderProduct.products.name,
         variants,
         optionLabels,
@@ -428,7 +429,7 @@ function OrderDetailsProductCard({
           }
           productId={editingProduct.productId}
           productName={editingProduct.product}
-          availability={{ kind: 'order', orderId: order.id }}
+          availability={{ kind: 'order', orderId: order.id, quantity: editingProduct.quantity }}
           currentVariants={editingCurrentVariants}
         />
       )}
