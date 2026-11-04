@@ -173,7 +173,8 @@ function buildFullTimeline(events: MappedEvent[], status: string): DayGroup[] {
   const allDates = events.map((e) => e.rawDate).sort();
   const result: DayGroup[] = [];
   const current = new Date(allDates[0] + 'T12:00:00Z');
-  const endKey = reachedDelivered ? allDates[allDates.length - 1] : todayKey;
+  const lastEventKey = allDates[allDates.length - 1];
+  const endKey = reachedDelivered || lastEventKey > todayKey ? lastEventKey : todayKey;
   const endDate = new Date(endKey + 'T12:00:00Z');
 
   while (current <= endDate) {
