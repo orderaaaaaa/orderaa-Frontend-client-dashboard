@@ -18,7 +18,7 @@ export default function PageTab({ label, count, icon, active, onClick }: PageTab
       title={label}
       className={`group flex items-center justify-between gap-2 px-3 py-2 border text-base rounded-[8px] transition min-w-[120px] max-w-full
     ${active
-          ? "bg-primary text-white font-bold hover:bg-primary hover:text-white"
+          ? "bg-primary text-white font-bold hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white"
           : "text-muted-foreground border-border"
         }
   `}
