@@ -280,8 +280,15 @@ export default function ValidationResultsPage() {
             </h3>
             <ul className="mb-3 space-y-1 text-sm leading-6 text-amber-900">
               {missingRows.map((row) => (
-                <li key={row.rowIndex} className="break-words">
-                  {missingRowText(row)}
+                <li key={row.rowIndex} className="flex flex-wrap items-start gap-x-3 gap-y-1">
+                  <span className="min-w-0 break-words">{missingRowText(row)}</span>
+                  <button
+                    type="button"
+                    onClick={() => clearAndGo(`/dashboard/orders/missing/${row.missingOrderId}`)}
+                    className="min-h-10 px-2 font-semibold text-primary-text hover:underline"
+                  >
+                    فتح الطلب المفقود
+                  </button>
                 </li>
               ))}
             </ul>
