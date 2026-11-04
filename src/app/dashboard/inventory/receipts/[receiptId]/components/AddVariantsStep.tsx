@@ -183,11 +183,11 @@ const AddVariantsStep = memo(
               onClear={() => handleRowReceivedChange(row.id as number, '')}
               min={0}
               clearable
-              disabled={isMulti}
+              disabled={hasRealVariants}
               placeholder="0"
               className={inputClassName}
             />
-            {isMulti && (
+            {hasRealVariants && (
               <span className="text-xs text-gray-500">حدد الكمية لكل متغير بالأسفل</span>
             )}
             {plainStock && <ReturnSourceStock cell={plainStock} />}
@@ -327,8 +327,6 @@ const AddVariantsStep = memo(
         );
         if (variants.length === 0) return null;
 
-        const showPerVariantQty = variants.length > 1;
-
         return (
           <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-2">
             {variants.map((v) => {
@@ -345,24 +343,20 @@ const AddVariantsStep = memo(
                 >
                   <span className="text-primary font-medium flex-1 min-w-0 break-words">{displayLabel}</span>
                   {stock && <ReturnSourceStock cell={stock} />}
-                   {showPerVariantQty && (
-                     <>
-                       <span className="text-gray-400">|</span>
-                       <Input
-                         type="number"
-                         inputMode="numeric"
-                         aria-label={`كمية المتغير ${displayLabel}`}
-                         value={v.quantity}
-                         onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
-                         onFocus={(e) => e.currentTarget.select()}
-                         onClear={() => handleQuantityChange(row.id as number, key, '')}
-                         min={0}
-                         clearable
-                         className="w-20 sm:w-16"
-                         inputClassName="!py-0.5 !px-1.5 text-center text-base sm:text-xs !rounded-full !bg-background"
-                       />
-                     </>
-                   )}
+                  <span className="text-gray-400">|</span>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    aria-label={`كمية المتغير ${displayLabel}`}
+                    value={v.quantity}
+                    onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onClear={() => handleQuantityChange(row.id as number, key, '')}
+                    min={0}
+                    clearable
+                    className="w-20 sm:w-16"
+                    inputClassName="!py-0.5 !px-1.5 text-center text-base sm:text-xs !rounded-full !bg-background"
+                  />
                   <Button
                     type="button"
                     variant="ghost"
