@@ -168,7 +168,7 @@ export default function AddNewProductModal({
   };
 
   const handleSave = async () => {
-    if (!selectedProduct || isSaving) return;
+    if (!selectedProduct || isSaving || !isFormValid) return;
     setIsSaving(true);
     try {
       const attributeOptionIds = Object.values(selection);
