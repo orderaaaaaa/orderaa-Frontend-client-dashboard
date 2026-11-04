@@ -139,9 +139,15 @@ export function Sidebar({
     [filteredNavigation, pathname],
   );
 
-  const activeItemStyle: React.CSSProperties = {
-    backgroundColor: 'var(--brand-active)',
-    boxShadow: '0px 2px 4px 0px #00000080 inset',
+  const topActiveStyle: React.CSSProperties = {
+    background: 'var(--rail-active-background)',
+    boxShadow: 'var(--rail-active-shadow)',
+    fontWeight: 500,
+  };
+
+  const nestedActiveStyle: React.CSSProperties = {
+    background: 'var(--rail-subactive-background)',
+    boxShadow: 'var(--rail-subactive-shadow)',
     fontWeight: 500,
   };
 
@@ -186,11 +192,11 @@ export function Sidebar({
           className={`
             relative flex flex-col h-full transition-[width] duration-300
             ${collapsed ? SIDEBAR_WIDTH.COLLAPSED : SIDEBAR_WIDTH.EXPANDED}
-            border border-white/10 overflow-hidden
+            border border-white/10 dark:border-y-0 dark:border-r-0 dark:border-l-sidebar-border overflow-hidden
             shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
           `}
           style={{
-            background: 'linear-gradient(180deg, var(--primary) 0%, var(--brand-deep) 100%)',
+            background: 'var(--rail-background)',
           }}
         >
           {/* Header */}
@@ -251,12 +257,12 @@ export function Sidebar({
                         ${
                           hasActiveChild
                             ? 'text-white'
-                            : 'text-white/80 hover:bg-white/10'
+                            : 'text-white/80 hover:bg-white/10 dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground'
                         }
                       `}
                       style={{
                         direction: 'rtl',
-                        ...(hasActiveChild ? activeItemStyle : {}),
+                        ...(hasActiveChild ? topActiveStyle : {}),
                       }}
                     >
                       <span className="flex items-center gap-2">
@@ -302,13 +308,13 @@ export function Sidebar({
                                           flex items-center justify-between w-full px-3 py-2.5 rounded-md cursor-pointer
                                           ${
                                             hasActiveLeaf
-                                              ? 'text-white'
-                                              : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                              ? 'text-white dark:text-primary-text'
+                                              : 'text-white/70 hover:bg-white/10 hover:text-white dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground'
                                           }
                                         `}
                                         style={{
                                           direction: 'rtl',
-                                          ...(hasActiveLeaf ? activeItemStyle : {}),
+                                          ...(hasActiveLeaf ? nestedActiveStyle : {}),
                                         }}
                                       >
                                         <span className="flex items-center gap-3">
@@ -343,11 +349,11 @@ export function Sidebar({
                                                       flex items-center gap-3 px-3 py-2.5 rounded-md
                                                       ${
                                                         isLeafActive
-                                                          ? 'text-white'
-                                                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                          ? 'text-white dark:text-primary-text'
+                                                          : 'text-white/70 hover:bg-white/10 hover:text-white dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground'
                                                       }
                                                     `}
-                                                    style={isLeafActive ? activeItemStyle : {}}
+                                                    style={isLeafActive ? nestedActiveStyle : {}}
                                                     onClick={onNavItemClick}
                                                   >
                                                     {LeafIcon && <LeafIcon className="h-5 w-5" />}
@@ -373,11 +379,11 @@ export function Sidebar({
                                       flex items-center gap-3 px-3 py-2.5 rounded-md
                                       ${
                                         isSubActive
-                                          ? 'text-white'
-                                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                          ? 'text-white dark:text-primary-text'
+                                          : 'text-white/70 hover:bg-white/10 hover:text-white dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground'
                                       }
                                     `}
-                                    style={isSubActive ? activeItemStyle : {}}
+                                    style={isSubActive ? nestedActiveStyle : {}}
                                     onClick={onNavItemClick}
                                   >
                                     {SubIcon && <SubIcon className="h-5 w-5" />}
@@ -403,12 +409,12 @@ export function Sidebar({
                     ${
                       isActive
                         ? 'text-white'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground'
                     }
                   `}
                   style={{
                     direction: 'rtl',
-                    ...(isActive ? activeItemStyle : {}),
+                    ...(isActive ? topActiveStyle : {}),
                   }}
                   onClick={(e) => {
                     if (pathname === item.href) {
@@ -426,7 +432,7 @@ export function Sidebar({
           </nav>
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-brand-deep to-transparent lg:hidden"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-brand-deep dark:from-sidebar to-transparent lg:hidden"
           />
         </div>
       </div>
