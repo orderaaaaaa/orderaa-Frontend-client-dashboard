@@ -224,7 +224,7 @@ const OrderDetailsCardId = ({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 bg-card shadow-md rounded-lg px-4 py-2 flex items-center gap-2 border border-border"
+          className="fixed bottom-6 right-6 z-(--z-page-fixed) bg-card shadow-md rounded-lg px-4 py-2 flex items-center gap-2 border border-border"
         >
           <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

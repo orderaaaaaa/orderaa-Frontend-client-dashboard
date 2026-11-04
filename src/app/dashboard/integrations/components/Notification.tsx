@@ -19,7 +19,7 @@ export const Notification = ({ message, type, onClose }: NotificationProps) => {
   return (
     <div
       className={clsx(
-        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg transition-all',
+        'fixed top-4 left-1/2 transform -translate-x-1/2 z-(--z-modal) flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg transition-all',
         isSuccess
           ? 'bg-green-50 border border-green-200'
           : 'bg-red-50 border border-red-200'

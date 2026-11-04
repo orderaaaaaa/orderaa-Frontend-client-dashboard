@@ -576,7 +576,7 @@ export function ShippingOrdersContent() {
           variant="default"
           size="icon"
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 left-8 z-(--z-page-fixed) rounded-full shadow-lg transition-all duration-300 hover:scale-110"
           aria-label="العودة للأعلى"
         >
           <ArrowUp className="size-6" />

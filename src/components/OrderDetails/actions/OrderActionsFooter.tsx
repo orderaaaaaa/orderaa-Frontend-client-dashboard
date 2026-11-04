@@ -89,7 +89,7 @@ export function OrderActionsFooter({
       <div aria-hidden="true" style={{ height: footerHeight + FOOTER_CLEARANCE_PX }} />
       <div
         ref={footerRef}
-        className="fixed bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-3 px-4 font-sans"
+        className="fixed bottom-8 left-0 right-0 z-(--z-page-fixed) flex flex-col items-center gap-3 px-4 font-sans"
       >
         {!showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
           <p className="w-full max-w-md max-h-32 overflow-y-auto rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-xs font-medium leading-5 whitespace-pre-line text-red-700 shadow-sm">

@@ -266,7 +266,7 @@ export function ScannedOrdersModal({
       aria-modal="true"
       aria-labelledby={headingId}
       tabIndex={-1}
-      className="fixed inset-0 z-[99999] bg-background flex flex-col outline-none"
+      className="fixed inset-0 z-(--z-top) bg-background flex flex-col outline-none"
     >
       <div
         className="min-h-[60px] flex flex-wrap items-center gap-x-3 gap-y-1 px-4 sm:px-8 py-2 flex-shrink-0"

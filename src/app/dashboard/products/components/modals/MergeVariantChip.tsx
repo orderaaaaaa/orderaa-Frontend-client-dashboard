@@ -174,7 +174,7 @@ export function MergeVariantChip({
               align="end"
               sideOffset={4}
               collisionPadding={8}
-              className="z-[60] max-h-[min(360px,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-card p-1 shadow-lg"
+              className="z-(--z-popover) max-h-[min(360px,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-card p-1 shadow-lg"
             >
               <DropdownMenuPrimitive.Item
                 className={itemClass}
