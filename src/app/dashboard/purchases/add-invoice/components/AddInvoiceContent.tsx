@@ -299,7 +299,14 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   }, []);
 
   const handleAddProducts = useCallback(
-    (products: SelectableProduct[]) => {
+    (picked: SelectableProduct[]) => {
+      const products = picked.filter((product) => {
+        if ((product.variantOptions?.length ?? 0) > 0 && (product.selectedVariants?.length ?? 0) === 0) {
+          toast.warning(`المنتج ${product.name} يتطلب تحديد المتغير قبل اعتماد الفاتورة`);
+          return false;
+        }
+        return true;
+      });
       const takenKeys = new Set(
         isEdit
           ? (items ?? []).map((item) =>

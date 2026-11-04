@@ -181,7 +181,14 @@ export function OpenInvoiceEditModal({ isOpen, onClose, invoice }: OpenInvoiceEd
   };
 
   const handleProductsPicked = (picked: SelectableProduct[]) => {
-    const picks = picked.map((product) => {
+    const ready = picked.filter((product) => {
+      if ((product.variantOptions?.length ?? 0) > 0 && (product.selectedVariants?.length ?? 0) === 0) {
+        toast.warning(`المنتج ${product.name} يتطلب تحديد المتغير قبل اعتماد الفاتورة`);
+        return false;
+      }
+      return true;
+    });
+    const picks = ready.map((product) => {
       const combo = product.selectedVariants ?? [];
       const ids = combo.map((variant) => variant.attributeOptionId ?? 0);
       return {
