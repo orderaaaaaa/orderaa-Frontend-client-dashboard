@@ -20,11 +20,10 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import CopyableCode from '@/components/ui/copyable-code';
 import { getTimeAgo } from '@/utils/timeAgo';
-import { formatMoney } from '@/utils/formatMoney';
 import { SupplierInvoice } from '../types';
 import { formatDate } from '@/utils/format';
 import InvoiceDetailModal from './InvoiceDetailModal';
-import { INVOICE_TYPE_LABEL } from '../../../constants';
+import { invoiceTypeLabel, signedInvoiceAmount } from '../../../constants';
 
 const TRANSACTION_TYPE_CONFIG: Record<
   string,
@@ -61,8 +60,6 @@ const SupplierInvoiceCard = memo(
       icon: LiaDollarSignSolid,
     };
 
-    const isNegativeAmount = invoice.type === 'RETURN' || invoice.type === 'PAID';
-
     const fields: CardField[] = useMemo(
       () => [
         {
@@ -86,23 +83,20 @@ const SupplierInvoiceCard = memo(
         },
         {
           label: 'المبلغ الاجمالي',
-          value: `${isNegativeAmount ? '-' : '+'}${formatMoney(String(Math.abs(invoice.totalAmount)))}`,
+          value: signedInvoiceAmount(invoice),
           icon: LiaMoneyBillWaveSolid,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
         },
         {
           label: 'نوع الفاتورة',
-          value:
-            invoice.type === 'PAID' && invoice.reversesInvoiceId != null
-              ? 'عكس دفعة'
-              : INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
+          value: invoiceTypeLabel(invoice),
           icon: typeColors.icon,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
         },
       ],
-      [invoice, typeColors, isNegativeAmount],
+      [invoice, typeColors],
     );
 
     return (

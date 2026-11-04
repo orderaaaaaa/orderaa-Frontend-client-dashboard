@@ -30,7 +30,7 @@ import { ReverseInvoiceModal } from '@/app/dashboard/purchases/all-invoices/comp
 import { OpenInvoiceEditModal } from '@/app/dashboard/purchases/all-invoices/components/OpenInvoiceEditModal';
 import { CloseInvoiceModal } from '@/components/purchases/CloseInvoiceModal';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
-import { INVOICE_PAYMENT_STATUS_LABEL, INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
+import { INVOICE_PAYMENT_STATUS_LABEL, invoiceTypeLabel, signedInvoiceAmount } from '@/app/dashboard/purchases/constants';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { supplierInvoiceErrorStatus, SUPPLIER_INVOICE_NOT_FOUND_MESSAGE } from '@/lib/api/supplierInvoiceErrors';
 import {
@@ -60,6 +60,9 @@ const PAYMENT_STATUS_TONE: Record<InvoicePaymentStatus, string> = {
 const INVOICES_LIST_HREF = '/dashboard/purchases/all-invoices';
 
 const money = (value: number) => <span dir="ltr" className="tabular-nums">{formatMoney(String(value))}</span>;
+const signedMoney = (invoice: { type: string; totalAmount: number }) => (
+  <span dir="ltr" className="tabular-nums">{signedInvoiceAmount(invoice)}</span>
+);
 
 interface DetailFieldProps {
   label: string;
@@ -172,7 +175,7 @@ function InvoiceDetailsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
           <span className="block text-sm font-normal text-muted-foreground">{invoice.supplier.nickname}</span>
         )}
       </DetailField>
-      <DetailField label="نوع الفاتورة">{INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type}</DetailField>
+      <DetailField label="نوع الفاتورة">{invoiceTypeLabel(invoice)}</DetailField>
       <DetailField label="رقم فاتورة المورد">
         {invoice.externalInvoiceNumber ? (
           <span dir="ltr" className="tabular-nums">{invoice.externalInvoiceNumber}</span>
@@ -422,18 +425,20 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
             {INVOICE_LIFECYCLE_BADGE[invoice.lifecycle].label}
           </Badge>
         )}
-        <Badge variant="outline" className={PAYMENT_STATUS_TONE[invoice.paymentStatus]}>
-          {INVOICE_PAYMENT_STATUS_LABEL[invoice.paymentStatus]}
-        </Badge>
+        {invoice.reversesInvoiceId === null && (
+          <Badge variant="outline" className={PAYMENT_STATUS_TONE[invoice.paymentStatus]}>
+            {INVOICE_PAYMENT_STATUS_LABEL[invoice.paymentStatus]}
+          </Badge>
+        )}
         <Badge variant="outline" className="border-border text-foreground">
-          {INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type}
+          {invoiceTypeLabel(invoice)}
         </Badge>
       </div>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="ملخص الفاتورة">
         <KpiCard
           label="الإجمالي"
-          value={money(invoice.totalAmount)}
+          value={signedMoney(invoice)}
           icon={<LiaMoneyBillWaveSolid className="size-5" aria-hidden="true" />}
           accent="primary"
         />
