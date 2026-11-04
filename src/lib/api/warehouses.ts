@@ -592,7 +592,6 @@ export interface AvailabilityLine {
    * (allowNegative, onInsufficient=SKIP) is reported without the warning.
    */
   safe: boolean;
-  /** short AND this product's settings forbid confirming — blocks the order */
   blocked: boolean;
   warning: boolean;
   selectable: boolean;
@@ -642,7 +641,6 @@ export interface VariantAvailability {
   safe: boolean;
   required: number;
   refusal: AvailabilityRefusal | null;
-  /** false when the product forbids picking an unavailable variant */
   selectable: boolean;
   blocked: boolean;
   warning: boolean;
