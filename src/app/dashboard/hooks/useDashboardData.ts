@@ -113,7 +113,11 @@ export function useDashboardData(): UseDashboardDataReturn {
   const orderStatusDistribution = useMemo(
     () =>
       byStatusQuery.data
-        ? transformByStatus(byStatusQuery.data, getStatusLabel, resolvedTheme === 'dark')
+        ? transformByStatus(
+            byStatusQuery.data,
+            getStatusLabel,
+            resolvedTheme === 'dark',
+          )
         : [],
     [byStatusQuery.data, getStatusLabel, resolvedTheme],
   );

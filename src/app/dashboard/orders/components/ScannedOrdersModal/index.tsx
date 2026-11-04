@@ -118,7 +118,10 @@ function NonConfirmedSection({
           const statusLabel =
             ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
           const statusColor =
-            getOrderStatusChartColor(group.status, resolvedTheme === 'dark');
+            getOrderStatusChartColor(
+              group.status,
+              resolvedTheme === 'dark',
+            );
 
           return (
             <div
@@ -371,7 +374,10 @@ export function ScannedOrdersModal({
                     const statusLabel =
                       ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
                     const statusColor =
-                      getOrderStatusChartColor(group.status, resolvedTheme === 'dark');
+                      getOrderStatusChartColor(
+                        group.status,
+                        resolvedTheme === 'dark',
+                      );
 
                     return (
                       <div
