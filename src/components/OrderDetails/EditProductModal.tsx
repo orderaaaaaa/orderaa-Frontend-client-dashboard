@@ -11,6 +11,8 @@ import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
+import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
+import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import {
   catalogAttributesOf,
   namesFromSelection,
@@ -89,6 +91,8 @@ export default function EditProductModal({
     );
   }, [selection, seed]);
 
+  const stockBlocked = useAnyBlockedLine('edit:');
+
   const missingAttributes = useMemo(
     () =>
       variantOptions
@@ -98,7 +102,7 @@ export default function EditProductModal({
   );
 
   const handleSave = async () => {
-    if (!hasChanges || missingAttributes.length > 0) return;
+    if (!hasChanges || missingAttributes.length > 0 || stockBlocked) return;
 
     const attributeOptionIds = Object.values(selection);
 
@@ -117,7 +121,7 @@ export default function EditProductModal({
       onConfirm={handleSave}
       confirmText="حفظ"
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
-      confirmDisabled={!hasChanges || missingAttributes.length > 0}
+      confirmDisabled={!hasChanges || missingAttributes.length > 0 || stockBlocked}
     >
       {isLoading ? (
         <div className="w-full text-center text-gray-500">جاري التحميل...</div>
@@ -133,8 +137,10 @@ export default function EditProductModal({
           availabilityLoading={activeAvailability.isLoading}
           availabilityError={activeAvailability.isError ? activeAvailability.error : null}
           onRetry={() => void activeAvailability.refetch()}
+          blockKey="edit:modal"
         />
       )}
+      <StockSubmitBlockedHint visible={stockBlocked} />
       {!isLoading && (
         <MissingAttributesHint missing={missingAttributes} className="mt-4" />
       )}
