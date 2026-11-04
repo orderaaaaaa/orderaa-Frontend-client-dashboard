@@ -1,5 +1,6 @@
 import api from './index';
 import type { OrderStatus } from '@/types/orders';
+import type { AvailableStockRefusalLine } from './stockShortage';
 
 /**
  * Wire types for the warehouses / stock-workflows / stock-movements domain.
@@ -593,6 +594,9 @@ export interface AvailabilityLine {
   safe: boolean;
   /** short AND this product's settings forbid confirming — blocks the order */
   blocked: boolean;
+  warning: boolean;
+  change: number;
+  after: number | null;
   confirmMode: ConfirmMode;
   bypassed: boolean;
 }
@@ -623,7 +627,7 @@ export interface VariantOptionRef {
 
 export type AvailabilityRefusal =
   | 'AVAILABLE_WAREHOUSE_NOT_SET'
-  | 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
+  | 'AVAILABLE_STOCK_WOULD_GO_NEGATIVE';
 
 export interface VariantAvailability {
   variantId: number;
@@ -638,7 +642,19 @@ export interface VariantAvailability {
   refusal: AvailabilityRefusal | null;
   /** false when the product forbids picking an unavailable variant */
   selectable: boolean;
+  blocked: boolean;
+  warning: boolean;
+  change: number;
+  after: number | null;
   confirmMode: ConfirmMode;
+}
+
+export interface AvailableStockRefusalBody {
+  code: 'AVAILABLE_STOCK_WOULD_GO_NEGATIVE';
+  message: string;
+  orderCode: string | null;
+  warehouseName: string;
+  lines: AvailableStockRefusalLine[];
 }
 
 /** The 409 body the confirm path returns when the settings refuse. */

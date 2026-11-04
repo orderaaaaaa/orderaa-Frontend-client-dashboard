@@ -1,6 +1,7 @@
 
 import type { CarrierSendBlock } from '@/types/carrierSends';
 import { FilterOrdersDto } from '@/types/orders';
+import type { AvailableStockRefusalLine } from '@/lib/api/stockShortage';
 
 /* =========================
    ORDER STATUS (SHARED)
@@ -96,9 +97,17 @@ export interface BulkCarrierResult {
   skipRowCode: string | null;
 }
 
+export interface BulkStockWarningDto {
+  id: number;
+  code: string;
+  warehouseName: string;
+  lines: AvailableStockRefusalLine[];
+}
+
 export interface BulkUpdateResponse {
   updatedCount: number;
   message: string;
   refused: BulkRefusedOrder[];
   carrierResults?: BulkCarrierResult[];
+  warnings?: BulkStockWarningDto[];
 }

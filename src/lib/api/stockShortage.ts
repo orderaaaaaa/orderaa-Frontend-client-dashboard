@@ -1,5 +1,15 @@
 export const OUTBOUND_INSUFFICIENT_STOCK_CODE = 'OUTBOUND_INSUFFICIENT_STOCK';
 export const AVAILABLE_WAREHOUSE_NOT_SET_CODE = 'AVAILABLE_WAREHOUSE_NOT_SET';
+export const AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE = 'AVAILABLE_STOCK_WOULD_GO_NEGATIVE';
+
+export interface AvailableStockRefusalLine {
+  variantId: number;
+  productName: string;
+  variantLabel: string;
+  available: number;
+  change: number;
+  after: number;
+}
 
 export interface ShortageLineApi {
   variantId: number;
