@@ -4,6 +4,17 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --z-raised: 1;
+  --z-inpage-sticky: 5;
+  --z-inpage-sticky-corner: 6;
+  --z-inpage-popup: 15;
+  --z-header: 20;
+  --z-page-fixed: 25;
+  --z-sidebar-overlay: 30;
+  --z-sidebar: 40;
+  --z-modal: 50;
+  --z-popover: 9999;
+  --z-top: 99999;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

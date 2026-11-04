@@ -86,11 +86,11 @@ export default function BaseModal({
       }}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-(--z-modal) bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           ref={setContentEl}
           className={cn(
-            'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 duration-200',
+            'fixed top-[50%] left-[50%] z-(--z-modal) -translate-x-1/2 -translate-y-1/2 duration-200',
             'flex flex-col max-h-[85vh] rounded-2xl border border-border bg-card text-card-foreground shadow-elevated',
             'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
             'w-[95vw] sm:w-[90vw]',

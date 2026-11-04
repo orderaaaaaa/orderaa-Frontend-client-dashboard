@@ -17,9 +17,8 @@ export default function ToastifyProvider() {
       pauseOnHover
       theme="colored"
       transition={Slide}
-      toastClassName="!z-[99999] whitespace-pre-line"
-      className="!z-[99999]"
-      style={{ zIndex: 99999 }}
+      toastClassName="!z-(--z-top) whitespace-pre-line"
+      className="!z-(--z-top)"
     />
   );
 }

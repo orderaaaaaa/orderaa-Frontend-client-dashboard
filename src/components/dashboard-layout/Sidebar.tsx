@@ -165,7 +165,7 @@ export function Sidebar({
       {/* Mobile overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-(--z-sidebar-overlay) bg-black/40 lg:hidden"
           aria-hidden="true"
           onClick={onToggle}
         />
@@ -177,7 +177,7 @@ export function Sidebar({
           ? { role: 'dialog', 'aria-modal': true, 'aria-label': 'القائمة الرئيسية' }
           : {})}
         className={`
-          fixed inset-y-0 right-0 z-40 transform transition-transform duration-300
+          fixed inset-y-0 right-0 z-(--z-sidebar) transform transition-transform duration-300
           ${open ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}
           lg:translate-x-0 lg:pointer-events-auto lg:sticky lg:top-0 lg:h-dvh
         `}

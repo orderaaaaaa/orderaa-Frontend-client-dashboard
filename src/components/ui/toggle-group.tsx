@@ -64,7 +64,7 @@ function ToggleGroupInner<T extends string>({
             <Tooltip.Content
               side="bottom"
               sideOffset={6}
-              className="z-[9999] rounded-lg bg-surface-contrast px-3 py-2 text-sm text-white shadow-lg animate-in fade-in-0 zoom-in-95"
+              className="z-(--z-popover) rounded-lg bg-surface-contrast px-3 py-2 text-sm text-white shadow-lg animate-in fade-in-0 zoom-in-95"
             >
               {disabledTooltip}
               <Tooltip.Arrow className="fill-surface-contrast" />

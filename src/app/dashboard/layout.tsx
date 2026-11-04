@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </ErrorBoundary>
 
         <MainContent>
-          <div className="sticky top-0 z-10 bg-surface-subtle">
+          <div className="sticky top-0 z-(--z-header) bg-surface-subtle">
             <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
               <TopBar
                 onMenuToggle={handleSidebarToggle}
