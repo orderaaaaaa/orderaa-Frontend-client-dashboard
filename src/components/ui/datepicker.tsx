@@ -109,7 +109,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             )}
           >
             {showIcon && (
-              <Icon className="me-2 h-4 w-4 text-foreground-subtle shrink-0 max-sm:hidden" />
+              <Icon className={cn('me-2 h-4 w-4 text-foreground-subtle shrink-0', selected && 'max-sm:hidden')} />
             )}
             <span className="flex-1 text-right truncate">
               {selected ? formatDisplayDate(selected) : placeholder}
@@ -262,7 +262,9 @@ function TimePicker({
             className
           )}
         >
-          {showIcon && <Icon className="me-2 h-4 w-4 text-foreground-subtle shrink-0 max-sm:hidden" />}
+          {showIcon && (
+            <Icon className={cn('me-2 h-4 w-4 text-foreground-subtle shrink-0', selected && 'max-sm:hidden')} />
+          )}
           <span className="flex-1 text-right truncate">
             {selected ? formatDisplayTime(selected) : placeholder}
           </span>
