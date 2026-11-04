@@ -37,6 +37,29 @@ const MONEY_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
 ]);
 
 
+const WRAPPING_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
+  'customerName',
+  'customerPhone',
+  'governorate',
+  'city',
+  'carrierName',
+  'storeOrPage',
+  'confirmedBy',
+  'cancelReason',
+  'cancelNotes',
+  'returnReason',
+  'returnNotes',
+  'shippingCancelReason',
+  'shippingCancelNotes',
+  'exclusionReason',
+]);
+
+function wrappingCellClass(column: SalesOrderColumn): string | false {
+  if (!WRAPPING_COLUMNS.has(column)) return false;
+  const breakClass = column === 'customerPhone' ? 'break-all' : 'break-words';
+  return cn('whitespace-normal min-w-[7rem] max-w-[14rem]', breakClass);
+}
+
 function joinStoreAndPage(row: SalesOrderRow): string | null {
   const parts = [row.storeName, row.pageName].filter((part): part is string => Boolean(part));
   return parts.length ? parts.join(' / ') : null;
@@ -217,6 +240,7 @@ export function SalesOrdersTable({ set, rows }: SalesOrdersTableProps) {
                       'whitespace-nowrap',
                       index === 0 && 'sticky start-0 z-[1] bg-card',
                       MONEY_COLUMNS.has(column) && 'tabular-nums text-end',
+                      wrappingCellClass(column),
                     )}
                   >
                     {renderOrderCell(row, column, set)}

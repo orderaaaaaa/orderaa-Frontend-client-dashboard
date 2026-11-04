@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { KpiAccent, KpiChipTone } from '@/components/ui/kpi-card';
-import { formatPercent } from '@/utils/formatMoney';
+import { formatCount, formatPercent } from '@/utils/formatMoney';
 import type {
   SalesDerivedKind,
   SalesExclusionReason,
@@ -542,6 +542,13 @@ export function isSalesOrderSet(set: SalesSubPageSet): set is SalesOrderSet {
   return (SALES_ORDER_SETS as readonly string[]).includes(set);
 }
 
+export function ordersCountText(count: number): string {
+  if (count === 1) return 'طلب واحد';
+  if (count === 2) return 'طلبان';
+  if (count <= 10) return `${formatCount(count)} طلبات`;
+  return `${formatCount(count)} طلباً`;
+}
+
 export function resolveCardHint(card: SalesCardDefinition, approvedOnly: boolean): string {
   return approvedOnly && card.approvedHint ? card.approvedHint : card.hint;
 }
@@ -570,13 +577,16 @@ export function resolveCardContextChip(
   }
   if (field === 'suppliedAmount') {
     if (totals.collectedWithoutSettlement <= 0) return undefined;
-    return { tone: 'warning', text: `${totals.collectedWithoutSettlement} طلبات بدون مبلغ مورد` };
+    return {
+      tone: 'warning',
+      text: `${ordersCountText(totals.collectedWithoutSettlement)} بدون مبلغ مورد`,
+    };
   }
   if (field === 'pendingCollectionAmount') {
     if (totals.ordersWithoutFee <= 0) return undefined;
     return {
       tone: 'warning',
-      text: `${totals.ordersWithoutFee} طلبات بدون رسوم شحن`,
+      text: `${ordersCountText(totals.ordersWithoutFee)} بدون رسوم شحن`,
       note: SALES_COPY.excludedFromAmountNote,
       tooltip: SALES_COPY.missingFeeTooltip,
     };
@@ -585,7 +595,7 @@ export function resolveCardContextChip(
     if (totals.ordersWithoutCost <= 0) return undefined;
     return {
       tone: 'warning',
-      text: `${totals.ordersWithoutCost} طلبات بدون تكلفة`,
+      text: `${ordersCountText(totals.ordersWithoutCost)} بدون تكلفة`,
       note: SALES_COPY.excludedFromAmountNote,
     };
   }
@@ -593,13 +603,13 @@ export function resolveCardContextChip(
     if (totals.pendingProfitExcludedOrders <= 0) return undefined;
     return {
       tone: 'warning',
-      text: `${totals.pendingProfitExcludedOrders} طلبات مستبعدة: ${totals.ordersWithoutFee} بدون رسوم شحن، ${totals.ordersWithoutCost} بدون تكلفة`,
+      text: `${ordersCountText(totals.pendingProfitExcludedOrders)} مستبعدة: ${formatCount(totals.ordersWithoutFee)} بدون رسوم شحن، ${formatCount(totals.ordersWithoutCost)} بدون تكلفة`,
       note: SALES_COPY.excludedFromProfitNote,
     };
   }
   if (field === 'soldPiecesCost') {
     if (totals.uncostedPieces <= 0) return undefined;
-    return { tone: 'warning', text: `${totals.uncostedPieces} قطعة بدون تكلفة` };
+    return { tone: 'warning', text: `${formatCount(totals.uncostedPieces)} قطعة بدون تكلفة` };
   }
   if (field === 'purchasesTotal') {
     if (!approvedOnly) return undefined;
@@ -607,7 +617,7 @@ export function resolveCardContextChip(
   }
   if (field === 'returnsExpense') {
     if (totals.returnsWithoutSettlement <= 0) return undefined;
-    return { tone: 'warning', text: `${totals.returnsWithoutSettlement} طلبات بدون مبلغ` };
+    return { tone: 'warning', text: `${ordersCountText(totals.returnsWithoutSettlement)} بدون مبلغ` };
   }
   return undefined;
 }
