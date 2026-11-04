@@ -67,6 +67,7 @@ export interface BulkImportMissingRow {
   missingOrderId: number;
   status: 'missing' | 'already_missing';
   message: string;
+  reasons: string[];
 }
 
 export interface BulkImportResponse {
@@ -77,6 +78,7 @@ export interface BulkImportResponse {
     failureCount: number;
     createdOrders: BulkImportCreatedOrder[];
     failedOrders: OrderCreationResult[];
+    missingCount: number;
     missingRows: BulkImportMissingRow[];
   };
 }

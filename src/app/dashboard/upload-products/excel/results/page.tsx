@@ -70,10 +70,17 @@ const readStoredResults = (json: string): StoredResults | null => {
   }
 };
 
-const missingRowText = (row: BulkImportMissingRow): string =>
-  row.status === 'already_missing'
-    ? `الطلب ${row.rowIndex}: موجود بالفعل في قائمة المفقودات`
-    : `الطلب ${row.rowIndex}: يجب اختيار نوع المنتج، وتم نقله إلى قائمة المفقودات`;
+const missingRowText = (row: BulkImportMissingRow): string => {
+  if (row.reasons.length === 0) {
+    return row.status === 'already_missing'
+      ? `الطلب ${row.rowIndex}: موجود بالفعل في قائمة المفقودات`
+      : `الطلب ${row.rowIndex}: تم نقله إلى قائمة المفقودات`;
+  }
+  const reasons = row.reasons.join(' · ');
+  return row.status === 'already_missing'
+    ? `الطلب ${row.rowIndex}: ${reasons} (موجود بالفعل في قائمة المفقودات)`
+    : `الطلب ${row.rowIndex}: ${reasons}`;
+};
 
 const failureMessages = (failure: OrderCreationResult): string[] => {
   if (failure.error === 'Validation failed' && failure.details) {
@@ -269,7 +276,7 @@ export default function ValidationResultsPage() {
         {missingRows.length > 0 && (
           <section className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
             <h3 className="mb-2 font-bold text-amber-800">
-              {`طلبات في قائمة المفقودات: ${missingRows.length}`}
+              {`طلبات في قائمة المفقودات: ${backend?.missingCount ?? missingRows.length}`}
             </h3>
             <ul className="mb-3 space-y-1 text-sm leading-6 text-amber-900">
               {missingRows.map((row) => (
