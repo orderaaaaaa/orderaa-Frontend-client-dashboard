@@ -6,10 +6,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   LiaBoxOpenSolid,
+  LiaCheckCircleSolid,
   LiaHourglassHalfSolid,
+  LiaLockSolid,
   LiaMoneyBillWaveSolid,
   LiaPencilAltSolid,
   LiaTrashAltSolid,
+  LiaUndoAltSolid,
   LiaWalletSolid,
 } from 'react-icons/lia';
 import { ActorChip } from '@/components/audit/ActorChip';
@@ -23,12 +26,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { INVOICE_LIFECYCLE_BADGE } from '@/components/purchases/receivingStatus';
 import { DeleteInvoiceModal } from '@/app/dashboard/purchases/all-invoices/components/DeleteInvoiceModal';
-import { PaymentInvoiceEditModal } from '@/app/dashboard/purchases/all-invoices/components/PaymentInvoiceEditModal';
+import { ReverseInvoiceModal } from '@/app/dashboard/purchases/all-invoices/components/ReverseInvoiceModal';
+import { OpenInvoiceEditModal } from '@/app/dashboard/purchases/all-invoices/components/OpenInvoiceEditModal';
+import { CloseInvoiceModal } from '@/components/purchases/CloseInvoiceModal';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { INVOICE_PAYMENT_STATUS_LABEL, INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { supplierInvoiceErrorStatus, SUPPLIER_INVOICE_NOT_FOUND_MESSAGE } from '@/lib/api/supplierInvoiceErrors';
-import type { InvoicePaymentStatus, SupplierInvoiceApiItem } from '@/lib/api/suppliers';
+import {
+  INVOICE_LIFECYCLE,
+  type InvoiceProductApiItem,
+  type InvoicePaymentStatus,
+  type SupplierInvoiceApiItem,
+  type SupplierInvoiceSettlement,
+} from '@/lib/api/suppliers';
+import { DataTable } from '@/components/ui/data-table';
+import BaseModal from '@/components/ui/base-modal';
+import { VariantCountsList } from '@/components/purchases/variantCounts';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useSupplierInvoiceByIdQuery } from '@/services/suppliers';
 import { formatDateTime } from '@/utils/format';
@@ -61,12 +75,97 @@ function DetailField({ label, children }: DetailFieldProps) {
   );
 }
 
+function InvoiceLinkField({ label, id, text }: { label: string; id: number; text: string }) {
+  return (
+    <DetailField label={label}>
+      <Link
+        href={`${INVOICES_LIST_HREF}/${id}`}
+        className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+      >
+        {text}
+      </Link>
+    </DetailField>
+  );
+}
+
+function InvoiceSettlementsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
+  const settlements = invoice.settlements ?? [];
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <DetailField label="المدفوع المرتبط">
+          {money(invoice.settledAmount ?? 0)}
+        </DetailField>
+        <DetailField label="المتبقي على الفاتورة">
+          {money(invoice.outstandingAmount ?? 0)}
+        </DetailField>
+      </div>
+      <DataTable<InvoiceSettlementRow>
+        columns={[
+          {
+            key: 'code',
+            header: 'رقم الدفعة',
+            render: (_value, row) => (
+              <Link href={`${INVOICES_LIST_HREF}/${row.id}`} className="text-primary underline-offset-4 hover:underline" dir="ltr">
+                {row.code}
+              </Link>
+            ),
+          },
+          {
+            key: 'paymentAmount',
+            header: 'المبلغ',
+            render: (value: unknown) => <span dir="ltr" className="tabular-nums">{formatMoney(String(value))}</span>,
+          },
+          {
+            key: 'createdAt',
+            header: 'التاريخ',
+            render: (value: unknown) => <span dir="ltr" className="tabular-nums">{formatDateTime(String(value))}</span>,
+          },
+          {
+            key: 'isReversal',
+            header: 'النوع',
+            render: (value: unknown) => (value ? 'عكس دفعة' : 'دفعة'),
+          },
+        ]}
+        data={settlements as InvoiceSettlementRow[]}
+        keyField="id"
+        emptyMessage="لا توجد مدفوعات مرتبطة بهذه الفاتورة"
+      />
+    </div>
+  );
+}
+
+type InvoiceSettlementRow = SupplierInvoiceSettlement & Record<string, unknown>;
+
 function InvoiceDetailsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
   const creatorDepartment = invoice.createdByEmployee?.department;
   const approverDepartment = invoice.approvedByEmployee?.department;
+  const closerDepartment = invoice.closedByEmployee?.department;
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {invoice.reversedByInvoiceId !== null && (
+        <InvoiceLinkField label="الحالة" id={invoice.reversedByInvoiceId} text="عُكست بواسطة" />
+      )}
+      {invoice.reversesInvoiceId !== null && (
+        <InvoiceLinkField label="الحالة" id={invoice.reversesInvoiceId} text="عكس الدفعة الأصلية" />
+      )}
+      {invoice.settlesInvoiceId !== null && (
+        <InvoiceLinkField label="مرتبطة بالفاتورة" id={invoice.settlesInvoiceId} text="الفاتورة المرتبطة" />
+      )}
+      {invoice.closedAt && (
+        <DetailField label="أغلقها">
+          <ActorChip actor={employeeActor(invoice.closedByEmployee)} />
+          {closerDepartment && (
+            <span className="block text-sm font-normal text-muted-foreground">
+              {getDepartmentLabel(closerDepartment)}
+            </span>
+          )}
+          <span dir="ltr" className="block text-sm font-normal tabular-nums text-muted-foreground">
+            {formatDateTime(invoice.closedAt)}
+          </span>
+        </DetailField>
+      )}
       <DetailField label="المورد">
         <span className="break-words">{invoice.supplier.name}</span>
         {invoice.supplier.nickname && (
@@ -153,6 +252,44 @@ function InvoiceDetailSkeleton() {
   );
 }
 
+interface InvoiceVariantCountsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  invoiceCode: string;
+  products: InvoiceProductApiItem[];
+  isApproved: boolean;
+}
+
+function InvoiceVariantCountsModal({
+  isOpen,
+  onClose,
+  invoiceCode,
+  products,
+  isApproved,
+}: InvoiceVariantCountsModalProps) {
+  return (
+    <BaseModal isOpen={isOpen} onClose={onClose} title={`عدد الأصناف · ${invoiceCode}`} showFooter={false} maxWidth="md:max-w-2xl">
+      <div className="flex flex-col gap-3">
+        {products.length === 0 ? (
+          <p className="text-sm text-muted-foreground">لا توجد أصناف في هذه الفاتورة</p>
+        ) : (
+          products.map((line) => (
+            <div key={line.id} className="flex flex-col gap-1 rounded-xl border border-border p-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="font-semibold break-words">{line.product.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  الكمية المفوترة <span dir="ltr" className="tabular-nums">{formatCount(line.quantity)}</span>
+                </span>
+              </div>
+              <VariantCountsList line={line} isApproved={isApproved} />
+            </div>
+          ))
+        )}
+      </div>
+    </BaseModal>
+  );
+}
+
 interface InvoiceDetailContentProps {
   invoiceId: number;
 }
@@ -160,7 +297,10 @@ interface InvoiceDetailContentProps {
 export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isPaymentEditOpen, setIsPaymentEditOpen] = useState(false);
+  const [isOpenEditOpen, setIsOpenEditOpen] = useState(false);
+  const [isCloseOpen, setIsCloseOpen] = useState(false);
+  const [isReverseOpen, setIsReverseOpen] = useState(false);
+  const [isVariantCountsOpen, setIsVariantCountsOpen] = useState(false);
   const isValidId = Number.isInteger(invoiceId) && invoiceId > 0;
 
   const { data: invoice, isPending, error, refetch } = useSupplierInvoiceByIdQuery(
@@ -169,6 +309,7 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
   const canUpdate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_UPDATE);
   const canDelete = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_DELETE);
   const canReadHistory = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_HISTORY_READ);
+  const canClose = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_CLOSE);
 
   if (!isValidId) {
     return (
@@ -203,15 +344,21 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
     return <ErrorState error={error} fallback="تعذّر تحميل الفاتورة" onRetry={() => void refetch()} />;
   }
 
-  const showEdit = canUpdate && !invoice.isApproved && invoice.type !== 'PAID';
-  const showPaymentEdit = canUpdate && !invoice.isApproved && invoice.type === 'PAID';
-  const showDelete = canDelete && !invoice.isApproved;
+  const isDraft = invoice.lifecycle === INVOICE_LIFECYCLE.DRAFT;
+  const isOpen = invoice.lifecycle === INVOICE_LIFECYCLE.OPEN;
+  const isPaid = invoice.type === 'PAID';
+  const showEdit = canUpdate && isDraft && !isPaid;
+  const showOpenEdit = canClose && isOpen && !isPaid;
+  const showClose = canClose && isOpen && !isPaid;
+  const showDelete = canDelete && isDraft && !isPaid;
+  const showReverse =
+    canDelete && isPaid && invoice.reversesInvoiceId === null && invoice.reversedByInvoiceId === null;
   const isReturn = invoice.type === 'RETURN';
   const paid = isReturn ? null : roundMoney(invoice.paymentAmount ?? 0);
   const remaining = paid === null ? null : Math.max(roundMoney(invoice.totalAmount - paid), 0);
 
   const actions =
-    showEdit || showPaymentEdit || showDelete ? (
+    showEdit || showOpenEdit || showClose || showReverse || showDelete ? (
       <>
         {showEdit && (
           <Button asChild variant="outline" className="rounded-full">
@@ -221,15 +368,22 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
             </Link>
           </Button>
         )}
-        {showPaymentEdit && (
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full"
-            onClick={() => setIsPaymentEditOpen(true)}
-          >
+        {showOpenEdit && (
+          <Button type="button" variant="outline" className="rounded-full" onClick={() => setIsOpenEditOpen(true)}>
             <LiaPencilAltSolid className="size-4" />
-            تعديل الدفعة
+            تعديل الأصناف والمبالغ
+          </Button>
+        )}
+        {showClose && (
+          <Button type="button" variant="outline" className="rounded-full" onClick={() => setIsCloseOpen(true)}>
+            <LiaLockSolid className="size-4" />
+            إغلاق الفاتورة
+          </Button>
+        )}
+        {showReverse && (
+          <Button type="button" variant="outline" className="rounded-full" onClick={() => setIsReverseOpen(true)}>
+            <LiaUndoAltSolid className="size-4" />
+            عكس الدفعة
           </Button>
         )}
         {showDelete && (
@@ -292,38 +446,76 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
           icon={<LiaHourglassHalfSolid className="size-5" aria-hidden="true" />}
           accent="chart3"
         />
-        <KpiCard
-          label="عدد الأصناف"
-          value={<span dir="ltr" className="tabular-nums">{formatCount(invoice.products.length)}</span>}
-          icon={<LiaBoxOpenSolid className="size-5" aria-hidden="true" />}
-          accent="chart4"
-        />
+        <button
+          type="button"
+          className="block w-full rounded-xl text-start transition-opacity hover:opacity-90"
+          onClick={() => setIsVariantCountsOpen(true)}
+        >
+          <KpiCard
+            label="عدد الأصناف"
+            value={<span dir="ltr" className="tabular-nums">{formatCount(invoice.products.length)}</span>}
+            icon={<LiaBoxOpenSolid className="size-5" aria-hidden="true" />}
+            accent="chart4"
+          />
+        </button>
       </section>
 
       <Tabs defaultValue="details">
         <TabsList className="justify-start">
           <TabsTrigger value="details">التفاصيل</TabsTrigger>
           <TabsTrigger value="lines">الأصناف</TabsTrigger>
+          {invoice.type === 'PURCHASE' && <TabsTrigger value="settlements">المدفوعات المرتبطة</TabsTrigger>}
           {canReadHistory && <TabsTrigger value="history">السجل</TabsTrigger>}
         </TabsList>
         <TabsContent value="details">
           <InvoiceDetailsPanel invoice={invoice} />
         </TabsContent>
         <TabsContent value="lines">
-          <InvoiceLinesTab products={invoice.products} />
+          <InvoiceLinesTab products={invoice.products} isApproved={invoice.isApproved} />
         </TabsContent>
+        {invoice.type === 'PURCHASE' && (
+          <TabsContent value="settlements">
+            <InvoiceSettlementsPanel invoice={invoice} />
+          </TabsContent>
+        )}
         {canReadHistory && (
           <TabsContent value="history">
-            <InvoiceHistoryTab invoiceId={invoice.id} />
+            <InvoiceHistoryTab invoiceId={invoice.id} products={invoice.products} />
           </TabsContent>
         )}
       </Tabs>
 
-      {isPaymentEditOpen && (
-        <PaymentInvoiceEditModal
-          isOpen={isPaymentEditOpen}
-          onClose={() => setIsPaymentEditOpen(false)}
+      {isVariantCountsOpen && (
+        <InvoiceVariantCountsModal
+          isOpen={isVariantCountsOpen}
+          onClose={() => setIsVariantCountsOpen(false)}
+          invoiceCode={invoice.code}
+          products={invoice.products}
+          isApproved={invoice.isApproved}
+        />
+      )}
+
+      {isOpenEditOpen && (
+        <OpenInvoiceEditModal
+          isOpen={isOpenEditOpen}
+          onClose={() => setIsOpenEditOpen(false)}
           invoice={invoice}
+        />
+      )}
+
+      {showClose && (
+        <CloseInvoiceModal
+          isOpen={isCloseOpen}
+          onClose={() => setIsCloseOpen(false)}
+          invoice={{ id: invoice.id, code: invoice.code }}
+        />
+      )}
+
+      {showReverse && (
+        <ReverseInvoiceModal
+          isOpen={isReverseOpen}
+          onClose={() => setIsReverseOpen(false)}
+          invoice={{ id: invoice.id, code: invoice.code, paymentAmount: invoice.paymentAmount }}
         />
       )}
 

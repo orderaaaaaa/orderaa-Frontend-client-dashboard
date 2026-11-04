@@ -2,9 +2,32 @@
 
 import { formatStockNumber } from '@/utils/format';
 import type { ReactNode } from 'react';
-import type { SupplierInvoiceEvent } from '@/lib/api/suppliers';
+import type { InvoiceProductApiItem, SupplierInvoiceEvent } from '@/lib/api/suppliers';
 import { INVOICE_PAYMENT_STATUS_LABEL } from '@/app/dashboard/purchases/constants';
+import { invoiceVariantCountLabel } from '@/components/purchases/variantCounts';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
+import { closedPayloadOf, reversedPayloadOf } from './historyPayloads';
+
+interface HistoryLabels {
+  productName: (invoiceProductId: number) => string;
+  variantLabel: (variantId: number | null) => string | null;
+}
+
+function historyLabelsOf(products: InvoiceProductApiItem[]): HistoryLabels {
+  return {
+    productName: (invoiceProductId) =>
+      products.find((line) => line.id === invoiceProductId)?.product.name ?? '—',
+    variantLabel: (variantId) => {
+      if (variantId === null) return null;
+      for (const line of products) {
+        if (line.variant?.id === variantId) return invoiceVariantCountLabel(line.variant);
+        const match = line.variantCounts?.find((count) => count.variantId === variantId);
+        if (match) return invoiceVariantCountLabel(match.variant);
+      }
+      return null;
+    },
+  };
+}
 
 interface Change<T> {
   before: T;
@@ -35,7 +58,22 @@ interface SnapshotChanges {
   lines?: LineSnapshot[];
 }
 
+interface VariantCountChange {
+  invoiceProductId: number;
+  variantId: number;
+  warehouseId: number | null;
+  from: { approvedCount: number; rejectedCount: number };
+  to: { approvedCount: number; rejectedCount: number };
+}
+
+interface ApprovedLine {
+  invoiceProductId: number;
+  invoiced: { variantId: number | null; quantity: number };
+  counted: { variantId: number; approvedCount: number; rejectedCount: number }[];
+}
+
 interface UpdatedChanges {
+  variantCounts?: VariantCountChange[];
   header?: {
     externalInvoiceNumber?: Change<string | null>;
     paymentAmount?: Change<number | null>;
@@ -65,7 +103,15 @@ interface ApprovedChanges {
     totalAmount: Change<number>;
     paymentStatus: Change<string>;
   };
+  lines?: ApprovedLine[];
 }
+
+
+const countsText = (approved: number, rejected: number): ReactNode => (
+  <>
+    مقبول {ltr(formatStockNumber(approved))} · مرفوض {ltr(formatStockNumber(rejected))}
+  </>
+);
 
 const LINE_FIELD_LABEL: Record<keyof LineFields, string> = {
   quantity: 'الكمية',
@@ -135,11 +181,22 @@ function DeletedBody({ changes }: { changes: SnapshotChanges | null }) {
   );
 }
 
-function UpdatedBody({ changes }: { changes: UpdatedChanges | null }) {
+function UpdatedBody({ changes, labels }: { changes: UpdatedChanges | null; labels: HistoryLabels }) {
   const rows: ReactNode[] = [];
   const header = changes?.header;
   const totals = changes?.totals;
   const lines = changes?.lines;
+
+  changes?.variantCounts?.forEach((entry, index) => {
+    rows.push(
+      <ChangeRow
+        key={`variant-${index}`}
+        label={`الأصناف · ${labels.productName(entry.invoiceProductId)} · ${labels.variantLabel(entry.variantId) ?? '—'}`}
+        before={countsText(entry.from.approvedCount, entry.from.rejectedCount)}
+        after={countsText(entry.to.approvedCount, entry.to.rejectedCount)}
+      />,
+    );
+  });
 
   if (header?.externalInvoiceNumber) {
     rows.push(
@@ -231,7 +288,7 @@ function AttributedBody({ changes }: { changes: AttributedChanges | null }) {
   );
 }
 
-function ApprovedBody({ changes }: { changes: ApprovedChanges | null }) {
+function ApprovedBody({ changes, labels }: { changes: ApprovedChanges | null; labels: HistoryLabels }) {
   const approval = changes?.approval;
   if (!approval) return <p>اعتماد الفاتورة</p>;
   return (
@@ -249,11 +306,53 @@ function ApprovedBody({ changes }: { changes: ApprovedChanges | null }) {
         before={paymentStatusOf(approval.paymentStatus.before)}
         after={paymentStatusOf(approval.paymentStatus.after)}
       />
+      {changes?.lines?.map((line) => {
+        const invoicedVariant = labels.variantLabel(line.invoiced.variantId);
+        return (
+          <li key={`approved-line-${line.invoiceProductId}`}>
+            {labels.productName(line.invoiceProductId)} · مفوتر{' '}
+            {ltr(formatStockNumber(line.invoiced.quantity))}
+            {invoicedVariant && ` (${invoicedVariant})`}
+            {line.counted.length > 0 && (
+              <ul className="mt-1 flex flex-col gap-1 ps-4 text-muted-foreground">
+                {line.counted.map((count) => (
+                  <li key={`counted-${line.invoiceProductId}-${count.variantId}`}>
+                    {labels.variantLabel(count.variantId) ?? '—'}:{' '}
+                    {countsText(count.approvedCount, count.rejectedCount)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
     </ChangeList>
   );
 }
 
-export function InvoiceHistoryBody({ event }: { event: SupplierInvoiceEvent }) {
+function ClosedBody({ changes }: { changes: unknown }) {
+  return <p>{closedPayloadOf(changes).auto ? 'أُغلقت الفاتورة تلقائياً' : 'أُغلقت الفاتورة'}</p>;
+}
+
+function ReversedBody({ changes }: { changes: unknown }) {
+  const payload = reversedPayloadOf(changes);
+  if (payload.reversalInvoiceId !== null) {
+    return <p>عُكست الدفعة بدفعة عكسية {ltr(`#${payload.reversalInvoiceId}`)}</p>;
+  }
+  if (payload.reversesInvoiceId !== null) {
+    return <p>دفعة عكسية للدفعة {ltr(`#${payload.reversesInvoiceId}`)}</p>;
+  }
+  return <p>عكس الدفعة</p>;
+}
+
+export function InvoiceHistoryBody({
+  event,
+  products,
+}: {
+  event: SupplierInvoiceEvent;
+  products: InvoiceProductApiItem[];
+}) {
+  const labels = historyLabelsOf(products);
   if (event.action === 'CREATED') {
     return <SnapshotBody changes={event.changes as SnapshotChanges | null} verb="أُنشئت الفاتورة" />;
   }
@@ -261,10 +360,16 @@ export function InvoiceHistoryBody({ event }: { event: SupplierInvoiceEvent }) {
     return <DeletedBody changes={event.changes as SnapshotChanges | null} />;
   }
   if (event.action === 'UPDATED') {
-    return <UpdatedBody changes={event.changes as UpdatedChanges | null} />;
+    return <UpdatedBody changes={event.changes as UpdatedChanges | null} labels={labels} />;
   }
   if (event.action === 'ATTRIBUTED') {
     return <AttributedBody changes={event.changes as AttributedChanges | null} />;
   }
-  return <ApprovedBody changes={event.changes as ApprovedChanges | null} />;
+  if (event.action === 'CLOSED') {
+    return <ClosedBody changes={event.changes} />;
+  }
+  if (event.action === 'REVERSED') {
+    return <ReversedBody changes={event.changes} />;
+  }
+  return <ApprovedBody changes={event.changes as ApprovedChanges | null} labels={labels} />;
 }

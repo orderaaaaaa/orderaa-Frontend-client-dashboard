@@ -12,7 +12,7 @@ import { Invoice } from '../types';
 import { formatDate } from '@/utils/format';
 import { INVOICE_TYPE_LABEL } from '../../constants';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
-import { PaymentInvoiceEditModal } from './PaymentInvoiceEditModal';
+import { ReverseInvoiceModal } from './ReverseInvoiceModal';
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -31,14 +31,18 @@ const InvoiceCard = memo(
     onTitleClick,
   }: InvoiceCardProps) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    const [isPaymentEditOpen, setIsPaymentEditOpen] = useState(false);
+    const [isReverseOpen, setIsReverseOpen] = useState(false);
 
     const canRead = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_READ);
     const canUpdate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_UPDATE);
     const canDelete = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_DELETE);
     const canEdit = canUpdate && !invoice.isApproved && invoice.type !== 'PAID';
-    const canEditPayment = canUpdate && !invoice.isApproved && invoice.type === 'PAID';
-    const canRemove = canDelete && !invoice.isApproved;
+    const canRemove = canDelete && !invoice.isApproved && invoice.type !== 'PAID';
+    const canReverse =
+      canDelete &&
+      invoice.type === 'PAID' &&
+      invoice.reversesInvoiceId === null &&
+      invoice.reversedByInvoiceId === null;
 
     const creatorDepartment = invoice.createdByEmployee?.department;
 
@@ -54,6 +58,7 @@ const InvoiceCard = memo(
         price: p.price,
         packageCount: p.packageCount,
         piecesPerPackage: p.piecesPerPackage,
+        line: p,
       })),
       creator: employeeActor(invoice.createdByEmployee),
       creatorSubtitle: creatorDepartment ? getDepartmentLabel(creatorDepartment) : undefined,
@@ -67,7 +72,7 @@ const InvoiceCard = memo(
     };
 
     const actions =
-      canRead || canEdit || canEditPayment || canRemove ? (
+      canRead || canEdit || canReverse || canRemove ? (
         <>
           {canRead && (
             <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -79,15 +84,15 @@ const InvoiceCard = memo(
               <Link href={`/dashboard/purchases/add-invoice?invoiceId=${invoice.id}`}>تعديل</Link>
             </Button>
           )}
-          {canEditPayment && (
+          {canReverse && (
             <Button
               type="button"
               variant="outline"
               size="sm"
               className="rounded-full"
-              onClick={() => setIsPaymentEditOpen(true)}
+              onClick={() => setIsReverseOpen(true)}
             >
-              تعديل
+              عكس الدفعة
             </Button>
           )}
           {canRemove && (
@@ -115,11 +120,11 @@ const InvoiceCard = memo(
           formatDate={formatDate}
           actions={actions}
         />
-        {isPaymentEditOpen && (
-          <PaymentInvoiceEditModal
-            isOpen={isPaymentEditOpen}
-            onClose={() => setIsPaymentEditOpen(false)}
-            invoice={invoice}
+        {canReverse && (
+          <ReverseInvoiceModal
+            isOpen={isReverseOpen}
+            onClose={() => setIsReverseOpen(false)}
+            invoice={{ id: invoice.id, code: invoice.code, paymentAmount: invoice.paymentAmount ?? null }}
           />
         )}
         {canRemove && (

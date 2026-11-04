@@ -173,6 +173,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         supplierId={supplier.id}
         supplierName={supplier.name}
         remaining={supplier.remaining}
+        held={supplier.held}
       />
       <EditSupplierModal
         supplier={supplier}

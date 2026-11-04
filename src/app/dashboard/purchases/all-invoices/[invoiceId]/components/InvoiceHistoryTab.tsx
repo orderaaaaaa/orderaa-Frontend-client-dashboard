@@ -3,7 +3,7 @@
 import { AuditHistoryList } from '@/components/audit/AuditHistoryList';
 import { ErrorState } from '@/components/ui/state-panels';
 import { useSupplierInvoiceHistoryQuery } from '@/services/suppliers';
-import type { SupplierInvoiceEvent } from '@/lib/api/suppliers';
+import type { InvoiceProductApiItem, SupplierInvoiceEvent } from '@/lib/api/suppliers';
 import { InvoiceHistoryBody } from './InvoiceHistoryBody';
 
 const ACTION_LABEL: Record<SupplierInvoiceEvent['action'], string> = {
@@ -18,9 +18,10 @@ const ACTION_LABEL: Record<SupplierInvoiceEvent['action'], string> = {
 
 interface InvoiceHistoryTabProps {
   invoiceId: number;
+  products: InvoiceProductApiItem[];
 }
 
-export function InvoiceHistoryTab({ invoiceId }: InvoiceHistoryTabProps) {
+export function InvoiceHistoryTab({ invoiceId, products }: InvoiceHistoryTabProps) {
   const query = useSupplierInvoiceHistoryQuery(invoiceId);
 
   if (query.isError) {
@@ -44,7 +45,7 @@ export function InvoiceHistoryTab({ invoiceId }: InvoiceHistoryTabProps) {
       getActor={(event) => event.actor}
       getAction={(event) => ACTION_LABEL[event.action]}
       getCreatedAt={(event) => event.createdAt}
-      renderBody={(event) => <InvoiceHistoryBody event={event} />}
+      renderBody={(event) => <InvoiceHistoryBody event={event} products={products} />}
       emptyTitle="لا يوجد سجل لهذه الفاتورة"
     />
   );

@@ -1,17 +1,7 @@
 import { InvoiceListTab } from '@/components/purchases/receivingStatus';
-import type { InvoiceLifecycle, InvoicePaymentStatus } from '@/lib/api/suppliers';
+import type { InvoiceLifecycle, InvoiceProductApiItem, InvoicePaymentStatus } from '@/lib/api/suppliers';
 
-export interface ReceiptProduct {
-  id: number;
-  invoiceId: number;
-  productId: number;
-  quantity: number;
-  price: number;
-  packageCount?: number;
-  piecesPerPackage?: number;
-  createdAt?: string;
-  product: { id: number; name: string };
-}
+export type ReceiptProduct = InvoiceProductApiItem;
 
 export interface Receipt {
   id: number;

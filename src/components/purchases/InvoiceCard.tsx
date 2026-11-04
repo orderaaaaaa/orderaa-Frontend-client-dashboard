@@ -21,11 +21,17 @@ import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
-import type { InvoiceLifecycle, InvoicePaymentStatus } from '@/lib/api/suppliers';
+import {
+  INVOICE_LIFECYCLE,
+  type InvoiceLifecycle,
+  type InvoiceProductApiItem,
+  type InvoicePaymentStatus,
+} from '@/lib/api/suppliers';
 import { formatMoney } from '@/utils/formatMoney';
 import { formatStockNumber } from '@/utils/format';
 import { INVOICE_LIFECYCLE_BADGE } from './receivingStatus';
 import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
+import { VariantCountsList } from './variantCounts';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
   'استبدال': { text: 'text-orange-500', iconColor: 'text-orange-500', icon: LiaExchangeAltSolid },
@@ -45,6 +51,7 @@ export interface InvoiceCardProduct {
   price: number;
   packageCount?: number;
   piecesPerPackage?: number;
+  line?: InvoiceProductApiItem;
 }
 
 export interface InvoiceCardData {
@@ -77,13 +84,23 @@ interface CardField {
 
 function buildProductColumns(
   products: InvoiceCardProduct[] | undefined,
+  isApproved: boolean,
 ): DataTableColumn<InvoiceCardProduct & Record<string, unknown>>[] {
   const hasPackageColumns = (products ?? []).some(
     (p) => p.packageCount != null || p.piecesPerPackage != null,
   );
 
   const cols: DataTableColumn<InvoiceCardProduct & Record<string, unknown>>[] = [
-    { key: 'name', header: 'اسم الصنف' },
+    {
+      key: 'name',
+      header: 'اسم الصنف',
+      render: (value, row) => (
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="break-words">{String(value)}</span>
+          {row.line && <VariantCountsList line={row.line} isApproved={isApproved} />}
+        </div>
+      ),
+    },
     {
       key: 'quantity',
       header: 'إجمالي عدد القطع',
@@ -160,8 +177,8 @@ const InvoiceCard = memo(
     const showRibbon = invoice.invoiceType !== 'RETURN';
 
     const productColumns = useMemo(
-      () => buildProductColumns(invoice.products),
-      [invoice.products],
+      () => buildProductColumns(invoice.products, invoice.lifecycle !== INVOICE_LIFECYCLE.DRAFT),
+      [invoice.products, invoice.lifecycle],
     );
 
     const fields: CardField[] = useMemo(

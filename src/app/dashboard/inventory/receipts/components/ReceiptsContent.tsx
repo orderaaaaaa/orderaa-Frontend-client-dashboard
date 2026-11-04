@@ -38,6 +38,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
       price: p.price,
       packageCount: p.packageCount,
       piecesPerPackage: p.piecesPerPackage,
+      line: p,
     })),
     creator: employeeActor(receipt.createdByEmployee),
     createdAt: receipt.createdAt,

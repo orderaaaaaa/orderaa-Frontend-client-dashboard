@@ -1,17 +1,12 @@
 import { InvoiceListTab } from '@/components/purchases/receivingStatus';
-import type { InvoiceLifecycle, InvoicePaymentStatus, SupplierEmployeeRef } from '@/lib/api/suppliers';
+import type {
+  InvoiceLifecycle,
+  InvoicePaymentStatus,
+  InvoiceProductApiItem,
+  SupplierEmployeeRef,
+} from '@/lib/api/suppliers';
 
-export interface InvoiceProduct {
-  id: number;
-  invoiceId: number;
-  productId: number;
-  quantity: number;
-  price: number;
-  packageCount?: number;
-  piecesPerPackage?: number;
-  createdAt?: string;
-  product: { id: number; name: string };
-}
+export type InvoiceProduct = InvoiceProductApiItem;
 
 export interface Invoice {
   id: number;
@@ -32,6 +27,9 @@ export interface Invoice {
   isApproved: boolean;
   approvedAt: string | null;
   lifecycle: InvoiceLifecycle;
+  settlesInvoiceId: number | null;
+  reversesInvoiceId: number | null;
+  reversedByInvoiceId: number | null;
 }
 
 export interface InvoiceFilters {

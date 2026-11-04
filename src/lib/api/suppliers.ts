@@ -56,16 +56,19 @@ export interface ProductTransactionApiItem {
 }
 
 export interface InvoiceProductVariantOption {
-  attributeOptionId?: number;
-  attribute_option?: { id: number; name: string; attributeId: number };
-  id?: number;
-  name?: string;
+  attribute_option: {
+    id: number;
+    name: string;
+    attributeId: number;
+    canonicalName: { name: string } | null;
+  };
 }
 
 export interface InvoiceProductVariantDetail {
   id: number;
-  name?: string;
-  options?: InvoiceProductVariantOption[];
+  combinationKey?: string;
+  sku?: string | null;
+  options: InvoiceProductVariantOption[];
 }
 
 export const INVOICE_LIFECYCLE = {

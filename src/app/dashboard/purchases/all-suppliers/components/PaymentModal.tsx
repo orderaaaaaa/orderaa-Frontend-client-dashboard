@@ -7,13 +7,16 @@ import { z } from 'zod';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
-import { useCreateSupplierInvoiceMutation } from '@/services/suppliers';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { INVOICE_LIFECYCLE, type SupplierInvoiceApiItem } from '@/lib/api/suppliers';
+import { useCreateSupplierInvoiceMutation, useSupplierInvoicesQuery } from '@/services/suppliers';
+import { formatMoney } from '@/utils/formatMoney';
 import {
   MONEY_DECIMALS_MESSAGE,
   hasAtMostTwoDecimals,
   moneyCents,
 } from '@/utils/money';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { supplierInvoiceErrorMessage } from '@/lib/api/supplierInvoiceErrors';
 import { formatCurrency, formatSupplierBalance } from '../utils';
 
 const paymentSchema = z.object({
@@ -28,12 +31,57 @@ const paymentSchema = z.object({
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
 
+const INVOICE_PICKER_LIMIT = 20;
+
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   supplierId: number;
   supplierName: string;
   remaining: number;
+  held: number;
+}
+
+interface LinkedInvoicePickerProps {
+  supplierId: number;
+  selected: SupplierInvoiceApiItem | null;
+  onSelect: (invoice: SupplierInvoiceApiItem | null) => void;
+}
+
+function invoiceOptionLabel(invoice: SupplierInvoiceApiItem): string {
+  return `${invoice.code} · إجمالي ${formatMoney(String(invoice.totalAmount))} · متبقٍ ${formatMoney(String(invoice.outstandingAmount ?? 0))}`;
+}
+
+function LinkedInvoicePicker({ supplierId, selected, onSelect }: LinkedInvoicePickerProps) {
+  const [search, setSearch] = useState('');
+  const { data, isFetching } = useSupplierInvoicesQuery({
+    supplierId,
+    type: 'PURCHASE',
+    outstanding: true,
+    search: search || undefined,
+    page: 1,
+    limit: INVOICE_PICKER_LIMIT,
+  });
+  const invoices = data?.data ?? [];
+  const options = invoices.map((invoice) => ({ key: String(invoice.id), value: invoiceOptionLabel(invoice) }));
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-sm text-muted-foreground">لفاتورة</span>
+      <SearchableSelect
+        value={selected ? String(selected.id) : ''}
+        displayValue={selected ? invoiceOptionLabel(selected) : undefined}
+        onChange={(key) => onSelect(invoices.find((invoice) => String(invoice.id) === key) ?? null)}
+        onClear={() => onSelect(null)}
+        options={options}
+        placeholder="بدون فاتورة"
+        searchPlaceholder="ابحث برقم الفاتورة"
+        onSearch={setSearch}
+        loading={isFetching}
+        clearable
+      />
+    </div>
+  );
 }
 
 export default function PaymentModal({
@@ -42,11 +90,16 @@ export default function PaymentModal({
   supplierId,
   supplierName: _supplierName,
   remaining,
+  held,
 }: PaymentModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [linkedInvoice, setLinkedInvoice] = useState<SupplierInvoiceApiItem | null>(null);
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
+  const isLinkedOpen = linkedInvoice !== null && linkedInvoice.lifecycle !== INVOICE_LIFECYCLE.CLOSED;
+  const totalOwed = Math.max(remaining + held, 0);
+  const limit = linkedInvoice ? linkedInvoice.outstandingAmount ?? 0 : totalOwed;
 
   const {
     register,
@@ -63,6 +116,7 @@ export default function PaymentModal({
     setShowSuccess(false);
     setPendingAmount(null);
     setSubmitError(null);
+    setLinkedInvoice(null);
     onClose();
   }, [reset, onClose]);
 
@@ -74,6 +128,7 @@ export default function PaymentModal({
           type: 'PAID',
           supplierId,
           paymentAmount: amount,
+          ...(linkedInvoice ? { settlesInvoiceId: linkedInvoice.id } : {}),
         });
         setPendingAmount(null);
         setShowSuccess(true);
@@ -81,30 +136,30 @@ export default function PaymentModal({
           handleClose();
         }, 1200);
       } catch (err: unknown) {
-        setSubmitError(getApiErrorMessage(err, 'حدث خطأ أثناء تسجيل الدفع'));
+        setSubmitError(supplierInvoiceErrorMessage(err, 'حدث خطأ أثناء تسجيل الدفع'));
       }
     },
-    [supplierId, handleClose, createInvoiceMutation],
+    [supplierId, linkedInvoice, handleClose, createInvoiceMutation],
   );
 
   const onSubmit = useCallback(
     async (data: PaymentFormValues) => {
       const amount = Number(data.amount);
-      if (moneyCents(amount) > moneyCents(Math.max(remaining, 0))) {
+      if (moneyCents(amount) > moneyCents(Math.max(limit, 0))) {
         setSubmitError(null);
         setPendingAmount(amount);
         return;
       }
       await submitPayment(amount);
     },
-    [remaining, submitPayment],
+    [limit, submitPayment],
   );
 
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title={showSuccess ? '' : pendingAmount !== null ? 'المبلغ أكبر من المتبقي' : 'إضافة معاملة جديدة'}
+      title={showSuccess ? '' : pendingAmount !== null ? 'المبلغ أكبر من المستحق' : 'إضافة معاملة جديدة'}
       showFooter={false}
       maxWidth="md:max-w-[500px]"
     >
@@ -149,7 +204,14 @@ export default function PaymentModal({
       ) : pendingAmount !== null ? (
         <div className="flex flex-col gap-6">
           <p className="text-base leading-7 text-gray-700">
-            المبلغ ({formatCurrency(pendingAmount)}) أكبر من المتبقي للمورد ({formatSupplierBalance(remaining).text}). بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}. هل تريد المتابعة؟
+            {linkedInvoice
+              ? `المبلغ (${formatCurrency(pendingAmount)}) أكبر من المتبقي على الفاتورة ${linkedInvoice.code} (${formatCurrency(limit)}). هل تريد المتابعة؟`
+              : `المبلغ (${formatCurrency(pendingAmount)}) أكبر من إجمالي المستحق للمورد (${formatCurrency(totalOwed)}). هل تريد المتابعة؟`}
+          </p>
+          <p className="text-base leading-7 text-gray-700">
+            {isLinkedOpen
+              ? `بعد الدفع سينخفض المعلّق من ${formatCurrency(held)} إلى ${formatCurrency(held - pendingAmount)}.`
+              : `بعد الدفع سيصبح الرصيد ${formatSupplierBalance(remaining - pendingAmount).text}.`}
           </p>
 
           {submitError && (
@@ -185,6 +247,14 @@ export default function PaymentModal({
             noValidate
             className="flex flex-col gap-6"
           >
+            {isOpen && (
+              <LinkedInvoicePicker
+                supplierId={supplierId}
+                selected={linkedInvoice}
+                onSelect={setLinkedInvoice}
+              />
+            )}
+
             <Input
               label="المبلغ"
               name="amount"

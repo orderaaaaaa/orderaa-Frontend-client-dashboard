@@ -21,4 +21,5 @@ export interface SupplierInvoice {
   createdByEmployee?: SupplierEmployeeRef | null;
   products: SupplierInvoiceItem[];
   images: string[];
+  reversesInvoiceId?: number | null;
 }

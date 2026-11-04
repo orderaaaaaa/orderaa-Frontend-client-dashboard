@@ -93,7 +93,10 @@ const SupplierInvoiceCard = memo(
         },
         {
           label: 'نوع الفاتورة',
-          value: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
+          value:
+            invoice.type === 'PAID' && invoice.reversesInvoiceId != null
+              ? 'عكس دفعة'
+              : INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
           icon: typeColors.icon,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,

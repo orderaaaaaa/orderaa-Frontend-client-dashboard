@@ -2,23 +2,22 @@
 
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { InvoiceProductApiItem } from '@/lib/api/suppliers';
+import { VariantCountsList, variantLabelFromDetail } from '@/components/purchases/variantCounts';
 import { formatMoney } from '@/utils/formatMoney';
 import { formatStockNumber } from '@/utils/format';
 
 type LineRow = InvoiceProductApiItem & Record<string, unknown>;
 
 export function variantLabelOf(line: InvoiceProductApiItem): string | null {
-  const names = (line.variant?.options ?? [])
-    .map((option) => option.attribute_option?.name)
-    .filter((name): name is string => Boolean(name));
-  return names.length > 0 ? names.join(' / ') : null;
+  return variantLabelFromDetail(line.variant);
 }
 
 interface InvoiceLinesTabProps {
   products: InvoiceProductApiItem[];
+  isApproved: boolean;
 }
 
-export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
+export function InvoiceLinesTab({ products, isApproved }: InvoiceLinesTabProps) {
   const hasPackageColumns = products.some(
     (line) => line.packageCount != null || line.piecesPerPackage != null,
   );
@@ -33,6 +32,7 @@ export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-semibold text-foreground break-words">{row.product.name}</span>
             {variant && <span className="text-xs text-muted-foreground">{variant}</span>}
+            {isApproved && <VariantCountsList line={row} isApproved />}
           </div>
         );
       },

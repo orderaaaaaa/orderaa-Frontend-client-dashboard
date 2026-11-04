@@ -13,7 +13,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { reportReturnSubmitError, warnReturnBlocked } from '@/components/stock/returnStockToasts';
-import { LiaSaveSolid, LiaCheckCircleSolid } from 'react-icons/lia';
+import { LiaSaveSolid, LiaCheckCircleSolid, LiaLockSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,13 @@ import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
 import { isEveryLineCounted } from '../../utils';
 import { formatDate, formatStockNumber } from '@/utils/format';
-import type { ApproveSupplierInvoiceVariantDto, ReturnStockLineRequest } from '@/lib/api/suppliers';
+import {
+  INVOICE_LIFECYCLE,
+  type ApproveSupplierInvoiceVariantDto,
+  type ReturnStockLineRequest,
+} from '@/lib/api/suppliers';
+import { CloseInvoiceModal } from '@/components/purchases/CloseInvoiceModal';
+import { variantLabelFromDetail, variantOptionIdsOf } from '@/components/purchases/variantCounts';
 import {
   buildReturnStockCells,
   isReturnStockBlocking,
@@ -94,7 +100,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   const approveMutation = useApproveSupplierInvoiceMutation();
   const queryClient = useQueryClient();
-  const canApprove = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_APPROVE);
+  const canApprove =
+    useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_APPROVE) && apiReceipt?.type !== 'PAID';
+  const canClose = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_CLOSE);
+  const [isCloseOpen, setIsCloseOpen] = useState(false);
   const isReturn = apiReceipt?.type === 'RETURN';
 
   const { pickerOptions: warehouseOptions } = useWarehouseOptions();
@@ -157,9 +166,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
     const seed: Record<number, SelectedVariant[]> = {};
     for (const p of apiReceipt.products) {
-      const rawIds = p.attributeOptionIds ?? (p.variant?.options ?? []).map((o) => (o as any).attributeOptionId ?? (o as any).attribute_option?.id);
-      const ids = rawIds.filter((x): x is number => typeof x === 'number');
-      const labels = (p.variant?.options ?? []).map((o) => (o as any).attribute_option?.name ?? (o as any).name).filter(Boolean) as string[];
+      const ids = p.attributeOptionIds ?? variantOptionIdsOf(p.variant);
+      const labels = (p.variant?.options ?? []).map((o) => o.attribute_option.name);
       if (ids.length === 0) continue;
       seed[p.id] = [
         {
@@ -167,7 +175,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           attributeLabels: labels,
           quantity: '',
           variantId: p.variantId ?? undefined,
-          variantName: p.variant?.name,
+          variantName: variantLabelFromDetail(p.variant) ?? undefined,
         },
       ];
     }
@@ -276,7 +284,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   const approve = useCallback(
     async (acknowledgeQuantityChange: boolean) => {
-      if (!apiReceipt) return;
+      if (!apiReceipt || apiReceipt.type === 'PAID') return;
       if (returnStockBlocked) {
         warnReturnBlocked();
         return;
@@ -455,12 +463,31 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             )}
           </div>
 
+          {canClose && apiReceipt.lifecycle === INVOICE_LIFECYCLE.OPEN && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                className="rounded-full font-semibold px-6"
+                onClick={() => setIsCloseOpen(true)}
+              >
+                <LiaLockSolid className="size-4" />
+                إغلاق الفاتورة
+              </Button>
+            </div>
+          )}
+
           <DataTable<ReceivedLineRow>
             columns={receivedColumns}
             data={invoiceProducts as ReceivedLineRow[]}
             emptyMessage="لا توجد منتجات"
           />
         </div>
+
+        <CloseInvoiceModal
+          isOpen={isCloseOpen}
+          onClose={() => setIsCloseOpen(false)}
+          invoice={{ id: apiReceipt.id, code: apiReceipt.code }}
+        />
       </div>
     );
   }

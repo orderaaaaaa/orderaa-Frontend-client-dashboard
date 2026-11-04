@@ -46,7 +46,11 @@ import {
   useSupplierInvoiceByIdQuery,
   useUpdateSupplierInvoiceMutation,
 } from '@/services/suppliers';
-import type { SupplierInvoiceApiItem, UpdateSupplierInvoiceDto } from '@/lib/api/suppliers';
+import {
+  INVOICE_LIFECYCLE,
+  type SupplierInvoiceApiItem,
+  type UpdateSupplierInvoiceDto,
+} from '@/lib/api/suppliers';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import {
@@ -699,6 +703,14 @@ function EditInvoiceRoute({ invoiceId }: { invoiceId: number }) {
     </Button>
   );
 
+  if (invoice.lifecycle === INVOICE_LIFECYCLE.OPEN) {
+    return (
+      <AddInvoiceNotice
+        title="الفاتورة مفتوحة، وتعديلها يتم من صفحة الفاتورة"
+        action={detailAction}
+      />
+    );
+  }
   if (invoice.isApproved) {
     return <AddInvoiceNotice title={SUPPLIER_INVOICE_APPROVED_MESSAGE} action={detailAction} />;
   }
