@@ -84,20 +84,26 @@ export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {
   RETURN_WAREHOUSE: '#6366f1',
 };
 
-export const ORDER_STATUS_CHART_COLORS_DARK: Record<string, string> = {
-  CANCELLED: '#f09a9a',
-  MISSING: '#c93b3f',
+export const ORDER_STATUS_CHART_COLORS_DARK: Record<
+  string,
+  { fill: string; text: string }
+> = {
+  CANCELLED: { fill: '#c93b3f', text: '#f09a9a' },
+  MISSING: { fill: '#9e2f35', text: '#f5b8b8' },
+  RETURNED_FINAL: { fill: '#b8344f', text: '#f2a7b8' },
+  FINAL_RETURN: { fill: '#c44a6a', text: '#f5b8c8' },
 };
 
 export const FALLBACK_CHART_COLOR = '#9ca3af';
 
+export type OrderStatusChartColorRole = 'fill' | 'text';
+
 export function getOrderStatusChartColor(
   status: string,
   isDark: boolean,
+  role: OrderStatusChartColorRole = 'fill',
 ): string {
-  return (
-    (isDark && ORDER_STATUS_CHART_COLORS_DARK[status]) ||
-    ORDER_STATUS_CHART_COLORS[status] ||
-    FALLBACK_CHART_COLOR
-  );
+  const darkPair = isDark ? ORDER_STATUS_CHART_COLORS_DARK[status] : undefined;
+  if (darkPair) return darkPair[role];
+  return ORDER_STATUS_CHART_COLORS[status] || FALLBACK_CHART_COLOR;
 }

@@ -117,11 +117,15 @@ function NonConfirmedSection({
         {groups.map((group) => {
           const statusLabel =
             ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
-          const statusColor =
-            getOrderStatusChartColor(
-              group.status,
-              resolvedTheme === 'dark',
-            );
+          const statusColor = getOrderStatusChartColor(
+            group.status,
+            resolvedTheme === 'dark',
+          );
+          const statusTextColor = getOrderStatusChartColor(
+            group.status,
+            resolvedTheme === 'dark',
+            'text',
+          );
 
           return (
             <div
@@ -139,7 +143,7 @@ function NonConfirmedSection({
                   />
                   <span
                     className="text-sm font-semibold"
-                    style={{ color: statusColor }}
+                    style={{ color: statusTextColor }}
                   >
                     {statusLabel}
                   </span>
@@ -373,11 +377,15 @@ export function ScannedOrdersModal({
                   {actionableFilteredGroups.map((group) => {
                     const statusLabel =
                       ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
-                    const statusColor =
-                      getOrderStatusChartColor(
-                        group.status,
-                        resolvedTheme === 'dark',
-                      );
+                    const statusColor = getOrderStatusChartColor(
+                      group.status,
+                      resolvedTheme === 'dark',
+                    );
+                    const statusTextColor = getOrderStatusChartColor(
+                      group.status,
+                      resolvedTheme === 'dark',
+                      'text',
+                    );
 
                     return (
                       <div
@@ -395,7 +403,7 @@ export function ScannedOrdersModal({
                             />
                             <span
                               className="text-sm font-semibold"
-                              style={{ color: statusColor }}
+                              style={{ color: statusTextColor }}
                             >
                               {statusLabel}
                             </span>
