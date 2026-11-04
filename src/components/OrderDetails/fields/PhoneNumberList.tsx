@@ -141,7 +141,7 @@ export function PhoneNumberList({
                     align="start"
                     side="bottom"
                     sideOffset={8}
-                    className="w-auto min-w-[150px] p-0 overflow-hidden rounded-lg bg-card border border-gray-200 shadow-lg"
+                    className="w-auto min-w-[150px] p-0 rounded-lg bg-card border border-gray-200 shadow-lg"
                   >
                     <Button
                       variant="ghost"
