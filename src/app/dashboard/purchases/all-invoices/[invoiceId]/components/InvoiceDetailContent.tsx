@@ -354,8 +354,11 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
   const showReverse =
     canDelete && isPaid && invoice.reversesInvoiceId === null && invoice.reversedByInvoiceId === null;
   const isReturn = invoice.type === 'RETURN';
-  const paid = isReturn ? null : roundMoney(invoice.paymentAmount ?? 0);
-  const remaining = paid === null ? null : Math.max(roundMoney(invoice.totalAmount - paid), 0);
+  const paid = isReturn ? null : roundMoney((invoice.paymentAmount ?? 0) + (invoice.settledAmount ?? 0));
+  const remaining =
+    paid === null
+      ? null
+      : Math.max(roundMoney(invoice.outstandingAmount ?? invoice.totalAmount - paid), 0);
 
   const actions =
     showEdit || showOpenEdit || showClose || showReverse || showDelete ? (

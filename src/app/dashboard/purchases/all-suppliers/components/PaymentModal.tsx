@@ -97,19 +97,27 @@ export default function PaymentModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [linkedInvoice, setLinkedInvoice] = useState<SupplierInvoiceApiItem | null>(null);
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
-  const isLinkedOpen = linkedInvoice !== null && linkedInvoice.lifecycle !== INVOICE_LIFECYCLE.CLOSED;
   const totalOwed = Math.max(remaining + held, 0);
-  const limit = linkedInvoice ? linkedInvoice.outstandingAmount ?? 0 : totalOwed;
+  const linkedOutstanding = Math.max(linkedInvoice?.outstandingAmount ?? 0, 0);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: { amount: '' },
   });
+
+  const amountText = watch('amount');
+  const amountValue = Number(amountText);
+  const linkedOverLimit =
+    linkedInvoice !== null &&
+    Number.isFinite(amountValue) &&
+    amountValue > 0 &&
+    moneyCents(amountValue) > moneyCents(linkedOutstanding);
 
   const handleClose = useCallback(() => {
     reset();
@@ -145,14 +153,22 @@ export default function PaymentModal({
   const onSubmit = useCallback(
     async (data: PaymentFormValues) => {
       const amount = Number(data.amount);
-      if (moneyCents(amount) > moneyCents(Math.max(limit, 0))) {
+      if (linkedInvoice) {
+        if (moneyCents(amount) > moneyCents(linkedOutstanding)) {
+          setSubmitError(null);
+          return;
+        }
+        await submitPayment(amount);
+        return;
+      }
+      if (moneyCents(amount) > moneyCents(totalOwed)) {
         setSubmitError(null);
         setPendingAmount(amount);
         return;
       }
       await submitPayment(amount);
     },
-    [limit, submitPayment],
+    [linkedInvoice, linkedOutstanding, totalOwed, submitPayment],
   );
 
   return (
@@ -204,14 +220,10 @@ export default function PaymentModal({
       ) : pendingAmount !== null ? (
         <div className="flex flex-col gap-6">
           <p className="text-base leading-7 text-gray-700">
-            {linkedInvoice
-              ? `المبلغ (${formatCurrency(pendingAmount)}) أكبر من المتبقي على الفاتورة ${linkedInvoice.code} (${formatCurrency(limit)}). هل تريد المتابعة؟`
-              : `المبلغ (${formatCurrency(pendingAmount)}) أكبر من إجمالي المستحق للمورد (${formatCurrency(totalOwed)}). هل تريد المتابعة؟`}
+            المبلغ ({formatCurrency(pendingAmount)}) أكبر من إجمالي المستحق للمورد ({formatCurrency(totalOwed)}). هل تريد المتابعة؟
           </p>
           <p className="text-base leading-7 text-gray-700">
-            {isLinkedOpen
-              ? `بعد الدفع سينخفض المعلّق من ${formatCurrency(held)} إلى ${formatCurrency(held - pendingAmount)}.`
-              : `بعد الدفع سيصبح الرصيد ${formatSupplierBalance(remaining - pendingAmount).text}.`}
+            بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}.
           </p>
 
           {submitError && (
@@ -267,13 +279,19 @@ export default function PaymentModal({
               min="0"
             />
 
+            {linkedOverLimit && linkedInvoice && (
+              <p className="text-red-500 text-sm">
+                المبلغ ({formatCurrency(amountValue)}) أكبر من المتبقي على الفاتورة ({formatCurrency(linkedOutstanding)})
+              </p>
+            )}
+
             {submitError && (
               <p className="text-red-500 text-sm">{submitError}</p>
             )}
 
             <Button
               type="submit"
-              disabled={createInvoiceMutation.isPending}
+              disabled={createInvoiceMutation.isPending || linkedOverLimit}
               className="w-full sm:w-[60%] mx-auto rounded-xl font-bold text-base py-3"
             >
               دفع
