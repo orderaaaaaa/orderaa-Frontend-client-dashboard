@@ -40,7 +40,7 @@ function Hero() {
             </span>
           </h1>
           <p className="w-full text-[18px] md:text-[24px] text-center max-w-[450px] px-4">
-            ستجد ما تحتاجة لادارة متجرك الالكتروني باستخدام الذكاء الاصطناعي
+            ستجد ما تحتاجة لإدارة متجرك الإلكتروني باستخدام الذكاء الاصطناعي
           </p>
           <button className="bg-gradient-to-l from-[#260946] to-[#9716EF] cursor-pointer font-bold text-[15px] md:text-[17px] py-3 px-7 !rounded-[10px]">
             ابدأ تجربتك المجانية لمدة 14 أيام{' '}

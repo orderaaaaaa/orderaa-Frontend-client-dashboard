@@ -100,7 +100,7 @@ export default function LeadsSearch({
               type="text"
               value={localSearch}
               onChange={handleSearchChange}
-              placeholder="البحث بالاسم، رقم الواتساب، البريد الالكتروني"
+              placeholder="البحث بالاسم، رقم الواتساب، البريد الإلكتروني"
               className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right placeholder-gray-500"
               dir="rtl"
             />

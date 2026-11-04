@@ -179,7 +179,7 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
           <div class="info-value">${sanitizeHtml(employeeDisplayName(invoice.createdByEmployee))}</div>
         </div>
         <div class="info-card">
-          <div class="info-label">تاريخ الانشاء</div>
+          <div class="info-label">تاريخ الإنشاء</div>
           <div class="info-value">${sanitizeHtml(formatDate(invoice.createdAt))}</div>
         </div>
       </div>

@@ -72,7 +72,7 @@ export default function LoginPage() {
       switchGoTo="signup"
     >
       <Input
-        label="الهاتف/البريد الالكتروني"
+        label="الهاتف/البريد الإلكتروني"
         name="emailOrPhoneNumber"
         placeholder="أدخل هاتفك أو بريدك الإلكتروني..."
         error={errors.emailOrPhoneNumber?.message}

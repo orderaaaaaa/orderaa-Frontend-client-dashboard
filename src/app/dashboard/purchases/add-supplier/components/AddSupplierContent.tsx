@@ -132,7 +132,7 @@ function AddSupplierForm() {
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="add-supplier-email" className="text-sm font-medium text-gray-700">
-                البريد الالكتروني (اختياري)
+                البريد الإلكتروني (اختياري)
               </label>
               <Input
                 name="email"

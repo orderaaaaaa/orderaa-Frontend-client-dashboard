@@ -210,7 +210,7 @@ const OrderDetailsCardId = ({
                     <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
                       {order?.customers?.totalCustomerOrders}
                     </p>
-                    هذا العميل قام بالطلب اكثر من مره
+                    هذا العميل قام بالطلب أكثر من مرة
                   </h3>
                 </button>
               )}

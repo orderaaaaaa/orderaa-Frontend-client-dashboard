@@ -96,7 +96,7 @@ export default function PasswordStrengthIndicator({
       </div>
       {showRequirement && (
         <div className="text-md">
-          يجب ان تحتوي علي 8 احرف علي الاقل و تشمل احرف كبيرة و صغيرة و ارقام
+          يجب أن تحتوي على 8 أحرف على الأقل و تشمل احرف كبيرة و صغيرة و ارقام
           ورموز
         </div>
       )}

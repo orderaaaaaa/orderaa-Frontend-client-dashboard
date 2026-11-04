@@ -12,7 +12,7 @@ export const addSupplierSchema = z.object({
     .optional()
     .refine(
       (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-      { message: 'البريد الالكتروني غير صالح' },
+      { message: 'البريد الإلكتروني غير صالح' },
     ),
   governorate: z.string().min(1, 'المحافظة مطلوبة'),
 });
