@@ -124,7 +124,7 @@ export const LEADS_TABLE_HEADERS: ILeadTableHeader[] = [
   { id: '3', key: 'source', label: 'المصدر' },
   { id: '4', key: 'leadType', label: 'الشارة' },
   { id: '5', key: 'time', label: 'الوقت' },
-  { id: '6', key: 'lastContact', label: 'اخر اتصال' }, // Changed from 'action'
+  { id: '6', key: 'lastContact', label: 'آخر اتصال' }, // Changed from 'action'
   { id: '7', key: 'status', label: 'الحالة' },
 ];
 
@@ -133,7 +133,7 @@ export const LEADS_TABLE_DATA: ILeadTableRow[] = [
     id: '1',
     name: 'خالد سمير',
     status: 'trialEnding',
-    statusText: 'تم انشاء حساب',
+    statusText: 'تم إنشاء حساب',
     phone: '013456789012',
     email: 'khalid.smith@gmail.com',
     source: 'Linked In',

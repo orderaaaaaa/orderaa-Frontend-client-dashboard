@@ -50,7 +50,7 @@ function buildProductColumns(
     { key: 'price', header: 'السعر', render: (value) => formatMoney(String(value)) },
     {
       key: 'total',
-      header: 'الاجمالي',
+      header: 'الإجمالي',
       render: (_value, row) => formatMoney(String(row.quantity * row.price)),
     },
   ];
@@ -186,7 +186,7 @@ export default function InvoiceDetailModal({
           )}
           <div className="flex items-center justify-between bg-secondary p-3 rounded-lg">
             <span className="text-base font-bold text-gray-800">
-              {isPayment ? 'المبلغ المدفوع' : 'المبلغ الاجمالي'}
+              {isPayment ? 'المبلغ المدفوع' : 'المبلغ الإجمالي'}
             </span>
             <span className="text-base font-bold text-gray-800">
               {formatMoney(String(grandTotal))}

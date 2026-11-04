@@ -8,6 +8,6 @@ export const distributionData: Slice[] = [
   { label: 'تاجيلات', value: 20, color: '#7438FF' },
   { label: 'إعادة الاتصال', value: 20, color: '#9365FF' },
   { label: 'وقف التشغيل', value: 30, color: '#D2BEFF' },
-  { label: 'تم الغاء', value: 60, color: '#F1EBFF' },
+  { label: 'تم إلغاء', value: 60, color: '#F1EBFF' },
 ];
 

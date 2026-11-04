@@ -383,7 +383,7 @@ export function FilterSection({
                 {filteredOptions.length === 0 ? (
                   <li className="px-3 py-2 text-muted-foreground text-base text-center">
                     {availableFilters.length === 0
-                      ? 'تم اضافة جميع الفلاتر'
+                      ? 'تمت إضافة جميع الفلاتر'
                       : 'لا توجد نتائج'}
                   </li>
                 ) : (

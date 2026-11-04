@@ -10,7 +10,7 @@ export const STORES_TABLE_HEADERS: IStoreTableHeader[] = [
   { id: 5, key: 'sales', label: 'المبيعات' },
   { id: 6, key: 'revenue', label: 'الايرادات' },
   { id: 7, key: 'deliveryRate', label: 'نسبة التسليم' },
-  { id: 8, key: 'dateAdded', label: 'تاريخ الاضافة' },
+  { id: 8, key: 'dateAdded', label: 'تاريخ الإضافة' },
   { id: 8, key: 'profitDate', label: 'ارباح التاجر' },
   { id: 9, key: 'actions', label: 'اجراءات' },
 ];

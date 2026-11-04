@@ -452,7 +452,7 @@ export default function OrderCard({
               className="w-[18px] h-[18px] shrink-0 opacity-30"
             />
             <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
-              سبب الالغاء: {cancelReason}
+              سبب الإلغاء: {cancelReason}
             </span>
           </div>
         )}
@@ -463,7 +463,7 @@ export default function OrderCard({
               className="w-[18px] h-[18px] shrink-0 opacity-30"
             />
             <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
-              ملاحظات الالغاء: {cancelNotes}
+              ملاحظات الإلغاء: {cancelNotes}
             </span>
           </div>
         )}

@@ -15,10 +15,10 @@ export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
         <LiaBanSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary-text mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
-            الالغاء التلقائي للطلب
+            الإلغاء التلقائي للطلب
           </h3>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            الغاء الطلب تلقائي بعد كام محاوله؟
+            إلغاء الطلب تلقائي بعد كام محاوله؟
           </p>
         </div>
       </div>

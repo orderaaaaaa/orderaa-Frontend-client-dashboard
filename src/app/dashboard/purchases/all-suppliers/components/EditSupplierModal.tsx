@@ -207,7 +207,7 @@ export default function EditSupplierModal({
             className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
             onClick={onClose}
           >
-            الغاء
+            إلغاء
             <LiaTimesSolid className="w-4 h-4" />
           </Button>
         </div>

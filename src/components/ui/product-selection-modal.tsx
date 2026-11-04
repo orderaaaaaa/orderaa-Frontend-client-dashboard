@@ -414,7 +414,7 @@ export default function ProductSelectionModal({
       onClose={handleClose}
       title="اختر المنتجات"
       onConfirm={handleConfirm}
-      confirmText={`اضافة (${selectedIds.size})`}
+      confirmText={`إضافة (${selectedIds.size})`}
       confirmIcon={<LiaPlusSolid className="w-5 h-5 text-white" />}
       confirmDisabled={selectedIds.size === 0}
       maxWidth="md:max-w-3xl"
@@ -590,7 +590,7 @@ export default function ProductSelectionModal({
                             onClick={() => handleAddCombo(product.id, allAttributes)}
                           >
                             <LiaPlusSolid className="w-4 h-4" />
-                            اضافة
+                            إضافة
                           </Button>
                         </div>
 

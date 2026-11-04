@@ -21,7 +21,7 @@ const InvoicesHeader = memo(() => {
           onClick={() => router.push('/dashboard/purchases/add-invoice')}
         >
           <LiaPlusSolid className="w-5 h-5 sm:w-7 sm:h-7" />
-          <p>انشاء فاتورة جديدة</p>
+          <p>إنشاء فاتورة جديدة</p>
         </Button>
       ) : (
         <span aria-hidden="true" />

@@ -344,7 +344,7 @@ export function PrintOrdersContent() {
       await callAgainMutation({
         orders: uniqBy(actionableOrders, 'id').map((o) => ({ id: o.id })),
       });
-      toast.success('تم تحديث الطلبات إلى اعادة اتصال');
+      toast.success('تم تحديث الطلبات إلى إعادة اتصال');
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
@@ -535,7 +535,7 @@ export function PrintOrdersContent() {
       await callAgainMutation({
         orders: uniqBy(ordersToProcess, 'id').map((o) => ({ id: o.id })),
       });
-      toast.success('تم تحديث الطلبات إلى اعادة اتصال');
+      toast.success('تم تحديث الطلبات إلى إعادة اتصال');
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {

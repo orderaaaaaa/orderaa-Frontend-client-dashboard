@@ -171,7 +171,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
               disabled={isDisabled}
             >
               <LiaEllipsisHSolid className="size-5" />
-              <span>اخرى</span>
+              <span>أخرى</span>
             </Button>
           </div>
         </div>

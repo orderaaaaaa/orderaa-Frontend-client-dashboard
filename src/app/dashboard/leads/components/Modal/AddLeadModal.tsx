@@ -44,7 +44,7 @@ export default function AddLeadModal({ onClose }: { onClose: () => void }) {
             <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
               <div className="text-right">
                 <DialogPrimitive.Title className="text-2xl font-bold">
-                  اضافة Lead جديد
+                  إضافة Lead جديد
                 </DialogPrimitive.Title>
                 <p className="text-gray-400 mt-1">ادخل معلومات العميل الجديد</p>
               </div>

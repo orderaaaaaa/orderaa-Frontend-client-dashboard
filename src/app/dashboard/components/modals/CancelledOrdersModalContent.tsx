@@ -42,7 +42,7 @@ const orderDetailsColumns: DataTableColumn<CancelledOrderDetail>[] = [
   },
   {
     key: 'cancelReason',
-    header: 'سبب الالغاء',
+    header: 'سبب الإلغاء',
   },
   {
     key: 'notes',

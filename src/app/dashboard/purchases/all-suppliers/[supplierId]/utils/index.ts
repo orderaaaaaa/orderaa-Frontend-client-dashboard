@@ -68,7 +68,7 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
     ...(hasPackageFields ? { 'عدد الطرود': item.packageCount ?? '' } : {}),
     ...(hasPackageFields ? { 'عدد القطع في الطرد': item.piecesPerPackage ?? '' } : {}),
     'السعر': item.price,
-    'الاجمالي': item.quantity * item.price,
+    'الإجمالي': item.quantity * item.price,
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -97,8 +97,8 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
     : ['إجمالي عدد القطع', totalQuantity, '', ''];
 
   const totalsGrand = hasPackageFields
-    ? ['المبلغ الاجمالي', '', '', '', '', grandTotal]
-    : ['المبلغ الاجمالي', '', '', grandTotal];
+    ? ['المبلغ الإجمالي', '', '', '', '', grandTotal]
+    : ['المبلغ الإجمالي', '', '', grandTotal];
 
   XLSX.utils.sheet_add_aoa(
     worksheet,
@@ -193,7 +193,7 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
             <th>إجمالي عدد القطع</th>
             ${hasPackageFields ? '<th>عدد الطرود</th><th>عدد القطع في الطرد</th>' : ''}
             <th>السعر</th>
-            <th>الاجمالي</th>
+            <th>الإجمالي</th>
           </tr>
         </thead>
         <tbody>
@@ -218,7 +218,7 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
           <span>${sanitizeHtml(totalQuantity)}</span>
         </div>
         <div class="total-row">
-          <span>المبلغ الاجمالي</span>
+          <span>المبلغ الإجمالي</span>
           <span>${sanitizeHtml(grandTotal.toFixed(2))}</span>
         </div>
       </div>

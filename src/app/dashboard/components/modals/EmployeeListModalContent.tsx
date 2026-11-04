@@ -79,7 +79,7 @@ export function EmployeeListModalContent({
     },
     {
       key: 'totalWorkHours',
-      header: 'اجمالي ساعات العمل',
+      header: 'إجمالي ساعات العمل',
     },
     {
       key: 'attempts',
@@ -119,7 +119,7 @@ export function EmployeeListModalContent({
               </div>
               <dl className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <dt className="text-gray-500">اجمالي ساعات العمل</dt>
+                  <dt className="text-gray-500">إجمالي ساعات العمل</dt>
                   <dd className="mt-0.5 text-sm font-medium">{row.totalWorkHours}</dd>
                 </div>
                 <div>

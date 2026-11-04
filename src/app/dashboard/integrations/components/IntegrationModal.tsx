@@ -251,7 +251,7 @@ const IntegrationModal = ({
         ...(Object.keys(metadata).length > 0 && { metadata }),
       });
 
-      toast.success('تم انشاء ربط API بنجاح');
+      toast.success('تم إنشاء ربط API بنجاح');
       onSuccess();
       setShowStepper(false);
       setCurrentStep(0);

@@ -47,7 +47,7 @@ const ACTION_RULES: Record<CallCenterBulkAction, ActionRule> = {
     allowedFrom: new Set<string>([OrderStatus.CONFIRMED]),
   },
   callAgain: {
-    label: 'اعادة اتصال',
+    label: 'إعادة اتصال',
     setStatusCode: 'orders:setStatus:CALL_AGAIN',
     allowedFrom: null,
   },

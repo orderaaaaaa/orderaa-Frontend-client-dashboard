@@ -206,7 +206,7 @@ function AddSupplierForm() {
               router.push('/dashboard/purchases/all-suppliers')
             }
           >
-            الغاء
+            إلغاء
             <LiaTimesSolid className="w-4 h-4" />
           </Button>
         </div>

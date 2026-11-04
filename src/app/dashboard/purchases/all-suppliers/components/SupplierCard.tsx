@@ -106,7 +106,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           )}
         </div>
         <div className="flex flex-col items-start sm:items-center gap-1.5">
-          <span className="text-sm sm:text-base text-gray-600">المبلغ الاجمالي</span>
+          <span className="text-sm sm:text-base text-gray-600">المبلغ الإجمالي</span>
           <div className="flex items-center gap-1.5">
             <LiaMoneyBillWaveSolid className="w-4 h-4 text-primary-text" />
             <span className="text-base font-semibold text-gray-800">

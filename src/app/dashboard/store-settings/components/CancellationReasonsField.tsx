@@ -21,7 +21,7 @@ export function CancellationReasonsField({ watch, setValue, errors }: Cancellati
     <TagListField
       id="settings-cancellation-reasons"
       icon={LiaHashtagSolid}
-      title="اسباب الغاء الطلب"
+      title="أسباب إلغاء الطلب"
       description="أضف الأسباب التي تظهر عند إلغاء الطلب"
       placeholder="اكتب السبب"
       items={values.map((value) => ({ key: value, label: value }))}

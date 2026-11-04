@@ -35,7 +35,7 @@ export default function GradientAreaChart() {
   return (
     <div className="w-full max-w-3xl p-6 bg-card rounded-2xl shadow-xl">
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
-        <h3 className="text-xl font-semibold">اجمالي الطلبات</h3>
+        <h3 className="text-xl font-semibold">إجمالي الطلبات</h3>
       </div>
 
       <div style={{ width: '100%', height: 350 }}>

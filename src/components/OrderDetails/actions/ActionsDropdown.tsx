@@ -29,7 +29,7 @@ interface ActionOption {
 
 const arrowOptions: ActionOption[] = [
   { label: 'مستعجل', action: 'urgent', icon: <LiaBoltSolid className="w-5 h-5" /> },
-  { label: 'الغاء', action: 'cancel', icon: <LiaBanSolid className="w-5 h-5" /> },
+  { label: 'إلغاء', action: 'cancel', icon: <LiaBanSolid className="w-5 h-5" /> },
   { label: 'رفض التعديل', action: 'reject_modification', icon: <LiaTimesCircleSolid className="w-5 h-5" /> },
   { label: 'تأجيل ساعات', action: 'postpone_hours', icon: <LiaHourglassSolid className="w-5 h-5" /> },
   { label: 'تأجيل أيام', action: 'postpone_days', icon: <LiaCalendarAltSolid className="w-5 h-5" /> },

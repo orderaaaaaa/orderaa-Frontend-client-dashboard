@@ -124,7 +124,7 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
               disabled={isDisabled}
             >
               {isLoading ? <Spinner /> : <LiaPhoneVolumeSolid className="size-5" />}
-              <span>اعادة اتصال</span>
+              <span>إعادة اتصال</span>
             </Button>
           )}
 

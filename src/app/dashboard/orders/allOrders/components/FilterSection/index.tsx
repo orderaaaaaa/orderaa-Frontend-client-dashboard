@@ -198,7 +198,7 @@ const FilterSection = React.memo(function FilterSection({
             <ul className="max-h-48 overflow-y-auto py-1">
               {filteredOptions.length === 0 ? (
                 <li className="px-3 py-2 text-muted-foreground text-base text-center">
-                  {availableFilters.length === 0 ? 'تم اضافة جميع الفلاتر' : 'لا توجد نتائج'}
+                  {availableFilters.length === 0 ? 'تمت إضافة جميع الفلاتر' : 'لا توجد نتائج'}
                 </li>
               ) : (
                 filteredOptions.map((filter) => (

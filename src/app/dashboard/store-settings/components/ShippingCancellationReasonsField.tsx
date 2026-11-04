@@ -21,7 +21,7 @@ export function ShippingCancellationReasonsField() {
     <TagListField
       id="settings-shipping-cancellation-reasons"
       icon={LiaBanSolid}
-      title="اسباب الغاء الشحن"
+      title="أسباب إلغاء الشحن"
       description="أضف الأسباب التي تظهر عند إلغاء الشحنة"
       placeholder="اكتب السبب"
       isLoading={isLoading}

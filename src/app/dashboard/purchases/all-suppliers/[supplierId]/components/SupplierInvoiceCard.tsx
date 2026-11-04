@@ -82,7 +82,7 @@ const SupplierInvoiceCard = memo(
           subtitle: formatDate(invoice.createdAt),
         },
         {
-          label: 'المبلغ الاجمالي',
+          label: 'المبلغ الإجمالي',
           value: signedInvoiceAmount(invoice),
           icon: LiaMoneyBillWaveSolid,
           valueClassName: typeColors.text,
