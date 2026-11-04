@@ -1,0 +1,169 @@
+import type { AvailabilityRefusal, VariantAvailability } from '@/lib/api/warehouses';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
+import { formatStockShortageLines } from '@/utils/apiError';
+
+export interface CatalogOption {
+  optionId: number;
+  optionName: string;
+}
+
+export interface CatalogAttribute {
+  attributeId: number;
+  attributeName: string;
+  options: CatalogOption[];
+}
+
+export type Selection = Record<number, number>;
+
+export type OptionState = 'ok' | 'low' | 'out' | 'notSet';
+
+export interface OptionStatus {
+  state: OptionState;
+  best: number | null;
+  required: number | null;
+  selected: boolean;
+}
+
+const byName = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+export function sortedCatalog(attributes: CatalogAttribute[]): CatalogAttribute[] {
+  return [...attributes]
+    .sort(
+      (a, b) =>
+        byName(a.attributeName, b.attributeName) || a.attributeId - b.attributeId,
+    )
+    .map((attribute) => ({
+      ...attribute,
+      options: [...attribute.options].sort(
+        (a, b) => byName(a.optionName, b.optionName) || a.optionId - b.optionId,
+      ),
+    }));
+}
+
+export function comboKeyOf(optionIds: readonly number[]): string {
+  return [...optionIds].sort((a, b) => a - b).join('-');
+}
+
+export function optionStatus({
+  variants,
+  attribute,
+  optionId,
+  selection,
+}: {
+  variants: VariantAvailability[];
+  attribute: CatalogAttribute;
+  optionId: number;
+  selection: Selection;
+}): OptionStatus {
+  const selected = selection[attribute.attributeId] === optionId;
+  const otherSelections = Object.entries(selection)
+    .filter(([attributeId]) => Number(attributeId) !== attribute.attributeId)
+    .map(([, selectedOptionId]) => selectedOptionId);
+  const candidates = variants.filter(
+    (variant) =>
+      variant.options.some((option) => option.optionId === optionId) &&
+      otherSelections.every((selectedOptionId) =>
+        variant.options.some((option) => option.optionId === selectedOptionId),
+      ),
+  );
+  const measured = candidates.filter((variant) => variant.available !== null);
+
+  if (measured.length === 0) {
+    const noWarehouse =
+      variants.length > 0 && variants.every((variant) => variant.available === null);
+    return {
+      state: noWarehouse ? 'notSet' : 'out',
+      best: null,
+      required: null,
+      selected,
+    };
+  }
+
+  const bestRow = measured.reduce((best, variant) =>
+    (variant.available ?? 0) > (best.available ?? 0) ? variant : best,
+  );
+  const best = bestRow.available ?? 0;
+  const covered = measured.some(
+    (variant) => (variant.available ?? 0) >= variant.required,
+  );
+  const state: OptionState = covered ? 'ok' : best > 0 ? 'low' : 'out';
+  return { state, best, required: bestRow.required, selected };
+}
+
+export function exactVariantFor(
+  variants: VariantAvailability[],
+  selection: Selection,
+  attributeCount: number,
+): VariantAvailability | null {
+  const selectedIds = Object.values(selection);
+  if (selectedIds.length !== attributeCount) return null;
+  return (
+    variants.find(
+      (variant) =>
+        variant.options.length === attributeCount &&
+        selectedIds.every((optionId) =>
+          variant.options.some((option) => option.optionId === optionId),
+        ),
+    ) ?? null
+  );
+}
+
+export function selectionLabel(
+  attributes: CatalogAttribute[],
+  selection: Selection,
+): string | null {
+  const sorted = sortedCatalog(attributes);
+  if (sorted.length === 0) return null;
+  const names: string[] = [];
+  for (const attribute of sorted) {
+    const optionId = selection[attribute.attributeId];
+    const option = attribute.options.find((item) => item.optionId === optionId);
+    if (!option) return null;
+    names.push(option.optionName);
+  }
+  return names.join(' / ');
+}
+
+export function draftFromLines(
+  lines: { optionIds: number[]; quantity: number }[],
+  attributeCount: number,
+): { draft: Record<string, number>; excluded: number } {
+  const draft: Record<string, number> = {};
+  let excluded = 0;
+  for (const line of lines) {
+    if (line.optionIds.length !== attributeCount) {
+      excluded += 1;
+      continue;
+    }
+    if (line.quantity < 1) continue;
+    const key = comboKeyOf(line.optionIds);
+    draft[key] = (draft[key] ?? 0) + line.quantity;
+  }
+  return { draft, excluded };
+}
+
+export function refusalTextFor({
+  refusal,
+  productName,
+  row,
+}: {
+  refusal: AvailabilityRefusal;
+  productName: string;
+  row: VariantAvailability;
+}): string {
+  const locale = readStoredLocale();
+  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET') {
+    return translate(locale, 'orderDetails.stock.availableWarehouseNotSet');
+  }
+  const lines = formatStockShortageLines([
+    {
+      variantId: row.variantId,
+      productName,
+      variantLabel: row.variantLabel,
+      required: row.required,
+      available: row.available ?? 0,
+    },
+  ]);
+  return `${translate(locale, 'stockShortage.confirmBlocked')}\n${lines}`;
+}
