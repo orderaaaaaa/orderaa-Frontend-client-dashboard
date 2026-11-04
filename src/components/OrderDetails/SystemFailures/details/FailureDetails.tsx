@@ -13,9 +13,13 @@ import type {
   OrderSystemFailure,
   ShipmentCarrierSendDetails,
 } from '@/types/orderSystemFailures';
-import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
+import {
+  AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
+  AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+} from '@/lib/api/stockShortage';
 import { formatStockShortageLines } from '@/utils/apiError';
 import CopyableCode from '@/components/ui/copyable-code';
+import { AvailableStockWouldGoNegativeNotice } from './AvailableStockWouldGoNegativeNotice';
 import { AvailableWarehouseNotSetNotice } from './AvailableWarehouseNotSetNotice';
 import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
@@ -258,6 +262,9 @@ export function FailureDetails({
     case 'MACHINE_TRANSITION_STOCK_SHORTAGE':
       if (narrowed.details.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
         return <AvailableWarehouseNotSetNotice />;
+      }
+      if (narrowed.details.errorCode === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) {
+        return <AvailableStockWouldGoNegativeNotice />;
       }
       return failure.details ? <GenericDetails details={failure.details} /> : null;
     case 'SCHEDULED_TRANSITION_FAILED':

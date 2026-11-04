@@ -1,6 +1,10 @@
 import { FAILURE_REASON_KIND_LABELS } from '@/constants/orderSystemFailures';
-import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
+import {
+  AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
+  AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+} from '@/lib/api/stockShortage';
 import type { ShipmentDispatchFailureReason } from '@/types/orderSystemFailures';
+import { AvailableStockWouldGoNegativeNotice } from './AvailableStockWouldGoNegativeNotice';
 import { AvailableWarehouseNotSetNotice } from './AvailableWarehouseNotSetNotice';
 import { DetailField, DetailGrid } from './DetailFields';
 import { StockShortageDetails } from './StockShortageDetails';
@@ -23,6 +27,8 @@ export function FailureReasonDetails({ reason }: { reason: ShipmentDispatchFailu
       {reason.kind === 'REJECTED' &&
         (reason.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE ? (
           <AvailableWarehouseNotSetNotice />
+        ) : reason.errorCode === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE ? (
+          <AvailableStockWouldGoNegativeNotice />
         ) : (
           <DetailGrid>
             <DetailField label="رمز الخطأ" ltr>

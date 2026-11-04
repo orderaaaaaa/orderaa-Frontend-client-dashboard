@@ -335,14 +335,26 @@ export interface StockMovementAllBypassedDetails {
   lines: StockMovementBypassedLine[];
 }
 
-export interface StockTransitionBlockedDetails {
+interface StockTransitionBlockedBase {
   fromStatus: string;
   toStatus: string;
   ruleId: number | null;
   warehouseName: string | null;
-  lines?: FailureStockShortageLine[] | AvailableStockRefusalLine[];
-  errorCode?: string | null;
 }
+
+export type StockTransitionRefusalDetails = StockTransitionBlockedBase & {
+  errorCode: 'AVAILABLE_STOCK_WOULD_GO_NEGATIVE';
+  lines?: AvailableStockRefusalLine[];
+};
+
+export type StockTransitionShortageDetails = StockTransitionBlockedBase & {
+  errorCode?: string | null;
+  lines?: FailureStockShortageLine[];
+};
+
+export type StockTransitionBlockedDetails =
+  | StockTransitionRefusalDetails
+  | StockTransitionShortageDetails;
 
 export type MachineShortageJob =
   | 'SCHEDULED'

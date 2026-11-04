@@ -200,6 +200,8 @@ const ar = {
   'stockShortage.bulkWarningTitle':
     'تم التأكيد، لكن رصيد «{warehouse}» (المخزن المتاح) أصبح سالبًا لهذه الطلبات:',
   'stockShortage.submitBlocked': 'لا يمكن الإرسال لأن أحد المنتجات لا يكفيه «المخزن المتاح»، عدّل المنتج أو الكمية.',
+  'stockShortage.availableWouldGoNegativeNoWarehouse': 'لا يمكن تنفيذ هذا الإجراء لأن رصيد المخزن المتاح سيصبح أقل من صفر:',
+  'stockShortage.bulkWarningLineNoVariant': '#{order} {product}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
   'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
   'stockShortage.returnLine': '{label}: مطلوب {required}، المتاح {available} في {warehouse}',
   'returnStock.exceedsAvailable': 'الكمية أكبر من المتاح',

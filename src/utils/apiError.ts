@@ -247,23 +247,25 @@ export type OutOfStockBlock =
       lines: AvailableStockRefusalLine[];
     };
 
-export function formatAvailableStockLines(lines: AvailableStockRefusalLine[]): string {
+const signedChange = (change: number): string => (change > 0 ? `+${change}` : String(change));
+
+export function availableStockLineText(line: AvailableStockRefusalLine): string {
   const locale = readStoredLocale();
-  return lines
-    .map((line) =>
-      translate(
-        locale,
-        line.variantLabel ? 'stockShortage.availableLine' : 'stockShortage.availableLineNoVariant',
-        {
-          product: line.productName,
-          variant: line.variantLabel,
-          available: line.available,
-          change: line.change,
-          after: line.after,
-        }
-      )
-    )
-    .join('\n');
+  return translate(
+    locale,
+    line.variantLabel ? 'stockShortage.availableLine' : 'stockShortage.availableLineNoVariant',
+    {
+      product: line.productName,
+      variant: line.variantLabel,
+      available: line.available,
+      change: signedChange(line.change),
+      after: line.after,
+    }
+  );
+}
+
+export function formatAvailableStockLines(lines: AvailableStockRefusalLine[]): string {
+  return lines.map(availableStockLineText).join('\n');
 }
 
 export function formatBulkStockWarnings(
@@ -276,14 +278,18 @@ export function formatBulkStockWarnings(
   });
   const rows = warnings.flatMap((warning) =>
     warning.lines.map((line) =>
-      translate(locale, 'stockShortage.bulkWarningLine', {
-        order: warning.id,
-        product: line.productName,
-        variant: line.variantLabel,
-        available: line.available,
-        change: line.change,
-        after: line.after,
-      })
+      translate(
+        locale,
+        line.variantLabel ? 'stockShortage.bulkWarningLine' : 'stockShortage.bulkWarningLineNoVariant',
+        {
+          order: warning.id,
+          product: line.productName,
+          variant: line.variantLabel,
+          available: line.available,
+          change: signedChange(line.change),
+          after: line.after,
+        }
+      )
     )
   );
   return [title, ...rows].join('\n');

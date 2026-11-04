@@ -187,6 +187,8 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.bulkWarningTitle':
     'Confirmed, but the balance of "{warehouse}" (available-stock warehouse) went negative for these orders:',
   'stockShortage.submitBlocked': 'Cannot submit: a product is not covered by the available-stock warehouse. Change the product or quantity.',
+  'stockShortage.availableWouldGoNegativeNoWarehouse': 'This action cannot be completed because the available-stock warehouse balance would drop below zero:',
+  'stockShortage.bulkWarningLineNoVariant': '#{order} {product}: available {available}, change {change}, after {after}',
   'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: available {available}, change {change}, after {after}',
   'stockShortage.returnLine': '{label}: required {required}, available {available} in {warehouse}',
   'returnStock.exceedsAvailable': 'Quantity exceeds available stock',
