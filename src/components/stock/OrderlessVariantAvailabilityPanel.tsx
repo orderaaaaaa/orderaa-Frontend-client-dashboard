@@ -49,8 +49,8 @@ export function OrderlessVariantAvailabilityPanel({
       selection={selection}
       onChange={onChange}
       isLoading={catalog.isLoading}
-      isError={catalog.isError}
-      catalogError={catalog.isError ? catalog.error : null}
+      isError={catalog.isLoadingError}
+      catalogError={catalog.isLoadingError ? catalog.error : null}
       onCatalogRetry={() => void catalog.refetch()}
       availabilityLoading={availability.isLoading}
       availabilityError={availability.isError ? availability.error : null}

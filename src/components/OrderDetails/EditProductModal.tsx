@@ -57,7 +57,7 @@ export default function EditProductModal({
   const {
     data: variantOptions = [],
     isLoading,
-    isError: isErrorCatalog,
+    isLoadingError: isErrorCatalog,
     error: catalogError,
     refetch: refetchCatalog,
   } = useProductVariantsOptions(isOpen ? productId : null);

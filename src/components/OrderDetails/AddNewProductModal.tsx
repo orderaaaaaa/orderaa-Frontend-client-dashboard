@@ -73,7 +73,7 @@ export default function AddNewProductModal({
   const {
     data: variantOptions = [],
     isLoading: isLoadingVariants,
-    isError: isErrorVariants,
+    isLoadingError: isErrorVariants,
     error: errorVariants,
     refetch: refetchVariants,
   } = useProductVariantsOptions(selectedProduct?.id ?? null);
