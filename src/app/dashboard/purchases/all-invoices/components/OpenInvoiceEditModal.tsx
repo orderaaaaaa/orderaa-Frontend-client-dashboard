@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { formatMoney } from '@/utils/formatMoney';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -328,6 +329,11 @@ export function OpenInvoiceEditModal({ isOpen, onClose, invoice }: OpenInvoiceEd
               onChange={(event) => setPaymentText(event.target.value)}
               dir="ltr"
             />
+            {(invoice.settledAmount ?? 0) !== 0 && (
+              <span className="text-xs text-muted-foreground">
+                مدفوعات مرتبطة: {formatMoney(String(invoice.settledAmount ?? 0))}
+              </span>
+            )}
           </label>
         )}
 
