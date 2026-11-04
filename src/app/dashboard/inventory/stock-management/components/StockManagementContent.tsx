@@ -287,7 +287,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-card shadow-sm p-3 md:flex-row md:flex-wrap md:items-center md:border-0 md:bg-transparent md:shadow-none md:p-0">
           <div className="relative w-full px-1 md:w-auto md:min-w-[12rem] md:flex-1">
-            <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10" />
+            <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-(--z-raised)" />
             <Input
               value={filters.searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
