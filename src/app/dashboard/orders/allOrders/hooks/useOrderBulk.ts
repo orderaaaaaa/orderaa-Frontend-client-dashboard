@@ -6,6 +6,7 @@ import {
 import { toast } from 'react-toastify';
 import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { bulkOrders } from '../api/orders';
+import { formatBulkStockWarnings } from '@/utils/apiError';
 import type { BulkRequest, BulkUpdateResponse } from '../types/Bulk';
 
 export const useBulkOrders = (
@@ -27,6 +28,9 @@ export const useBulkOrders = (
       bulkOrders(payload, currentStatus),
     onSuccess: async (data, ...rest) => {
       for (const item of data.refused) toast.warning(item.message);
+      if (data.warnings && data.warnings.length > 0) {
+        toast.warning(formatBulkStockWarnings(data.warnings));
+      }
       await invalidateAndWait(queryClient, orderStatusKeys());
       await options?.onSuccess?.(data, ...rest);
     },

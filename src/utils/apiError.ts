@@ -266,6 +266,29 @@ export function formatAvailableStockLines(lines: AvailableStockRefusalLine[]): s
     .join('\n');
 }
 
+export function formatBulkStockWarnings(
+  warnings: { id: number; warehouseName: string; lines: AvailableStockRefusalLine[] }[]
+): string {
+  if (warnings.length === 0) return '';
+  const locale = readStoredLocale();
+  const title = translate(locale, 'stockShortage.bulkWarningTitle', {
+    warehouse: warnings[0].warehouseName,
+  });
+  const rows = warnings.flatMap((warning) =>
+    warning.lines.map((line) =>
+      translate(locale, 'stockShortage.bulkWarningLine', {
+        order: warning.id,
+        product: line.productName,
+        variant: line.variantLabel,
+        available: line.available,
+        change: line.change,
+        after: line.after,
+      })
+    )
+  );
+  return [title, ...rows].join('\n');
+}
+
 function availableStockRefusalText(
   warehouseName: string,
   lines: AvailableStockRefusalLine[]
