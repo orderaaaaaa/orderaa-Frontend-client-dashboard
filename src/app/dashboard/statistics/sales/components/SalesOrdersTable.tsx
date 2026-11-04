@@ -176,7 +176,7 @@ export function salesOrderExportValue(row: SalesOrderRow, column: SalesOrderColu
 }
 
 function isCopyableColumn(set: SalesOrderSet, column: SalesOrderColumn): boolean {
-  if (column === 'code' || column === 'settlementCode' || column === 'customerPhone') return true;
+  if (column === 'code' || column === 'settlementCode') return true;
   if (column === 'shippingCode') return set !== 'RETURNS';
   return false;
 }
