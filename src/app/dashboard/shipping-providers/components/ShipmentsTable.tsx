@@ -172,9 +172,9 @@ export function CustomerCell({
   return (
     <div className="flex min-w-max flex-col items-start gap-1">
       <span className="block max-w-32 truncate font-medium" title={name ?? undefined}>{name ?? '—'}</span>
-      <div className="flex items-center gap-1 max-sm:gap-6">
-        <PhoneCell phones={phones} />
+      <div className="flex items-center gap-1.5">
         <WhatsAppLink template={whatsapp} />
+        <PhoneCell phones={phones} />
       </div>
     </div>
   );
