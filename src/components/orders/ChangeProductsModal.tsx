@@ -372,7 +372,10 @@ export default function ChangeProductsModal({
                         className="flex flex-col gap-3 p-3 rounded-lg border border-border"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                          <span
+                            title={line.name}
+                            className="text-sm font-medium text-foreground line-clamp-2 break-words flex-1 min-w-0"
+                          >
                             {line.name}
                           </span>
                           <div className="flex items-center gap-1 shrink-0">
