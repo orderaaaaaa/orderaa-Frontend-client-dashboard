@@ -15,3 +15,11 @@ export const formatArabicCount = (count: number, forms: ArabicCountForms): strin
   if (tail >= 11) return `${count} ${forms.many}`;
   return `${count} ${forms.singular}`;
 };
+
+export const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
+  one: 'طلب واحد',
+  two: 'طلبين',
+  few: 'طلبات',
+  many: 'طلبًا',
+  singular: 'طلب',
+};

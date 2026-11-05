@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { CREATED_ORDER_COUNT_FORMS, formatArabicCount } from '@/utils/arabicCount';
 
 // Mock data - replace with your actual data
 const Result = {
@@ -56,13 +57,13 @@ const ResultFileUpload = () => {
               </h1>
               <CheckCircle className="w-6 h-6 text-[#2DB742]" />
               <div className="text-3xl font-bold text-[#2DB742]">
-                {Result.success} طلب بنجاح
+                {formatArabicCount(Result.success, CREATED_ORDER_COUNT_FORMS)} بنجاح
               </div>
             </div>
           </div>
           <div className="mt-4 max-sm:text-center">
             <p className="text-[#F61515] dark:text-danger-text font-bold text-[22px]">
-              يوجد {Result.failed} طلبات بها أخطاء
+              يوجد {formatArabicCount(Result.failed, CREATED_ORDER_COUNT_FORMS)} بها أخطاء
             </p>
           </div>
         </div>

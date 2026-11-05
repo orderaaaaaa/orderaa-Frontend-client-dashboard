@@ -8,7 +8,11 @@ import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { useAuthStore } from '@/store/authStore';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
-import { formatArabicCount, type ArabicCountForms } from '@/utils/arabicCount';
+import {
+  CREATED_ORDER_COUNT_FORMS,
+  formatArabicCount,
+  type ArabicCountForms,
+} from '@/utils/arabicCount';
 
 type UploadStage = 'reading' | 'importing';
 
@@ -169,7 +173,7 @@ const FileUpload = () => {
     stage === 'reading'
       ? 'جاري قراءة الملف والتحقق من الصفوف...'
       : stage === 'importing'
-        ? `جاري إنشاء ${importCount} طلب في النظام...`
+        ? `جاري إنشاء ${formatArabicCount(importCount, CREATED_ORDER_COUNT_FORMS)} في النظام...`
         : null;
 
   return (

@@ -9,7 +9,11 @@ import type {
   OrderCreationResult,
 } from '@/lib/api/bulk-import';
 import { carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
-import { formatArabicCount, type ArabicCountForms } from '@/utils/arabicCount';
+import {
+  CREATED_ORDER_COUNT_FORMS,
+  formatArabicCount,
+  type ArabicCountForms,
+} from '@/utils/arabicCount';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 
 type StoredResults = {
@@ -51,14 +55,6 @@ const ROW_ORDINALS = [
 const MISSING_ORDER_COUNT_FORMS: ArabicCountForms = {
   one: 'طلب واحد',
   two: 'طلبان',
-  few: 'طلبات',
-  many: 'طلبًا',
-  singular: 'طلب',
-};
-
-const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
-  one: 'طلب واحد',
-  two: 'طلبين',
   few: 'طلبات',
   many: 'طلبًا',
   singular: 'طلب',
