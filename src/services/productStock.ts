@@ -107,9 +107,38 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
     [flattened, t]
   );
 
+  const allowedIds = useMemo<Set<number>>(
+    () =>
+      new Set(
+        cards
+          .filter((card) => card.isActive && card.allowManualTransfer)
+          .map((card) => card.id)
+      ),
+    [cards]
+  );
+
+  const movePickerOptions = useMemo<WarehouseOption[]>(
+    () =>
+      flattened
+        .filter(({ card }) => allowedIds.has(card.id))
+        .map(({ card, isChild }) => ({
+          key: String(card.id),
+          value: label(card, isChild),
+        })),
+    [flattened, allowedIds]
+  );
+
+  const isMoveAllowed = (id: number) => allowedIds.has(id);
+
+  const hasMovePartner = (id: number) =>
+    allowedIds.size > (allowedIds.has(id) ? 1 : 0);
+
   return {
     options: optionsList,
     pickerOptions,
+    movePickerOptions,
+    isMoveAllowed,
+    hasMovePartner,
     isLoading: summaryQuery.isLoading,
     isError: summaryQuery.isError,
     onRetry: () => void summaryQuery.refetch(),

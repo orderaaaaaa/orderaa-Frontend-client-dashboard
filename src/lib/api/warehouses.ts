@@ -147,6 +147,7 @@ export interface WarehouseSummaryCard {
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
   showOnlyExistingItems: boolean;
+  allowManualTransfer: boolean;
   lowStockVariantCount: number | null;
   outOfStockVariantCount: number | null;
 }
