@@ -64,6 +64,20 @@ const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
   many: 'طلبًا',
 };
 
+const VALID_ORDER_COUNT_FORMS: ArabicCountForms = {
+  one: 'طلب واحد صالح',
+  two: 'طلبان صالحان',
+  few: 'طلبات صالحة',
+  many: 'طلبًا صالحًا',
+};
+
+const ISSUE_ORDER_COUNT_FORMS: ArabicCountForms = {
+  one: 'طلب واحد به',
+  two: 'طلبان بهما',
+  few: 'طلبات بها',
+  many: 'طلبًا بها',
+};
+
 const rowLabel = (rowIndex: number) =>
   ROW_ORDINALS[rowIndex - 1] ?? `رقم ${rowIndex}`;
 
@@ -238,7 +252,7 @@ export default function ValidationResultsPage() {
               <p className="text-base sm:text-lg text-gray-600 mb-8">
                 {imported
                   ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)} في النظام`
-                  : `جميع الـ ${results.successCount} طلب صالحة. ارفع الملف مرة أخرى لإنشائها`}
+                  : `جميع الطلبات صالحة (${results.successCount}). ارفع الملف مرة أخرى لإنشائها`}
               </p>
               {carrierUnsentLine}
               <div className="flex flex-wrap gap-3 justify-center">
@@ -274,7 +288,7 @@ export default function ValidationResultsPage() {
           </h2>
           <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
             <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
-            {imported ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}` : `${results.successCount} طلب صالح`}
+            {imported ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}` : formatArabicCount(results.successCount, VALID_ORDER_COUNT_FORMS)}
           </span>
         </div>
 
@@ -283,8 +297,8 @@ export default function ValidationResultsPage() {
         {failedCount > 0 && (
           <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004] dark:text-danger-text">
             {imported
-              ? `تعذر إنشاء ${failedCount} طلب`
-              : `يوجد ${failedCount} طلبات بها أخطاء`}
+              ? `تعذر إنشاء ${formatArabicCount(failedCount, CREATED_ORDER_COUNT_FORMS)}`
+              : `يوجد ${formatArabicCount(failedCount, ISSUE_ORDER_COUNT_FORMS)} أخطاء`}
           </p>
         )}
 
