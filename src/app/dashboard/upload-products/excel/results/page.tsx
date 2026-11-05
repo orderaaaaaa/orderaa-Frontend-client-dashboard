@@ -53,6 +53,7 @@ const MISSING_ORDER_COUNT_FORMS: ArabicCountForms = {
   two: 'طلبان',
   few: 'طلبات',
   many: 'طلبًا',
+  singular: 'طلب',
 };
 
 const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
@@ -60,6 +61,7 @@ const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
   two: 'طلبين',
   few: 'طلبات',
   many: 'طلبًا',
+  singular: 'طلب',
 };
 
 const rowLabel = (rowIndex: number) =>
@@ -211,7 +213,7 @@ export default function ValidationResultsPage() {
       </button>
     ) : null;
 
-  if (failedCount === 0 && missingRows.length === 0) {
+  if (failedCount === 0 && missingRows.length === 0 && createdCount > 0) {
     return (
       <div className="w-full bg-card px-4 py-6 sm:p-6" dir="rtl">
         <div className="flex items-center justify-center py-6 sm:py-12">
@@ -245,7 +247,9 @@ export default function ValidationResultsPage() {
           </h2>
           <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
             <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
-            {`تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}`}
+            {createdCount > 0
+              ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}`
+              : 'لم يتم إنشاء أي طلب'}
           </span>
         </div>
 

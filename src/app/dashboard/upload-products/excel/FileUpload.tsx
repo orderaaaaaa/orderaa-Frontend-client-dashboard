@@ -17,6 +17,7 @@ const ROW_COUNT_FORMS: ArabicCountForms = {
   two: 'صفين',
   few: 'صفوف',
   many: 'صفًا',
+  singular: 'صف',
 };
 
 const ARABIC_PATTERN = /[؀-ۿ]/;
