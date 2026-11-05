@@ -6,6 +6,7 @@ import { StockPageHeader } from '@/components/stock/StockPageHeader';
 import { EmptyState } from '@/components/ui/state-panels';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { useStockWarehouseOptions } from '@/services/productStock';
 import { OperationsProductPanel } from './OperationsProductPanel';
 import { OperationsProductTable } from './OperationsProductTable';
 import { OperationsWarehousePicker } from './OperationsWarehousePicker';
@@ -26,6 +27,16 @@ export function OperationsContent() {
   const canTransfer = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_TRANSFER);
   const canAdjust = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
   const canHistory = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_HISTORY_READ);
+  const canReadStock = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const stockOptions = useStockWarehouseOptions({ enabled: canReadStock });
+  const canMove =
+    canTransfer &&
+    canReadStock &&
+    !stockOptions.isLoading &&
+    !stockOptions.isError &&
+    warehouseId !== null &&
+    stockOptions.isMoveAllowed(warehouseId) &&
+    stockOptions.hasMovePartner(warehouseId);
 
   const updateParams = useCallback(
     (patch: Record<string, number | null>) => {
@@ -74,7 +85,7 @@ export function OperationsContent() {
           warehouseId={warehouseId}
           selectedProductId={productId}
           onSelectProduct={(id) => updateParams({ productId: id, variantId: null })}
-          canTransfer={canTransfer}
+          canTransfer={canMove}
           canAdjust={canAdjust}
         />
       )}

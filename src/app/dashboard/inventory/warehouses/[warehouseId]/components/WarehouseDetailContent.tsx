@@ -22,6 +22,7 @@ import {
   useWarehouseSummaryQuery,
 } from '@/services/warehouses';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { useStockWarehouseOptions } from '@/services/productStock';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { variantPlainLabel } from '@/lib/variantOptionLabel';
@@ -63,6 +64,14 @@ export function WarehouseDetailContent({
     enabled: !canReadWarehouses && canReadStock,
   });
   const summaryName = summaryCards?.find((card) => card.id === warehouseId)?.name;
+  const stockOptions = useStockWarehouseOptions({ enabled: canReadStock });
+  const canMove =
+    canTransfer &&
+    canReadStock &&
+    !stockOptions.isLoading &&
+    !stockOptions.isError &&
+    stockOptions.isMoveAllowed(warehouseId) &&
+    stockOptions.hasMovePartner(warehouseId);
   const debouncedSearch = useDebounce(search, 400);
   const {
     data: stock,
@@ -168,7 +177,7 @@ export function WarehouseDetailContent({
               تسوية المخزون
             </Button>
           )}
-          {canTransfer && (
+          {canMove && (
             <Button
               disabled={selectedItems.length === 0}
               onClick={() => setIsTransferOpen(true)}

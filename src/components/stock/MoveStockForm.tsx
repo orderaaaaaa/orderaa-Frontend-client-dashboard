@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
@@ -11,11 +12,12 @@ import { useEntryGrid } from '@/components/stock/useEntryGrid';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
+import { TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE } from '@/lib/api/stockShortage';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { variantPlainLabel, type VariantDisplayItem } from '@/lib/variantOptionLabel';
 import { useStockWarehouseOptions } from '@/services/productStock';
-import { useTransferStockMutation } from '@/services/warehouses';
+import { invalidateStockViews, useTransferStockMutation } from '@/services/warehouses';
 import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
 
 export interface MoveStockLine {
@@ -40,6 +42,7 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
   const [attempted, setAttempted] = useState(false);
   const canReadWarehouses = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
   const destinations = useStockWarehouseOptions({ enabled: canReadWarehouses });
+  const queryClient = useQueryClient();
   const transferMutation = useTransferStockMutation();
   const { registerInput, onInputKeyDown } = useEntryGrid(
     lines.map((line) => String(line.variantId))
@@ -116,6 +119,8 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
       toast.success('تم نقل المخزون بنجاح');
       onDone();
     } catch (err: unknown) {
+      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
+      if (code === TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE) void invalidateStockViews(queryClient);
       toast.error(getApiErrorMessage(err, 'تعذر نقل المخزون'), { autoClose: 8000 });
     }
   };
@@ -142,7 +147,7 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
           <WarehouseSelect
             value={toWarehouseId}
             onChange={setToWarehouseId}
-            source={destinations}
+            source={{ ...destinations, pickerOptions: destinations.movePickerOptions }}
             disabledIds={[fromWarehouseId]}
             placeholder="اختر مخزن الوجهة"
           />
