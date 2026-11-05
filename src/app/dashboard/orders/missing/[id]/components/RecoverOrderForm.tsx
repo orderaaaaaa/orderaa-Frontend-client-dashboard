@@ -132,6 +132,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       setPendingStoreLinkMoves(null);
       const status = err?.response?.status;
       const body: unknown = err?.response?.data;
+      const fallback = 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
 
       if (status === 409 && isStoreLinkMoveConfirmationBody(body)) {
         setPendingStoreLinkMoves({ payload, moves: body.moves });
@@ -153,6 +154,11 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         return;
       }
 
+      if (isAvailabilityRefusal(err)) {
+        toast.error(getAvailabilityRefusalMessage(err, fallback));
+        return;
+      }
+
       if (
         status === 409 &&
         isMissingOrderErrorBody(body) &&
@@ -162,12 +168,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         return;
       }
 
-      const fallback = 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
-      toast.error(
-        isAvailabilityRefusal(err)
-          ? getAvailabilityRefusalMessage(err, fallback)
-          : locationSaveErrorTextOf(err, fallback),
-      );
+      toast.error(locationSaveErrorTextOf(err, fallback));
 
       if (status === 500) {
         toast.error('تواصل مع الدعم');
