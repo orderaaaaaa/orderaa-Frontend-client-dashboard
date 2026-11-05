@@ -8,8 +8,16 @@ import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { useAuthStore } from '@/store/authStore';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { formatArabicCount, type ArabicCountForms } from '@/utils/arabicCount';
 
 type UploadStage = 'reading' | 'importing';
+
+const ROW_COUNT_FORMS: ArabicCountForms = {
+  one: 'صف واحد',
+  two: 'صفين',
+  few: 'صفوف',
+  many: 'صفًا',
+};
 
 const ARABIC_PATTERN = /[؀-ۿ]/;
 
@@ -246,7 +254,7 @@ const FileUpload = () => {
 
             {stage === 'importing' && flaggedCount > 0 && (
               <p className="mb-4 text-center text-sm font-semibold text-amber-700">
-                {`سيتم نقل ${flaggedCount} صفوف إلى الطلبات الناقصة`}
+                {`سيتم نقل ${formatArabicCount(flaggedCount, ROW_COUNT_FORMS)} إلى الطلبات الناقصة`}
               </p>
             )}
 

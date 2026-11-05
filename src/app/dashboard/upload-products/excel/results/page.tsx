@@ -10,6 +10,7 @@ import type {
   OrderCreationResult,
 } from '@/lib/api/bulk-import';
 import { carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { formatArabicCount, type ArabicCountForms } from '@/utils/arabicCount';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 
 type StoredResults = UploadResult & {
@@ -48,6 +49,13 @@ const ROW_ORDINALS = [
   'الحادي عشر',
   'الثاني عشر',
 ];
+
+const MISSING_ORDER_COUNT_FORMS: ArabicCountForms = {
+  one: 'طلب واحد',
+  two: 'طلبان',
+  few: 'طلبات',
+  many: 'طلبًا',
+};
 
 const rowLabel = (rowIndex: number) =>
   ROW_ORDINALS[rowIndex - 1] ?? `رقم ${rowIndex}`;
@@ -276,7 +284,7 @@ export default function ValidationResultsPage() {
         {missingRows.length > 0 && (
           <section className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
             <h3 className="mb-2 font-bold text-amber-800">
-              {`طلبات في قائمة المفقودات: ${backend?.missingCount ?? missingRows.length}`}
+              {`${formatArabicCount(backend?.missingCount ?? missingRows.length, MISSING_ORDER_COUNT_FORMS)} في قائمة المفقودات`}
             </h3>
             <ul className="mb-3 space-y-1 text-sm leading-6 text-amber-900">
               {missingRows.map((row) => (
