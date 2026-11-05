@@ -175,6 +175,7 @@ export default function ValidationResultsPage() {
   const createdCount = backend.successCount;
   const failedOrders = backend.failedOrders;
   const missingRows = backend.missingRows;
+  const missingCount = backend.missingCount > 0 ? backend.missingCount : missingRows.length;
   const failedCount = backend.failureCount;
   const carrierUnsentCount = backend.createdOrders.filter((order) =>
     carrierSendNeedsAttention(order.carrierSend)
@@ -245,12 +246,17 @@ export default function ValidationResultsPage() {
           <h2 className="font-bold text-xl sm:text-[28px] leading-snug text-foreground">
             نتيجة الرفع:
           </h2>
-          <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
-            <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
-            {createdCount > 0
-              ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}`
-              : 'لم يتم إنشاء أي طلب'}
-          </span>
+          {createdCount > 0 ? (
+            <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
+              <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
+              {`تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}`}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-amber-700">
+              <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
+              لم يتم إنشاء أي طلب
+            </span>
+          )}
         </div>
 
         {carrierUnsentLine}
@@ -261,10 +267,10 @@ export default function ValidationResultsPage() {
           </p>
         )}
 
-        {missingRows.length > 0 && (
+        {missingCount > 0 && (
           <section className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
             <h3 className="mb-2 font-bold text-amber-800">
-              {`${formatArabicCount(backend?.missingCount ?? missingRows.length, MISSING_ORDER_COUNT_FORMS)} في قائمة المفقودات`}
+              {`${formatArabicCount(missingCount, MISSING_ORDER_COUNT_FORMS)} في قائمة المفقودات`}
             </h3>
             <ul className="mb-3 space-y-1 text-sm leading-6 text-amber-900">
               {missingRows.map((row) => (
