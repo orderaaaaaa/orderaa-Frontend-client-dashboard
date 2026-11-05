@@ -131,6 +131,7 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
     } catch (err: unknown) {
       if (isTransferWarehouseNotAllowed(err)) {
         setToWarehouseId(null);
+        setAttempted(false);
         void invalidateStockViews(queryClient);
       }
       toast.error(getApiErrorMessage(err, 'تعذر نقل المخزون'), { autoClose: 8000 });
