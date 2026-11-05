@@ -4,6 +4,7 @@ import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMapp
 import {
   OUTBOUND_INSUFFICIENT_STOCK_CODE,
   AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+  TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE,
   AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
   type AvailableStockRefusalLine,
   type BatchShortageOrder,
@@ -79,6 +80,11 @@ export function getInboundRuleMissingMessage(err: unknown): string | null {
   const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
   if (data?.code !== 'INBOUND_RULE_MISSING') return null;
   return translate(readStoredLocale(), 'returnStock.uncovered');
+}
+
+export function isTransferWarehouseNotAllowed(err: unknown): boolean {
+  const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
+  return data?.code === TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE;
 }
 
 export function getReturnVariantNotStockedMessage(err: unknown): string | null {

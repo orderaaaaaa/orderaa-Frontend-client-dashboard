@@ -12,13 +12,16 @@ import { useEntryGrid } from '@/components/stock/useEntryGrid';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
-import { TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE } from '@/lib/api/stockShortage';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { variantPlainLabel, type VariantDisplayItem } from '@/lib/variantOptionLabel';
 import { useStockWarehouseOptions } from '@/services/productStock';
 import { invalidateStockViews, useTransferStockMutation } from '@/services/warehouses';
-import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
+import {
+  formatStockShortageLines,
+  getApiErrorMessage,
+  isTransferWarehouseNotAllowed,
+} from '@/utils/apiError';
 
 export interface MoveStockLine {
   variantId: number;
@@ -47,6 +50,13 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
   const { registerInput, onInputKeyDown } = useEntryGrid(
     lines.map((line) => String(line.variantId))
   );
+
+  const destinationSource = {
+    ...destinations,
+    pickerOptions: destinations.movePickerOptions.filter(
+      (option) => option.key !== String(fromWarehouseId)
+    ),
+  };
 
   const rawOf = (line: MoveStockLine) => (quantities[line.variantId] ?? '').trim();
 
@@ -119,8 +129,10 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
       toast.success('تم نقل المخزون بنجاح');
       onDone();
     } catch (err: unknown) {
-      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
-      if (code === TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE) void invalidateStockViews(queryClient);
+      if (isTransferWarehouseNotAllowed(err)) {
+        setToWarehouseId(null);
+        void invalidateStockViews(queryClient);
+      }
       toast.error(getApiErrorMessage(err, 'تعذر نقل المخزون'), { autoClose: 8000 });
     }
   };
@@ -147,7 +159,7 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
           <WarehouseSelect
             value={toWarehouseId}
             onChange={setToWarehouseId}
-            source={{ ...destinations, pickerOptions: destinations.movePickerOptions }}
+            source={destinationSource}
             disabledIds={[fromWarehouseId]}
             placeholder="اختر مخزن الوجهة"
           />

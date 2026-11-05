@@ -54,6 +54,9 @@ export const useAdjustStockBatchMutation = () => {
   });
 };
 
+const warehouseLabel = (card: WarehouseSummaryCard, isChild: boolean) =>
+  isChild ? `— ${card.name}` : card.name;
+
 export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
   const { t } = useI18n();
   const summaryQuery = useWarehouseSummaryQuery({ enabled: options?.enabled ?? true });
@@ -80,14 +83,11 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
     return rows;
   }, [cards]);
 
-  const label = (card: WarehouseSummaryCard, isChild: boolean) =>
-    isChild ? `— ${card.name}` : card.name;
-
   const optionsList = useMemo<WarehouseOption[]>(
     () =>
       flattened.map(({ card, isChild }) => ({
         key: String(card.id),
-        value: label(card, isChild),
+        value: warehouseLabel(card, isChild),
       })),
     [flattened]
   );
@@ -95,7 +95,7 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
   const pickerOptions = useMemo<WarehouseOption[]>(
     () =>
       flattened.map(({ card, isChild }) => {
-        const name = label(card, isChild);
+        const name = warehouseLabel(card, isChild);
         return card.isActive
           ? { key: String(card.id), value: name }
           : {
@@ -123,7 +123,7 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
         .filter(({ card }) => allowedIds.has(card.id))
         .map(({ card, isChild }) => ({
           key: String(card.id),
-          value: label(card, isChild),
+          value: warehouseLabel(card, isChild),
         })),
     [flattened, allowedIds]
   );
