@@ -254,7 +254,7 @@ const FileUpload = () => {
 
             {stage === 'importing' && flaggedCount > 0 && (
               <p className="mb-4 text-center text-sm font-semibold text-amber-700">
-                {`سيتم نقل ${formatArabicCount(flaggedCount, ROW_COUNT_FORMS)} إلى الطلبات الناقصة`}
+                {`قد يُنقل حتى ${formatArabicCount(flaggedCount, ROW_COUNT_FORMS)} إلى قائمة المفقودات`}
               </p>
             )}
 
