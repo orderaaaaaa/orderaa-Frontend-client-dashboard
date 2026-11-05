@@ -130,7 +130,6 @@ const FileUpload = () => {
       };
 
       sessionStorage.setItem('excelValidationResults', JSON.stringify(combinedResults));
-      sessionStorage.removeItem('excelValidationOnly');
 
       router.push(`/dashboard/upload-products/excel/results`);
     } catch (err: any) {

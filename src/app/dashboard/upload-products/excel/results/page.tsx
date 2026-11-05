@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
-import { UploadResult } from '@/types/excel-upload';
 import type {
   BulkImportMissingRow,
   BulkImportResponse,
@@ -13,9 +12,8 @@ import { carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { formatArabicCount, type ArabicCountForms } from '@/utils/arabicCount';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 
-type StoredResults = UploadResult & {
-  backendResponse?: BulkImportResponse;
-  imported?: boolean;
+type StoredResults = {
+  backendResponse: BulkImportResponse;
 };
 
 interface RowProblem {
@@ -64,20 +62,6 @@ const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
   many: 'طلبًا',
 };
 
-const VALID_ORDER_COUNT_FORMS: ArabicCountForms = {
-  one: 'طلب واحد صالح',
-  two: 'طلبان صالحان',
-  few: 'طلبات صالحة',
-  many: 'طلبًا صالحًا',
-};
-
-const ISSUE_ORDER_COUNT_FORMS: ArabicCountForms = {
-  one: 'طلب واحد به',
-  two: 'طلبان بهما',
-  few: 'طلبات بها',
-  many: 'طلبًا بها',
-};
-
 const rowLabel = (rowIndex: number) =>
   ROW_ORDINALS[rowIndex - 1] ?? `رقم ${rowIndex}`;
 
@@ -85,10 +69,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
 const isStoredResults = (value: unknown): value is StoredResults =>
-  isRecord(value) &&
-  typeof value.successCount === 'number' &&
-  typeof value.errorCount === 'number' &&
-  Array.isArray(value.invalidOrders);
+  isRecord(value) && isRecord(value.backendResponse) && isRecord(value.backendResponse.data);
 
 const readStoredResults = (json: string): StoredResults | null => {
   try {
@@ -164,7 +145,6 @@ export default function ValidationResultsPage() {
 
   const clearAndGo = (path: string) => {
     sessionStorage.removeItem('excelValidationResults');
-    sessionStorage.removeItem('excelValidationOnly');
     router.push(path);
   };
 
@@ -189,17 +169,14 @@ export default function ValidationResultsPage() {
     );
   }
 
-  const imported = !!results.imported;
-  const backend = results.backendResponse?.data;
-  const createdCount = imported ? backend?.successCount ?? 0 : results.successCount;
-  const failedOrders = imported ? backend?.failedOrders ?? [] : [];
-  const missingRows = imported ? backend?.missingRows ?? [] : [];
-  const failedCount = imported
-    ? backend?.failureCount ?? failedOrders.length
-    : results.errorCount;
-  const carrierUnsentCount = imported
-    ? (backend?.createdOrders ?? []).filter((order) => carrierSendNeedsAttention(order.carrierSend)).length
-    : 0;
+  const backend = results.backendResponse.data;
+  const createdCount = backend.successCount;
+  const failedOrders = backend.failedOrders;
+  const missingRows = backend.missingRows;
+  const failedCount = backend.failureCount;
+  const carrierUnsentCount = backend.createdOrders.filter((order) =>
+    carrierSendNeedsAttention(order.carrierSend)
+  ).length;
   const carrierUnsentLine =
     carrierUnsentCount > 0 ? (
       <p className="font-semibold text-amber-700">
@@ -207,15 +184,10 @@ export default function ValidationResultsPage() {
       </p>
     ) : null;
 
-  const problems: RowProblem[] = imported
-    ? failedOrders.map((failure) => ({
-        rowIndex: failure.rowIndex,
-        messages: failureMessages(failure),
-      }))
-    : results.invalidOrders.map((order) => ({
-        rowIndex: order.rowIndex,
-        messages: order.errors.map((error) => error.message),
-      }));
+  const problems: RowProblem[] = failedOrders.map((failure) => ({
+    rowIndex: failure.rowIndex,
+    messages: failureMessages(failure),
+  }));
 
   const newUploadButton = (
     <button
@@ -229,7 +201,7 @@ export default function ValidationResultsPage() {
   );
 
   const viewOrdersButton =
-    imported && createdCount > 0 ? (
+    createdCount > 0 ? (
       <button
         type="button"
         onClick={() => clearAndGo('/dashboard/orders/allOrders')}
@@ -247,12 +219,10 @@ export default function ValidationResultsPage() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-5 sm:p-8">
               <CheckCircle2 className="w-16 h-16 sm:w-20 sm:h-20 text-green-500 mx-auto mb-6" />
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                {imported ? 'تم إنشاء جميع الطلبات بنجاح!' : 'تم التحقق من جميع الطلبات بنجاح!'}
+                تم إنشاء جميع الطلبات بنجاح!
               </h2>
               <p className="text-base sm:text-lg text-gray-600 mb-8">
-                {imported
-                  ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)} في النظام`
-                  : `جميع الطلبات صالحة (${results.successCount}). ارفع الملف مرة أخرى لإنشائها`}
+                {`تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)} في النظام`}
               </p>
               {carrierUnsentLine}
               <div className="flex flex-wrap gap-3 justify-center">
@@ -269,26 +239,13 @@ export default function ValidationResultsPage() {
   return (
     <div className="w-full bg-card px-4 py-6 sm:p-6" dir="rtl">
       <div className="max-w-[656px] w-full">
-        {!imported && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-2 text-blue-800">
-              <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="font-medium">
-                لم يتم إنشاء أي طلب. صحّح الصفوف التالية في الملف ثم ارفعه مرة أخرى.
-              </span>
-            </div>
-          </div>
-        )}
-
         <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
           <h2 className="font-bold text-xl sm:text-[28px] leading-snug text-foreground">
-            {imported ? 'نتيجة الرفع:' : 'نتيجة التحقق:'}
+            نتيجة الرفع:
           </h2>
           <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
             <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
-            {imported ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}` : formatArabicCount(results.successCount, VALID_ORDER_COUNT_FORMS)}
+            {`تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}`}
           </span>
         </div>
 
@@ -296,9 +253,7 @@ export default function ValidationResultsPage() {
 
         {failedCount > 0 && (
           <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004] dark:text-danger-text">
-            {imported
-              ? `تعذر إنشاء ${formatArabicCount(failedCount, CREATED_ORDER_COUNT_FORMS)}`
-              : `يوجد ${formatArabicCount(failedCount, ISSUE_ORDER_COUNT_FORMS)} أخطاء`}
+            {`تعذر إنشاء ${formatArabicCount(failedCount, CREATED_ORDER_COUNT_FORMS)}`}
           </p>
         )}
 
