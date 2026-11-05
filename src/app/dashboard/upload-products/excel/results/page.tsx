@@ -57,6 +57,13 @@ const MISSING_ORDER_COUNT_FORMS: ArabicCountForms = {
   many: 'طلبًا',
 };
 
+const CREATED_ORDER_COUNT_FORMS: ArabicCountForms = {
+  one: 'طلب واحد',
+  two: 'طلبين',
+  few: 'طلبات',
+  many: 'طلبًا',
+};
+
 const rowLabel = (rowIndex: number) =>
   ROW_ORDINALS[rowIndex - 1] ?? `رقم ${rowIndex}`;
 
@@ -230,7 +237,7 @@ export default function ValidationResultsPage() {
               </h2>
               <p className="text-base sm:text-lg text-gray-600 mb-8">
                 {imported
-                  ? `تم إنشاء ${createdCount} طلب في النظام`
+                  ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)} في النظام`
                   : `جميع الـ ${results.successCount} طلب صالحة. ارفع الملف مرة أخرى لإنشائها`}
               </p>
               {carrierUnsentLine}
@@ -267,7 +274,7 @@ export default function ValidationResultsPage() {
           </h2>
           <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
             <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
-            {imported ? `تم إنشاء ${createdCount} طلب` : `${results.successCount} طلب صالح`}
+            {imported ? `تم إنشاء ${formatArabicCount(createdCount, CREATED_ORDER_COUNT_FORMS)}` : `${results.successCount} طلب صالح`}
           </span>
         </div>
 
