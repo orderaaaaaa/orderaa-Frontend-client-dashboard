@@ -44,6 +44,12 @@ const Result = {
   ],
 };
 
+const failedOrdersLine = (count: number) => {
+  if (count === 1) return 'يوجد طلب واحد به أخطاء';
+  if (count === 2) return 'يوجد طلبان بهما أخطاء';
+  return `يوجد ${formatArabicCount(count, CREATED_ORDER_COUNT_FORMS)} بها أخطاء`;
+};
+
 const ResultFileUpload = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
@@ -63,7 +69,7 @@ const ResultFileUpload = () => {
           </div>
           <div className="mt-4 max-sm:text-center">
             <p className="text-[#F61515] dark:text-danger-text font-bold text-[22px]">
-              يوجد {formatArabicCount(Result.failed, CREATED_ORDER_COUNT_FORMS)} بها أخطاء
+              {failedOrdersLine(Result.failed)}
             </p>
           </div>
         </div>
