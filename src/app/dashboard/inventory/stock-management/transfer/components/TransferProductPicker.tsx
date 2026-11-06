@@ -99,7 +99,7 @@ export function TransferProductPicker({
           />
         )
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+        <ul className="max-h-[60dvh] divide-y divide-border overflow-x-hidden overflow-y-auto rounded-lg border border-border">
           {rows.map((row) => {
             const selected = selectedIds.has(row.variantId);
             return (
