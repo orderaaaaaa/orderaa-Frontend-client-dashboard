@@ -84,7 +84,7 @@ export function TransferContent() {
         />
       ) : (
         <>
-          <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 md:flex-row md:items-end md:gap-4 md:p-5">
+          <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 md:flex-row md:items-start md:gap-4 md:p-5">
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-sm font-medium text-foreground">من مخزن</span>
               <WarehouseSelect
@@ -100,8 +100,8 @@ export function TransferContent() {
                 </p>
               )}
             </div>
-            <ArrowLeft aria-hidden="true" className="hidden size-5 shrink-0 text-muted-foreground md:block" />
-            <ArrowDown aria-hidden="true" className="size-5 shrink-0 text-muted-foreground md:hidden" />
+            <ArrowLeft aria-hidden="true" className="hidden size-5 shrink-0 text-muted-foreground md:mt-9 md:block" />
+            <ArrowDown aria-hidden="true" className="size-5 shrink-0 self-center text-muted-foreground md:hidden" />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-sm font-medium text-foreground">إلى مخزن</span>
               <WarehouseSelect

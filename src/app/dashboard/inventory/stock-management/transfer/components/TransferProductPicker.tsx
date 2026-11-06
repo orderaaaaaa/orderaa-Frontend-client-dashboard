@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import type { MoveStockLine } from '@/components/stock/MoveStockForm';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import { STOCK_FIELD_CLASS } from '@/components/stock/formStyles';
 import { Button } from '@/components/ui/button';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { cn } from '@/lib/utils';
-import { variantDisplayLabel } from '@/lib/variantOptionLabel';
 import { useStockProducts } from '@/services/stock';
 import { useDebounce } from '@/utils/debounce';
 
@@ -95,7 +95,7 @@ export function TransferProductPicker({
         ) : (
           <EmptyState
             title="لا توجد متغيرات في هذا المخزن"
-            description="لم تُضف منتجات إلى هذا المخزن بعد"
+            description="لا يوجد مخزون متاح للنقل في هذا المخزن"
           />
         )
       ) : (
@@ -108,14 +108,7 @@ export function TransferProductPicker({
                 className={cn('flex items-center gap-3 px-3 py-2.5', selected && 'bg-primary/5')}
               >
                 <div className="min-w-0 flex-1">
-                  <span className="block break-words font-medium text-foreground">
-                    {row.productName}
-                  </span>
-                  {row.options.length > 0 && (
-                    <span className="block break-words text-xs text-muted-foreground">
-                      {variantDisplayLabel(row.options)}
-                    </span>
-                  )}
+                  <VariantLabel productName={row.productName} sku={row.sku} options={row.options} size="sm" />
                 </div>
                 <StockQuantityCell quantity={row.available} />
                 <Button

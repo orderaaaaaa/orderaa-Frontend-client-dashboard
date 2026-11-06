@@ -98,6 +98,10 @@ export function MoveStockForm({
   const overAvailableOf = (line: MoveStockLine) =>
     !invalidOf(line) && quantityOf(line) > line.available;
 
+  const lineColumns = onRemoveLine
+    ? '@md:grid-cols-[minmax(0,1fr)_5rem_7rem_2rem]'
+    : '@md:grid-cols-[minmax(0,1fr)_5rem_7rem]';
+
   const movingLines = lines.filter((line) => !invalidOf(line) && quantityOf(line) > 0);
   const movingTotal = movingLines.reduce((total, line) => total + quantityOf(line), 0);
   const hasInvalid = lines.some(invalidOf);
@@ -209,11 +213,11 @@ export function MoveStockForm({
       )}
 
       <div className="overflow-hidden rounded-lg border border-border">
-        <div className="hidden bg-muted/50 px-3 py-2.5 text-sm font-medium text-muted-foreground @md:grid @md:grid-cols-[minmax(0,1fr)_auto_auto_auto] @md:items-center @md:gap-3">
+        <div className={cn('hidden bg-muted/50 px-3 py-2.5 text-sm font-medium text-muted-foreground @md:grid @md:items-center @md:gap-3', lineColumns)}>
           <span>المنتج / المتغير</span>
           <span>المتاح</span>
           <span>الكمية المنقولة</span>
-          <span className="sr-only">الإجراءات</span>
+          {onRemoveLine && <span className="sr-only">الإجراءات</span>}
         </div>
         <ul className="divide-y divide-border">
           {lines.map((line) => {
@@ -222,7 +226,7 @@ export function MoveStockForm({
             return (
               <li
                 key={line.variantId}
-                className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 gap-y-2 px-3 py-2.5 @md:grid-cols-[minmax(0,1fr)_auto_auto_auto]"
+                className={cn('grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 gap-y-2 px-3 py-2.5', lineColumns)}
               >
                 <div className="col-start-1 row-start-1 min-w-0">
                   <VariantLabel productName={line.productName} sku={line.sku} options={line.options} size="sm" />
