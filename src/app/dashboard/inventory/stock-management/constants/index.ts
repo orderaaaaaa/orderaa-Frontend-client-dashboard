@@ -2,6 +2,8 @@ import type { StockScope, StockStatus } from '../types';
 
 export const STOCK_MANAGEMENT_BASE_PATH = '/dashboard/inventory/stock-management';
 
+export const STOCK_TRANSFER_HREF = `${STOCK_MANAGEMENT_BASE_PATH}/transfer`;
+
 export const STOCK_SCOPE_KINDS = {
   PHYSICAL: 'physical',
   VIRTUAL: 'virtual',

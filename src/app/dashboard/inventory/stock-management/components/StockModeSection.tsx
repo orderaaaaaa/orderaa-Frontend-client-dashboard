@@ -18,6 +18,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate } from '@/utils/format';
 import { STOCKTAKE_LIST_HREF } from './stocktake/stocktakeRoutes';
 import { StockActionsMenu, type StockActionItem } from './StockActionsMenu';
+import { TransferStockLink } from './TransferStockLink';
 import {
   formatCountAmount,
   formatStockNumber,
@@ -48,7 +49,8 @@ export function StockModeSection() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: mode } = useStockModeQuery(canRead);
+  const modeQuery = useStockModeQuery(canRead);
+  const mode = modeQuery.data;
   const {
     data: summary,
     isLoading: summaryLoading,
@@ -56,7 +58,9 @@ export function StockModeSection() {
   } = useGoLiveSummaryQuery(dialogOpen && canRead);
   const goLive = useGoLiveMutation();
 
-  if (!canRead || !mode) return null;
+  if (!canRead || (!mode && modeQuery.isError)) return <TransferStockLink standalone />;
+
+  if (!mode) return null;
 
   const negativeCount = summary
     ? summary.negativeBalances.reduce(
@@ -134,6 +138,7 @@ export function StockModeSection() {
               <Link href={STOCKTAKE_LIST_HREF}>جرد المخزون</Link>
             </Button>
           )}
+          <TransferStockLink />
           <StockActionsMenu items={menuItems} />
         </div>
       </div>
