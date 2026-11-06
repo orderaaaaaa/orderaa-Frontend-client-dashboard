@@ -140,7 +140,7 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
     isMoveAllowed,
     hasMovePartner,
     isLoading: summaryQuery.isLoading,
-    isError: summaryQuery.isError,
+    isError: summaryQuery.isError && summaryQuery.data === undefined,
     onRetry: () => void summaryQuery.refetch(),
   };
 };

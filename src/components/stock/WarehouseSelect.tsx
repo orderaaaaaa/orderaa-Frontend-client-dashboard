@@ -20,6 +20,7 @@ interface WarehouseSelectProps {
   includeHidden?: boolean;
   disabledIds?: number[];
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function WarehouseSelect({
@@ -29,6 +30,7 @@ export function WarehouseSelect({
   includeHidden = false,
   disabledIds = [],
   placeholder = 'اختر المخزن',
+  disabled = false,
 }: WarehouseSelectProps) {
   if (source.isLoading) {
     return <Skeleton className="h-10 w-full" />;
@@ -56,6 +58,7 @@ export function WarehouseSelect({
         if (Number.isInteger(id) && id > 0) onChange(id);
       }}
       placeholder={placeholder}
+      disabled={disabled}
     />
   );
 }

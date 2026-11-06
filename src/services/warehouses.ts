@@ -225,9 +225,12 @@ export const useAdjustStockMutation = () => {
   });
 };
 
+export const TRANSFER_STOCK_MUTATION_KEY = ['stock-transfer'] as const;
+
 export const useTransferStockMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: TRANSFER_STOCK_MUTATION_KEY,
     mutationFn: (body: TransferStockDto) => transferStock(body),
     onSuccess: () => invalidateStockViews(queryClient),
   });

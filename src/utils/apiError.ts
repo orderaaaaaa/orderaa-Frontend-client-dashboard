@@ -4,12 +4,14 @@ import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMapp
 import {
   OUTBOUND_INSUFFICIENT_STOCK_CODE,
   AVAILABLE_WAREHOUSE_NOT_SET_CODE,
+  TRANSFER_INSUFFICIENT_STOCK_CODE,
   TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE,
   AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE,
   type AvailableStockRefusalLine,
   type BatchShortageOrder,
   type OutboundInsufficientStockBody,
   type OutboundShortageLineApi,
+  type ShortageLineApi,
   type ShortageRenderLine,
 } from '@/lib/api/stockShortage';
 import {
@@ -85,6 +87,23 @@ export function getInboundRuleMissingMessage(err: unknown): string | null {
 export function isTransferWarehouseNotAllowed(err: unknown): boolean {
   const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
   return data?.code === TRANSFER_WAREHOUSE_NOT_ALLOWED_CODE;
+}
+
+export function getTransferShortageLines(
+  err: unknown
+): { variantId: number; available: number }[] | null {
+  const data = (
+    err as {
+      response?: { data?: { code?: string; lines?: Pick<ShortageLineApi, 'variantId' | 'available'>[] } };
+    }
+  )?.response?.data;
+
+  if (data?.code !== TRANSFER_INSUFFICIENT_STOCK_CODE) return null;
+
+  return (data.lines ?? []).map((line) => ({
+    variantId: line.variantId,
+    available: Math.max(0, line.available),
+  }));
 }
 
 export function getReturnVariantNotStockedMessage(err: unknown): string | null {
