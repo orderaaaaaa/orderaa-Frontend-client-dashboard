@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, type MouseEvent } from 'react';
-import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { AdjustStockForm } from '@/components/stock/AdjustStockForm';
-import { MoveStockForm } from '@/components/stock/MoveStockForm';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
 import { STOCK_FIELD_CLASS } from '@/components/stock/formStyles';
 import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
@@ -24,7 +23,6 @@ interface OperationsProductTableProps {
   warehouseId: number;
   selectedProductId: number | null;
   onSelectProduct(productId: number): void;
-  canTransfer: boolean;
   canAdjust: boolean;
 }
 
@@ -33,20 +31,15 @@ interface OperationsRow {
   variant: StockVariantCombination;
 }
 
-type SheetState =
-  | { kind: 'move'; row: OperationsRow }
-  | { kind: 'adjust'; row: OperationsRow };
-
 export function OperationsProductTable({
   warehouseId,
   selectedProductId,
   onSelectProduct,
-  canTransfer,
   canAdjust,
 }: OperationsProductTableProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [sheet, setSheet] = useState<SheetState | null>(null);
+  const [adjustRow, setAdjustRow] = useState<OperationsRow | null>(null);
   const debouncedSearch = useDebounce(search, 300);
 
   const stockQuery = useStockProducts({
@@ -62,7 +55,7 @@ export function OperationsProductTable({
   );
   const totalPages = stockQuery.data?.totalPages ?? 1;
 
-  const closeSheet = () => setSheet(null);
+  const closeAdjust = () => setAdjustRow(null);
 
   const stopRowClick = (event: MouseEvent<HTMLButtonElement>, open: () => void) => {
     event.stopPropagation();
@@ -158,23 +151,12 @@ export function OperationsProductTable({
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center justify-end gap-2">
-                        {canTransfer && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(event) => stopRowClick(event, () => setSheet({ kind: 'move', row }))}
-                          >
-                            <ArrowLeftRight aria-hidden="true" />
-                            نقل
-                          </Button>
-                        )}
                         {canAdjust && (
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={(event) => stopRowClick(event, () => setSheet({ kind: 'adjust', row }))}
+                            onClick={(event) => stopRowClick(event, () => setAdjustRow(row))}
                           >
                             <SlidersHorizontal aria-hidden="true" />
                             تسوية
@@ -205,44 +187,28 @@ export function OperationsProductTable({
       )}
 
       <BaseModal
-        isOpen={sheet !== null}
-        onClose={closeSheet}
-        title={sheet?.kind === 'move' ? 'نقل المخزون' : 'تسوية المخزون'}
+        isOpen={adjustRow !== null}
+        onClose={closeAdjust}
+        title="تسوية المخزون"
         showFooter={false}
         maxWidth="md:max-w-[720px]"
         onEscapeKeyDown={preventEntryGridEscape}
       >
-        {sheet?.kind === 'move' && (
-          <MoveStockForm
-            fromWarehouseId={warehouseId}
-            lines={[
-              {
-                variantId: sheet.row.variant.id,
-                productName: sheet.row.product.name,
-                sku: sheet.row.variant.sku ?? null,
-                options: sheet.row.variant.options,
-                available: sheet.row.variant.availableCount,
-              },
-            ]}
-            onDone={closeSheet}
-            onCancel={closeSheet}
-          />
-        )}
-        {sheet?.kind === 'adjust' && (
+        {adjustRow && (
           <AdjustStockForm
             mode="single"
             warehouseId={warehouseId}
             lines={[
               {
-                variantId: sheet.row.variant.id,
-                productName: sheet.row.product.name,
-                sku: sheet.row.variant.sku ?? null,
-                options: sheet.row.variant.options,
-                current: sheet.row.variant.availableCount,
+                variantId: adjustRow.variant.id,
+                productName: adjustRow.product.name,
+                sku: adjustRow.variant.sku ?? null,
+                options: adjustRow.variant.options,
+                current: adjustRow.variant.availableCount,
               },
             ]}
-            onDone={closeSheet}
-            onCancel={closeSheet}
+            onDone={closeAdjust}
+            onCancel={closeAdjust}
           />
         )}
       </BaseModal>

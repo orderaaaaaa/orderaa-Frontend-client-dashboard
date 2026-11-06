@@ -6,7 +6,6 @@ import { StockPageHeader } from '@/components/stock/StockPageHeader';
 import { EmptyState } from '@/components/ui/state-panels';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
-import { useStockWarehouseOptions } from '@/services/productStock';
 import { OperationsProductPanel } from './OperationsProductPanel';
 import { OperationsProductTable } from './OperationsProductTable';
 import { OperationsWarehousePicker } from './OperationsWarehousePicker';
@@ -24,19 +23,8 @@ export function OperationsContent() {
   const warehouseId = parseId(searchParams.get('warehouseId'));
   const productId = parseId(searchParams.get('productId'));
   const variantId = parseId(searchParams.get('variantId'));
-  const canTransfer = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_TRANSFER);
   const canAdjust = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
   const canHistory = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_HISTORY_READ);
-  const canReadStock = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
-  const stockOptions = useStockWarehouseOptions({ enabled: canReadStock });
-  const canMove =
-    canTransfer &&
-    canReadStock &&
-    !stockOptions.isLoading &&
-    !stockOptions.isError &&
-    warehouseId !== null &&
-    stockOptions.isMoveAllowed(warehouseId) &&
-    stockOptions.hasMovePartner(warehouseId);
 
   const updateParams = useCallback(
     (patch: Record<string, number | null>) => {
@@ -58,7 +46,7 @@ export function OperationsContent() {
     <>
       <StockPageHeader
         title="عمليات المخزون"
-        subtitle="انقل الكميات بين المخازن وسوِّ الأرصدة وتابع سجل كل منتج"
+        subtitle="سوِّ الأرصدة وتابع سجل كل منتج"
         breadcrumbs={[
           { label: 'إدارة المخزن', href: '/dashboard/inventory/stock-management' },
           { label: 'العمليات' },
@@ -85,7 +73,6 @@ export function OperationsContent() {
           warehouseId={warehouseId}
           selectedProductId={productId}
           onSelectProduct={(id) => updateParams({ productId: id, variantId: null })}
-          canTransfer={canMove}
           canAdjust={canAdjust}
         />
       )}

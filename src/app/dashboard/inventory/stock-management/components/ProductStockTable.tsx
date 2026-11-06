@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import { ArrowLeftRight } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -244,7 +244,7 @@ export function ProductStockTable({
             href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary/5"
           >
-            <ArrowLeftRight className="size-4" aria-hidden="true" />
+            <SlidersHorizontal className="size-4" aria-hidden="true" />
             <span>العمليات</span>
             <span className="sr-only">على {product.name}</span>
           </Link>
