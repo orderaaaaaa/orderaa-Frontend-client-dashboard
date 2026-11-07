@@ -232,7 +232,7 @@ function OrderDetailsInfoComponent({
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
     hasActiveShippingId: order.shipping_ids?.some((row) => row.isActive) ?? false,
-    partialReturnCount: order.partialReturns?.length ?? 0,
+    partialReturnCount: (order.partialReturns ?? []).filter((item) => item.lineCount > 0).length,
   });
 
   const handleConfirmClick = () =>

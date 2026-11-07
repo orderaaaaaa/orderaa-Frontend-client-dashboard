@@ -496,6 +496,7 @@ export interface OrderPartialReturnRef {
   id: number;
   code: string;
   status: OrderStatus;
+  lineCount: number;
 }
 
 export interface OrderLockedBy {
