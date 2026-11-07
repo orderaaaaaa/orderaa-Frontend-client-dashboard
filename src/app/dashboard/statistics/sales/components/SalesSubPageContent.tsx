@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { exportSalesRowsToExcel, type SalesExportCell } from '@/lib/excel/export-sales-statistics';
 import {
   useSalesStatisticsFilterOptionsQuery,
-  useSalesStatisticsLifetimePiecesQuery,
   useSalesStatisticsOrdersQuery,
   useSalesStatisticsPiecesQuery,
 } from '@/services/salesStatistics';
@@ -44,16 +43,6 @@ function labelsFor(options: FilterOption[] | undefined, keys: string[] | undefin
   return keys.map((key) => options?.find((option) => option.key === key)?.label ?? key).join('، ');
 }
 
-function buildLifetimePiecesFilterSummary(
-  scopeNote: string,
-  approvedOnly: boolean,
-): Array<{ label: string; value: string }> {
-  return [
-    { label: 'النطاق', value: scopeNote },
-    { label: SALES_COPY.approvedOnlyLabel, value: approvedOnly ? 'نعم' : 'لا' },
-  ];
-}
-
 function formatEligibilityLine(summary: SalesOrdersSummary): string | null {
   const { eligibleCount, excludedCount, feeMissingCount, costMissingCount, amount } = summary;
   if (eligibleCount === null || excludedCount === null) return null;
@@ -78,9 +67,11 @@ function buildFilterSummary(
   params: SalesStatisticsParams,
   title: string,
   filterOptions: SalesStatisticsFilterOptions | undefined,
+  scopeNote?: string,
 ): Array<{ label: string; value: string }> {
   return [
     { label: 'القائمة', value: title },
+    ...(scopeNote ? [{ label: 'النطاق', value: scopeNote }] : []),
     { label: 'من تاريخ', value: params.from },
     { label: 'إلى تاريخ', value: params.to },
     { label: SALES_COPY.approvedOnlyLabel, value: params.approvedOnly ? 'نعم' : 'لا' },
@@ -143,7 +134,6 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
 
   const definition = SALES_SUBPAGE_SETS[set];
   const orderSet: SalesOrderSet | null = isSalesOrderSet(set) ? set : null;
-  const isLifetimePieces = set === 'PIECES_COST';
   const requestParams = params ?? EMPTY_PARAMS;
 
   const ordersQuery = useSalesStatisticsOrdersQuery(
@@ -153,13 +143,11 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
   );
   const piecesQuery = useSalesStatisticsPiecesQuery(
     requestParams,
-    orderSet === null && !isLifetimePieces && params !== null,
+    orderSet === null && params !== null,
   );
-  const lifetimePiecesQuery = useSalesStatisticsLifetimePiecesQuery(approvedOnly, isLifetimePieces);
   const filterOptionsQuery = useSalesStatisticsFilterOptionsQuery(true);
 
-  const activeQuery =
-    orderSet !== null ? ordersQuery : isLifetimePieces ? lifetimePiecesQuery : piecesQuery;
+  const activeQuery = orderSet !== null ? ordersQuery : piecesQuery;
   const isError = activeQuery.isError;
 
   const heroBar = (
@@ -257,8 +245,8 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
         filterSummary: buildFilterSummary(requestParams, definition.title, filterOptionsQuery.data),
       });
     };
-  } else if (isLifetimePieces && lifetimePiecesQuery.data) {
-    const data = lifetimePiecesQuery.data;
+  } else if (orderSet === null && piecesQuery.data) {
+    const data = piecesQuery.data;
     const piecesExport = buildSalesPieceExport(data.products, definition.withCost);
     header = (
       <div className="flex flex-col gap-1">
@@ -268,40 +256,8 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
         )}
         <p className="text-sm text-muted-foreground">
           {`${SALES_COPY.piecesCountLabel}: ${formatCount(data.totals.piecesSold)}`}
-          {` · ${SALES_COPY.amountLabel}: ${formatMoney(data.totals.soldPiecesCost)}`}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {`${SALES_COPY.approvedOnlyLabel}: ${approvedOnly ? 'نعم' : 'لا'}`}
-        </p>
-      </div>
-    );
-    exportRowCount = piecesExport.rows.length;
-    body =
-      data.products.length === 0 ? (
-        <StatisticsState
-          icon={Inbox}
-          title={SALES_COPY.emptyStateTitle}
-          subtitle={SALES_COPY.emptyStateSubtitle}
-        />
-      ) : (
-        <SalesPiecesTable withCost={definition.withCost} products={data.products} />
-      );
-    exportHandler = () => {
-      exportSalesRowsToExcel({
-        rows: piecesExport.rows,
-        columns: piecesExport.columns,
-        fileName: `sales-${set.toLowerCase()}-all-time`,
-        filterSummary: buildLifetimePiecesFilterSummary(definition.scopeNote ?? '', approvedOnly),
-      });
-    };
-  } else if (orderSet === null && !isLifetimePieces && piecesQuery.data) {
-    const data = piecesQuery.data;
-    const piecesExport = buildSalesPieceExport(data.products, definition.withCost);
-    header = (
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold">{definition.title}</h1>
-        <p className="text-sm text-muted-foreground">
-          {`${SALES_COPY.piecesCountLabel}: ${formatCount(data.totals.piecesSold)}`}
+          {definition.withCost &&
+            ` · ${SALES_COPY.amountLabel}: ${formatMoney(data.totals.soldPiecesCost)}`}
         </p>
       </div>
     );
@@ -321,7 +277,12 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
         rows: piecesExport.rows,
         columns: piecesExport.columns,
         fileName: `sales-${set.toLowerCase()}-${data.range.from}-${data.range.to}`,
-        filterSummary: buildFilterSummary(requestParams, definition.title, filterOptionsQuery.data),
+        filterSummary: buildFilterSummary(
+          requestParams,
+          definition.title,
+          filterOptionsQuery.data,
+          definition.scopeNote,
+        ),
       });
     };
   } else if (isError) {
@@ -340,7 +301,7 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
   return (
     <div className={PAGE_CONTAINER}>
       {backLink}
-      {!isLifetimePieces && heroBar}
+      {heroBar}
       <div className="flex flex-wrap items-start justify-between gap-3">
         {header}
         {exportHandler && (

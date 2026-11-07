@@ -160,8 +160,6 @@ export interface SalesPiecesResponse {
   products: SalesPieceProduct[];
 }
 
-export type SalesLifetimePiecesResponse = Omit<SalesPiecesResponse, 'range'>;
-
 export interface FilterOption {
   key: string;
   label: string;
