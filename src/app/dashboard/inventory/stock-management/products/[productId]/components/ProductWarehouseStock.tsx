@@ -24,7 +24,7 @@ export function ProductWarehouseStock({ stock, canAdjustRow, onAdjust }: Product
         <>
           <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
             <table className="w-full min-w-[480px] text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
+              <thead className="bg-muted text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-3 py-2.5 text-start font-medium">
                     المتغير

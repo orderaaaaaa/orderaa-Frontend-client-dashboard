@@ -255,7 +255,7 @@ function ProductStockBody({
           <h3 className="text-sm font-semibold text-foreground">سجل الحركات</h3>
           {canHistory ? (
             <>
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 xl:grid-cols-3">
                 <SearchableSelect
                   options={variantOptions}
                   value={variantId === null ? '' : String(variantId)}
