@@ -118,8 +118,8 @@ export function VariantAvailabilitySelector({
         <div
           ref={scrollerRef}
           className={cn(
-            'overflow-y-auto overscroll-contain',
-            maxHeightClassName ?? 'max-h-72',
+            'overflow-y-auto overscroll-contain p-0.5',
+            maxHeightClassName ?? 'max-h-72 max-sm:max-h-none',
           )}
         >
           {sorted.map((attribute) => (
