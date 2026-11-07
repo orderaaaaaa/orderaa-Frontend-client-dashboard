@@ -21,7 +21,6 @@ export default function SendBackConfirmModal({
       title="تأكيد التعديل"
       onConfirm={onConfirm}
       confirmText="متابعة"
-      toastOnConfirmError
       maxWidth="md:max-w-[480px]"
     >
       <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">

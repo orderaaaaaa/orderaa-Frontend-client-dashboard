@@ -1,4 +1,4 @@
-import type { AvailabilityRefusal, VariantAvailability } from '@/lib/api/warehouses';
+import type { VariantAvailability } from '@/lib/api/warehouses';
 import type { VariantOption } from '@/services/orders';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
@@ -256,16 +256,14 @@ function availableLineOf(
 }
 
 export function availableNumbersTextFor({
-  refusal,
   productName,
   row,
 }: {
-  refusal: AvailabilityRefusal;
   productName: string;
   row: VariantAvailability;
 }): string | null {
   const line = availableLineOf(productName, row);
-  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET' || line === null) return null;
+  if (line === null) return null;
   return formatAvailableStockLines([line]);
 }
 

@@ -35,7 +35,6 @@ export interface VariantAvailabilitySelectorProps {
   maxHeightClassName?: string;
   className?: string;
   excludedLines?: number;
-  showWarehouseNote?: boolean;
   informationOnly?: boolean;
 }
 
@@ -55,7 +54,6 @@ export function VariantAvailabilitySelector({
   maxHeightClassName,
   className,
   excludedLines = 0,
-  showWarehouseNote = true,
   informationOnly = false,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
@@ -95,7 +93,7 @@ export function VariantAvailabilitySelector({
   const refusal = informationOnly ? null : (exact?.refusal ?? null);
   const warningText = exact && !informationOnly ? warningTextFor({ productName, row: exact }) : null;
   const availableNumbersText =
-    exact && refusal ? availableNumbersTextFor({ refusal, productName, row: exact }) : null;
+    exact && refusal ? availableNumbersTextFor({ productName, row: exact }) : null;
   const summary = selectionLabel(attributes, selection);
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =
@@ -216,7 +214,7 @@ export function VariantAvailabilitySelector({
         </p>
       )}
 
-      {(exactNotSet || (showWarehouseNote && allWarehouseNotSet)) && (
+      {(exactNotSet || allWarehouseNotSet) && (
         <p className="mt-2 text-sm text-muted-foreground">
           {t('orderDetails.stock.availableWarehouseNotSet')}
         </p>

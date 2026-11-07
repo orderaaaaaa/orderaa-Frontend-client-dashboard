@@ -138,10 +138,6 @@ export function getReturnWarehouseLockedMessage(err: unknown): string | null {
  * and will change, the code is the contract. The backend returns 409 with every
  * blocked line, so the agent is told which products to swap rather than
  * discovering them one confirmation attempt at a time.
- *
- * This is a RACE BACKSTOP, not the normal path — the confirm control is already
- * disabled from the availability response. It fires when stock moved between
- * the agent seeing the number and pressing confirm.
  */
 export interface StockShortageLineInput {
   variantId: number;

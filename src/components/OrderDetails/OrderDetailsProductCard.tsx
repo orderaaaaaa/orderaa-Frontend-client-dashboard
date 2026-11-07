@@ -25,7 +25,6 @@ import { ORDER_LINE_EDIT_CONFLICT } from '@/types/orderLineEdits';
 import {
   getAvailabilityRefusalMessage,
   getOrderLineEditConflict,
-  isAvailabilityRefusal,
   refusalToastOptions,
 } from '@/utils/apiError';
 import { toast } from 'react-toastify';
@@ -161,7 +160,6 @@ function OrderDetailsProductCard({
     try {
       await pendingSendBack.retry();
     } catch (error: unknown) {
-      if (!isAvailabilityRefusal(error)) throw error;
       toast.error(
         getAvailabilityRefusalMessage(error, 'تعذر تنفيذ التعديل على المنتج'),
         refusalToastOptions(error)
