@@ -1,10 +1,10 @@
 'use client';
 
-import { SlidersHorizontal } from 'lucide-react';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
-import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/state-panels';
 import type { ProductStockDto } from '@/lib/api/productStock';
+import { AdjustRowButton, VariantIdentity } from './VariantParts';
+import { quantityIn } from './quantityIn';
 
 const HIDDEN_WAREHOUSE_LABEL = 'مخزن غير ظاهر';
 
@@ -51,37 +51,19 @@ export function ProductWarehouseStock({ stock, canAdjustRow, onAdjust }: Product
                 {stock.variants.map((variant) => (
                   <tr key={variant.variantId}>
                     <td className="px-3 py-2.5">
-                      <span className="block break-words text-foreground">{variant.variantLabel || stock.product.name}</span>
-                      {variant.sku && (
-                        <span dir="ltr" className="font-mono text-xs text-muted-foreground">
-                          {variant.sku}
-                        </span>
-                      )}
+                      <VariantIdentity label={variant.variantLabel || stock.product.name} sku={variant.sku} />
                     </td>
                     {stock.warehouses.map((warehouse) => (
                       <td key={warehouse.id} className="px-3 py-2.5">
-                        <StockQuantityCell
-                          quantity={
-                            variant.byWarehouse.find((cell) => cell.warehouseId === warehouse.id)?.quantity ?? 0
-                          }
-                          tone="muted"
-                        />
+                        <StockQuantityCell quantity={quantityIn(variant, warehouse.id)} tone="muted" />
                       </td>
                     ))}
                     <td className="px-3 py-2.5">
                       <StockQuantityCell quantity={variant.totalQuantity} />
                     </td>
                     {canAdjustRow && (
-                      <td className="sticky end-0 z-[1] bg-card px-3 py-2.5">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onAdjust(variant.variantId)}
-                        >
-                          <SlidersHorizontal aria-hidden="true" />
-                          تسوية
-                        </Button>
+                      <td className="sticky end-0 z-[1] bg-card px-3 py-2.5 text-end">
+                        <AdjustRowButton onClick={() => onAdjust(variant.variantId)} />
                       </td>
                     )}
                   </tr>
@@ -95,26 +77,10 @@ export function ProductWarehouseStock({ stock, canAdjustRow, onAdjust }: Product
               <div key={variant.variantId} className="flex flex-col gap-3 rounded-lg border border-border p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="block break-words font-medium text-foreground">
-                      {variant.variantLabel || stock.product.name}
-                    </span>
-                    {variant.sku && (
-                      <span dir="ltr" className="block break-all font-mono text-xs text-muted-foreground">
-                        {variant.sku}
-                      </span>
-                    )}
+                    <VariantIdentity label={variant.variantLabel || stock.product.name} sku={variant.sku} breakSku />
                   </div>
                   {canAdjustRow && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => onAdjust(variant.variantId)}
-                    >
-                      <SlidersHorizontal aria-hidden="true" />
-                      تسوية
-                    </Button>
+                    <AdjustRowButton className="shrink-0" onClick={() => onAdjust(variant.variantId)} />
                   )}
                 </div>
                 <ul className="flex flex-col divide-y divide-border">
@@ -128,12 +94,7 @@ export function ProductWarehouseStock({ stock, canAdjustRow, onAdjust }: Product
                           <span className="text-xs text-muted-foreground">غير نشط</span>
                         )}
                       </div>
-                      <StockQuantityCell
-                        quantity={
-                          variant.byWarehouse.find((cell) => cell.warehouseId === warehouse.id)?.quantity ?? 0
-                        }
-                        tone="muted"
-                      />
+                      <StockQuantityCell quantity={quantityIn(variant, warehouse.id)} tone="muted" />
                     </li>
                   ))}
                 </ul>

@@ -6,6 +6,8 @@ import { WarehouseSelect, type WarehouseSelectSource } from '@/components/stock/
 import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import BaseModal from '@/components/ui/base-modal';
 import type { ProductStockDto } from '@/lib/api/productStock';
+import { VariantIdentity } from './VariantParts';
+import { quantityIn } from './quantityIn';
 
 interface AdjustVariantDialogProps {
   stock: ProductStockDto;
@@ -31,10 +33,7 @@ export function AdjustVariantDialog({ stock, variantId, warehouses, onClose }: A
   const warehouseId = chosenWarehouseId ?? onlyEnabledId;
   const warehouseListed =
     warehouseId !== null && stock.warehouses.some((warehouse) => warehouse.id === warehouseId);
-  const current =
-    variant && warehouseId !== null
-      ? variant.byWarehouse.find((cell) => cell.warehouseId === warehouseId)?.quantity ?? 0
-      : 0;
+  const current = variant && warehouseId !== null ? quantityIn(variant, warehouseId) : 0;
   const showNoWarehouseLine = !warehouses.isLoading && !warehouses.isError && enabledIds.length === 0;
 
   return (
@@ -49,14 +48,7 @@ export function AdjustVariantDialog({ stock, variantId, warehouses, onClose }: A
       {variant && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <span className="break-words font-medium text-foreground">
-              {variant.variantLabel || stock.product.name}
-            </span>
-            {variant.sku && (
-              <span dir="ltr" className="break-all font-mono text-xs text-muted-foreground">
-                {variant.sku}
-              </span>
-            )}
+            <VariantIdentity label={variant.variantLabel || stock.product.name} sku={variant.sku} breakSku />
           </div>
 
           {showNoWarehouseLine ? (

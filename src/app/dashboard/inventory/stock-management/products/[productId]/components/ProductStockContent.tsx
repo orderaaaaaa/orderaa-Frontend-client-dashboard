@@ -27,6 +27,7 @@ import { STOCK_MANAGEMENT_BASE_PATH } from '../../../constants';
 import { parsePositiveId } from '../../../utils/parsePositiveId';
 import { AdjustVariantDialog } from './AdjustVariantDialog';
 import { ProductWarehouseStock } from './ProductWarehouseStock';
+import { quantityIn } from './quantityIn';
 
 const TIMELINE_PAGE_SIZE = 50;
 const SOURCE_OPTIONS = [
@@ -98,34 +99,37 @@ export function ProductStockContent({ productId }: ProductStockContentProps) {
   }
 
   return (
-    <ProductPanelBody
+    <ProductStockBody
       stock={stockQuery.data}
       productId={productId}
       variantId={variantId}
       onVariantChange={onVariantChange}
       canAdjust={canAdjust}
       canHistory={canHistory}
+      refetchFailed={stockQuery.isRefetchError}
     />
   );
 }
 
-interface ProductPanelBodyProps {
+interface ProductStockBodyProps {
   stock: ProductStockDto;
   productId: number;
   variantId: number | null;
   onVariantChange(variantId: number | null): void;
   canAdjust: boolean;
   canHistory: boolean;
+  refetchFailed: boolean;
 }
 
-function ProductPanelBody({
+function ProductStockBody({
   stock,
   productId,
   variantId,
   onVariantChange,
   canAdjust,
   canHistory,
-}: ProductPanelBodyProps) {
+  refetchFailed,
+}: ProductStockBodyProps) {
   const [batchOpen, setBatchOpen] = useState(false);
   const [targetVariantId, setTargetVariantId] = useState<number | null>(null);
   const [source, setSource] = useState<StockMovementSource | ''>('');
@@ -161,8 +165,7 @@ function ProductPanelBody({
             productName: stock.product.name,
             sku: variant.sku,
             options: variant.options,
-            current:
-              variant.byWarehouse.find((cell) => cell.warehouseId === warehouse.id)?.quantity ?? 0,
+            current: quantityIn(variant, warehouse.id),
           })),
         })),
     [stock]
@@ -235,6 +238,12 @@ function ProductPanelBody({
             accent="chart5"
           />
         </div>
+
+        {refetchFailed && (
+          <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            تعذر تحديث بيانات المخزون، الأرقام المعروضة قد لا تكون الأحدث
+          </p>
+        )}
 
         <ProductWarehouseStock
           stock={stock}
