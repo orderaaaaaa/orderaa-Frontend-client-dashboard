@@ -23,7 +23,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { VariantLabel } from '@/components/stock/VariantLabel';
-import { STOCK_STATUS_CONFIG } from '../constants';
+import { STOCK_STATUS_CONFIG, stockProductHref } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
 import {
   displayCell,
@@ -148,7 +148,7 @@ export function ProductStockTable({
   indicators,
 }: ProductStockTableProps) {
   const isMobile = useIsMobile();
-  const canViewOperations = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_STOCK_READ);
+  const canViewProductStock = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_STOCK_READ);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
 
   const visibleColors = filterColor
@@ -224,7 +224,7 @@ export function ProductStockTable({
 
   return (
     <div className="rounded-xl border border-gray-100 bg-card shadow-sm overflow-hidden">
-      <div className="flex items-center gap-4 border-b border-gray-100 px-5 py-4">
+      <div className="flex flex-wrap items-center gap-4 border-b border-gray-100 px-5 py-4">
         <div className="size-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
           <img
             src={product.image}
@@ -239,13 +239,13 @@ export function ProductStockTable({
           <h3 className="break-words text-base font-bold text-gray-900">{product.name}</h3>
           {/* <p className="text-sm text-gray-400">SKU: {product.sku}</p> */}
         </div>
-        {canViewOperations && (
+        {canViewProductStock && (
           <Link
-            href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary/5"
+            href={stockProductHref(product.id)}
+            className="inline-flex w-full shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary-text transition-colors hover:bg-primary/5 sm:w-auto"
           >
             <SlidersHorizontal className="size-4" aria-hidden="true" />
-            <span>العمليات</span>
+            <span>المخزون والحركات</span>
             <span className="sr-only">على {product.name}</span>
           </Link>
         )}
