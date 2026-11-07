@@ -8,6 +8,7 @@ import { AttributeChipsEditor } from '../AttributeChipsEditor';
 import {
   type AttributeDraft,
   type AttributeErrors,
+  moveAttribute,
   nextKey,
 } from './editorModel';
 
@@ -41,7 +42,7 @@ export function AttributesEditor({
           لا توجد خصائص لهذا المنتج
         </p>
       ) : (
-        attributes.map((attribute) => {
+        attributes.map((attribute, index) => {
           const displayName =
             attribute.id !== undefined ? displayNames.get(attribute.id) : undefined;
           const entry = showErrors ? errors.byKey[attribute.key] : undefined;
@@ -79,6 +80,11 @@ export function AttributesEditor({
               onRemove={() =>
                 onChange(attributes.filter((item) => item.key !== attribute.key))
               }
+              onMove={(direction) =>
+                onChange(moveAttribute(attributes, attribute.key, direction))
+              }
+              canMoveUp={index > 0}
+              canMoveDown={index < attributes.length - 1}
               maxValues={PRODUCT_CREATE_LIMITS.optionsPerAttribute}
               nameError={entry?.name}
               valuesError={entry?.values}

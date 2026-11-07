@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { duplicateNameKey } from '../utils/manualProduct';
 
@@ -13,6 +14,9 @@ export interface AttributeChipsEditorProps {
   onRemoveValue: (index: number) => void;
   onRenameValue?: (index: number, value: string) => void;
   onRemove: () => void;
+  onMove?: (direction: 'up' | 'down') => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
   maxValues: number;
   nameError?: string;
   valuesError?: string;
@@ -31,6 +35,9 @@ export function AttributeChipsEditor({
   onRemoveValue,
   onRenameValue,
   onRemove,
+  onMove,
+  canMoveUp = false,
+  canMoveDown = false,
   maxValues,
   nameError,
   valuesError,
@@ -133,6 +140,32 @@ export function AttributeChipsEditor({
             disabled={disabled}
             className="flex-1 min-w-0 min-h-10 text-base font-semibold bg-transparent border-0 border-b border-transparent focus:border-primary focus:outline-none px-0 py-1 placeholder:font-normal placeholder:text-gray-400"
           />
+          {onMove && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="touch"
+                onClick={() => onMove('up')}
+                disabled={disabled || !canMoveUp}
+                className="text-gray-500 hover:bg-gray-100 shrink-0"
+                aria-label="تحريك لأعلى"
+              >
+                <ChevronUp className="w-5 h-5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="touch"
+                onClick={() => onMove('down')}
+                disabled={disabled || !canMoveDown}
+                className="text-gray-500 hover:bg-gray-100 shrink-0"
+                aria-label="تحريك لأسفل"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </Button>
+            </>
+          )}
           <Button
             type="button"
             variant="ghost"

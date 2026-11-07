@@ -140,6 +140,19 @@ const attributeSignature = (attributes: AttributeDraft[]) =>
 export const sameAttributes = (a: AttributeDraft[], b: AttributeDraft[]) =>
   attributeSignature(a) === attributeSignature(b);
 
+export const moveAttribute = (
+  attributes: AttributeDraft[],
+  key: string,
+  direction: 'up' | 'down',
+): AttributeDraft[] => {
+  const index = attributes.findIndex((attribute) => attribute.key === key);
+  const target = direction === 'up' ? index - 1 : index + 1;
+  if (index < 0 || target < 0 || target >= attributes.length) return attributes;
+  const next = [...attributes];
+  [next[index], next[target]] = [next[target], next[index]];
+  return next;
+};
+
 const specSignature = (rows: SpecRow[]) =>
   JSON.stringify(
     rows
