@@ -83,7 +83,7 @@ export function TransferProductPicker({
           fallback="تعذر تحميل منتجات المخزن"
           onRetry={() => void stockQuery.refetch()}
         />
-      ) : stockQuery.isLoading ? (
+      ) : stockQuery.isPending ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: SKELETON_ROWS }, (_, index) => (
             <Skeleton key={index} className="h-12 w-full" />
