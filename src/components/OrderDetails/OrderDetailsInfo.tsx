@@ -27,8 +27,13 @@ import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 import { PartialReturnLinks } from './PartialReturnLinks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
-import { orderPagePartialActionOf } from '@/utils/partialDelivery/partialDeliveryGate';
+import {
+  PARTIAL_DELIVERY_CODES,
+  mustOpenSplitPopup,
+  orderPagePartialActionOf,
+} from '@/utils/partialDelivery/partialDeliveryGate';
 import { useI18n } from '@/i18n/I18nProvider';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -89,6 +94,7 @@ function OrderDetailsInfoComponent({
 
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
   const { t } = useI18n();
+  const { hasAllPermissions } = usePermissionCheck();
   // Permission-scoped on purpose — these become the status actions offered.
   const availableStatuses = statusesData?.statuses ?? [];
 
@@ -191,15 +197,18 @@ function OrderDetailsInfoComponent({
   }, [order.order_events]);
 
   const frozen = order.frozenReturnChild === true;
+  const lineCount = order.order_products.length;
+  const hasReturnChild = (order.partialReturns ?? []).some((item) => item.lineCount > 0);
+  const hasActiveShippingId = order.shipping_ids?.some((row) => row.isActive) ?? false;
 
   const partialGate = orderPagePartialActionOf({
     status: order.status,
-    lineCount: order.order_products.length,
-    hasReturnChild: (order.partialReturns ?? []).some((item) => item.lineCount > 0),
+    lineCount,
+    hasReturnChild,
     frozen,
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
-    hasActiveShippingId: order.shipping_ids?.some((row) => row.isActive) ?? false,
+    hasActiveShippingId,
   });
   const partialAction = {
     visible: partialGate.visible,
@@ -340,6 +349,25 @@ function OrderDetailsInfoComponent({
     if (value === 'DELIVERY') {
       setPendingShippingType(null);
       updateField('shippingType', value);
+      return;
+    }
+    if (
+      mustOpenSplitPopup({
+        requestedType: value,
+        currentType: order.shippingType,
+        carrierImplementation: order.shippingCompanyRef?.implementation,
+        hasActiveShippingId,
+        status: order.status,
+        lineCount,
+        hasReturnChild,
+      })
+    ) {
+      if (!hasAllPermissions(PARTIAL_DELIVERY_CODES)) {
+        toast.error(t('partialDelivery.edit.noPermission'));
+        return;
+      }
+      setPendingShippingType(null);
+      runWhenLockSettles(() => modals.partialDelivery.open());
       return;
     }
     setPendingShippingType(value);

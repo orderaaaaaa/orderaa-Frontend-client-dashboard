@@ -87,3 +87,28 @@ export const orderPagePartialActionOf = ({
   }
   return { visible: true, blockedKey: splitBlockReasonKeyOf({ lineCount, hasReturnChild }) };
 };
+
+export const mustOpenSplitPopup = ({
+  requestedType,
+  currentType,
+  carrierImplementation,
+  hasActiveShippingId,
+  status,
+  lineCount,
+  hasReturnChild,
+}: {
+  requestedType: string;
+  currentType: string | undefined;
+  carrierImplementation: ShippingImplementation | undefined;
+  hasActiveShippingId: boolean;
+  status: string;
+  lineCount: number;
+  hasReturnChild: boolean;
+}): boolean =>
+  requestedType === 'PARTIAL_RETURN' &&
+  currentType !== 'PARTIAL_RETURN' &&
+  carrierImplementation === 'TURBO' &&
+  hasActiveShippingId &&
+  (['WAITING_FOR_APPROVAL', 'SHIPPING', 'WITH_DRIVER'] as readonly string[]).includes(status) &&
+  lineCount >= 2 &&
+  !hasReturnChild;
