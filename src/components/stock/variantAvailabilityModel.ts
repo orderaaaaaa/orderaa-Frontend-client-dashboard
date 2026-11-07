@@ -69,22 +69,6 @@ export const unknownOptionStatus = (selected: boolean): OptionStatus => ({
   selected,
 });
 
-const byName = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
-
-export function sortedCatalog(attributes: CatalogAttribute[]): CatalogAttribute[] {
-  return [...attributes]
-    .sort(
-      (a, b) =>
-        byName(a.attributeName, b.attributeName) || a.attributeId - b.attributeId,
-    )
-    .map((attribute) => ({
-      ...attribute,
-      options: [...attribute.options].sort(
-        (a, b) => byName(a.optionName, b.optionName) || a.optionId - b.optionId,
-      ),
-    }));
-}
-
 export function comboKeyOf(optionIds: readonly number[]): string {
   return [...optionIds].sort((a, b) => a - b).join('-');
 }
@@ -179,10 +163,9 @@ export function selectionLabel(
   attributes: CatalogAttribute[],
   selection: Selection,
 ): string | null {
-  const sorted = sortedCatalog(attributes);
-  if (sorted.length === 0) return null;
+  if (attributes.length === 0) return null;
   const names: string[] = [];
-  for (const attribute of sorted) {
+  for (const attribute of attributes) {
     const optionId = selection[attribute.attributeId];
     const option = attribute.options.find((item) => item.optionId === optionId);
     if (!option) return null;

@@ -13,7 +13,6 @@ import {
   optionStatus,
   selectionLabel,
   warningTextFor,
-  sortedCatalog,
   unknownOptionStatus,
   type CatalogAttribute,
   type Selection,
@@ -88,7 +87,6 @@ export function VariantAvailabilitySelector({
     );
   }
 
-  const sorted = sortedCatalog(attributes);
   const exact = exactVariantFor(variants, selection, attributes.length);
   const refusal = informationOnly ? null : (exact?.refusal ?? null);
   const warningText = exact && !informationOnly ? warningTextFor({ productName, row: exact }) : null;
@@ -122,7 +120,7 @@ export function VariantAvailabilitySelector({
             maxHeightClassName ?? 'max-h-72 max-sm:max-h-none max-sm:overflow-y-visible',
           )}
         >
-          {sorted.map((attribute) => (
+          {attributes.map((attribute) => (
             <div key={attribute.attributeId} className="mb-3 last:mb-0">
               <p className="mb-1.5 text-sm font-semibold text-muted-foreground">
                 {attribute.attributeName}
