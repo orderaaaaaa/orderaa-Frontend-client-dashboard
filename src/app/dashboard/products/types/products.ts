@@ -68,14 +68,8 @@ export interface AttributeManual {
   options: AttributeOptionManual[];
 }
 
-export interface VariantTarget {
-  variantId: number;
-  optionId: number;
-}
-
 export interface UpdateAttributesPayload {
   attributes: AttributeManual[];
-  variantTargets?: VariantTarget[];
   confirmVariantReshape?: boolean;
 }
 
@@ -101,20 +95,12 @@ export interface VariantReshapeRelink {
   resultOptionIds: number[];
 }
 
-export interface VariantReshapeCandidateOption {
-  id: number;
-  name: string;
-}
-
 export interface VariantReshapeValueRemoval {
   variantId: number;
   label: string;
   attributeId: number;
   removedOptionId: number;
   stock: number;
-  targetRequired: boolean;
-  candidateOptions: VariantReshapeCandidateOption[];
-  chosenOptionId: number | null;
 }
 
 export interface VariantReshapeRetired {
@@ -163,19 +149,6 @@ export interface VariantInUseRow {
   label: string;
   openLines: number;
   warehouses: VariantInUseWarehouse[];
-}
-
-export type VariantTargetIssueReason =
-  | 'VARIANT_NOT_ON_PRODUCT'
-  | 'NOT_A_KEPT_OPTION'
-  | 'VARIANT_NOT_AFFECTED'
-  | 'DUPLICATE_TARGET'
-  | 'PARTIAL_TARGETS';
-
-export interface VariantTargetIssue {
-  variantId: number;
-  optionId: number;
-  reason: VariantTargetIssueReason;
 }
 
 export interface AttributeCountItem {
@@ -572,8 +545,6 @@ export const PRODUCT_EDIT_ERROR_CODES = [
   'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED',
   'DUPLICATE_VARIANT_IN_REQUEST',
   'VARIANT_RESHAPE_CONFIRMATION_REQUIRED',
-  'VARIANT_REMOVAL_TARGET_REQUIRED',
-  'INVALID_VARIANT_TARGET',
   'VARIANT_MERGE_CONFLICT',
   'VARIANT_UNAVAILABLE',
   'OPTION_IN_USE',
@@ -608,7 +579,6 @@ export interface ProductApiErrorDetails {
   productId?: number;
   plan?: VariantReshapePlan;
   optionId?: number;
-  issues?: VariantTargetIssue[];
   id?: number;
   name?: string;
   removedId?: number;

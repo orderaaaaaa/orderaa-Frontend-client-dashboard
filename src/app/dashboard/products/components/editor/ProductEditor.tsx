@@ -51,7 +51,6 @@ import {
   type GalleryItem,
   type NewVariantRow,
   type ReshapeDecision,
-  type ReshapeSelections,
   type ReshapeState,
   type SpecRow,
   type VariantPatch,
@@ -69,10 +68,7 @@ import {
   galleryUrls,
   hasAttributeErrors,
   hasSpecErrors,
-  isReshapeBlocked,
   isStoreLinked,
-  reshapeSelectionsFromPlan,
-  reshapeTargets,
   sameAttributes,
   sameBasic,
   sameGallery,
@@ -331,15 +327,13 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     return true;
   };
 
-  const requestReshapeDecision = (
-    plan: VariantReshapePlan,
-    picks?: ReshapeSelections,
-  ) =>
+  const requestReshapeDecision = (plan: VariantReshapePlan) =>
     new Promise<ReshapeDecision | null>((resolve) => {
       reshapeDecision.current = resolve;
-      const mergedAway = new Set(
-        plan.merges.flatMap((merge) => merge.mergedVariantIds),
-      );
+      const mergedAway = new Set([
+        ...plan.merges.flatMap((merge) => merge.mergedVariantIds),
+        ...plan.goingSoft.map((row) => row.variantId),
+      ]);
       const affected = freshDetail().variants.filter(
         (variant) =>
           mergedAway.has(variant.id) && variantEdits[variant.id] !== undefined,
@@ -355,7 +349,6 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         .map((variant) => variantLabelOf(variant));
       setReshape({
         plan,
-        selections: reshapeSelectionsFromPlan(plan, picks),
         discardedIds: affected.map((variant) => variant.id),
         discardedLabels,
       });
@@ -363,12 +356,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     });
 
   const confirmReshape = () => {
-    if (!reshape || isReshapeBlocked(reshape.plan, reshape.selections)) return;
-    reshapeDecision.current?.({
-      variantTargets: reshapeTargets(reshape.plan, reshape.selections),
-      discardedIds: reshape.discardedIds,
-      selections: reshape.selections,
-    });
+    if (!reshape) return;
+    reshapeDecision.current?.({ discardedIds: reshape.discardedIds });
     setReshapeOpen(false);
   };
 
@@ -384,21 +373,13 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       try {
         await updateAttributes.mutateAsync({
           attributes,
-          ...(reshapeReply
-            ? {
-                variantTargets: reshapeReply.variantTargets,
-                confirmVariantReshape: true,
-              }
-            : {}),
+          ...(reshapeReply ? { confirmVariantReshape: true } : {}),
         });
         break;
       } catch (saveError) {
         const plan = variantReshapePlanOf(saveError);
         if (plan) {
-          const decision = await requestReshapeDecision(
-            plan,
-            reshapeReply?.selections,
-          );
+          const decision = await requestReshapeDecision(plan);
           if (decision === null) return false;
           reshapeReply = decision;
           continue;
@@ -781,16 +762,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       <VariantReshapeDialog
         open={reshapeOpen}
         plan={reshape?.plan ?? null}
-        selections={reshape?.selections ?? {}}
         discardedLabels={reshape?.discardedLabels ?? []}
-        onSelect={(key, optionId) =>
-          setReshape((current) =>
-            current && {
-              ...current,
-              selections: { ...current.selections, [key]: optionId },
-            },
-          )
-        }
         onCancel={cancelReshape}
         onConfirm={async () => confirmReshape()}
       />

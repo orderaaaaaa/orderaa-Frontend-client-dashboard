@@ -6,7 +6,6 @@ import type {
   UpdateProductScalarsPayload,
   UpsertVariantInput,
   VariantReshapePlan,
-  VariantTarget,
 } from '../../types/products';
 import { PRODUCT_CREATE_LIMITS, PRODUCT_EDIT_LIMITS } from '../../types/products';
 import { duplicateNameKey, duplicateNames } from '../../utils/manualProduct';
@@ -316,85 +315,15 @@ export interface VariantPlan {
 export const STALE_VARIANT_ROW_MESSAGE =
   'هذا المتغير يستخدم قيمة أو خاصية محذوفة';
 
-export type ReshapeSelections = Record<string, number | null>;
-
 export interface ReshapeState {
   plan: VariantReshapePlan;
-  selections: ReshapeSelections;
   discardedIds: number[];
   discardedLabels: string[];
 }
 
 export interface ReshapeDecision {
-  variantTargets: VariantTarget[];
   discardedIds: number[];
-  selections: ReshapeSelections;
 }
-
-export const reshapeSelectionKey = (removal: {
-  variantId: number;
-  removedOptionId: number;
-}) => `${removal.variantId}:${removal.removedOptionId}`;
-
-export const reshapeSelectionsFromPlan = (
-  plan: VariantReshapePlan,
-  previous: ReshapeSelections = {},
-): ReshapeSelections =>
-  Object.fromEntries(
-    plan.valueRemovals.map((removal): [string, number | null] => {
-      const key = reshapeSelectionKey(removal);
-      const kept = previous[key] ?? null;
-      return [
-        key,
-        kept !== null &&
-        removal.candidateOptions.some((option) => option.id === kept)
-          ? kept
-          : removal.chosenOptionId,
-      ];
-    }),
-  );
-
-export const reshapeTargets = (
-  plan: VariantReshapePlan,
-  selections: ReshapeSelections,
-): VariantTarget[] =>
-  plan.valueRemovals.flatMap((removal) => {
-    const optionId = selections[reshapeSelectionKey(removal)];
-    return optionId === null || optionId === undefined
-      ? []
-      : [{ variantId: removal.variantId, optionId }];
-  });
-
-export const partialReshapeVariantIds = (
-  plan: VariantReshapePlan,
-  selections: ReshapeSelections,
-): number[] => {
-  const counts = new Map<number, { total: number; chosen: number }>();
-  for (const removal of plan.valueRemovals) {
-    const entry = counts.get(removal.variantId) ?? { total: 0, chosen: 0 };
-    entry.total += 1;
-    if ((selections[reshapeSelectionKey(removal)] ?? null) !== null) {
-      entry.chosen += 1;
-    }
-    counts.set(removal.variantId, entry);
-  }
-  return [...counts]
-    .filter(
-      ([, { total, chosen }]) => total > 1 && chosen > 0 && chosen < total,
-    )
-    .map(([variantId]) => variantId);
-};
-
-export const isReshapeBlocked = (
-  plan: VariantReshapePlan,
-  selections: ReshapeSelections,
-) =>
-  partialReshapeVariantIds(plan, selections).length > 0 ||
-  plan.valueRemovals.some(
-    (removal) =>
-      removal.targetRequired &&
-      (selections[reshapeSelectionKey(removal)] ?? null) === null,
-  );
 
 const priceValue = (price: string): number | null =>
   price.trim() === '' ? null : Number(price.trim());

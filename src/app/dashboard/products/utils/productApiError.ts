@@ -29,9 +29,6 @@ export const isVariantDeleteBlocker = (
 ): value is VariantDeleteBlocker =>
   typeof value === 'string' && value in VARIANT_DELETE_REASON_LABELS;
 
-export const PARTIAL_TARGETS_MESSAGE =
-  'اختر بديلاً لكل القيم المحذوفة لهذا المتغير أو لا تختر أي بديل';
-
 export function productApiErrorBody(error: unknown): ProductApiErrorBody | null {
   const data = (
     error as { response?: { data?: Partial<ProductApiErrorBody> } }
@@ -114,12 +111,6 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       return 'نفس المتغير مذكور مرتين';
     case 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED':
       return 'تعديل الخصائص يدمج متغيرات، أكّد التغيير أولاً';
-    case 'VARIANT_REMOVAL_TARGET_REQUIRED':
-      return 'اختر قيمة بديلة للمتغيرات التي لها مخزون قبل الحفظ';
-    case 'INVALID_VARIANT_TARGET':
-      return details.reason === 'PARTIAL_TARGETS'
-        ? PARTIAL_TARGETS_MESSAGE
-        : 'القيمة البديلة المختارة لا تصلح لهذا المتغير، اختر قيمة أخرى';
     case 'VARIANT_MERGE_CONFLICT':
       return 'تعارض أثناء دمج المتغيرات، أعد تحميل الصفحة وحاول مرة أخرى';
   }
@@ -131,10 +122,7 @@ export const variantReshapePlanOf = (
   const body = productApiErrorBody(error);
   const plan = body?.details?.plan;
   if (!plan) return null;
-  return body?.code === 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED' ||
-    body?.code === 'VARIANT_REMOVAL_TARGET_REQUIRED'
-    ? plan
-    : null;
+  return body?.code === 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED' ? plan : null;
 };
 
 export function toastProductError(error: unknown, fallback: string) {
