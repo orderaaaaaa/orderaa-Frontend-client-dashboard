@@ -65,11 +65,16 @@ export function AttributeChipsEditor({
     const direction = pendingMoveRef.current;
     if (!direction) return;
     pendingMoveRef.current = null;
+    const pressedButton = direction === 'up' ? upButtonRef : downButtonRef;
+    const otherButton = direction === 'up' ? downButtonRef : upButtonRef;
     const pressedStillEnabled = direction === 'up' ? canMoveUp : canMoveDown;
-    if (pressedStillEnabled) return;
+    if (pressedStillEnabled) {
+      pressedButton.current?.focus();
+      return;
+    }
     const otherEnabled = direction === 'up' ? canMoveDown : canMoveUp;
     if (!otherEnabled) return;
-    (direction === 'up' ? downButtonRef : upButtonRef).current?.focus();
+    otherButton.current?.focus();
   });
 
   const move = (direction: 'up' | 'down') => {
