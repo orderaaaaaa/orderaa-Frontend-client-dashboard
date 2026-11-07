@@ -119,7 +119,7 @@ export function VariantAvailabilitySelector({
           ref={scrollerRef}
           className={cn(
             'overflow-y-auto overscroll-contain p-0.5',
-            maxHeightClassName ?? 'max-h-72 max-sm:max-h-none',
+            maxHeightClassName ?? 'max-h-72 max-sm:max-h-none max-sm:overflow-y-visible',
           )}
         >
           {sorted.map((attribute) => (
