@@ -38,6 +38,7 @@ import ProductSpecificationRows from './ProductSpecificationRows';
 interface OrderDetailsProductCardProps {
   order: Order;
   isLockedByOther?: boolean;
+  readOnly?: boolean;
 }
 
 interface PendingSendBack {
@@ -48,13 +49,14 @@ interface PendingSendBack {
 function OrderDetailsProductCard({
   order,
   isLockedByOther = false,
+  readOnly = false,
 }: OrderDetailsProductCardProps) {
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
   // Add / edit / delete of order products all sit behind `orders:products:manage`.
   const { hasPermission } = usePermissionCheck();
-  const canManageProducts = hasPermission(PERMISSION_CODES.ORDERS_PRODUCTS_MANAGE);
+  const canManageProducts = hasPermission(PERMISSION_CODES.ORDERS_PRODUCTS_MANAGE) && !readOnly;
 
   const { data: availability } = useOrderStockAvailabilityQuery(
     order.id,
