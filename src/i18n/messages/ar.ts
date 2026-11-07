@@ -420,6 +420,7 @@ const ar = {
   'inProcess.table.copyPhone': 'نسخ رقم الهاتف',
   'inProcess.table.copyShippingCode': 'نسخ كود الشحن',
   'inProcess.table.morePhones': 'عرض كل الأرقام ({n})',
+  'inProcess.table.unreadNotes': 'ملاحظات غير مقروءة: {n}',
   'inProcess.table.columns.code': 'الكود',
   'inProcess.table.columns.customer': 'العميل',
   'inProcess.table.columns.status': 'الحالة',

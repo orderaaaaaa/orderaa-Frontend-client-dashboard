@@ -31,6 +31,7 @@ import {
 } from '@/types/shippingProviders';
 import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import { getTimeAgoCompact } from '@/utils/timeAgo';
+import { FollowupNotesUnreadBadge } from './FollowupNotesUnreadBadge';
 import { formatDate, formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
 import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
@@ -79,13 +80,26 @@ export function useIsBulkClosable(): (row: ShipmentRowBase) => boolean {
   return (row) => row.closure === null && canCloseToday && row.awaitingCarrierReturn !== true;
 }
 
-export function CodeCell({ code, shippingCode }: { code: string; shippingCode: string | null }) {
+export function CodeCell({
+  code,
+  shippingCode,
+  unreadNoteCount,
+  onOpenNotes,
+}: {
+  code: string;
+  shippingCode: string | null;
+  unreadNoteCount: number | undefined;
+  onOpenNotes: () => void;
+}) {
   const { t } = useI18n();
   return (
     <div className="flex flex-col items-start gap-1">
-      <CopyableCode value={code} label="نسخ كود الطلب">
-        <span className="font-mono font-semibold text-foreground">{code}</span>
-      </CopyableCode>
+      <div className="flex items-center gap-1.5">
+        <CopyableCode value={code} label="نسخ كود الطلب">
+          <span className="font-mono font-semibold text-foreground">{code}</span>
+        </CopyableCode>
+        <FollowupNotesUnreadBadge count={unreadNoteCount} onOpen={onOpenNotes} />
+      </div>
       <CopyableCode value={shippingCode} label={t('inProcess.table.copyShippingCode')}>
         <span className={cn('font-mono', SECONDARY_TEXT_CLASS)}>{shippingCode ?? '—'}</span>
       </CopyableCode>
@@ -317,6 +331,7 @@ export function InProcessRowActions({
       editRow={row}
       carrierSupportsUpdate={carrierSupportsUpdate}
       awaitingCarrierReturn={row.awaitingCarrierReturn}
+      unreadNoteCount={row.unreadNoteCount}
       onOpenNotes={() => onOpenNotes(row.id)}
       onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
     />
@@ -344,6 +359,7 @@ export function ReturnedRowActions({
         closure={row.closure}
         sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
         carrierResendSupported={carrierResendSupported}
+        unreadNoteCount={row.unreadNoteCount}
         onOpenNotes={() => onOpenNotes(row.id)}
         onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
       />
@@ -450,7 +466,12 @@ export function InProcessShipmentsTable({
                     ) : (
                       <span aria-hidden className="size-5 shrink-0" />
                     ))}
-                  <CodeCell code={row.code} shippingCode={row.shippingCode} />
+                  <CodeCell
+                    code={row.code}
+                    shippingCode={row.shippingCode}
+                    unreadNoteCount={row.unreadNoteCount}
+                    onOpenNotes={() => onOpenNotes(row.id)}
+                  />
                 </div>
               </td>
               <td className={CELL_CLASS}>
@@ -561,7 +582,12 @@ export function ReturnedShipmentsTable({
         {shipments.map((row) => (
           <tr key={row.id} className={ROW_CLASS}>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 whitespace-nowrap')}>
-              <CodeCell code={row.code} shippingCode={row.shippingCode} />
+              <CodeCell
+                code={row.code}
+                shippingCode={row.shippingCode}
+                unreadNoteCount={row.unreadNoteCount}
+                onOpenNotes={() => onOpenNotes(row.id)}
+              />
             </td>
             <td className={CELL_CLASS}>
               <CustomerCell name={row.customer.name} phones={row.customer.phones} />

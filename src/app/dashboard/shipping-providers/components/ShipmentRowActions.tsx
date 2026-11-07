@@ -58,6 +58,8 @@ import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } fro
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
+import { UnreadNotesCountPill } from './FollowupNotesUnreadBadge';
+import { formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf } from './LatenessChip';
 import { LateMarkModal } from './LateMarkModal';
 import { OrderEditModal, type OrderEditKind } from './OrderEditModals';
@@ -84,6 +86,7 @@ interface RowAction {
   disabledReason?: string;
   reasonTone?: 'warning';
   pending?: boolean;
+  count?: number;
   onSelect: () => void;
 }
 
@@ -137,6 +140,7 @@ export interface ShipmentRowActionsProps {
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
   awaitingCarrierReturn?: boolean;
+  unreadNoteCount?: number;
 }
 
 export function ShipmentRowActions({
@@ -160,6 +164,7 @@ export function ShipmentRowActions({
   editRow,
   carrierSupportsUpdate,
   awaitingCarrierReturn = false,
+  unreadNoteCount,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -230,6 +235,7 @@ export function ShipmentRowActions({
             survivesPending: true,
             codes: [PERMISSIONS.FOLLOWUP_READ],
             disabled: false,
+            count: unreadNoteCount,
             onSelect: onOpenNotes,
           },
         ]
@@ -494,6 +500,7 @@ export function ShipmentRowActions({
 
   const renderAction = (action: RowAction) => {
     const Icon = action.icon;
+    const unreadCount = action.count ?? 0;
     const isDisabled = action.disabled || partialRequested || (isPending && action.survivesPending !== true);
     const reason = action.disabledReason ?? (isBusy ? t('inProcess.reason.pending') : undefined);
     const reasonId = `${idPrefix}-${action.id}-reason`;
@@ -516,11 +523,12 @@ export function ShipmentRowActions({
       >
         <span
           className={cn(
-            'flex size-9 shrink-0 items-center justify-center rounded-md bg-muted',
+            'relative flex size-9 shrink-0 items-center justify-center rounded-md bg-muted',
             action.destructive && 'bg-destructive/10',
           )}
         >
           <Icon className={cn('size-4', action.destructive ? 'text-destructive' : 'text-muted-foreground')} />
+          {unreadCount > 0 && <UnreadNotesCountPill count={unreadCount} className="absolute -top-1 -end-1" />}
         </span>
         <span className="flex min-w-0 flex-col items-start gap-1 text-start">
           <span className={cn('font-medium', action.destructive ? 'text-destructive' : 'text-foreground')}>
@@ -542,6 +550,9 @@ export function ShipmentRowActions({
               {action.reasonTone === 'warning' && <Info className="size-3.5 shrink-0" />}
               {reason}
             </span>
+          )}
+          {unreadCount > 0 && (
+            <span className="sr-only">{t('inProcess.table.unreadNotes', { n: formatNumber(unreadCount) })}</span>
           )}
         </span>
       </Button>
