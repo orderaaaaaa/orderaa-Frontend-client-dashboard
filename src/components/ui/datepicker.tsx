@@ -57,6 +57,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
+    const [calendarKey, setCalendarKey] = React.useState(0);
 
     // Time-only picker
     if (showTimeSelectOnly) {
@@ -93,8 +94,15 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
       onChange(null);
     };
 
+    const handleOpenChange = (nextOpen: boolean) => {
+      if (nextOpen) {
+        setCalendarKey((key) => key + 1);
+      }
+      setOpen(nextOpen);
+    };
+
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             ref={ref}
@@ -131,8 +139,10 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
           <Calendar
+            key={calendarKey}
             mode="single"
             selected={selected || undefined}
+            defaultMonth={selected || undefined}
             onSelect={(date) => {
               if (showTimeSelect && date) {
                 // Preserve the time from the previously selected date
