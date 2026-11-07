@@ -329,6 +329,7 @@ export const useUpdateOrderProduct = () => {
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
         [QUERY_KEYS.DELAYED_ORDERS],
+        [QUERY_KEYS.ORDER_STOCK_AVAILABILITY],
       ]);
     },
   });
@@ -359,6 +360,7 @@ export const useDeleteOrderProduct = () => {
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
         [QUERY_KEYS.DELAYED_ORDERS],
+        [QUERY_KEYS.ORDER_STOCK_AVAILABILITY],
       ]);
     },
   });
@@ -397,6 +399,7 @@ export const useAddOrderProduct = () => {
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
         [QUERY_KEYS.DELAYED_ORDERS],
+        [QUERY_KEYS.ORDER_STOCK_AVAILABILITY],
       ]);
     },
   });
