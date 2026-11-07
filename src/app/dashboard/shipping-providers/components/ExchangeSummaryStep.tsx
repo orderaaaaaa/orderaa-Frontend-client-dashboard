@@ -127,6 +127,7 @@ export function ExchangeSummaryStep({
         </label>
         <Textarea
           name="exchangeReturnContent"
+          dir="auto"
           value={content}
           onChange={(e) => onChangeContent(e.target.value)}
           disabled={disabled}
