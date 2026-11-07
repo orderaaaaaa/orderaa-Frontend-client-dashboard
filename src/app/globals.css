@@ -784,7 +784,7 @@ html {
 }
 
 .Toastify {
-  --toastify-font-family: var(--font-sans);
+  --toastify-font-family: var(--font-beiruti);
   --toastify-color-info: #1d4ed8;
   --toastify-color-success: #15803d;
   --toastify-color-warning: #f1c40f;
