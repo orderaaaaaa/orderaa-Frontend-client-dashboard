@@ -323,6 +323,8 @@ const en: Record<keyof typeof ar, string> = {
   'orderSystemFailures.label.CARRIER_CANCELLED_LANE_STOCK': 'A carrier status was applied to a cancelled order: check the stock',
   'orderSystemFailures.label.CARRIER_STATUS_CORRECTED': 'The carrier changed a status we had set. Review the order',
   'orderSystemFailures.label.CARRIER_RETURN_AT_MERCHANT': 'The carrier reports the shipment is back with the merchant, and the order status did not change',
+  'orderSystemFailures.label.CARRIER_RETURN_WITHOUT_CHILD': 'The carrier reports a return for this order, and no return order is linked to it',
+  'orderSystemFailures.label.PARTIAL_RETURN_RULE_MISSING': 'No stock rule covers some lines of this return order: the status changed and no stock moved',
   'orderSystemFailures.label.CARRIER_MESSAGE_AFTER_SWITCH': 'A message arrived from the previous carrier after the carrier was changed: cancel the shipment there manually',
   'orderSystemFailures.label.SHIPMENT_NOT_CREATED_MISSING_ADDRESS': 'The order was not sent to shipping: the governorate or city is missing',
   'orderSystemFailures.label.SHIPMENT_NOT_CREATED_MISSING_PHONE': 'The order was not sent to shipping: the phone number is missing',

@@ -484,6 +484,7 @@ export interface Order {
   returnOfOrderId?: number | null;
   returnOf?: OrderReturnOfRef | null;
   partialReturns?: OrderPartialReturnRef[];
+  awaitingCarrierReturn?: boolean;
 }
 
 export interface OrderReturnOfRef {

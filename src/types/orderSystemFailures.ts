@@ -20,6 +20,8 @@ export type CarrierWebhookFailureCode =
   | 'CARRIER_CANCELLED_LANE_STOCK'
   | 'CARRIER_STATUS_CORRECTED'
   | 'CARRIER_RETURN_AT_MERCHANT'
+  | 'CARRIER_RETURN_WITHOUT_CHILD'
+  | 'PARTIAL_RETURN_RULE_MISSING'
   | 'CARRIER_MESSAGE_AFTER_SWITCH';
 
 export type ShippingDispatchFailureCode =
@@ -183,6 +185,14 @@ export interface CarrierStatusCorrectedDetails
 }
 
 export type CarrierReturnAtMerchantDetails = CarrierFailureDetailsBase;
+
+export interface CarrierReturnWithoutChildDetails extends CarrierFailureDetailsBase {
+  legCode: string;
+}
+
+export interface PartialReturnRuleMissingDetails extends CarrierFailureDetailsBase {
+  variantIds: number[];
+}
 
 export type ShipmentMissingAddressField = 'governorate' | 'city';
 
@@ -472,6 +482,8 @@ export interface OrderSystemFailureDetailsByCode {
   CARRIER_CANCELLED_LANE_STOCK: CarrierCancelledLaneStockDetails;
   CARRIER_STATUS_CORRECTED: CarrierStatusCorrectedDetails;
   CARRIER_RETURN_AT_MERCHANT: CarrierReturnAtMerchantDetails;
+  CARRIER_RETURN_WITHOUT_CHILD: CarrierReturnWithoutChildDetails;
+  PARTIAL_RETURN_RULE_MISSING: PartialReturnRuleMissingDetails;
   CARRIER_MESSAGE_AFTER_SWITCH: CarrierMessageAfterSwitchDetails;
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;

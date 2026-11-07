@@ -336,6 +336,8 @@ const ar = {
   'orderSystemFailures.label.CARRIER_CANCELLED_LANE_STOCK': 'تم تطبيق حالة شركة الشحن على طلب ملغي: تحقق من المخزون',
   'orderSystemFailures.label.CARRIER_STATUS_CORRECTED': 'غيّرت شركة الشحن حالة طلب كنا قد حددناها. راجع الطلب',
   'orderSystemFailures.label.CARRIER_RETURN_AT_MERCHANT': 'شركة الشحن تفيد بأن الشحنة عادت إلى التاجر، ولم تتغير حالة الطلب',
+  'orderSystemFailures.label.CARRIER_RETURN_WITHOUT_CHILD': 'شركة الشحن تبلغ عن مرتجع لهذا الطلب ولا يوجد طلب مرتجع مرتبط به',
+  'orderSystemFailures.label.PARTIAL_RETURN_RULE_MISSING': 'لا توجد قاعدة مخزون تغطي بعض قطع طلب المرتجع، فتغيرت الحالة ولم يتحرك المخزون',
   'orderSystemFailures.label.CARRIER_MESSAGE_AFTER_SWITCH': 'وصلت رسالة من شركة الشحن القديمة بعد تغيير الشركة: ألغِ الشحنة لديها يدوياً',
   'orderSystemFailures.label.SHIPMENT_NOT_CREATED_MISSING_ADDRESS': 'لم يتم إرسال الطلب للشحن: المحافظة أو المدينة غير موجودة',
   'orderSystemFailures.label.SHIPMENT_NOT_CREATED_MISSING_PHONE': 'لم يتم إرسال الطلب للشحن: رقم الهاتف غير موجود',

@@ -14,6 +14,7 @@ import type {
   CarrierCancelledLaneStockDetails,
   CarrierFailureDetailsBase,
   CarrierMessageAfterSwitchDetails,
+  CarrierReturnWithoutChildDetails,
   CarrierStatusCorrectedDetails,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
@@ -29,6 +30,7 @@ import type {
   OrderSystemFailure,
   OrderSystemFailureCode,
   OrderSystemFailureDetailsByCode,
+  PartialReturnRuleMissingDetails,
   ScheduledTransitionFailedDetails,
   ShadowActivationFailedDetails,
   ShipmentCancelAtCarrierDetails,
@@ -186,6 +188,12 @@ const isCarrierCancelledLaneStock = (value: unknown): value is CarrierCancelledL
   (value.trialSkipped === undefined ||
     (Array.isArray(value.trialSkipped) &&
       value.trialSkipped.every(isCancelledLaneTrialSkippedLine)));
+
+const isCarrierReturnWithoutChild = (value: unknown): value is CarrierReturnWithoutChildDetails =>
+  isCarrierBase(value) && isRecord(value) && isString(value.legCode);
+
+const isPartialReturnRuleMissing = (value: unknown): value is PartialReturnRuleMissingDetails =>
+  isCarrierBase(value) && isRecord(value) && isNumberArray(value.variantIds);
 
 const isCarrierStatusCorrected = (value: unknown): value is CarrierStatusCorrectedDetails =>
   isCarrierBase(value) &&
@@ -446,6 +454,10 @@ export function narrowFailureDetails(
       return isCarrierStatusCorrected(details) ? { code, details } : null;
     case 'CARRIER_RETURN_AT_MERCHANT':
       return isCarrierBase(details) ? { code, details } : null;
+    case 'CARRIER_RETURN_WITHOUT_CHILD':
+      return isCarrierReturnWithoutChild(details) ? { code, details } : null;
+    case 'PARTIAL_RETURN_RULE_MISSING':
+      return isPartialReturnRuleMissing(details) ? { code, details } : null;
     case 'CARRIER_MESSAGE_AFTER_SWITCH':
       return isCarrierMessageAfterSwitch(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':

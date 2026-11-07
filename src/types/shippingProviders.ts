@@ -110,6 +110,7 @@ export interface ShipmentRowBase {
   area: string | null;
   address: string | null;
   returnShippingCost: number | null;
+  awaitingCarrierReturn?: boolean;
 }
 
 export interface InProcessShipment extends ShipmentRowBase {

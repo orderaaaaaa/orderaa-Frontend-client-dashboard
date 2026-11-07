@@ -77,6 +77,8 @@ export function FailureDetails({
     case 'CARRIER_STATUS_NOT_APPLIED':
     case 'CARRIER_STATUS_CORRECTED':
     case 'CARRIER_RETURN_AT_MERCHANT':
+    case 'CARRIER_RETURN_WITHOUT_CHILD':
+    case 'PARTIAL_RETURN_RULE_MISSING':
       return <CarrierDetails details={narrowed.details} />;
     case 'CARRIER_CANCELLED_LANE_APPLIED':
       return <CancelledLaneAppliedDetails details={narrowed.details} />;

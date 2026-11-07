@@ -2,12 +2,14 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { integrationLabelOf } from '@/lib/shippingCompanies';
 import type {
   CarrierReturnAtMerchantDetails,
+  CarrierReturnWithoutChildDetails,
   CarrierStatusCorrectedDetails,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
   CarrierStatusNotAppliedDetails,
   CarrierStatusUnmappedDetails,
+  PartialReturnRuleMissingDetails,
 } from '@/types/orderSystemFailures';
 import { DetailField, DetailGrid, EMPTY_VALUE } from './DetailFields';
 import { FailureReasonDetails } from './FailureReasonDetails';
@@ -19,7 +21,9 @@ type CarrierDetailsValue =
   | CarrierStatusIgnoredOutsideWindowDetails
   | CarrierStatusNotAppliedDetails
   | CarrierStatusCorrectedDetails
-  | CarrierReturnAtMerchantDetails;
+  | CarrierReturnAtMerchantDetails
+  | CarrierReturnWithoutChildDetails
+  | PartialReturnRuleMissingDetails;
 
 export function CarrierDetails({ details }: { details: CarrierDetailsValue }) {
   const { getStatusLabel } = useStatusLabel();
@@ -48,6 +52,14 @@ export function CarrierDetails({ details }: { details: CarrierDetailsValue }) {
         )}
         {'toStatus' in details && (
           <DetailField label="الحالة بعد التصحيح">{getStatusLabel(details.toStatus)}</DetailField>
+        )}
+        {'legCode' in details && (
+          <DetailField label="كود شحنة المرتجع" ltr>
+            {details.legCode}
+          </DetailField>
+        )}
+        {'variantIds' in details && (
+          <DetailField label="أرقام المتغيرات">{details.variantIds.join('، ') || EMPTY_VALUE}</DetailField>
         )}
       </DetailGrid>
       {'reason' in details && <FailureReasonDetails reason={details.reason} />}
