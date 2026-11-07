@@ -9,7 +9,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
  */
 export interface PackagingNotesSectionProps {
   packagingNotes?: string | null;
-  onAddClick: () => void;
+  onAddClick?: () => void;
   className?: string;
 }
 
@@ -33,14 +33,16 @@ export function PackagingNotesSection({
       <div className="flex justify-between items-center">
         <h2 className="text-primary-text font-bold text-lg">ملاحظات التغليف</h2>
         <Can code={PERMISSION_CODES.ORDERS_UPDATE}>
-          <Button
-            variant="ghost"
-            onClick={onAddClick}
-            className="flex items-center gap-2 px-4 py-2 bg-card text-primary-text rounded-lg hover:bg-purple-50 transition-colors font-bold"
-          >
-            <LiaPlusSolid className="w-4 h-4" />
-            إضافة ملاحظة
-          </Button>
+          {onAddClick && (
+            <Button
+              variant="ghost"
+              onClick={onAddClick}
+              className="flex items-center gap-2 px-4 py-2 bg-card text-primary-text rounded-lg hover:bg-purple-50 transition-colors font-bold"
+            >
+              <LiaPlusSolid className="w-4 h-4" />
+              إضافة ملاحظة
+            </Button>
+          )}
         </Can>
       </div>
       {packagingNotes && (

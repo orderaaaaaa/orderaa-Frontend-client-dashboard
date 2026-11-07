@@ -35,6 +35,7 @@ export interface OrderActionsFooterProps {
   stockBlockReason?: string;
   isBusy?: boolean;
   canSplitDelivered?: boolean;
+  waiting?: boolean;
 }
 
 export function OrderActionsFooterLargeScreens({
@@ -51,6 +52,7 @@ export function OrderActionsFooterLargeScreens({
   stockBlockReason,
   isBusy = false,
   canSplitDelivered = false,
+  waiting = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -122,7 +124,7 @@ export function OrderActionsFooterLargeScreens({
           </Button>
         </div>
 
-        {showStopOperation ? (
+        {!waiting && showStopOperation ? (
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -132,7 +134,7 @@ export function OrderActionsFooterLargeScreens({
             <LiaStopCircleSolid className="w-5 h-5" />
             وقف التشغيل
           </Button>
-        ) : showActionsMenu ? (
+        ) : !waiting && showActionsMenu ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
               {canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (

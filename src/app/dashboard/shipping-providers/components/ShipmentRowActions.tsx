@@ -136,6 +136,7 @@ export interface ShipmentRowActionsProps {
   exchangeCarrier?: ExchangeCarrierAccess;
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
+  awaitingCarrierReturn?: boolean;
 }
 
 export function ShipmentRowActions({
@@ -158,6 +159,7 @@ export function ShipmentRowActions({
   exchangeCarrier,
   editRow,
   carrierSupportsUpdate,
+  awaitingCarrierReturn = false,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -456,7 +458,9 @@ export function ShipmentRowActions({
 
   const isActionVisible = (action: RowAction): boolean =>
     hasAllPermissions(action.codes) && (!action.anyOfCodes || hasAnyPermission(action.anyOfCodes));
-  const visibleActions = actions.filter(isActionVisible);
+  const isAllowedWhileAwaitingCarrier = (action: RowAction): boolean =>
+    !awaitingCarrierReturn || action.id === 'notes' || action.id === 'log';
+  const visibleActions = actions.filter(isAllowedWhileAwaitingCarrier).filter(isActionVisible);
   const hasNonFinalActions = visibleActions.some((action) => action.group !== 'final');
 
   const chooseAction = (action: RowAction) => {

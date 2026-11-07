@@ -26,6 +26,7 @@ export interface PricingSectionProps {
   pendingShippingType?: string | null;
   onSaveReturnContent?: (content: string) => Promise<void>;
   className?: string;
+  readOnly?: boolean;
 }
 
 /**
@@ -42,10 +43,11 @@ export function PricingSection({
   pendingShippingType,
   onSaveReturnContent,
   className = '',
+  readOnly = false,
 }: PricingSectionProps) {
   // Every field here saves through PATCH /orders/:id (`orders:update`).
   const { hasPermission } = usePermissionCheck();
-  const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
+  const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly;
   const priceLocked = order.shippingCompanyRef?.carrierSupportsUpdate === false;
 
   // T8. Every amount is a decimal string from the API and is rendered as-is —

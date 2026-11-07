@@ -37,6 +37,7 @@ export interface OrderActionsFooterProps {
   stockBlockReason?: string;
   isBusy?: boolean;
   canSplitDelivered?: boolean;
+  waiting?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -53,6 +54,7 @@ export function OrderActionsFooter({
   stockBlockReason,
   isBusy = false,
   canSplitDelivered = false,
+  waiting = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -93,7 +95,7 @@ export function OrderActionsFooter({
         ref={footerRef}
         className="fixed bottom-8 left-0 right-0 z-(--z-page-fixed) flex flex-col items-center gap-3 px-4 font-sans"
       >
-        {!showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
+        {!waiting && !showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
           <p className="w-full max-w-md max-h-32 overflow-y-auto rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-sm font-medium leading-5 whitespace-pre-line text-red-700 shadow-sm">
             {stockBlockReason}
           </p>
@@ -108,7 +110,7 @@ export function OrderActionsFooter({
             <LiaAngleRightSolid className="w-6 h-6" />
           </Button>
 
-          {showStopOperation ? (
+          {!waiting && showStopOperation ? (
             <Button
               variant="default"
               onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -118,7 +120,7 @@ export function OrderActionsFooter({
               <LiaStopCircleSolid className="w-5 h-5" />
               وقف التشغيل
             </Button>
-          ) : showActionsMenu ? (
+          ) : !waiting && showActionsMenu ? (
             <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
               {canUpdate && orderStatus !== 'CONFIRMED' && (
                 <Button

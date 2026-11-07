@@ -225,6 +225,8 @@ function OrderDetailsInfoComponent({
     return sortedEvents[0]?.name;
   }, [order.order_events]);
 
+  const waiting = order.awaitingCarrierReturn === true;
+
   const splitDeliveredAllowed = canSplitDelivered({
     status: order.status,
     carrierImplementation: order.shippingCompanyRef?.implementation,
@@ -397,6 +399,7 @@ function OrderDetailsInfoComponent({
         <CustomerDataSection
           order={order}
           onUpdate={updateField}
+          readOnly={waiting}
         />
 
         <PricingSection
@@ -405,6 +408,7 @@ function OrderDetailsInfoComponent({
           onShippingTypeSelect={handleShippingTypeSelect}
           pendingShippingType={pendingShippingType}
           onSaveReturnContent={handleSaveReturnContent}
+          readOnly={waiting}
         />
 
         <ShippingSection
@@ -412,7 +416,7 @@ function OrderDetailsInfoComponent({
           governorate={order.governorate}
           city={order.city}
           address={order.address}
-          onEditClick={modals.shipping.open}
+          onEditClick={waiting ? undefined : modals.shipping.open}
           externalGovernorate={order.externalGovernorate}
           externalCity={order.externalCity}
           sourceGovernorate={order.sourceGovernorate}
@@ -421,12 +425,13 @@ function OrderDetailsInfoComponent({
 
         <PackagingNotesSection
           packagingNotes={order.packagingNotes}
-          onAddClick={modals.packagingNotes.open}
+          onAddClick={waiting ? undefined : modals.packagingNotes.open}
         />
       </div>
 
       <div className="md:hidden">
         <OrderActionsFooter
+          waiting={waiting}
           orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}
@@ -445,6 +450,7 @@ function OrderDetailsInfoComponent({
 
       <div className="hidden md:block">
         <OrderActionsFooterLargeScreens
+          waiting={waiting}
           orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}
