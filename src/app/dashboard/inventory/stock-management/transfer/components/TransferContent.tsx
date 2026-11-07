@@ -115,10 +115,12 @@ export function TransferContent() {
           </section>
 
           {sourceId === null ? (
-            <EmptyState
-              title="اختر مخزنًا لعرض منتجاته"
-              description="بعد اختيار المخزن أضف المتغيرات التي تريد نقلها"
-            />
+            !warehouses.isLoading && (
+              <EmptyState
+                title="اختر مخزنًا لعرض منتجاته"
+                description="بعد اختيار المخزن أضف المتغيرات التي تريد نقلها"
+              />
+            )
           ) : (
             <div className="grid items-start gap-6 xl:grid-cols-[3fr_2fr]">
               <TransferProductPicker
