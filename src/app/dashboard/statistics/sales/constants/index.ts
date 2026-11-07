@@ -205,8 +205,8 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     section: 'costAndProfit',
     kind: 'money',
     label: 'تكلفة القطع المباعة',
-    hint: 'متوسط سعر الشراء × كل القطع المباعة، كل الفترات، كل المتاجر، كل الفواتير غير المحذوفة',
-    approvedHint: 'متوسط تكلفة الفواتير المغلقة × كل القطع المباعة، كل الفترات، كل المتاجر',
+    hint: 'متوسط سعر الشراء لكل متغير (أو متوسط المنتج إن لم يكن للمتغير سعر)، كل الفترات، كل الفواتير غير المحذوفة × قطع الفترة والفلاتر المحددة',
+    approvedHint: 'متوسط سعر الشراء لكل متغير (أو متوسط المنتج إن لم يكن للمتغير سعر)، كل الفترات، الفواتير المغلقة × قطع الفترة والفلاتر المحددة',
     accent: 'chart1',
     icon: Tags,
     trend: 'hidden',
@@ -272,7 +272,7 @@ export const SALES_COPY = {
   missingFeeTooltip: 'حدّد تكلفة الشحن للمحافظة من إعدادات المتجر ← اللوجستيك والمحافظات',
   clearAll: 'مسح الكل',
   breakdownTitle: 'التفصيل حسب النطاق',
-  breakdownCostScopeNote: 'كل الفترات',
+  breakdownCostScopeNote: 'متوسط كل الفترات × قطع الفترة المحددة',
   breakdownColumns: [
     'النطاق',
     'الطلبات',
@@ -530,7 +530,7 @@ export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition>
     includesDerived: false,
     columns: [],
     withCost: true,
-    scopeNote: 'كل الفترات، كل المتاجر',
+    scopeNote: SALES_COPY.breakdownCostScopeNote,
   },
 };
 
