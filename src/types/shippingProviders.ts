@@ -113,7 +113,7 @@ export interface ShipmentRowBase {
   returnShippingCost: number | null;
   lineCount: number;
   returnChildCode: string | null;
-  awaitingCarrierReturn?: boolean;
+  frozenReturnChild: boolean;
   unreadNoteCount?: number;
 }
 

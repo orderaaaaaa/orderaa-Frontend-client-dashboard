@@ -29,7 +29,7 @@ export interface OrderActionsFooterProps {
   isNavigatingPrevious?: boolean;
   isBusy?: boolean;
   partialAction: PartialDeliveryMenuAction;
-  waiting?: boolean;
+  frozen?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -44,7 +44,7 @@ export function OrderActionsFooter({
   isNavigatingPrevious = false,
   isBusy = false,
   partialAction,
-  waiting = false,
+  frozen = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -95,7 +95,7 @@ export function OrderActionsFooter({
             <LiaAngleRightSolid className="w-6 h-6" />
           </Button>
 
-          {!waiting && showStopOperation ? (
+          {!frozen && showStopOperation ? (
             <Button
               variant="default"
               onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -105,9 +105,9 @@ export function OrderActionsFooter({
               <LiaStopCircleSolid className="w-5 h-5" />
               وقف التشغيل
             </Button>
-          ) : !waiting && showActionsMenu ? (
+          ) : showActionsMenu ? (
             <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
-              {canUpdate && orderStatus !== 'CONFIRMED' && (
+              {canUpdate && !frozen && orderStatus !== 'CONFIRMED' && (
                 <Button
                   variant="ghost"
                   onClick={onConfirm}
@@ -121,7 +121,7 @@ export function OrderActionsFooter({
                 </Button>
               )}
 
-              {canUpdate && (
+              {canUpdate && !frozen && (
                 <div className="relative top-[-6px]" ref={followUpDropdown.ref}>
                   <Button
                     variant="ghost"
@@ -167,6 +167,7 @@ export function OrderActionsFooter({
                     orderStatus={orderStatus}
                     lastEventStatus={lastEventStatus}
                     partialAction={partialAction}
+                    frozen={frozen}
                     className="max-h-[60vh] max-w-full"
                     onActionClick={(label, action) => {
                       actionsDropdown.close();

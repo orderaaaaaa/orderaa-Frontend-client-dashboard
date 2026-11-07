@@ -28,7 +28,7 @@ export interface OrderActionsFooterProps {
   isNavigatingPrevious?: boolean;
   isBusy?: boolean;
   partialAction: PartialDeliveryMenuAction;
-  waiting?: boolean;
+  frozen?: boolean;
 }
 
 export function OrderActionsFooterLargeScreens({
@@ -43,7 +43,7 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingPrevious = false,
   isBusy = false,
   partialAction,
-  waiting = false,
+  frozen = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -115,7 +115,7 @@ export function OrderActionsFooterLargeScreens({
           </Button>
         </div>
 
-        {!waiting && showStopOperation ? (
+        {!frozen && showStopOperation ? (
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -125,10 +125,10 @@ export function OrderActionsFooterLargeScreens({
             <LiaStopCircleSolid className="w-5 h-5" />
             وقف التشغيل
           </Button>
-        ) : !waiting && showActionsMenu ? (
+        ) : showActionsMenu ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
-              {canUpdate && orderStatus !== 'CONFIRMED' && (
+              {canUpdate && !frozen && orderStatus !== 'CONFIRMED' && (
                 <Button
                   variant="default"
                   onClick={onConfirm}
@@ -141,7 +141,7 @@ export function OrderActionsFooterLargeScreens({
                 </Button>
               )}
 
-              {canUpdate && (
+              {canUpdate && !frozen && (
                 <div className="relative" ref={followUpDropdown.ref}>
                   <Button
                     variant="outline"
@@ -179,6 +179,7 @@ export function OrderActionsFooterLargeScreens({
               orderStatus={orderStatus}
               lastEventStatus={lastEventStatus}
               partialAction={partialAction}
+              frozen={frozen}
               onActionClick={handleActionClick}
             />
           </div>

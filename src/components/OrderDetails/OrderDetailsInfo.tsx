@@ -190,13 +190,13 @@ function OrderDetailsInfoComponent({
     return sortedEvents[0]?.name;
   }, [order.order_events]);
 
-  const waiting = order.awaitingCarrierReturn === true;
+  const frozen = order.frozenReturnChild === true;
 
   const partialGate = orderPagePartialActionOf({
     status: order.status,
     lineCount: order.order_products.length,
     hasReturnChild: (order.partialReturns ?? []).some((item) => item.lineCount > 0),
-    frozen: order.frozenReturnChild === true,
+    frozen,
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
     hasActiveShippingId: order.shipping_ids?.some((row) => row.isActive) ?? false,
@@ -370,7 +370,7 @@ function OrderDetailsInfoComponent({
         <CustomerDataSection
           order={order}
           onUpdate={updateField}
-          readOnly={waiting}
+          readOnly={frozen}
         />
 
         <PricingSection
@@ -379,7 +379,7 @@ function OrderDetailsInfoComponent({
           onShippingTypeSelect={handleShippingTypeSelect}
           pendingShippingType={pendingShippingType}
           onSaveReturnContent={handleSaveReturnContent}
-          readOnly={waiting}
+          readOnly={frozen}
         />
 
         <ShippingSection
@@ -387,7 +387,7 @@ function OrderDetailsInfoComponent({
           governorate={order.governorate}
           city={order.city}
           address={order.address}
-          onEditClick={waiting ? undefined : modals.shipping.open}
+          onEditClick={frozen ? undefined : modals.shipping.open}
           externalGovernorate={order.externalGovernorate}
           externalCity={order.externalCity}
           sourceGovernorate={order.sourceGovernorate}
@@ -396,13 +396,13 @@ function OrderDetailsInfoComponent({
 
         <PackagingNotesSection
           packagingNotes={order.packagingNotes}
-          onAddClick={waiting ? undefined : modals.packagingNotes.open}
+          onAddClick={frozen ? undefined : modals.packagingNotes.open}
         />
       </div>
 
       <div className="md:hidden">
         <OrderActionsFooter
-          waiting={waiting}
+          frozen={frozen}
           orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}
@@ -419,7 +419,7 @@ function OrderDetailsInfoComponent({
 
       <div className="hidden md:block">
         <OrderActionsFooterLargeScreens
-          waiting={waiting}
+          frozen={frozen}
           orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}

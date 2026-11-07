@@ -66,7 +66,7 @@ function OrderDetailsInfo({
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
-        readOnly={order.awaitingCarrierReturn === true}
+        readOnly={order.frozenReturnChild === true}
       />
       <OrderDetailsInfoComponent
         order={order}

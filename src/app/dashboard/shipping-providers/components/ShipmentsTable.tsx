@@ -111,7 +111,7 @@ export type InProcessCarrier = ReturnType<typeof useInProcessCarrier>;
 export function useIsBulkClosable(): (row: ShipmentRowBase) => boolean {
   const { hasPermission } = usePermissionCheck();
   const canCloseToday = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_CLOSE_MANAGE);
-  return (row) => row.closure === null && canCloseToday && row.awaitingCarrierReturn !== true;
+  return (row) => row.closure === null && canCloseToday;
 }
 
 export function CodeCell({
@@ -363,7 +363,7 @@ export function InProcessRowActions({
       rowLocked={locked}
       editRow={row}
       carrierSupportsUpdate={carrierSupportsUpdate}
-      awaitingCarrierReturn={row.awaitingCarrierReturn}
+      frozenReturnChild={row.frozenReturnChild}
       unreadNoteCount={row.unreadNoteCount}
       onOpenNotes={() => onOpenNotes(row.id)}
       onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
@@ -392,6 +392,7 @@ export function ReturnedRowActions({
         closure={row.closure}
         sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
         carrierResendSupported={carrierResendSupported}
+        frozenReturnChild={row.frozenReturnChild}
         unreadNoteCount={row.unreadNoteCount}
         onOpenNotes={() => onOpenNotes(row.id)}
         onOpenActionLog={() => onOpenActionLog(row.id, row.code)}

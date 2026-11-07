@@ -106,6 +106,8 @@ export const CLOSURE_KIND_LABEL_KEYS: Record<FollowupClosureKind, TranslationKey
 export const closureReasonOf = (closure: FollowupClosure): string | null =>
   closure.reasonName ?? closure.reasonText;
 
+const FROZEN_ROW_ACTION_IDS = ['notes', 'log', 'close', 'refuse', 'cancel', 'reopen'];
+
 const ACTION_GROUPS: { id: ActionGroupId; titleKey: TranslationKey }[] = [
   { id: 'follow', titleKey: 'inProcess.sheet.group.follow' },
   { id: 'delivery', titleKey: 'inProcess.sheet.group.edit' },
@@ -139,7 +141,7 @@ export interface ShipmentRowActionsProps {
   exchangeCarrier?: ExchangeCarrierAccess;
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
-  awaitingCarrierReturn?: boolean;
+  frozenReturnChild?: boolean;
   unreadNoteCount?: number;
 }
 
@@ -163,7 +165,7 @@ export function ShipmentRowActions({
   exchangeCarrier,
   editRow,
   carrierSupportsUpdate,
-  awaitingCarrierReturn = false,
+  frozenReturnChild = false,
   unreadNoteCount,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
@@ -464,9 +466,9 @@ export function ShipmentRowActions({
 
   const isActionVisible = (action: RowAction): boolean =>
     hasAllPermissions(action.codes) && (!action.anyOfCodes || hasAnyPermission(action.anyOfCodes));
-  const isAllowedWhileAwaitingCarrier = (action: RowAction): boolean =>
-    !awaitingCarrierReturn || action.id === 'notes' || action.id === 'log';
-  const visibleActions = actions.filter(isAllowedWhileAwaitingCarrier).filter(isActionVisible);
+  const isAllowedOnFrozenChild = (action: RowAction): boolean =>
+    !frozenReturnChild || FROZEN_ROW_ACTION_IDS.includes(action.id);
+  const visibleActions = actions.filter(isAllowedOnFrozenChild).filter(isActionVisible);
   const hasNonFinalActions = visibleActions.some((action) => action.group !== 'final');
 
   const chooseAction = (action: RowAction) => {

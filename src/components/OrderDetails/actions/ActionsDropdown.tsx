@@ -53,6 +53,7 @@ export interface ActionsDropdownProps {
   orderStatus: string;
   lastEventStatus?: string;
   partialAction: PartialDeliveryMenuAction;
+  frozen: boolean;
   className?: string;
   onActionClick: (label: string, action: string) => void;
 }
@@ -62,6 +63,7 @@ export function ActionsDropdown({
   orderStatus,
   lastEventStatus,
   partialAction,
+  frozen,
   className,
   onActionClick,
 }: ActionsDropdownProps) {
@@ -73,6 +75,9 @@ export function ActionsDropdown({
   const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
   const filteredOptions = useMemo(() => {
+    if (frozen) {
+      return canUpdate ? postShippingOptions.filter((option) => option.action === 'return_refund') : [];
+    }
     const base = arrowOptions.filter((option) => {
       if (option.action === 'cancel') {
         return canCancel;
@@ -100,7 +105,7 @@ export function ActionsDropdown({
     }
 
     return base;
-  }, [orderStatus, lastEventStatus, partialVisible, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
+  }, [frozen, orderStatus, lastEventStatus, partialVisible, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
 
   if (!isOpen || filteredOptions.length === 0) return null;
 
