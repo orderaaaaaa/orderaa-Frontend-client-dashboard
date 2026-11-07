@@ -139,7 +139,7 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
     movePickerOptions,
     isMoveAllowed,
     hasMovePartner,
-    isLoading: summaryQuery.isLoading,
+    isLoading: summaryQuery.isPending && summaryQuery.fetchStatus !== 'idle',
     isError: summaryQuery.isError && summaryQuery.data === undefined,
     onRetry: () => void summaryQuery.refetch(),
   };
