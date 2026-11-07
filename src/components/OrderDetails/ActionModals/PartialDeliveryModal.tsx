@@ -10,6 +10,7 @@ import { isNoEditPartialDeliveryCarrier, type ShippingImplementation } from '@/t
 import {
   RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
   returnShipmentContentOf,
+  variantLabelOf,
 } from '@/utils/partialDelivery/returnShipmentContent';
 
 interface PartialDeliveryModalProps {
@@ -22,6 +23,7 @@ interface PartialDeliveryModalProps {
   shippingType?: ShippingType;
   orderStatus: string;
   hasActiveShippingId: boolean;
+  parentReturnContent: string | null;
 }
 
 interface VariantGroup {
@@ -33,17 +35,6 @@ interface VariantGroup {
 }
 
 const groupKey = (op: OrderProduct) => `v${op.variantId}`;
-
-const variantLabelOf = (op: OrderProduct) => {
-  const attrs = (op.attributes ?? []).filter(
-    (a) => a?.name && a?.options?.name,
-  );
-  return attrs.length > 0
-    ? attrs.map((a) => `${a.name}: ${a.options.name}`).join(' • ')
-    : (op.products.extraDetails?.variants ?? [])
-        .map((v) => v.title)
-        .join(' • ');
-};
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
 
@@ -57,6 +48,7 @@ export default function PartialDeliveryModal({
   shippingType,
   orderStatus,
   hasActiveShippingId,
+  parentReturnContent,
 }: PartialDeliveryModalProps) {
   const [refusedByGroup, setRefusedByGroup] = useState<Record<string, number>>(
     {},
@@ -108,14 +100,21 @@ export default function PartialDeliveryModal({
   const calculatedPrice =
     shippingType === ShippingType.PARTIAL_RETURN ? totalCost : roundMoney(totalCost - refusedValue);
   const selectedSet = new Set(selectedIds);
-  const remainingUnits = orderProducts.filter((op) => !selectedSet.has(op.id));
-  const returnShipmentContent = contentOverride ?? returnShipmentContentOf(remainingUnits);
+  const refusedUnits = orderProducts.filter((op) => selectedSet.has(op.id));
+  const returnShipmentContent = contentOverride ?? returnShipmentContentOf(refusedUnits);
   const totalUnits = orderProducts.length;
   const refusesAll = totalUnits > 0 && selectedIds.length === totalUnits;
   const overrideValue = overridePrice === '' ? undefined : Number(overridePrice);
   const overrideInvalid =
     overrideValue !== undefined &&
     (!Number.isFinite(overrideValue) || overrideValue < 0);
+  const sendsCarrierEdit =
+    carrierImplementation === 'TURBO' &&
+    hasActiveShippingId &&
+    orderStatus !== 'DELIVERED' &&
+    (shippingType !== ShippingType.PARTIAL_RETURN ||
+      (overrideValue ?? calculatedPrice) !== totalCost ||
+      returnShipmentContent !== (parentReturnContent ?? ''));
   const isNoEditCarrier =
     carrierImplementation !== undefined && isNoEditPartialDeliveryCarrier(carrierImplementation);
   const isPending = partialDelivery.isPending;
@@ -177,13 +176,9 @@ export default function PartialDeliveryModal({
           </div>
         )}
 
-        {carrierImplementation === 'TURBO' && hasActiveShippingId && (
+        {sendsCarrierEdit && (
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
-            {t(
-              orderStatus === 'DELIVERED'
-                ? 'partialDelivery.banner.followsCarrierDelivered'
-                : 'partialDelivery.banner.followsCarrier',
-            )}
+            {t('partialDelivery.banner.followsCarrier')}
           </div>
         )}
 

@@ -719,6 +719,7 @@ export function ShipmentRowActions({
           shippingType={orderQuery.data.shippingType}
           orderStatus={orderQuery.data.status}
           hasActiveShippingId={orderQuery.data.shipping_ids?.some((row) => row.isActive) ?? false}
+          parentReturnContent={orderQuery.data.returnShipmentContent ?? null}
         />
       )}
     </div>

@@ -287,6 +287,7 @@ export function OrderActionModals({
         shippingType={order.shippingType}
         orderStatus={order.status}
         hasActiveShippingId={order.shipping_ids?.some((row) => row.isActive) ?? false}
+        parentReturnContent={order.returnShipmentContent ?? null}
       />
     </>
   );
