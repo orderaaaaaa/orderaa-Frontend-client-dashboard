@@ -13,6 +13,11 @@ export function stockScopeHref(scope: StockScope): string {
   return `${STOCK_MANAGEMENT_BASE_PATH}/${scope.kind}/${scope.id}`;
 }
 
+export function stockProductHref(productId: number, variantId?: number | null): string {
+  const base = `${STOCK_MANAGEMENT_BASE_PATH}/products/${productId}`;
+  return variantId === undefined || variantId === null ? base : `${base}?variantId=${variantId}`;
+}
+
 export const STOCK_OUT_OF_STOCK_QUERY_PARAM = 'outOfStock';
 
 export function stockScopeOutOfStockHref(scope: StockScope): string {

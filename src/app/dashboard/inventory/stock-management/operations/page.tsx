@@ -1,28 +1,26 @@
-'use client';
+import { redirect } from 'next/navigation';
+import {
+  STOCK_MANAGEMENT_BASE_PATH,
+  STOCK_SCOPE_KINDS,
+  stockProductHref,
+  stockScopeHref,
+} from '../constants';
+import { parsePositiveId } from '../utils/parsePositiveId';
 
-import { Suspense } from 'react';
-import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import PageLoading from '@/components/ui/page-loading';
-import { PERMISSION_CODES } from '@/lib/permissions';
-import { StocktakeAccessDenied } from '../components/stocktake/StocktakeAccessDenied';
-import { OperationsContent } from './components/OperationsContent';
-
-function StockOperationsGate() {
-  const canView = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_STOCK_READ);
-
-  if (!canView) {
-    return <StocktakeAccessDenied title="ليس لديك صلاحية عرض عمليات المخزون" />;
-  }
-
-  return <OperationsContent />;
+interface StockOperationsRedirectPageProps {
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
-export default function StockOperationsPage() {
-  return (
-    <div className="w-full max-w-full space-y-6 overflow-x-hidden p-4">
-      <Suspense fallback={<PageLoading message="جاري التحميل..." />}>
-        <StockOperationsGate />
-      </Suspense>
-    </div>
-  );
+export default function StockOperationsRedirectPage({ searchParams }: StockOperationsRedirectPageProps) {
+  const productId = parsePositiveId(searchParams.productId);
+  if (productId !== null) {
+    redirect(stockProductHref(productId, parsePositiveId(searchParams.variantId)));
+  }
+
+  const warehouseId = parsePositiveId(searchParams.warehouseId);
+  if (warehouseId !== null) {
+    redirect(stockScopeHref({ kind: STOCK_SCOPE_KINDS.PHYSICAL, id: warehouseId }));
+  }
+
+  redirect(STOCK_MANAGEMENT_BASE_PATH);
 }
