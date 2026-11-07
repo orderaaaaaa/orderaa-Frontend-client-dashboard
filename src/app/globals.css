@@ -802,6 +802,7 @@ html {
   background: #1c1917;
 }
 
+.Toastify__toast-container,
 .Toastify__toast {
   pointer-events: auto;
 }

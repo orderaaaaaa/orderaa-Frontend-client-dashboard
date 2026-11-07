@@ -15,7 +15,7 @@ export const ModalContainerContext = React.createContext<HTMLElement | null>(
 );
 
 const isToastTarget = (target: EventTarget | null) =>
-  target instanceof Element && target.closest('.Toastify') !== null;
+  target instanceof Element && target.closest('.Toastify, .Toastify__toast') !== null;
 
 interface BaseModalProps {
   isOpen: boolean;
