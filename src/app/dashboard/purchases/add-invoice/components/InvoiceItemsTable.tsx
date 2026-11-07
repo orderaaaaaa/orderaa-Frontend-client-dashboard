@@ -306,7 +306,7 @@ const InvoiceItemsTable = memo(
                 <Switch
                   checked={withVariants}
                   onCheckedChange={onWithVariantsChange}
-                  disabled={hasItems}
+                  disabled={hasItems || invoiceType === 'RETURN'}
                   aria-describedby={hasItems ? LOCK_HINT_ID : undefined}
                 />
               </label>

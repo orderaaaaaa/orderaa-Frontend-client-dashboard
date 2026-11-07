@@ -153,6 +153,8 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const items = watch('items');
   const invoiceImage = watch('invoiceImage');
   const isReturn = invoiceType === 'RETURN';
+  const variantsOn =
+    withVariants || isReturn || (items ?? []).some((item) => (item.variants?.length ?? 0) > 0);
 
   const returnStockRequests = useMemo<ReturnStockRequest[]>(
     () =>
@@ -301,7 +303,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const handleAddProducts = useCallback(
     (picked: SelectableProduct[]) => {
       const products = picked.filter((product) => {
-        if ((product.variantOptions?.length ?? 0) > 0 && (product.selectedVariants?.length ?? 0) === 0) {
+        if (variantsOn && (product.variantOptions?.length ?? 0) > 0 && (product.selectedVariants?.length ?? 0) === 0) {
           toast.warning(`المنتج ${product.name} يتطلب تحديد المتغير قبل اعتماد الفاتورة`);
           return false;
         }
@@ -344,7 +346,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
       });
       setIsProductModalOpen(false);
     },
-    [append, isEdit, items],
+    [append, isEdit, items, variantsOn],
   );
 
   const handleRemoveItem = useCallback(
@@ -547,7 +549,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           invoiceType={invoiceType ?? ''}
           onInvoiceTypeChange={handleInvoiceTypeChange}
           invoiceTypeError={errors.invoiceType?.message}
-          withVariants={withVariants}
+          withVariants={variantsOn}
           onWithVariantsChange={setWithVariants}
           structureLocked={isEdit}
           onModeChange={handleModeChange}
@@ -611,7 +613,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
         onConfirm={handleAddProducts}
         existingProductIds={existingNoVariantProductIds}
         existingVariantCombos={existingVariantCombos}
-        allowVariants={withVariants}
+        allowVariants={variantsOn}
       />
 
       <UnsavedChangesDialog

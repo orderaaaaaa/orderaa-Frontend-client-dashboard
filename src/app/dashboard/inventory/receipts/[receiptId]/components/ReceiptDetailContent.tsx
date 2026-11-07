@@ -368,7 +368,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
         setPendingMismatches(null);
         toast.error(getApiErrorMessage(err, 'فشل تأكيد الإيصال، حاول مرة أخرى'));
-        if (response?.status !== undefined && STALE_APPROVE_STATUSES.includes(response.status)) {
+        if (
+          response?.status !== undefined &&
+          STALE_APPROVE_STATUSES.includes(response.status) &&
+          response.data?.code !== 'SUPPLIER_INVOICE_PRODUCT_REQUIRES_VARIANTS'
+        ) {
           toast.info('تم تحديث بيانات الفاتورة، راجع البنود وأعد التأكيد');
           await invalidateAndWait(queryClient, [
             [QUERY_KEYS.SUPPLIER_INVOICES],
