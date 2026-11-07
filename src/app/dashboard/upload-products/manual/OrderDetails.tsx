@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import ProductDropdown from '@/components/productDropdown';
 import EditProductModal from '@/components/OrderDetails/EditProductModal';
-import { draftFromLines, probeQuantityOf } from '@/components/stock/variantAvailabilityModel';
+import { comboKeyOf, draftFromLines, probeQuantityOf } from '@/components/stock/variantAvailabilityModel';
 import { useProductVariantsOptions } from '@/services/orders';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
@@ -96,9 +96,11 @@ function OrderDetails({
       attributeOptionIds,
       variantEdited: true,
     };
-    const editedKey = getVariantKey(edited);
     const twinIndex = selectedProducts.findIndex(
-      (p, i) => i !== index && p.id === edited.id && getVariantKey(p) === editedKey
+      (p, i) =>
+        i !== index &&
+        p.id === edited.id &&
+        comboKeyOf(p.attributeOptionIds) === comboKeyOf(attributeOptionIds)
     );
     const twin = twinIndex === -1 ? undefined : selectedProducts[twinIndex];
     const keepsBothBindings =

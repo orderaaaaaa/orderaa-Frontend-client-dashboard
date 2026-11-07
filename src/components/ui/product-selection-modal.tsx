@@ -144,7 +144,11 @@ function ProductAvailabilityBlock({
 }
 
 const comboKeyOfSelected = (combo: SelectedVariant[]) =>
-  comboKeyOf(combo.flatMap((variant) => (variant.attributeOptionId === undefined ? [] : [variant.attributeOptionId])));
+  comboKeyOf(
+    combo.flatMap((variant) =>
+      variant.attributeOptionId === undefined ? [] : [variant.attributeOptionId]
+    )
+  );
 
 const sameCombo = (a: SelectedVariant[], b: SelectedVariant[]) =>
   comboKeyOfSelected(a) === comboKeyOfSelected(b);

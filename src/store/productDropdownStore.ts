@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { comboKeyOf } from '@/components/stock/variantAvailabilityModel';
 
 interface VariantOption {
   attribute: string;
@@ -44,9 +45,6 @@ export const missingAttributeNamesOf = (
 
 export const missingAttributesOfPending = (pending: PendingProduct): string[] =>
   missingAttributeNamesOf(pending.product, pending.selectedVariants);
-
-const optionKeyOf = (optionIds: readonly number[]): string =>
-  [...optionIds].sort((a, b) => a - b).join('-');
 
 const variantOf = (
   product: ApiProduct,
@@ -282,9 +280,9 @@ export const useProductDropdownStore = create<ProductDropdownState>(
 
       const merged = [...selectedProducts];
       for (const p of newProducts) {
-        const variantKey = optionKeyOf(p.attributeOptionIds);
+        const variantKey = comboKeyOf(p.attributeOptionIds);
         const existingIndex = merged.findIndex(
-          (m) => m.id === p.id && optionKeyOf(m.attributeOptionIds) === variantKey
+          (m) => m.id === p.id && comboKeyOf(m.attributeOptionIds) === variantKey
         );
         if (existingIndex === -1) {
           merged.push(p);

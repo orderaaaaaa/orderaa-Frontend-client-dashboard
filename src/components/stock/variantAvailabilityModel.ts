@@ -37,7 +37,7 @@ export function namesFromSelection(
   const names: Record<string, string> = {};
   for (const group of groups) {
     const option = group.options.find((item) => item.id === selection[group.attributeId]);
-    if (option) names[group.attribute] = option.name;
+    if (option) names[group.displayName || group.attribute] = option.displayName || option.name;
   }
   return names;
 }
