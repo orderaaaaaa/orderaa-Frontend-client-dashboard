@@ -3,11 +3,15 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import BaseModal from '@/components/ui/base-modal';
-import type { ProductDetailVariant } from '../../types/products';
+import type {
+  ProductApiStoreLink,
+  ProductDetailVariant,
+} from '../../types/products';
 
 interface DeleteVariantDialogProps {
   variant: ProductDetailVariant | null;
   storeLinked: boolean;
+  storeLinks?: Pick<ProductApiStoreLink, 'storeName'>[];
   label: string;
   onCancel: () => void;
   onConfirm: () => Promise<void>;
@@ -16,10 +20,14 @@ interface DeleteVariantDialogProps {
 export function DeleteVariantDialog({
   variant,
   storeLinked,
+  storeLinks = [],
   label,
   onCancel,
   onConfirm,
 }: DeleteVariantDialogProps) {
+  const storeNames = storeLinks.flatMap((link) =>
+    link.storeName ? [link.storeName] : [],
+  );
   return (
     <BaseModal
       isOpen={variant !== null}
@@ -32,7 +40,8 @@ export function DeleteVariantDialog({
     >
       <div className="space-y-3 text-sm text-gray-700">
         <p>
-          سيتم حذف المتغير <span className="font-semibold">{label}</span> نهائياً.
+          سيتم حذف المتغير <span className="font-semibold">{label}</span>. يمكنك استعادته من قائمة
+          المتغيرات المحذوفة.
         </p>
         {storeLinked && (
           <div
@@ -41,12 +50,13 @@ export function DeleteVariantDialog({
           >
             <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
             <ul className="list-disc space-y-1 ps-4">
-              <li>هذا المتغير مرتبط بمتجرك.</li>
-              <li>بعد الحذف لن تعيده مزامنة المتجر.</li>
-              <li>أي طلب جديد من المتجر على هذا المتغير سيذهب إلى قائمة المفقودات.</li>
               <li>
-                إذا أضفته يدوياً لاحقاً فلن يرتبط بالمتجر تلقائياً، ويرتبط عند ربط طلب ناقص عليه.
+                {storeNames.length > 0
+                  ? `هذا المتغير مرتبط بمتجرك: ${storeNames.join('، ')}.`
+                  : 'هذا المتغير مرتبط بمتجرك.'}
               </li>
+              <li>أي طلب جديد من المتجر على هذا المتغير سيذهب إلى قائمة المفقودات حتى يُنقل الربط.</li>
+              <li>بعد الحذف لن تعيده مزامنة المتجر.</li>
             </ul>
           </div>
         )}

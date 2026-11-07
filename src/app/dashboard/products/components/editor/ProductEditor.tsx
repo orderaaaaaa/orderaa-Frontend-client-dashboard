@@ -27,6 +27,7 @@ import {
 } from '../../hooks/useProduct';
 import { productKeys } from '../../hooks/queryKeys';
 import type {
+  ProductApiStoreLink,
   ProductDetail,
   ProductDetailVariant,
   VariantReshapePlan,
@@ -167,6 +168,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [variantServerErrors, setVariantServerErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ProductDetailVariant | null>(null);
+  const [deleteStoreLinks, setDeleteStoreLinks] = useState<ProductApiStoreLink[] | null>(null);
   const [reshape, setReshape] = useState<ReshapeState | null>(null);
   const [reshapeOpen, setReshapeOpen] = useState(false);
   const reshapeDecision = useRef<((decision: ReshapeDecision | null) => void) | null>(null);
@@ -545,10 +547,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         confirmStoreLink: storeLinked,
       });
     } catch (deleteError) {
-      if (
-        productApiErrorBody(deleteError)?.code ===
-        'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED'
-      ) {
+      const body = productApiErrorBody(deleteError);
+      if (body?.code === 'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED') {
+        setDeleteStoreLinks(body.details?.links ?? []);
         setDeleteTarget({ ...target, deleteConfirmation: 'HAS_EXTERNAL_LINK' });
         return;
       }
@@ -712,7 +713,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
               rowErrors={variantRowErrors}
               attributesDirty={state.attributesDirty}
               imageChoices={detail.images}
-              onDelete={setDeleteTarget}
+              onDelete={(variant) => {
+                setDeleteStoreLinks(null);
+                setDeleteTarget(variant);
+              }}
               deletingId={deleteVariant.isPending ? deleteVariant.variables?.variantId ?? null : null}
               disabled={fieldsDisabled}
             />
@@ -794,6 +798,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       <DeleteVariantDialog
         variant={deleteTarget}
         storeLinked={deleteTarget?.deleteConfirmation === 'HAS_EXTERNAL_LINK'}
+        storeLinks={deleteStoreLinks ?? deleteTarget?.storeLinks ?? []}
         label={deleteTarget ? variantLabelOf(deleteTarget) : ''}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}

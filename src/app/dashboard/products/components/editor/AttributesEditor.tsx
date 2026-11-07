@@ -35,7 +35,7 @@ export function AttributesEditor({
   return (
     <div className="space-y-3">
       <p className="text-sm text-gray-500">
-        الخصائص مثل المقاس واللون. اضغط على قيمة لتعديل اسمها. حذف قيمة أو خاصية لا يحذف المتغيرات المرتبطة بها.
+        الخصائص مثل المقاس واللون. اضغط على قيمة لتعديل اسمها. حذف قيمة يحذف متغيراتها غير المستخدمة، ولا يمكن حذفها إذا كان عليها مخزون أو طلبات مفتوحة.
       </p>
       {attributes.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-3">
