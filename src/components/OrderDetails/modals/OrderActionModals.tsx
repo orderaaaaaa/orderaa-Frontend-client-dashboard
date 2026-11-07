@@ -284,6 +284,9 @@ export function OrderActionModals({
         orderProducts={order.order_products || []}
         totalCost={order.totalCost}
         carrierImplementation={order.shippingCompanyRef?.implementation}
+        shippingType={order.shippingType}
+        orderStatus={order.status}
+        hasActiveShippingId={order.shipping_ids?.some((row) => row.isActive) ?? false}
       />
     </>
   );

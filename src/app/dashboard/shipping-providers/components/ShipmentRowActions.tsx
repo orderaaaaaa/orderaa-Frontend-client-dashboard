@@ -699,6 +699,9 @@ export function ShipmentRowActions({
           orderProducts={orderQuery.data.order_products}
           totalCost={orderQuery.data.totalCost}
           carrierImplementation={carrierImplementation}
+          shippingType={orderQuery.data.shippingType}
+          orderStatus={orderQuery.data.status}
+          hasActiveShippingId={orderQuery.data.shipping_ids?.some((row) => row.isActive) ?? false}
         />
       )}
     </div>

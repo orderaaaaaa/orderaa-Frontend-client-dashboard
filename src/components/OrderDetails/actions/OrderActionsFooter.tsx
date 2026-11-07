@@ -36,6 +36,7 @@ export interface OrderActionsFooterProps {
   /** Which products block it, for the tooltip. */
   stockBlockReason?: string;
   isBusy?: boolean;
+  canSplitDelivered?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -51,6 +52,7 @@ export function OrderActionsFooter({
   canConfirmStock = true,
   stockBlockReason,
   isBusy = false,
+  canSplitDelivered = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -178,6 +180,7 @@ export function OrderActionsFooter({
                     isOpen={actionsDropdown.isOpen}
                     orderStatus={orderStatus}
                     lastEventStatus={lastEventStatus}
+                    canSplitDelivered={canSplitDelivered}
                     className="max-h-[60vh] max-w-full"
                     onActionClick={(label, action) => {
                       actionsDropdown.close();

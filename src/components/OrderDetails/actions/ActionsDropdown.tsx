@@ -50,11 +50,19 @@ export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: string;
   lastEventStatus?: string;
+  canSplitDelivered?: boolean;
   className?: string;
   onActionClick: (label: string, action: string) => void;
 }
 
-export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, className, onActionClick }: ActionsDropdownProps) {
+export function ActionsDropdown({
+  isOpen,
+  orderStatus,
+  lastEventStatus,
+  canSplitDelivered = false,
+  className,
+  onActionClick,
+}: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
   const { hasPermission, hasAllPermissions } = usePermissionCheck();
@@ -72,7 +80,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, classNam
       if (option.action === 'partial_delivery') {
         return (
           hasAllPermissions(PARTIAL_DELIVERY_CODES) &&
-          partialDeliveryBlockReasonOf({ locked: false, status: orderStatus }) === null
+          (partialDeliveryBlockReasonOf({ locked: false, status: orderStatus }) === null || canSplitDelivered)
         );
       }
       if (option.action === 'stop_operation') {
@@ -92,7 +100,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, classNam
     }
 
     return base;
-  }, [orderStatus, lastEventStatus, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
+  }, [orderStatus, lastEventStatus, canSplitDelivered, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
 
   if (!isOpen || filteredOptions.length === 0) return null;
 

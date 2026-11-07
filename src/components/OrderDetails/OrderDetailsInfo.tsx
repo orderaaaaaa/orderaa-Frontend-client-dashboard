@@ -28,6 +28,7 @@ import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 import { PartialReturnLinks } from './PartialReturnLinks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
+import { canSplitDelivered } from '@/utils/partialDelivery/partialDeliveryGate';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -223,6 +224,14 @@ function OrderDetailsInfoComponent({
     );
     return sortedEvents[0]?.name;
   }, [order.order_events]);
+
+  const splitDeliveredAllowed = canSplitDelivered({
+    status: order.status,
+    carrierImplementation: order.shippingCompanyRef?.implementation,
+    settlementAmount: order.settlementAmount ?? null,
+    hasActiveShippingId: order.shipping_ids?.some((row) => row.isActive) ?? false,
+    partialReturnCount: order.partialReturns?.length ?? 0,
+  });
 
   const handleConfirmClick = () =>
     runWhenLockSettles(() =>
@@ -430,6 +439,7 @@ function OrderDetailsInfoComponent({
           canConfirmStock={stockGate.canConfirm}
           stockBlockReason={stockGate.reason}
           isBusy={actions.isTransitioning}
+          canSplitDelivered={splitDeliveredAllowed}
         />
       </div>
 
@@ -447,6 +457,7 @@ function OrderDetailsInfoComponent({
           canConfirmStock={stockGate.canConfirm}
           stockBlockReason={stockGate.reason}
           isBusy={actions.isTransitioning}
+          canSplitDelivered={splitDeliveredAllowed}
         />
       </div>
 

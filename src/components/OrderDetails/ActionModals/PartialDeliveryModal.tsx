@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { LiaMinusSolid, LiaPlusSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { useI18n } from '@/i18n/I18nProvider';
-import { OrderProduct } from '@/types/orders';
+import { OrderProduct, ShippingType } from '@/types/orders';
 import { usePartialDelivery } from '@/services/logistics';
 import { isNoEditPartialDeliveryCarrier, type ShippingImplementation } from '@/types/shippingCompanies';
 import {
@@ -19,6 +19,9 @@ interface PartialDeliveryModalProps {
   orderProducts: OrderProduct[];
   totalCost: number;
   carrierImplementation?: ShippingImplementation;
+  shippingType?: ShippingType;
+  orderStatus: string;
+  hasActiveShippingId: boolean;
 }
 
 interface VariantGroup {
@@ -51,6 +54,9 @@ export default function PartialDeliveryModal({
   orderProducts,
   totalCost,
   carrierImplementation,
+  shippingType,
+  orderStatus,
+  hasActiveShippingId,
 }: PartialDeliveryModalProps) {
   const [refusedByGroup, setRefusedByGroup] = useState<Record<string, number>>(
     {},
@@ -99,7 +105,8 @@ export default function PartialDeliveryModal({
     );
   }, [orderProducts, selectedIds]);
 
-  const calculatedPrice = roundMoney(totalCost - refusedValue);
+  const calculatedPrice =
+    shippingType === ShippingType.PARTIAL_RETURN ? totalCost : roundMoney(totalCost - refusedValue);
   const selectedSet = new Set(selectedIds);
   const remainingUnits = orderProducts.filter((op) => !selectedSet.has(op.id));
   const returnShipmentContent = contentOverride ?? returnShipmentContentOf(remainingUnits);
@@ -164,9 +171,25 @@ export default function PartialDeliveryModal({
           {t('partialDelivery.banner.confirmOutcome')}
         </div>
 
-        {isNoEditCarrier && (
+        {(isNoEditCarrier || orderStatus === 'DELIVERED') && (
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
             {t('partialDelivery.banner.noCarrierEdit')}
+          </div>
+        )}
+
+        {carrierImplementation === 'TURBO' && hasActiveShippingId && (
+          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+            {t(
+              orderStatus === 'DELIVERED'
+                ? 'partialDelivery.banner.followsCarrierDelivered'
+                : 'partialDelivery.banner.followsCarrier',
+            )}
+          </div>
+        )}
+
+        {orderStatus === 'DELIVERED' && shippingType !== ShippingType.PARTIAL_RETURN && (
+          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+            {t('partialDelivery.banner.checkAmount')}
           </div>
         )}
 

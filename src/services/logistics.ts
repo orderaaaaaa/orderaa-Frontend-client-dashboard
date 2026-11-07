@@ -17,6 +17,8 @@ import {
 import { toast } from 'react-toastify';
 import { recordPartialDelivery, recordReturnRefund } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { invalidateStockViews } from '@/services/warehouses';
 import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
 import {
@@ -107,6 +109,9 @@ export const usePartialDelivery = () => {
       queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
       invalidateStockViews(queryClient);
       toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
+      if (result.returnOrder.status !== 'RETURNED_DELIVERED') {
+        toast.info(translate(readStoredLocale(), 'partialDelivery.toast.waitingCarrier'));
+      }
       if (carrierSendNeedsAttention(result.carrierSend)) {
         toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
       }

@@ -1,6 +1,7 @@
 import type { TranslationKey } from '@/i18n/translate';
 import { PERMISSIONS, orderStatusSetCodeOf, type PermissionCode } from '@/lib/permissions';
 import { IN_PROCESS_STATUSES } from '@/types/shippingProviders';
+import type { ShippingImplementation } from '@/types/shippingCompanies';
 
 const PARTIAL_DELIVERY_STATUS_KEYS = ['RETURNED_DELIVERED', 'DELIVERED'] as const;
 
@@ -25,3 +26,22 @@ export const partialDeliveryBlockReasonOf = ({
   if (!(IN_PROCESS_STATUSES as readonly string[]).includes(status)) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.status;
   return null;
 };
+
+export const canSplitDelivered = ({
+  status,
+  carrierImplementation,
+  settlementAmount,
+  hasActiveShippingId,
+  partialReturnCount,
+}: {
+  status: string;
+  carrierImplementation: ShippingImplementation | undefined;
+  settlementAmount: string | null;
+  hasActiveShippingId: boolean;
+  partialReturnCount: number;
+}): boolean =>
+  status === 'DELIVERED' &&
+  carrierImplementation === 'TURBO' &&
+  settlementAmount === null &&
+  hasActiveShippingId &&
+  partialReturnCount === 0;
