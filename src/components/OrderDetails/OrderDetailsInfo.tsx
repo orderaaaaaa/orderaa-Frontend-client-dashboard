@@ -27,7 +27,8 @@ import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 import { PartialReturnLinks } from './PartialReturnLinks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
-import { canSplitDelivered } from '@/utils/partialDelivery/partialDeliveryGate';
+import { orderPagePartialActionOf } from '@/utils/partialDelivery/partialDeliveryGate';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -87,6 +88,7 @@ function OrderDetailsInfoComponent({
   const [pendingShippingType, setPendingShippingType] = useState<string | null>(null);
 
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
+  const { t } = useI18n();
   // Permission-scoped on purpose — these become the status actions offered.
   const availableStatuses = statusesData?.statuses ?? [];
 
@@ -190,13 +192,19 @@ function OrderDetailsInfoComponent({
 
   const waiting = order.awaitingCarrierReturn === true;
 
-  const splitDeliveredAllowed = canSplitDelivered({
+  const partialGate = orderPagePartialActionOf({
     status: order.status,
+    lineCount: order.order_products.length,
+    hasReturnChild: (order.partialReturns ?? []).some((item) => item.lineCount > 0),
+    frozen: order.frozenReturnChild === true,
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
     hasActiveShippingId: order.shipping_ids?.some((row) => row.isActive) ?? false,
-    partialReturnCount: (order.partialReturns ?? []).filter((item) => item.lineCount > 0).length,
   });
+  const partialAction = {
+    visible: partialGate.visible,
+    blockedReason: partialGate.blockedKey === null ? null : t(partialGate.blockedKey),
+  };
 
   const handleConfirmClick = () =>
     runWhenLockSettles(() =>
@@ -405,7 +413,7 @@ function OrderDetailsInfoComponent({
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           isBusy={actions.isTransitioning}
-          canSplitDelivered={splitDeliveredAllowed}
+          partialAction={partialAction}
         />
       </div>
 
@@ -422,7 +430,7 @@ function OrderDetailsInfoComponent({
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           isBusy={actions.isTransitioning}
-          canSplitDelivered={splitDeliveredAllowed}
+          partialAction={partialAction}
         />
       </div>
 

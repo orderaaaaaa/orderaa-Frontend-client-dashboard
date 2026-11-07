@@ -12,7 +12,7 @@ import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
-import { ActionsDropdown } from './ActionsDropdown';
+import { ActionsDropdown, type PartialDeliveryMenuAction } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
 
 const FOOTER_CLEARANCE_PX = 48;
@@ -28,7 +28,7 @@ export interface OrderActionsFooterProps {
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
   isBusy?: boolean;
-  canSplitDelivered?: boolean;
+  partialAction: PartialDeliveryMenuAction;
   waiting?: boolean;
 }
 
@@ -43,7 +43,7 @@ export function OrderActionsFooter({
   isNavigatingNext = false,
   isNavigatingPrevious = false,
   isBusy = false,
-  canSplitDelivered = false,
+  partialAction,
   waiting = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
@@ -166,7 +166,7 @@ export function OrderActionsFooter({
                     isOpen={actionsDropdown.isOpen}
                     orderStatus={orderStatus}
                     lastEventStatus={lastEventStatus}
-                    canSplitDelivered={canSplitDelivered}
+                    partialAction={partialAction}
                     className="max-h-[60vh] max-w-full"
                     onActionClick={(label, action) => {
                       actionsDropdown.close();

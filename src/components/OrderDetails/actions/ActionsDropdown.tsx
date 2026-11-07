@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
-import { PARTIAL_DELIVERY_CODES, partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
+import { PARTIAL_DELIVERY_CODES } from '@/utils/partialDelivery/partialDeliveryGate';
 import { cn } from '@/lib/utils';
 
 interface ActionOption {
@@ -46,11 +46,13 @@ const postShippingOptions: ActionOption[] = [
   { label: 'متأخر', action: 'late', icon: <LiaClockSolid className="w-5 h-5" /> },
 ];
 
+export type PartialDeliveryMenuAction = { visible: boolean; blockedReason: string | null };
+
 export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: string;
   lastEventStatus?: string;
-  canSplitDelivered?: boolean;
+  partialAction: PartialDeliveryMenuAction;
   className?: string;
   onActionClick: (label: string, action: string) => void;
 }
@@ -59,11 +61,12 @@ export function ActionsDropdown({
   isOpen,
   orderStatus,
   lastEventStatus,
-  canSplitDelivered = false,
+  partialAction,
   className,
   onActionClick,
 }: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
+  const { visible: partialVisible, blockedReason: partialBlockedReason } = partialAction;
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
   const { hasPermission, hasAllPermissions } = usePermissionCheck();
   const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
@@ -78,10 +81,7 @@ export function ActionsDropdown({
         return false;
       }
       if (option.action === 'partial_delivery') {
-        return (
-          hasAllPermissions(PARTIAL_DELIVERY_CODES) &&
-          (partialDeliveryBlockReasonOf({ locked: false, status: orderStatus }) === null || canSplitDelivered)
-        );
+        return partialVisible && hasAllPermissions(PARTIAL_DELIVERY_CODES);
       }
       if (option.action === 'stop_operation') {
         return orderStatus === 'CONFIRMED';
@@ -100,7 +100,7 @@ export function ActionsDropdown({
     }
 
     return base;
-  }, [orderStatus, lastEventStatus, canSplitDelivered, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
+  }, [orderStatus, lastEventStatus, partialVisible, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
 
   if (!isOpen || filteredOptions.length === 0) return null;
 
@@ -112,19 +112,28 @@ export function ActionsDropdown({
       )}
       dir="rtl"
     >
-      {filteredOptions.map((option) => (
-        <Button
-          key={option.action}
-          variant="ghost"
-          onClick={() => onActionClick(option.label, option.action)}
-          className="w-full px-4 py-3 text-sm font-bold text-foreground hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
-        >
-          <div className="flex flex-row items-center gap-2">
-            {option.icon}
-            {option.label}
-          </div>
-        </Button>
-      ))}
+      {filteredOptions.map((option) => {
+        const blockedReason = option.action === 'partial_delivery' ? partialBlockedReason : null;
+        return (
+          <Button
+            key={option.action}
+            variant="ghost"
+            disabled={blockedReason !== null}
+            onClick={() => onActionClick(option.label, option.action)}
+            className="w-full px-4 py-3 text-sm font-bold text-foreground hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
+          >
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex flex-row items-center gap-2">
+                {option.icon}
+                {option.label}
+              </div>
+              {blockedReason !== null && (
+                <span className="text-xs font-normal whitespace-normal text-gray-500">{blockedReason}</span>
+              )}
+            </div>
+          </Button>
+        );
+      })}
     </div>
   );
 }

@@ -338,6 +338,8 @@ export function InProcessRowActions({
   const partialBlockKey = partialDeliveryBlockReasonOf({
     locked,
     status: row.status,
+    lineCount: row.lineCount,
+    hasReturnChild: row.returnChildCode !== null,
   });
 
   return (
