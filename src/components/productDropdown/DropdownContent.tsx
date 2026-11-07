@@ -9,13 +9,15 @@ import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
 
 interface SelectedVariantValue {
+  attributeId: number;
   attribute: string;
+  optionId: number;
   option: string;
 }
 
 interface SelectedProduct {
   id: number;
-  selectedVariants: SelectedVariantValue[];
+  selectedVariants: Array<Pick<SelectedVariantValue, 'attribute' | 'option'>>;
   attributeOptionIds: number[];
   quantity: number;
 }
@@ -26,7 +28,7 @@ interface DropdownContentProps {
   selectedProducts: SelectedProduct[];
   expandedProductId: number | null;
   onProductClick: (product: ApiProduct) => void;
-  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
   search: string;

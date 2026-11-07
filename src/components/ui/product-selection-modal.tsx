@@ -13,8 +13,7 @@ import api from '@/lib/api';
 import { useProductVariantsOptions } from '@/services/orders';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
-  listNamedGroups,
-  selectionFromNames,
+  comboKeyOf,
   type Selection,
   type DraftSummary,
 } from '@/components/stock/variantAvailabilityModel';
@@ -88,18 +87,18 @@ interface ProductSelectionModalProps {
 
 function resolveCombo(
   product: SelectableProduct | undefined,
-  attributes: string[],
-  selection: Record<string, string>,
+  attributeIds: number[],
+  selection: Selection,
 ): SelectedVariant[] | null {
-  if (attributes.length === 0) return null;
+  if (attributeIds.length === 0) return null;
   const combo: SelectedVariant[] = [];
-  for (const attribute of attributes) {
-    const option = selection[attribute];
-    if (!option) return null;
-    const group = product?.variantOptions?.find((o) => o.attribute === attribute);
-    const detail = group?.optionDetails.find((o) => o.name === option);
-    if (!detail) return null;
-    combo.push({ attribute, option, attributeOptionId: detail.id });
+  for (const attributeId of attributeIds) {
+    const optionId = selection[attributeId];
+    if (optionId === undefined) return null;
+    const group = product?.variantOptions?.find((o) => o.attributeId === attributeId);
+    const detail = group?.optionDetails.find((o) => o.id === optionId);
+    if (!group || !detail) return null;
+    combo.push({ attribute: group.attribute, option: detail.name, attributeOptionId: detail.id });
   }
   return combo;
 }
@@ -108,18 +107,17 @@ function ProductAvailabilityBlock({
   productId,
   productName,
   availability,
-  names,
+  selection,
   onVariantSelect,
 }: {
   productId: number;
   productName: string;
   availability: ProductSelectionAvailability;
-  names: Record<string, string>;
-  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+  selection: Selection;
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
 }) {
   const catalog = useProductVariantsOptions(productId);
-  const groups = listNamedGroups(catalog.data ?? []);
-  const selection = selectionFromNames(groups, names);
+  const groups = catalog.data ?? [];
 
   const handleChange = (next: Selection) => {
     for (const group of groups) {
@@ -127,8 +125,7 @@ function ProductAvailabilityBlock({
       const nextId = next[group.attributeId];
       if (previousId === nextId) continue;
       const optionId = nextId === undefined ? previousId : nextId;
-      const name = group.options.find((option) => option.id === optionId)?.name;
-      if (name) onVariantSelect(productId, group.attribute, name);
+      if (optionId !== undefined) onVariantSelect(productId, group.attributeId, optionId);
     }
   };
 
@@ -146,30 +143,30 @@ function ProductAvailabilityBlock({
   );
 }
 
-const sameCombo = (a: SelectedVariant[], b: SelectedVariant[], attributes: string[]) =>
-  attributes.every(
-    (attr) =>
-      a.find((v) => v.attribute === attr)?.option ===
-      b.find((v) => v.attribute === attr)?.option,
-  );
+const comboKeyOfSelected = (combo: SelectedVariant[]) =>
+  comboKeyOf(combo.flatMap((variant) => (variant.attributeOptionId === undefined ? [] : [variant.attributeOptionId])));
+
+const sameCombo = (a: SelectedVariant[], b: SelectedVariant[]) =>
+  comboKeyOfSelected(a) === comboKeyOfSelected(b);
 
 function isValueDisabled(
-  attribute: string,
-  option: string,
-  currentSelection: Record<string, string>,
+  attributeId: number,
+  optionId: number,
+  currentSelection: Selection,
   addedCombos: SelectedVariant[][],
-  allAttributes: string[],
+  allAttributeIds: number[],
 ): boolean {
   if (addedCombos.length === 0) return false;
 
-  const hypothetical = { ...currentSelection, [attribute]: option };
+  const hypothetical: Selection = { ...currentSelection, [attributeId]: optionId };
 
-  const filledAttributes = allAttributes.filter((l) => hypothetical[l]);
-  if (filledAttributes.length < allAttributes.length) return false;
-
-  return addedCombos.some((combo) =>
-    allAttributes.every((l) => combo.find((v) => v.attribute === l)?.option === hypothetical[l]),
+  const chosenIds = allAttributeIds.flatMap((id) =>
+    hypothetical[id] === undefined ? [] : [hypothetical[id]],
   );
+  if (chosenIds.length < allAttributeIds.length) return false;
+
+  const key = comboKeyOf(chosenIds);
+  return addedCombos.some((combo) => comboKeyOfSelected(combo) === key);
 }
 
 export default function ProductSelectionModal({
@@ -188,7 +185,7 @@ export default function ProductSelectionModal({
   const [hasNextPage, setHasNextPage] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [addedCombos, setAddedCombos] = useState<Map<number, SelectedVariant[][]>>(new Map());
-  const [currentSelection, setCurrentSelection] = useState<Map<number, Record<string, string>>>(new Map());
+  const [currentSelection, setCurrentSelection] = useState<Map<number, Selection>>(new Map());
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -261,11 +258,15 @@ export default function ProductSelectionModal({
   }, []);
 
   const handleVariantSelect = useCallback(
-    (productId: number, attribute: string, option: string) => {
+    (productId: number, attributeId: number, optionId: number) => {
       setCurrentSelection((prev) => {
         const next = new Map(prev);
-        const current = { ...(next.get(productId) ?? {}) };
-        current[attribute] = current[attribute] === option ? '' : option;
+        const current: Selection = { ...(next.get(productId) ?? {}) };
+        if (current[attributeId] === optionId) {
+          delete current[attributeId];
+        } else {
+          current[attributeId] = optionId;
+        }
         next.set(productId, current);
         return next;
       });
@@ -274,15 +275,15 @@ export default function ProductSelectionModal({
   );
 
   const handleAddCombo = useCallback(
-    (productId: number, attributes: string[]) => {
+    (productId: number, attributeIds: number[]) => {
       const selection = currentSelection.get(productId);
       if (!selection) return;
 
       const product = products.find((p) => p.id === productId);
 
-      const combo = resolveCombo(product, attributes, selection);
+      const combo = resolveCombo(product, attributeIds, selection);
       if (!combo) return;
-      if ((addedCombos.get(productId) ?? []).some((staged) => sameCombo(staged, combo, attributes))) return;
+      if ((addedCombos.get(productId) ?? []).some((staged) => sameCombo(staged, combo))) return;
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -330,12 +331,11 @@ export default function ProductSelectionModal({
         [[]],
       );
 
-      const attributes = groups.map((g) => g.attribute);
       setAddedCombos((prev) => {
         const next = new Map(prev);
         const existing = next.get(productId) ?? [];
         const missing = combos.filter(
-          (combo) => !existing.some((staged) => sameCombo(staged, combo, attributes)),
+          (combo) => !existing.some((staged) => sameCombo(staged, combo)),
         );
         next.set(productId, [...existing, ...missing]);
         return next;
@@ -377,14 +377,9 @@ export default function ProductSelectionModal({
           return;
         }
         const existingCombosForProduct = existingVariantCombos?.get(p.id) ?? [];
-        const allAttributes = (p.variantOptions ?? []).map((o) => o.attribute);
         for (const combo of combos) {
           const isExisting = existingCombosForProduct.some((existing) =>
-            allAttributes.every(
-              (l) =>
-                existing.find((v) => v.attribute === l)?.option ===
-                combo.find((v) => v.attribute === l)?.option,
-            ),
+            sameCombo(existing, combo),
           );
           if (!isExisting) {
             expanded.push({ ...p, selectedVariants: combo });
@@ -466,9 +461,9 @@ export default function ProductSelectionModal({
                 const isAlreadyInTable = isNoVariantInTable;
                 const isChecked = selectedIds.has(product.id);
                 const productCombos = addedCombos.get(product.id) ?? [];
-                const selection = currentSelection.get(product.id) ?? {};
-                const allAttributes = (product.variantOptions ?? []).map((o) => o.attribute);
-                const readyCombo = resolveCombo(product, allAttributes, selection);
+                const selection: Selection = currentSelection.get(product.id) ?? {};
+                const allAttributeIds = (product.variantOptions ?? []).map((o) => o.attributeId);
+                const readyCombo = resolveCombo(product, allAttributeIds, selection);
 
                 return (
                   <div
@@ -529,27 +524,27 @@ export default function ProductSelectionModal({
                             productId={product.id}
                             productName={product.name}
                             availability={availability}
-                            names={selection}
+                            selection={selection}
                             onVariantSelect={handleVariantSelect}
                           />
                         ) : product.variantOptions!.map((option) => (
-                          <div key={option.attribute} className="flex flex-wrap items-center gap-2">
+                          <div key={option.attributeId} className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-semibold text-muted-foreground min-w-16">
                               {option.attribute}:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
-                              {option.options.map((value) => {
-                                const isSelected = selection[option.attribute] === value;
+                              {option.optionDetails.map((value) => {
+                                const isSelected = selection[option.attributeId] === value.id;
                                 const disabled = isValueDisabled(
-                                  option.attribute,
-                                  value,
+                                  option.attributeId,
+                                  value.id,
                                   selection,
                                   productCombos,
-                                  allAttributes,
+                                  allAttributeIds,
                                 );
                                 return (
                                   <Button
-                                    key={value}
+                                    key={value.id}
                                     type="button"
                                     variant={isSelected ? 'default' : 'outline'}
                                     size="sm"
@@ -558,9 +553,9 @@ export default function ProductSelectionModal({
                                       'rounded-full text-xs h-7 px-3 max-sm:h-10',
                                       !isSelected && !disabled && 'border-input text-foreground hover:border-primary hover:text-primary-text',
                                     )}
-                                    onClick={() => handleVariantSelect(product.id, option.attribute, value)}
+                                    onClick={() => handleVariantSelect(product.id, option.attributeId, value.id)}
                                   >
-                                    {value}
+                                    {value.name}
                                   </Button>
                                 );
                               })}
@@ -584,9 +579,9 @@ export default function ProductSelectionModal({
                             type="button"
                             variant="default"
                             size="sm"
-                            disabled={!readyCombo || productCombos.some((staged) => sameCombo(staged, readyCombo, allAttributes))}
+                            disabled={!readyCombo || productCombos.some((staged) => sameCombo(staged, readyCombo))}
                             className="rounded-full text-xs h-7 px-4 max-sm:h-10"
-                            onClick={() => handleAddCombo(product.id, allAttributes)}
+                            onClick={() => handleAddCombo(product.id, allAttributeIds)}
                           >
                             <LiaPlusSolid className="w-4 h-4" />
                             إضافة
@@ -599,11 +594,7 @@ export default function ProductSelectionModal({
                             <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border">
                               {productCombos.map((combo, idx) => {
                                 const isPreExisting = existingCombosForProduct.some((existing) =>
-                                  allAttributes.every(
-                                    (l) =>
-                                      existing.find((v) => v.attribute === l)?.option ===
-                                      combo.find((v) => v.attribute === l)?.option,
-                                  ),
+                                  sameCombo(existing, combo),
                                 );
                                 return (
                                   <span

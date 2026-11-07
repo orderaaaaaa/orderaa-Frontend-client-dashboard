@@ -97,6 +97,7 @@ function OrderDetailsProductCard({
         .map((attr) => ({
           id: attr.id,
           name: attr.name,
+          optionId: attr.options.id,
           value: attr.options.name,
         }));
       return {
@@ -219,12 +220,8 @@ function OrderDetailsProductCard({
     (item) => item.id === editingProductId
   );
 
-  const editingCurrentVariants = useMemo(
-    () =>
-      (editingProduct?.attributes ?? []).reduce<Record<string, string>>((acc, attr) => {
-        if (attr.name && attr.value) acc[attr.name] = attr.value;
-        return acc;
-      }, {}),
+  const editingCurrentOptionIds = useMemo(
+    () => (editingProduct?.attributes ?? []).map((attr) => attr.optionId),
     [editingProduct]
   );
 
@@ -450,7 +447,7 @@ function OrderDetailsProductCard({
           productId={editingProduct.productId}
           productName={editingProduct.product}
           availability={{ kind: 'order', orderId: order.id, quantity: editingProduct.quantity }}
-          currentVariants={editingCurrentVariants}
+          currentOptionIds={editingCurrentOptionIds}
         />
       )}
 

@@ -15,7 +15,7 @@ import {
   catalogAttributesOf,
   namesFromSelection,
   probeQuantityOf,
-  selectionFromNames,
+  selectionFromIds,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
 
@@ -38,7 +38,7 @@ interface EditProductModalProps {
   productId: number;
   productName: string;
   availability: EditProductAvailability;
-  currentVariants: Record<string, string>;
+  currentOptionIds: number[];
 }
 
 export default function EditProductModal({
@@ -48,7 +48,7 @@ export default function EditProductModal({
   productId,
   productName,
   availability,
-  currentVariants,
+  currentOptionIds,
 }: EditProductModalProps) {
   const [draft, setDraft] = useState<Selection | null>(null);
 
@@ -81,8 +81,8 @@ export default function EditProductModal({
   }, [isOpen]);
 
   const seed = useMemo(
-    () => selectionFromNames(variantOptions, currentVariants),
-    [variantOptions, currentVariants]
+    () => selectionFromIds(variantOptions, currentOptionIds),
+    [variantOptions, currentOptionIds]
   );
   const selection = draft ?? seed;
 

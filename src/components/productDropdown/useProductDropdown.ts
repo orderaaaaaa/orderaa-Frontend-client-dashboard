@@ -136,13 +136,13 @@ export const useProductDropdown = () => {
 
   const handleVariantSelect = (
     productId: number,
-    attribute: string,
-    option: string
+    attributeId: number,
+    optionId: number
   ) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
 
-    selectVariant(productId, attribute, option, product);
+    selectVariant(productId, attributeId, optionId, product);
   };
 
   const handleAddProduct = () => {

@@ -3,18 +3,15 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { ApiProduct } from './useProductDropdown';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
-import { missingAttributesOf } from '@/utils/variantSelection';
-import { useProductVariantsOptions, type VariantOption } from '@/services/orders';
+import { missingAttributeNamesOf } from '@/store/productDropdownStore';
+import { useProductVariantsOptions } from '@/services/orders';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
-import {
-  listNamedGroups,
-  selectionFromNames,
-  type Selection,
-  type DraftSummary,
-} from '@/components/stock/variantAvailabilityModel';
+import type { Selection, DraftSummary } from '@/components/stock/variantAvailabilityModel';
 
 interface SelectedVariantValue {
+  attributeId: number;
   attribute: string;
+  optionId: number;
   option: string;
 }
 
@@ -25,7 +22,7 @@ interface ProductRowProps {
   isExpanded: boolean;
   selectedVariants: SelectedVariantValue[];
   onProductClick: (product: ApiProduct) => void;
-  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
   availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
@@ -37,11 +34,14 @@ interface RowAvailabilityPanelProps {
   targetStatus: 'NEW_ORDER' | 'CONFIRMED';
   draft: DraftSummary;
   selectedVariants: SelectedVariantValue[];
-  onVariantSelect: (productId: number, attribute: string, option: string) => void;
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
 }
 
-const optionNameOf = (group: VariantOption, optionId: number | undefined) =>
-  group.options.find((option) => option.id === optionId)?.name ?? '';
+const selectionOf = (variants: SelectedVariantValue[]): Selection =>
+  variants.reduce<Selection>(
+    (selection, variant) => ({ ...selection, [variant.attributeId]: variant.optionId }),
+    {},
+  );
 
 const RowAvailabilityPanel = ({
   product,
@@ -51,19 +51,16 @@ const RowAvailabilityPanel = ({
   onVariantSelect,
 }: RowAvailabilityPanelProps) => {
   const catalog = useProductVariantsOptions(product.id);
-  const groups = listNamedGroups(catalog.data ?? []);
-  const selection = selectionFromNames(
-    groups,
-    Object.fromEntries(selectedVariants.map((variant) => [variant.attribute, variant.option])),
-  );
+  const groups = catalog.data ?? [];
+  const selection = selectionOf(selectedVariants);
 
   const handleChange = (next: Selection) => {
     for (const group of groups) {
       const previousId = selection[group.attributeId];
       const nextId = next[group.attributeId];
       if (previousId === nextId) continue;
-      const name = optionNameOf(group, nextId === undefined ? previousId : nextId);
-      if (name) onVariantSelect(product.id, group.attribute, name);
+      const optionId = nextId === undefined ? previousId : nextId;
+      if (optionId !== undefined) onVariantSelect(product.id, group.attributeId, optionId);
     }
   };
 
@@ -98,17 +95,12 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   const hasVariants = product.variantOptions && product.variantOptions.length > 0;
 
   const missingAttributes =
-    isSelected && hasVariants
-      ? missingAttributesOf(
-          product.variantOptions.map((option) => option.attribute),
-          selectedVariants.map((variant) => variant.attribute)
-        )
-      : [];
+    isSelected && hasVariants ? missingAttributeNamesOf(product, selectedVariants) : [];
 
   const priceLabel = product.price != null ? `${product.price} ج.م` : null;
 
-  const getSelectedValue = (attribute: string): string | undefined => {
-    return selectedVariants.find((v) => v.attribute === attribute)?.option;
+  const getSelectedValue = (attributeId: number): number | undefined => {
+    return selectedVariants.find((v) => v.attributeId === attributeId)?.optionId;
   };
 
   const getRowClassName = () => {
@@ -180,25 +172,25 @@ export const ProductRow: React.FC<ProductRowProps> = ({
             />
           ) : (
             <div className="space-y-4">
-              {product.variantOptions.map((option) => (
-                <div key={option.attribute}>
+              {(product.attributes ?? []).map((attribute) => (
+                <div key={attribute.id}>
                   <div className="text-sm font-medium text-gray-700 mb-2">
-                    {option.attribute}
+                    {attribute.name}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {option.options.map((opt) => {
-                      const isValueSelected = getSelectedValue(option.attribute) === opt;
+                    {attribute.options.map((opt) => {
+                      const isValueSelected = getSelectedValue(attribute.id) === opt.id;
                       return (
                         <Button
-                          key={`${option.attribute}-${opt}`}
+                          key={opt.id}
                           type="button"
                           variant={isValueSelected ? 'default' : 'outline'}
                           size="sm"
                           className="min-h-10"
                           aria-pressed={isValueSelected}
-                          onClick={() => onVariantSelect(product.id, option.attribute, opt)}
+                          onClick={() => onVariantSelect(product.id, attribute.id, opt.id)}
                         >
-                          {opt}
+                          {opt.name}
                         </Button>
                       );
                     })}

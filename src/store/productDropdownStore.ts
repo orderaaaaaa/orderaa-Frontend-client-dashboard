@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface VariantOption {
   attribute: string;
@@ -22,7 +21,9 @@ interface ApiProduct {
 }
 
 interface SelectedVariantValue {
+  attributeId: number;
   attribute: string;
+  optionId: number;
   option: string;
 }
 
@@ -31,11 +32,33 @@ export interface PendingProduct {
   selectedVariants: SelectedVariantValue[];
 }
 
+export const missingAttributeNamesOf = (
+  product: Pick<ApiProduct, 'attributes'>,
+  selectedVariants: readonly Pick<SelectedVariantValue, 'attributeId'>[]
+): string[] => {
+  const chosen = new Set(selectedVariants.map((variant) => variant.attributeId));
+  return (product.attributes ?? [])
+    .filter((attribute) => !chosen.has(attribute.id))
+    .map((attribute) => attribute.name);
+};
+
 export const missingAttributesOfPending = (pending: PendingProduct): string[] =>
-  missingAttributesOf(
-    pending.product.variantOptions.map((option) => option.attribute),
-    pending.selectedVariants.map((variant) => variant.attribute)
-  );
+  missingAttributeNamesOf(pending.product, pending.selectedVariants);
+
+const optionKeyOf = (optionIds: readonly number[]): string =>
+  [...optionIds].sort((a, b) => a - b).join('-');
+
+const variantOf = (
+  product: ApiProduct,
+  attributeId: number,
+  optionId: number
+): SelectedVariantValue | null => {
+  const attribute = product.attributes?.find((a) => a.id === attributeId);
+  const option = attribute?.options.find((o) => o.id === optionId);
+  return attribute && option
+    ? { attributeId, attribute: attribute.name, optionId, option: option.name }
+    : null;
+};
 
 export interface SelectedProduct {
   id: number;
@@ -43,7 +66,7 @@ export interface SelectedProduct {
   price: string;
   image: string;
   quantity: number;
-  selectedVariants: SelectedVariantValue[];
+  selectedVariants: Array<Pick<SelectedVariantValue, 'attribute' | 'option'>>;
   attributeOptionIds: number[];
   sourceIndex?: number;
   variantEdited?: boolean;
@@ -65,30 +88,17 @@ interface ProductDropdownState {
   toggleProductExpansion: (productId: number) => void;
   selectVariant: (
     productId: number,
-    attribute: string,
-    option: string,
+    attributeId: number,
+    optionId: number,
     product: ApiProduct
   ) => void;
   addProductWithoutVariants: (product: ApiProduct) => void;
   removeProductFromPending: (productId: number) => void;
-  deselectVariant: (productId: number, attribute: string) => void;
+  deselectVariant: (productId: number, attributeId: number) => void;
   clearPendingSelections: () => void;
   confirmSelections: () => SelectedProduct[];
   reset: () => void;
 }
-
-const resolveAttributeOptionIds = (
-  product: ApiProduct,
-  selectedVariants: SelectedVariantValue[]
-): number[] => {
-  const attributes = product.attributes ?? [];
-  return selectedVariants.reduce<number[]>((ids, variant) => {
-    const attr = attributes.find((a) => a.name === variant.attribute);
-    const opt = attr?.options.find((o) => o.name === variant.option);
-    if (opt) ids.push(opt.id);
-    return ids;
-  }, []);
-};
 
 const initialState = {
   isOpen: false,
@@ -131,23 +141,26 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       });
     },
 
-    selectVariant: (productId, attribute, option, product) => {
+    selectVariant: (productId, attributeId, optionId, product) => {
       const { pendingSelections, selectedVariants } = get();
 
+      const variant = variantOf(product, attributeId, optionId);
+      if (!variant) return;
+
       const currentSelections = pendingSelections[productId]?.selectedVariants || [];
-      const existingIndex = currentSelections.findIndex((v) => v.attribute === attribute);
+      const existing = currentSelections.find((v) => v.attributeId === attributeId);
 
       let newSelections: SelectedVariantValue[];
-      if (existingIndex >= 0) {
-        if (currentSelections[existingIndex].option === option) {
-          newSelections = currentSelections.filter((v) => v.attribute !== attribute);
+      if (existing) {
+        if (existing.optionId === optionId) {
+          newSelections = currentSelections.filter((v) => v.attributeId !== attributeId);
         } else {
           newSelections = currentSelections.map((v) =>
-            v.attribute === attribute ? { attribute, option } : v
+            v.attributeId === attributeId ? variant : v
           );
         }
       } else {
-        newSelections = [...currentSelections, { attribute, option }];
+        newSelections = [...currentSelections, variant];
       }
 
       if (newSelections.length === 0) {
@@ -206,10 +219,10 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       });
     },
 
-    deselectVariant: (productId, attribute) => {
+    deselectVariant: (productId, attributeId) => {
       const { pendingSelections, selectedVariants } = get();
       const currentSelections = pendingSelections[productId]?.selectedVariants || [];
-      const newSelections = currentSelections.filter((v) => v.attribute !== attribute);
+      const newSelections = currentSelections.filter((v) => v.attributeId !== attributeId);
 
       if (newSelections.length === 0) {
         const newPendingSelections = { ...pendingSelections };
@@ -263,24 +276,15 @@ export const useProductDropdownStore = create<ProductDropdownState>(
           image: selection.product.image || '',
           quantity: 1,
           selectedVariants: selection.selectedVariants,
-          attributeOptionIds: resolveAttributeOptionIds(
-            selection.product,
-            selection.selectedVariants
-          ),
+          attributeOptionIds: selection.selectedVariants.map((variant) => variant.optionId),
         })
       );
 
       const merged = [...selectedProducts];
       for (const p of newProducts) {
-        const variantKey = JSON.stringify(
-          [...p.selectedVariants].sort((a, b) => a.attribute.localeCompare(b.attribute))
-        );
+        const variantKey = optionKeyOf(p.attributeOptionIds);
         const existingIndex = merged.findIndex(
-          (m) =>
-            m.id === p.id &&
-            JSON.stringify(
-              [...m.selectedVariants].sort((a, b) => a.attribute.localeCompare(b.attribute))
-            ) === variantKey
+          (m) => m.id === p.id && optionKeyOf(m.attributeOptionIds) === variantKey
         );
         if (existingIndex === -1) {
           merged.push(p);

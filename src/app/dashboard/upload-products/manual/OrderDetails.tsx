@@ -144,17 +144,6 @@ function OrderDetails({
     return draftFromLines(otherLines, editingCatalog.length).draft;
   }, [editingProduct, editingIndex, selectedProducts, editingCatalog.length]);
 
-  const editingVariants = useMemo(
-    () =>
-      Object.fromEntries(
-        (editingProduct?.selectedVariants ?? []).map((variant) => [
-          variant.attribute,
-          variant.option,
-        ])
-      ),
-    [editingProduct]
-  );
-
   const calculatedTotal = useMemo(() => {
     return roundMoney(
       selectedProducts.reduce((sum, product) => {
@@ -424,7 +413,7 @@ function OrderDetails({
               quantity: probeQuantityOf(editingProduct.quantity),
               draft: editingDraft,
             }}
-            currentVariants={editingVariants}
+            currentOptionIds={editingProduct.attributeOptionIds}
           />
         )}
 

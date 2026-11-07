@@ -18,13 +18,13 @@ export interface CatalogAttribute {
 
 export type Selection = Record<number, number>;
 
-export function selectionFromNames(
+export function selectionFromIds(
   groups: VariantOption[],
-  values: Readonly<Record<string, string>>,
+  optionIds: readonly number[],
 ): Selection {
   const selection: Selection = {};
   for (const group of groups) {
-    const option = group.options.find((item) => item.name === values[group.attribute]);
+    const option = group.options.find((item) => optionIds.includes(item.id));
     if (option) selection[group.attributeId] = option.id;
   }
   return selection;
