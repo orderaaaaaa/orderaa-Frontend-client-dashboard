@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
@@ -15,6 +16,7 @@ import {
   FOLLOWUP_NOTE_EDIT_LABEL,
   FOLLOWUP_NOTE_EDITED_TAG,
   FOLLOWUP_NOTE_MAX_LENGTH,
+  FOLLOWUP_NOTE_NEW_TAG,
   FOLLOWUP_NOTE_NO_WRITER,
   FOLLOWUP_NOTE_PARTY_TONES,
   FOLLOWUP_NOTE_SAVE_LABEL,
@@ -24,9 +26,10 @@ interface FollowupNoteItemProps {
   orderId: number;
   note: FollowupNoteView;
   canManage: boolean;
+  isNew: boolean;
 }
 
-export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemProps) {
+export function FollowupNoteItem({ orderId, note, canManage, isNew }: FollowupNoteItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [draft, setDraft] = useState(note.body);
@@ -58,6 +61,11 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
     <span>
       {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(note.createdAt)}
       {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
+      {isNew && (
+        <Badge variant="destructive" className="ms-1">
+          {FOLLOWUP_NOTE_NEW_TAG}
+        </Badge>
+      )}
     </span>
   );
 

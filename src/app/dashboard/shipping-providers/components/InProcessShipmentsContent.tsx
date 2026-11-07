@@ -1225,7 +1225,11 @@ export function InProcessShipmentsContent({
         )}
       </div>
       {notesOrderId !== null && (
-        <FollowupNotesModal orderId={notesOrderId} onClose={() => setNotesOrderId(null)} />
+        <FollowupNotesModal
+          key={notesOrderId}
+          orderId={notesOrderId}
+          onClose={() => setNotesOrderId(null)}
+        />
       )}
       {actionLog !== null && (
         <OrderActionLogModal

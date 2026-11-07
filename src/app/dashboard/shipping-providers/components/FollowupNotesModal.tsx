@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
@@ -8,7 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import type { FollowupNotePartyValue } from '@/lib/api/followup';
 import { PERMISSIONS } from '@/lib/permissions';
-import { useAddFollowupNoteMutation, useFollowupNotesQuery } from '@/services/followup';
+import {
+  useAddFollowupNoteMutation,
+  useFollowupNotesQuery,
+  useMarkFollowupNotesReadMutation,
+} from '@/services/followup';
 import { FollowupNoteDayCard } from './FollowupNoteDayCard';
 import {
   FOLLOWUP_NOTE_ADD_LABEL,
@@ -26,6 +30,8 @@ interface FollowupNotesModalProps {
   orderId: number;
   onClose: () => void;
 }
+
+const NO_NEW_NOTES: ReadonlySet<number> = new Set<number>();
 
 function AddFollowupNoteForm({ orderId }: { orderId: number }) {
   const [party, setParty] = useState<FollowupNotePartyValue>('CUSTOMER');
@@ -81,7 +87,27 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
   const { hasPermission } = usePermissionCheck();
   const canManage = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_NOTE_MANAGE);
   const notesQuery = useFollowupNotesQuery(orderId, true);
-  const canAddNote = canManage && (notesQuery.data?.days.some((day) => day.canAddNotes) ?? false);
+  const { data: notesData, isFetchedAfterMount, isFetching, isError } = notesQuery;
+  const { mutate: markRead } = useMarkFollowupNotesReadMutation();
+  const [newNoteIds, setNewNoteIds] = useState<ReadonlySet<number> | null>(null);
+  const snapshotTakenRef = useRef(false);
+  const canAddNote = canManage && (notesData?.days.some((day) => day.canAddNotes) ?? false);
+
+  useEffect(() => {
+    if (snapshotTakenRef.current) return;
+    if (!notesData || !isFetchedAfterMount || isFetching || isError) return;
+    snapshotTakenRef.current = true;
+    const ids = new Set<number>();
+    for (const day of notesData.days) {
+      for (const note of day.notes) {
+        if (note.unread) ids.add(note.id);
+      }
+    }
+    setNewNoteIds(ids);
+    if (ids.size > 0 && notesData.readThroughEntryId !== null) {
+      markRead({ orderId, throughEntryId: notesData.readThroughEntryId });
+    }
+  }, [notesData, isFetchedAfterMount, isFetching, isError, markRead, orderId]);
 
   return (
     <BaseModal
@@ -110,7 +136,13 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
         <>
           <div className="flex flex-col gap-3" dir="rtl">
             {notesQuery.data?.days.map((day) => (
-              <FollowupNoteDayCard key={day.day} orderId={orderId} day={day} canManage={canManage} />
+              <FollowupNoteDayCard
+                key={day.day}
+                orderId={orderId}
+                day={day}
+                canManage={canManage}
+                newNoteIds={newNoteIds ?? NO_NEW_NOTES}
+              />
             ))}
           </div>
           {canAddNote && (

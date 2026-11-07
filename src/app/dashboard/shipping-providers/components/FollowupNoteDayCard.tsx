@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { MessageSquareText } from 'lucide-react';
 import { LiaAngleDownSolid } from 'react-icons/lia';
@@ -80,6 +80,7 @@ function PartySection({
   canManage,
   carrierTexts,
   carrierContacts,
+  newNoteIds,
 }: {
   party: FollowupNotePartyValue;
   notes: FollowupNoteView[];
@@ -87,6 +88,7 @@ function PartySection({
   canManage: boolean;
   carrierTexts: FollowupCarrierText[];
   carrierContacts: FollowupCarrierContact[];
+  newNoteIds: ReadonlySet<number>;
 }) {
   const showTexts = party !== 'CUSTOMER' && carrierTexts.length > 0;
   const showContacts = party === 'COURIER' && carrierContacts.length > 0;
@@ -104,7 +106,13 @@ function PartySection({
       {notes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (
-            <FollowupNoteItem key={note.id} orderId={orderId} note={note} canManage={canManage} />
+            <FollowupNoteItem
+              key={note.id}
+              orderId={orderId}
+              note={note}
+              canManage={canManage}
+              isNew={newNoteIds.has(note.id)}
+            />
           ))}
         </ul>
       )}
@@ -154,16 +162,25 @@ interface FollowupNoteDayCardProps {
   orderId: number;
   day: FollowupNoteDay;
   canManage: boolean;
+  newNoteIds: ReadonlySet<number>;
 }
 
-export function FollowupNoteDayCard({ orderId, day, canManage }: FollowupNoteDayCardProps) {
+export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds }: FollowupNoteDayCardProps) {
   const [isOpen, setIsOpen] = useState(day.isToday);
+  const openedForNewRef = useRef(false);
   const hasContent =
     day.notes.length > 0 ||
     day.legacyNotes.length > 0 ||
     day.carrier.texts.length > 0 ||
     day.carrier.contacts.length > 0;
   const headerLabel = day.isToday ? `${FOLLOWUP_TODAY_LABEL} - ${formatDayKey(day.day)}` : formatDayKey(day.day);
+
+  useEffect(() => {
+    if (openedForNewRef.current) return;
+    if (!day.notes.some((note) => newNoteIds.has(note.id))) return;
+    openedForNewRef.current = true;
+    setIsOpen(true);
+  }, [newNoteIds, day]);
 
   return (
     <div className="flex flex-col rounded-xl border border-border bg-card">
@@ -192,6 +209,7 @@ export function FollowupNoteDayCard({ orderId, day, canManage }: FollowupNoteDay
                   canManage={canManage}
                   carrierTexts={day.carrier.texts}
                   carrierContacts={day.carrier.contacts}
+                  newNoteIds={newNoteIds}
                 />
               ))}
             </div>
