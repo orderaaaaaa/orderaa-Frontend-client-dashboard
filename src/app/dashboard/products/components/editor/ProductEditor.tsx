@@ -21,6 +21,7 @@ import {
   useDeleteVariant,
   usePatchProduct,
   useProductDetail,
+  useRestoreVariant,
   useUpdateProductAttributes,
   useUpdateProductSpecifications,
   useUpsertVariants,
@@ -149,6 +150,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const upsertVariants = useUpsertVariants(productId);
   const updateSpecifications = useUpdateProductSpecifications(productId);
   const deleteVariant = useDeleteVariant(productId);
+  const restoreVariant = useRestoreVariant(productId);
 
   const [basicPatch, setBasicPatch] = useState<BasicPatch>({});
   const [galleryDraft, setGalleryDraft] = useState<GalleryItem[] | null>(null);
@@ -699,6 +701,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 setDeleteTarget(variant);
               }}
               deletingId={deleteVariant.isPending ? deleteVariant.variables?.variantId ?? null : null}
+              onRestore={(variantId) =>
+                restoreVariant.mutateAsync(variantId).catch(() => undefined)
+              }
+              restoringId={restoreVariant.isPending ? restoreVariant.variables ?? null : null}
               disabled={fieldsDisabled}
             />
           </div>

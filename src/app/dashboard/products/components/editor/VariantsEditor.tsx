@@ -1,11 +1,17 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import { Link2, Trash2 } from 'lucide-react';
+import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
-import type { ProductDetail, ProductDetailVariant } from '../../types/products';
+import { useI18n } from '@/i18n/I18nProvider';
+import type {
+  ProductDetail,
+  ProductDetailDeletedVariant,
+  ProductDetailVariant,
+} from '../../types/products';
 import { VariantStoreLinks } from './VariantStoreLinks';
 import { PRODUCT_EDIT_LIMITS } from '../../types/products';
 import { VARIANT_DELETE_REASON_LABELS } from '../../utils/productApiError';
@@ -31,6 +37,8 @@ interface VariantsEditorProps {
   imageChoices: string[];
   onDelete: (variant: ProductDetailVariant) => void;
   deletingId: number | null;
+  onRestore: (variantId: number) => Promise<unknown>;
+  restoringId: number | null;
   disabled?: boolean;
 }
 
@@ -56,8 +64,12 @@ export function VariantsEditor({
   imageChoices,
   onDelete,
   deletingId,
+  onRestore,
+  restoringId,
   disabled = false,
 }: VariantsEditorProps) {
+  const { t } = useI18n();
+  const [restoreTarget, setRestoreTarget] = useState<ProductDetailDeletedVariant | null>(null);
   const rows: Row[] = useMemo(
     () => [
       ...detail.variants.map((variant) => ({
@@ -318,6 +330,60 @@ export function VariantsEditor({
           </div>
         )}
       />
+      {detail.deletedVariants.length > 0 && (
+        <section className="space-y-2">
+          <h4 className="text-sm font-semibold text-gray-900">المتغيرات المحذوفة</h4>
+          <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+            {detail.deletedVariants.map((variant) => (
+              <li
+                key={variant.id}
+                className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+              >
+                <span className="min-w-0 break-words text-gray-700">{variant.label}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={disabled || restoringId !== null}
+                  onClick={() => setRestoreTarget(variant)}
+                >
+                  استعادة
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <BaseModal
+        isOpen={restoreTarget !== null}
+        onClose={() => setRestoreTarget(null)}
+        title="استعادة المتغير"
+        onConfirm={async () => {
+          if (!restoreTarget) return;
+          const variantId = restoreTarget.id;
+          setRestoreTarget(null);
+          await onRestore(variantId);
+        }}
+        confirmText="استعادة"
+        maxWidth="md:max-w-lg"
+      >
+        {restoreTarget && (
+          <p className="text-sm text-gray-700 break-words">
+            {`استعادة ${restoreTarget.label}؟`}
+            {restoreTarget.storeLinks.length > 0 &&
+              ` تعود معه روابط المتاجر التالية: ${restoreTarget.storeLinks
+                .map((link) => {
+                  const store =
+                    link.storeName ??
+                    (link.storeId === null
+                      ? t('storeLinks.variant.storeUnknown')
+                      : t('storeLinks.variant.store', { storeId: link.storeId }));
+                  return `${store} ${link.externalId}`;
+                })
+                .join('، ')}`}
+          </p>
+        )}
+      </BaseModal>
       {attributesDirty && (
         <p className="text-xs text-amber-700">
           القيم الجديدة للخصائص تظهر هنا بعد حفظ الخصائص.

@@ -124,6 +124,20 @@ export const useDeleteVariant = (productId: number) => {
   });
 };
 
+export const useRestoreVariant = (productId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variantId: number) => productsApi.restoreVariant(productId, variantId),
+    onSuccess: (detail) => applyDetail(queryClient, productId, detail),
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر استعادة المتغير');
+      if (productApiErrorBody(error)?.code === 'VARIANT_NOT_FOUND') {
+        return invalidateAndWait(queryClient, [productKeys.detail(productId)]);
+      }
+    },
+  });
+};
+
 /**
  * T22 — saves المواصفات (specifications) through their own endpoint.
  *

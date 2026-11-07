@@ -69,6 +69,16 @@ export const productsApi = {
     return response.data;
   },
 
+  restoreVariant: async (
+    productId: number,
+    variantId: number,
+  ): Promise<ProductDetail> => {
+    const response = await http.post<ProductDetail>(
+      `/products/${productId}/variants/${variantId}/restore`,
+    );
+    return response.data;
+  },
+
   getAttributeCounts: async (
     productId: number,
   ): Promise<AttributeCountsResponse> => {
