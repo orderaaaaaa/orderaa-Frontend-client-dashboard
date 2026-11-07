@@ -85,6 +85,8 @@ export function AttributesEditor({
               }
               canMoveUp={index > 0}
               canMoveDown={index < attributes.length - 1}
+              position={index + 1}
+              total={attributes.length}
               maxValues={PRODUCT_CREATE_LIMITS.optionsPerAttribute}
               nameError={entry?.name}
               valuesError={entry?.values}

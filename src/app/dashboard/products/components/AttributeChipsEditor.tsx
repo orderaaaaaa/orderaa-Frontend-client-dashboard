@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,8 @@ export interface AttributeChipsEditorProps {
   onMove?: (direction: 'up' | 'down') => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  position?: number;
+  total?: number;
   maxValues: number;
   nameError?: string;
   valuesError?: string;
@@ -38,6 +40,8 @@ export function AttributeChipsEditor({
   onMove,
   canMoveUp = false,
   canMoveDown = false,
+  position,
+  total,
   maxValues,
   nameError,
   valuesError,
@@ -52,6 +56,33 @@ export function AttributeChipsEditor({
   const [draftError, setDraftError] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
+  const [moveAnnouncement, setMoveAnnouncement] = useState('');
+  const upButtonRef = useRef<HTMLButtonElement>(null);
+  const downButtonRef = useRef<HTMLButtonElement>(null);
+  const pendingMoveRef = useRef<'up' | 'down' | null>(null);
+
+  useEffect(() => {
+    const direction = pendingMoveRef.current;
+    if (!direction) return;
+    pendingMoveRef.current = null;
+    const pressedStillEnabled = direction === 'up' ? canMoveUp : canMoveDown;
+    if (pressedStillEnabled) return;
+    const otherEnabled = direction === 'up' ? canMoveDown : canMoveUp;
+    if (!otherEnabled) return;
+    (direction === 'up' ? downButtonRef : upButtonRef).current?.focus();
+  });
+
+  const move = (direction: 'up' | 'down') => {
+    if (!onMove) return;
+    pendingMoveRef.current = direction;
+    if (position !== undefined && total !== undefined) {
+      const newPosition = direction === 'up' ? position - 1 : position + 1;
+      setMoveAnnouncement(
+        `تم نقل الخاصية ${name} إلى الموضع ${newPosition} من ${total}`,
+      );
+    }
+    onMove(direction);
+  };
 
   const isTaken = (value: string, exceptIndex?: number) => {
     const key = duplicateNameKey(value);
@@ -143,24 +174,26 @@ export function AttributeChipsEditor({
           {onMove && (
             <>
               <Button
+                ref={upButtonRef}
                 type="button"
                 variant="ghost"
                 size="touch"
-                onClick={() => onMove('up')}
+                onClick={() => move('up')}
                 disabled={disabled || !canMoveUp}
                 className="text-gray-500 hover:bg-gray-100 shrink-0"
-                aria-label="تحريك لأعلى"
+                aria-label={`تحريك الخاصية ${name} لأعلى`}
               >
                 <ChevronUp className="w-5 h-5" />
               </Button>
               <Button
+                ref={downButtonRef}
                 type="button"
                 variant="ghost"
                 size="touch"
-                onClick={() => onMove('down')}
+                onClick={() => move('down')}
                 disabled={disabled || !canMoveDown}
                 className="text-gray-500 hover:bg-gray-100 shrink-0"
-                aria-label="تحريك لأسفل"
+                aria-label={`تحريك الخاصية ${name} لأسفل`}
               >
                 <ChevronDown className="w-5 h-5" />
               </Button>
@@ -178,6 +211,11 @@ export function AttributeChipsEditor({
             <LiaTimesSolid className="w-5 h-5" />
           </Button>
         </div>
+        {onMove && (
+          <p aria-live="polite" className="sr-only">
+            {moveAnnouncement}
+          </p>
+        )}
         {nameHint && (
           <p className="mb-2 text-xs text-gray-400">{nameHint}</p>
         )}
