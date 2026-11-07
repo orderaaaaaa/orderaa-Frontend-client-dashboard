@@ -111,6 +111,8 @@ export interface ShipmentRowBase {
   area: string | null;
   address: string | null;
   returnShippingCost: number | null;
+  lineCount: number;
+  returnChildCode: string | null;
   awaitingCarrierReturn?: boolean;
   unreadNoteCount?: number;
 }
