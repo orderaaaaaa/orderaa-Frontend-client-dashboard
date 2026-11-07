@@ -13,6 +13,7 @@ import {
   getApiErrorMessage,
   getOutOfStockBlock,
   outOfStockBlockText,
+  refusalToastOptions,
 } from '@/utils/apiError';
 
 interface OrderStockReturnRequiredModalProps {
@@ -42,7 +43,7 @@ export default function OrderStockReturnRequiredModal({
     } catch (err: unknown) {
       const block = getOutOfStockBlock(err);
       if (block) {
-        toast.error(outOfStockBlockText(block));
+        toast.error(outOfStockBlockText(block), refusalToastOptions(err));
         return;
       }
       toast.error(getApiErrorMessage(err, 'تعذرت مزامنة مخزون الطلب'));

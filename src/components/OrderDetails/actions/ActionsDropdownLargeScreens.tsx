@@ -26,13 +26,6 @@ export interface OrderActionsFooterProps {
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
-  /**
-   * T27: false when a line is short AND its product forbids confirming out of
-   * stock. The server refuses independently with a 409 — stock can change
-   * between this render and the click — so this is a courtesy, not the guard.
-   */
-  canConfirmStock?: boolean;
-  stockBlockReason?: string;
   isBusy?: boolean;
   canSplitDelivered?: boolean;
   waiting?: boolean;
@@ -48,8 +41,6 @@ export function OrderActionsFooterLargeScreens({
   onNavigatePrevious,
   isNavigatingNext = false,
   isNavigatingPrevious = false,
-  canConfirmStock = true,
-  stockBlockReason,
   isBusy = false,
   canSplitDelivered = false,
   waiting = false,
@@ -137,18 +128,12 @@ export function OrderActionsFooterLargeScreens({
         ) : !waiting && showActionsMenu ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
-              {canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
-                <p className="max-w-md max-h-32 self-center overflow-y-auto whitespace-pre-line text-xs font-medium leading-5 text-red-700">
-                  {stockBlockReason}
-                </p>
-              )}
               {canUpdate && orderStatus !== 'CONFIRMED' && (
                 <Button
                   variant="default"
                   onClick={onConfirm}
                   loading={isBusy}
-                  disabled={isBusy || !canConfirmStock}
-                  title={canConfirmStock ? undefined : stockBlockReason}
+                  disabled={isBusy}
                   className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-brand-hover transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
                 >
                   <LiaCheckCircle className="w-5 h-5" />

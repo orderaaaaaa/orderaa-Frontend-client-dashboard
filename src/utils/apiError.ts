@@ -1,3 +1,4 @@
+import type { ToastOptions } from 'react-toastify';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
@@ -406,6 +407,10 @@ const AVAILABILITY_REFUSAL_CODES = [
 export function isAvailabilityRefusal(err: unknown): boolean {
   const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
   return code !== undefined && AVAILABILITY_REFUSAL_CODES.includes(code);
+}
+
+export function refusalToastOptions(err: unknown): ToastOptions | undefined {
+  return isAvailabilityRefusal(err) ? { autoClose: 8000 } : undefined;
 }
 
 export function getAvailabilityRefusalMessage(err: unknown, fallback: string): string {

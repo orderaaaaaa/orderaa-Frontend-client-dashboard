@@ -207,7 +207,6 @@ export function ExchangeProductsStep({
                     excludedLines={draftForProductLines(lines, line.productId, line.key).excluded}
                     selection={line.attributeOptionIds}
                     onChange={disabled ? undefined : (next) => onChangeLineSelection(line.key, next)}
-                    blockKey={`exchange:${line.key}`}
                   />
                 )}
                 {!isLineComplete(line) && (

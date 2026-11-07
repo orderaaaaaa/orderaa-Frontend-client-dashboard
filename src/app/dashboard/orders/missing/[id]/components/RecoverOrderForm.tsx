@@ -21,7 +21,7 @@ import {
 } from '@/utils/manualOrder/payload';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
-import { getAvailabilityRefusalMessage, isAvailabilityRefusal } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage, isAvailabilityRefusal, refusalToastOptions } from '@/utils/apiError';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
 import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
@@ -31,8 +31,6 @@ import {
   type StoreLinkMove,
 } from '@/types/storeLinks';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
-import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import { blockedStoreLinesOf, capturedStoreLineIndexes } from '@/utils/manualOrder/storeLineLinks';
 import type {
   MissingOrderDetail,
@@ -87,7 +85,6 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
   const [productsError, setProductsError] = useState<string | null>(null);
   const { mutateAsync: recover, isPending: isRecovering } = useRecoverMissingOrder(id);
   const variantCheck = useIncompleteVariantLines(selectedProducts);
-  const stockBlocked = useAnyBlockedLine('dropdown:');
   const variantsBlocked =
     variantCheck.isChecking || variantCheck.lines.length > 0;
   const incompleteLines = useMemo(
@@ -155,7 +152,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       }
 
       if (isAvailabilityRefusal(err)) {
-        toast.error(getAvailabilityRefusalMessage(err, fallback));
+        toast.error(getAvailabilityRefusalMessage(err, fallback), refusalToastOptions(err));
         return;
       }
 
@@ -389,8 +386,6 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           </p>
         )}
 
-        <StockSubmitBlockedHint visible={stockBlocked} />
-
         <div className="flex justify-end gap-3 ml-6">
           <Can code={PERMISSION_CODES.ORDERS_MISSING_MANAGE}>
             <Button
@@ -404,8 +399,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || variantsBlocked || stockBlocked}
-              title={stockBlocked ? t('stockShortage.submitBlocked') : undefined}
+              disabled={isSubmitting || variantsBlocked}
               size="lg"
               className="w-40 rounded-full font-bold"
             >

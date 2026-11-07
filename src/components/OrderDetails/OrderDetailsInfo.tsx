@@ -9,7 +9,6 @@ import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import type { AvailabilityLine } from '@/lib/api/warehouses';
 import { toast } from 'react-toastify';
 import {
-  availableStockRefusalText,
   formatAvailableStockLines,
   getApiErrorMessage,
   getOutOfStockBlock,
@@ -157,59 +156,23 @@ function OrderDetailsInfoComponent({
     }
   }, [isLockPending, isLockedByOther, deferredIntent]);
 
-  /**
-   * T27 — the out-of-stock confirmation gate, mirrored into the UI.
-   *
-   * Disabling the button is a courtesy so the agent sees the problem before
-   * clicking; the server refuses independently with a 409, because stock can
-   * change between this render and the click. Never rely on the disabled state.
-   */
   const { data: stockAvailability } = useOrderStockAvailabilityQuery(
     order.id
   );
-  const stockGate = useMemo(() => {
+  const stockWarning = useMemo(() => {
     const notSet =
       stockAvailability?.availableWarehouseSet === false &&
       stockAvailability.lines.length > 0;
     const settled = (stockAvailability?.lines ?? []).filter(
       (line): line is SettledAvailabilityLine => line.available !== null
     );
-    // Undefined while loading — do NOT block on that, or the confirm button is
-    // dead on every first paint.
     const warehouseName = stockAvailability?.availableWarehouse?.name ?? '';
     const toRefusalLine = (line: SettledAvailabilityLine) =>
       availableRefusalLineOf(line.productName, line);
     const warned = notSet ? [] : settled.filter((line) => line.warning && !line.blocked);
-    const warning =
-      warned.length > 0
-        ? `${translate(readStoredLocale(), 'stockShortage.availableWarning', { warehouse: warehouseName })}\n${formatAvailableStockLines(warned.map(toRefusalLine))}`
-        : undefined;
-    if (notSet) {
-      return {
-        canConfirm: false,
-        reason: translate(
-          readStoredLocale(),
-          'orderDetails.stock.availableWarehouseNotSet'
-        ),
-        warning,
-      };
-    }
-    if (
-      !stockAvailability ||
-      (stockAvailability.canConfirm && !settled.some((line) => line.blocked))
-    ) {
-      return {
-        canConfirm: true,
-        reason: undefined as string | undefined,
-        warning,
-      };
-    }
-    const blocking = settled.filter((line) => line.blocked);
-    return {
-      canConfirm: false,
-      reason: availableStockRefusalText(warehouseName, blocking.map(toRefusalLine)),
-      warning,
-    };
+    return warned.length > 0
+      ? `${translate(readStoredLocale(), 'stockShortage.availableWarning', { warehouse: warehouseName })}\n${formatAvailableStockLines(warned.map(toRefusalLine))}`
+      : undefined;
   }, [stockAvailability]);
 
   // Get the last event status from order events
@@ -240,8 +203,8 @@ function OrderDetailsInfoComponent({
       setConfirmationDialog({
         isOpen: true,
         title: 'تأكيد الطلب',
-        message: stockGate.warning
-          ? `هل أنت متأكد من تأكيد هذا الطلب؟\n\n${stockGate.warning}`
+        message: stockWarning
+          ? `هل أنت متأكد من تأكيد هذا الطلب؟\n\n${stockWarning}`
           : 'هل أنت متأكد من تأكيد هذا الطلب؟',
         action: 'confirm',
       })
@@ -441,8 +404,6 @@ function OrderDetailsInfoComponent({
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
-          canConfirmStock={stockGate.canConfirm}
-          stockBlockReason={stockGate.reason}
           isBusy={actions.isTransitioning}
           canSplitDelivered={splitDeliveredAllowed}
         />
@@ -460,8 +421,6 @@ function OrderDetailsInfoComponent({
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
-          canConfirmStock={stockGate.canConfirm}
-          stockBlockReason={stockGate.reason}
           isBusy={actions.isTransitioning}
           canSplitDelivered={splitDeliveredAllowed}
         />

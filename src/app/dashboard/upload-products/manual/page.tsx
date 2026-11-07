@@ -21,7 +21,7 @@ import {
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
-import { getAvailabilityRefusalMessage, isAvailabilityRefusal } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage, isAvailabilityRefusal, refusalToastOptions } from '@/utils/apiError';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
@@ -29,8 +29,6 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import ToggleGroup from '@/components/ui/toggle-group';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
-import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import CustomerReturnForm from './return/CustomerReturnForm';
 
 const DIRTY = { shouldDirty: true } as const;
@@ -38,8 +36,6 @@ const DIRTY = { shouldDirty: true } as const;
 type ManualOrderMode = 'new' | 'return';
 
 function NewOrderForm() {
-  const { t } = useI18n();
-  const stockBlocked = useAnyBlockedLine('dropdown:');
   const queryClient = useQueryClient();
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -162,7 +158,8 @@ function NewOrderForm() {
       toast.error(
         isAvailabilityRefusal(err)
           ? getAvailabilityRefusalMessage(err, fallback)
-          : locationSaveErrorTextOf(err, fallback)
+          : locationSaveErrorTextOf(err, fallback),
+        refusalToastOptions(err)
       );
     }
   };
@@ -328,7 +325,6 @@ function NewOrderForm() {
           }}
         />
 
-        <StockSubmitBlockedHint visible={stockBlocked} />
         <StickyFormFooter
           isDirty={hasUnsavedChanges}
           isSaving={isSubmitting}
@@ -342,8 +338,7 @@ function NewOrderForm() {
         >
           <Button
             type="submit"
-            disabled={isSubmitting || stockBlocked}
-            title={stockBlocked ? t('stockShortage.submitBlocked') : undefined}
+            disabled={isSubmitting}
             loading={isSubmitting}
             loadingText="جاري الإرسال..."
             className="min-h-10 min-w-40 rounded-full font-bold"

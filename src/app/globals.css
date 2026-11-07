@@ -794,6 +794,10 @@ html {
   --toastify-text-color-error: #ffffff;
 }
 
+.Toastify__toast {
+  pointer-events: auto;
+}
+
 .Toastify .Toastify__toast-theme--colored.Toastify__toast--warning .Toastify__close-button {
   color: #1c1917;
 }

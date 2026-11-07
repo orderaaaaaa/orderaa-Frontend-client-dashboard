@@ -255,7 +255,7 @@ function availableLineOf(
   return availableRefusalLineOf(productName, { ...row, available: row.available });
 }
 
-export function refusalTextFor({
+export function availableNumbersTextFor({
   refusal,
   productName,
   row,
@@ -263,16 +263,10 @@ export function refusalTextFor({
   refusal: AvailabilityRefusal;
   productName: string;
   row: VariantAvailability;
-}): string {
-  const locale = readStoredLocale();
+}): string | null {
   const line = availableLineOf(productName, row);
-  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET' || line === null) {
-    return translate(locale, 'orderDetails.stock.availableWarehouseNotSet');
-  }
-  const heading = translate(locale, 'stockShortage.availableWouldGoNegative', {
-    warehouse: row.availableWarehouse?.name ?? '',
-  });
-  return `${heading}\n${formatAvailableStockLines([line])}`;
+  if (refusal === 'AVAILABLE_WAREHOUSE_NOT_SET' || line === null) return null;
+  return formatAvailableStockLines([line]);
 }
 
 export function warningTextFor({

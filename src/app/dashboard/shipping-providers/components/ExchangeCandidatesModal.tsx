@@ -18,8 +18,6 @@ import ProductSelectionModal, { type SelectableProduct } from '@/components/ui/p
 import { Stepper } from '@/components/ui/stepper';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
-import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 import type {
   FollowupChangeProductInput,
   FollowupExchangeBody,
@@ -30,7 +28,7 @@ import type {
 } from '@/lib/api/followup';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useCreateExchangeMutation, useExchangeCandidatesQuery } from '@/services/followup';
-import { getAvailabilityRefusalMessage } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage, refusalToastOptions } from '@/utils/apiError';
 import { carrierSendNeedsAttention, carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 import { ExchangeCandidateStep } from './ExchangeCandidateStep';
 import { ExchangeProductsStep, itemKeyOf, type ExchangeLine } from './ExchangeProductsStep';
@@ -117,8 +115,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
           ? t('exchange.create.step2.incompleteVariants')
           : null;
   const navHint = step === 1 && !isProductsValid ? productsHint : null;
-  const stockBlocked = useAnyBlockedLine('exchange:');
-  const canConfirm = canManage && stepValid.every(Boolean) && !stockBlocked && !isPending;
+  const canConfirm = canManage && stepValid.every(Boolean) && !isPending;
 
   const handleClose = () => {
     if (isPending) return;
@@ -245,7 +242,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     } catch (err: unknown) {
       const message = getAvailabilityRefusalMessage(err, t('exchange.create.submitError'));
       setSubmitError(message);
-      toast.error(message);
+      toast.error(message, refusalToastOptions(err));
     }
   };
 
@@ -258,7 +255,6 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       )}
       {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
       {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
-      <StockSubmitBlockedHint visible={stockBlocked} />
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0 || isPending}>
           {t('exchange.create.nav.back')}
@@ -268,7 +264,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
             {t('exchange.create.nav.next')}
           </Button>
         ) : (
-          <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending} title={stockBlocked ? t('stockShortage.submitBlocked') : undefined}>
+          <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending}>
             {t('exchange.create.nav.confirm')}
           </Button>
         )}
@@ -359,7 +355,6 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
           targetStatus: 'CONFIRMED',
           quantity: 1,
           draftFor: (productId) => draftForProduct(productId),
-          blockScope: 'exchange:picker',
         }}
       />
     </>

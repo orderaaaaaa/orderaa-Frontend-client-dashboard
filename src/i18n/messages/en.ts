@@ -144,14 +144,10 @@ const en: Record<keyof typeof ar, string> = {
     'Available: {available} (required: {required})',
   'orderDetails.stock.unavailable':
     'Out of stock — {available} available, {required} required',
-  'orderDetails.stock.blocked':
-    'This order cannot be confirmed with this product — choose another one',
   'orderDetails.stock.availableWarehouseNotSet':
     'The available-stock warehouse is not set — contact the administration',
 
   'orderDetails.variants.title': 'Available in stock',
-  'orderDetails.variants.blockedSelection':
-    'This option is out of stock and the product settings block adding it — pick something else',
   'orderDetails.variants.state.low': 'Left: {count}',
   'orderDetails.variants.state.warning': 'Sale allowed: {count}',
   'orderDetails.variants.state.out': 'Out of stock',
@@ -187,7 +183,6 @@ const en: Record<keyof typeof ar, string> = {
     'This action will make the balance of "{warehouse}" (available-stock warehouse) negative, because negative stock is allowed for this product:',
   'stockShortage.bulkWarningTitle':
     'Confirmed, but the balance of "{warehouse}" (available-stock warehouse) went negative for these orders:',
-  'stockShortage.submitBlocked': 'Cannot submit: a product is not covered by the available-stock warehouse. Change the product or quantity.',
   'stockShortage.availableWouldGoNegativeNoWarehouse': 'This action cannot be completed because the available-stock warehouse balance would drop below zero:',
   'stockShortage.bulkWarningLineNoVariant': '#{order} {product}: available {available}, change {change}, after {after}',
   'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: available {available}, change {change}, after {after}',

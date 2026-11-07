@@ -8,8 +8,6 @@ import { DropdownInput } from './DropdownInput';
 import BaseModal from '../ui/base-modal';
 import { MissingAttributesHint } from '../ui/missing-attributes-hint';
 import { missingAttributesOfPending } from '@/store/productDropdownStore';
-import { useAnyBlockedLine } from '@/components/stock/blockedLinesStore';
-import { StockSubmitBlockedHint } from '@/components/stock/StockSubmitBlockedHint';
 
 interface ProductDropdownProps {
   label?: string;
@@ -48,7 +46,6 @@ export default function ProductDropdown({
   } = useProductDropdown();
 
   const pendingSelectionsCount = Object.keys(selectedVariants).length;
-  const stockBlocked = useAnyBlockedLine('dropdown:');
   const incompleteSelections = Object.values(pendingSelections)
     .map((pending) => ({
       productId: pending.product.id,
@@ -84,9 +81,7 @@ export default function ProductDropdown({
           onConfirm={handlers.handleAddProduct}
           confirmText={`إضافة (${pendingSelectionsCount})`}
           confirmIcon={<LiaPlusSolid className="w-5 h-5 text-white" />}
-          confirmDisabled={
-            pendingSelectionsCount === 0 || incompleteSelections.length > 0 || stockBlocked
-          }
+          confirmDisabled={pendingSelectionsCount === 0 || incompleteSelections.length > 0}
           maxWidth="md:max-w-5xl"
         >
           <DropdownContent
@@ -107,7 +102,6 @@ export default function ProductDropdown({
             onLoadMore={handlers.handleLoadMore}
             availabilityTarget={availabilityTarget}
           />
-          <StockSubmitBlockedHint visible={stockBlocked} />
           {incompleteSelections.length > 0 && (
             <div className="mt-3 flex flex-col gap-1 px-0 sm:px-4">
               {incompleteSelections.map((selection) => (

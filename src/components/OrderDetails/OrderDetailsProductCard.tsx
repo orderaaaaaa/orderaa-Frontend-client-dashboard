@@ -22,7 +22,12 @@ import {
   useAddOrderProduct,
 } from '@/services/orders';
 import { ORDER_LINE_EDIT_CONFLICT } from '@/types/orderLineEdits';
-import { getAvailabilityRefusalMessage, getOrderLineEditConflict } from '@/utils/apiError';
+import {
+  getAvailabilityRefusalMessage,
+  getOrderLineEditConflict,
+  isAvailabilityRefusal,
+  refusalToastOptions,
+} from '@/utils/apiError';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -153,7 +158,16 @@ function OrderDetailsProductCard({
 
   const handleConfirmSendBack = async () => {
     if (!pendingSendBack) return;
-    await pendingSendBack.retry();
+    try {
+      await pendingSendBack.retry();
+    } catch (error: unknown) {
+      if (!isAvailabilityRefusal(error)) throw error;
+      toast.error(
+        getAvailabilityRefusalMessage(error, 'تعذر تنفيذ التعديل على المنتج'),
+        refusalToastOptions(error)
+      );
+      return;
+    }
     pendingSendBack.onApplied();
     setPendingSendBack(null);
   };
@@ -179,7 +193,10 @@ function OrderDetailsProductCard({
       if (applied) notifyUpdated();
       return applied;
     } catch (error: any) {
-      toast.error(getAvailabilityRefusalMessage(error, 'فشل في تحديث المنتج'));
+      toast.error(
+        getAvailabilityRefusalMessage(error, 'فشل في تحديث المنتج'),
+        refusalToastOptions(error)
+      );
       return false;
     }
   };
@@ -251,7 +268,10 @@ function OrderDetailsProductCard({
       if (applied) notifyAdded();
       return applied;
     } catch (err: any) {
-      toast.error(getAvailabilityRefusalMessage(err, 'فشل في إضافة المنتج'));
+      toast.error(
+        getAvailabilityRefusalMessage(err, 'فشل في إضافة المنتج'),
+        refusalToastOptions(err)
+      );
       return false;
     }
   };

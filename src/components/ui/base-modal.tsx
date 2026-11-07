@@ -14,6 +14,9 @@ export const ModalContainerContext = React.createContext<HTMLElement | null>(
   null
 );
 
+const isToastTarget = (target: EventTarget | null) =>
+  target instanceof Element && target.closest('.Toastify') !== null;
+
 interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -100,7 +103,10 @@ export default function BaseModal({
             'max-sm:w-[95vw]'
           )}
           onPointerDownOutside={(e) => {
-            if (isLoading) e.preventDefault();
+            if (isLoading || isToastTarget(e.target)) e.preventDefault();
+          }}
+          onInteractOutside={(e) => {
+            if (isToastTarget(e.target)) e.preventDefault();
           }}
           onEscapeKeyDown={(e) => {
             if (isLoading) e.preventDefault();

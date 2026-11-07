@@ -55,10 +55,9 @@ export function StockAvailabilityBadge({ line }: Props) {
     );
   }
 
-  const tone = line.blocked ? 'text-red-600' : 'text-warning';
   return (
     <div className="flex flex-col gap-0.5">
-      <p className={`flex items-center gap-1 text-sm font-semibold ${tone}`}>
+      <p className="flex items-center gap-1 text-sm font-semibold text-warning">
         <LiaExclamationTriangleSolid className="size-4 shrink-0" />
         <span>
           {t('orderDetails.stock.unavailable', {
@@ -67,14 +66,6 @@ export function StockAvailabilityBadge({ line }: Props) {
           })}
         </span>
       </p>
-      {line.blocked && (
-        // The settings refuse confirmation for this product, so the agent must
-        // be told to pick something else rather than discovering it on submit.
-        // `ps-5` keeps the indent under the icon on both sides.
-        <p className="ps-5 text-xs text-red-500">
-          {t('orderDetails.stock.blocked')}
-        </p>
-      )}
     </div>
   );
 }

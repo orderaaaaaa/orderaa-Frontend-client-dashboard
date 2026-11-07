@@ -10,16 +10,12 @@ import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useProductVariantsOptions } from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
-import {
-  useOrderStockAvailabilityQuery,
-  useProductVariantAvailabilityQuery,
-} from '@/services/warehouses';
+import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
-import { getAvailabilityRefusalMessage } from '@/utils/apiError';
+import { getAvailabilityRefusalMessage, refusalToastOptions } from '@/utils/apiError';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
   catalogAttributesOf,
-  exactVariantFor,
   probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
@@ -91,16 +87,6 @@ export default function AddNewProductModal({
     NEXT_STOCK_TARGET,
     { quantity: probeQuantityOf(quantity) }
   );
-  const selectedVariantAvailability = useMemo(
-    () => exactVariantFor(variantAvailability, selection, variantOptions.length),
-    [variantAvailability, selection, variantOptions.length]
-  );
-
-  const { data: orderAvailability } = useOrderStockAvailabilityQuery(orderId);
-  const availableWarehouseNotSet =
-    orderAvailability?.availableWarehouseSet === false ||
-    variantAvailability.some((variant) => variant.available === null);
-
   const productOptions = useMemo(() => productsData.map((p) => p.name), [productsData]);
 
   const productsByName = useMemo(() => {
@@ -139,16 +125,10 @@ export default function AddNewProductModal({
       variantOptions.length === 0 ||
       Object.keys(selection).length === variantOptions.length;
 
-    // T27: a variant the product's settings refuse cannot be added. `!== false`
-    // so an unresolved or still-loading match never blocks the form.
-    const stockAllows =
-      !availableWarehouseNotSet && selectedVariantAvailability?.blocked !== true;
-
     return (
       hasProduct &&
       variantsReady &&
       allVariantsSelected &&
-      stockAllows &&
       quantity > 0
     );
   }, [
@@ -157,8 +137,6 @@ export default function AddNewProductModal({
     selection,
     isLoadingVariants,
     isErrorVariants,
-    selectedVariantAvailability,
-    availableWarehouseNotSet,
     quantity,
   ]);
 
@@ -184,7 +162,8 @@ export default function AddNewProductModal({
     } catch (error: any) {
       console.error('Failed to add product:', error);
       toast.error(
-        getAvailabilityRefusalMessage(error, 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.')
+        getAvailabilityRefusalMessage(error, 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.'),
+        refusalToastOptions(error)
       );
     } finally {
       setIsSaving(false);

@@ -6,13 +6,11 @@ import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { useEffect } from 'react';
 import { VariantOptionChip } from './VariantOptionChip';
-import { useBlockedLinesStore } from './blockedLinesStore';
 import {
+  availableNumbersTextFor,
   exactVariantFor,
   optionStatus,
-  refusalTextFor,
   selectionLabel,
   warningTextFor,
   sortedCatalog,
@@ -38,7 +36,6 @@ export interface VariantAvailabilitySelectorProps {
   className?: string;
   excludedLines?: number;
   showWarehouseNote?: boolean;
-  blockKey?: string;
   informationOnly?: boolean;
 }
 
@@ -59,24 +56,10 @@ export function VariantAvailabilitySelector({
   className,
   excludedLines = 0,
   showWarehouseNote = true,
-  blockKey,
   informationOnly = false,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
-  const setBlocked = useBlockedLinesStore((state) => state.setBlocked);
-  const isBlockedNow =
-    !informationOnly && exactVariantFor(variants, selection, attributes.length)?.blocked === true;
-
-  useEffect(() => {
-    if (blockKey) setBlocked(blockKey, isBlockedNow);
-  }, [blockKey, isBlockedNow, setBlocked]);
-
-  useEffect(() => {
-    if (!blockKey) return;
-    return () => setBlocked(blockKey, false);
-  }, [blockKey, setBlocked]);
-
   if (attributes.length === 0 && !isLoading && !isError) return null;
 
   const container = (body: React.ReactNode) => (
@@ -110,13 +93,14 @@ export function VariantAvailabilitySelector({
   const sorted = sortedCatalog(attributes);
   const exact = exactVariantFor(variants, selection, attributes.length);
   const refusal = informationOnly ? null : (exact?.refusal ?? null);
-  const warningText =
-    exact && !refusal && !informationOnly ? warningTextFor({ productName, row: exact }) : null;
+  const warningText = exact && !informationOnly ? warningTextFor({ productName, row: exact }) : null;
+  const availableNumbersText =
+    exact && refusal ? availableNumbersTextFor({ refusal, productName, row: exact }) : null;
   const summary = selectionLabel(attributes, selection);
   const someUnselected = Object.keys(selection).length < attributes.length;
   const allWarehouseNotSet =
     variants.length > 0 && variants.every((variant) => variant.available === null);
-  const exactNotSet = exact !== null && exact.available === null && refusal === null;
+  const exactNotSet = exact !== null && exact.available === null;
   const hasStates = variants.length > 0 || (!availabilityLoading && !availabilityError);
 
   const choose = (attributeId: number, optionId: number) => {
@@ -212,13 +196,13 @@ export function VariantAvailabilitySelector({
         </p>
       )}
 
-      {exact && refusal && (
+      {availableNumbersText && (
         <p
           role="status"
           aria-live="polite"
-          className="mt-2 whitespace-pre-line text-sm font-semibold text-destructive"
+          className="mt-2 whitespace-pre-line text-sm text-muted-foreground"
         >
-          {refusalTextFor({ refusal, productName, row: exact })}
+          {availableNumbersText}
         </p>
       )}
 
@@ -232,23 +216,11 @@ export function VariantAvailabilitySelector({
         </p>
       )}
 
-      {exactNotSet && (
-        <p
-          role="status"
-          aria-live="polite"
-          className="mt-2 text-sm font-semibold text-destructive"
-        >
+      {(exactNotSet || (showWarehouseNote && allWarehouseNotSet)) && (
+        <p className="mt-2 text-sm text-muted-foreground">
           {t('orderDetails.stock.availableWarehouseNotSet')}
         </p>
       )}
-      {showWarehouseNote &&
-        allWarehouseNotSet &&
-        !exactNotSet &&
-        refusal !== 'AVAILABLE_WAREHOUSE_NOT_SET' && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('orderDetails.stock.availableWarehouseNotSet')}
-          </p>
-        )}
       {variants.length === 0 && !availabilityLoading && !availabilityError && (
         <p className="mt-2 text-sm text-muted-foreground">
           {t('orderDetails.variants.noVariantRows')}

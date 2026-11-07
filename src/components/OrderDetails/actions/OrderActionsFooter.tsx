@@ -27,14 +27,6 @@ export interface OrderActionsFooterProps {
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
-  /**
-   * T27: false when a line is short AND its product forbids confirming out of
-   * stock. Disabling here is a courtesy — the server refuses independently with
-   * a 409, because stock can change between this render and the click.
-   */
-  canConfirmStock?: boolean;
-  /** Which products block it, for the tooltip. */
-  stockBlockReason?: string;
   isBusy?: boolean;
   canSplitDelivered?: boolean;
   waiting?: boolean;
@@ -50,8 +42,6 @@ export function OrderActionsFooter({
   onNavigatePrevious,
   isNavigatingNext = false,
   isNavigatingPrevious = false,
-  canConfirmStock = true,
-  stockBlockReason,
   isBusy = false,
   canSplitDelivered = false,
   waiting = false,
@@ -95,11 +85,6 @@ export function OrderActionsFooter({
         ref={footerRef}
         className="fixed bottom-8 left-0 right-0 z-(--z-page-fixed) flex flex-col items-center gap-3 px-4 font-sans"
       >
-        {!waiting && !showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
-          <p className="w-full max-w-md max-h-32 overflow-y-auto rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-sm font-medium leading-5 whitespace-pre-line text-red-700 shadow-sm">
-            {stockBlockReason}
-          </p>
-        )}
         <div className="flex justify-center items-center gap-4">
           <Button
             variant="ghost"
@@ -126,8 +111,7 @@ export function OrderActionsFooter({
                 <Button
                   variant="ghost"
                   onClick={onConfirm}
-                  disabled={isBusy || !canConfirmStock}
-                  title={canConfirmStock ? undefined : stockBlockReason}
+                  disabled={isBusy}
                   className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
                 >
                   <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">

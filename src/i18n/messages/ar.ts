@@ -159,12 +159,9 @@ const ar = {
   'orderDetails.stock.unavailable':
     'غير متوفر بالمخزون — المتاح {available} والمطلوب {required}',
   'orderDetails.stockTransition.sameStatus': 'في حالة {status}',
-  'orderDetails.stock.blocked': 'لا يمكن تأكيد الطلب بهذا المنتج — اختر منتجًا آخر',
   'orderDetails.stock.availableWarehouseNotSet': 'لم يتم تحديد مخزن المتاح — تواصل مع الإدارة',
 
   'orderDetails.variants.title': 'المتاح بالمخزون',
-  'orderDetails.variants.blockedSelection':
-    'هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر حاجة تانية',
   'orderDetails.variants.state.low': 'متبقي: {count}',
   'orderDetails.variants.state.warning': 'مسموح بالبيع: {count}',
   'orderDetails.variants.state.out': 'غير متوفر',
@@ -200,7 +197,6 @@ const ar = {
     'هذا الإجراء سيجعل رصيد «{warehouse}» (المخزن المتاح) سالبًا، لأن السماح بالسالب مفعّل لهذا المنتج:',
   'stockShortage.bulkWarningTitle':
     'تم التأكيد، لكن رصيد «{warehouse}» (المخزن المتاح) أصبح سالبًا لهذه الطلبات:',
-  'stockShortage.submitBlocked': 'لا يمكن الإرسال لأن أحد المنتجات لا يكفيه «المخزن المتاح»، عدّل المنتج أو الكمية.',
   'stockShortage.availableWouldGoNegativeNoWarehouse': 'لا يمكن تنفيذ هذا الإجراء لأن رصيد المخزن المتاح سيصبح أقل من صفر:',
   'stockShortage.bulkWarningLineNoVariant': '#{order} {product}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
   'stockShortage.bulkWarningLine': '#{order} {product} - {variant}: المتاح {available}، التغيير {change}، بعد الإجراء {after}',
