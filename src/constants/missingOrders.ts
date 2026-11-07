@@ -30,6 +30,7 @@ export const MISSING_ORDER_FAILURE_LABELS: Record<
   UNKNOWN_PROVIDER: 'مصدر الطلب غير معروف',
   STORE_NOT_FOUND: 'المتجر غير موجود',
   PRODUCT_UNRESOLVED: 'المنتج غير معروف',
+  VARIANT_UNAVAILABLE: 'المنتج غير متاح',
   PRODUCT_WITHOUT_PRICE: 'المنتج ليس له سعر محدد',
   NO_ITEMS: 'الطلب لا يحتوي على منتجات',
   MISSING_PRODUCT_NAME: 'اسم المنتج غير موجود',

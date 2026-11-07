@@ -98,6 +98,16 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       return isVariantDeleteBlocker(details.reason)
         ? `لا يمكن حذف المتغير لأنه ${VARIANT_DELETE_REASON_LABELS[details.reason]}`
         : 'لا يمكن حذف المتغير لأنه مستخدم';
+    case 'VARIANT_UNAVAILABLE':
+      return 'المنتج غير متاح. إن كان محذوفًا يمكن استعادته من محرر المنتج';
+    case 'OPTION_IN_USE':
+      return ARABIC_TEXT.test(body.message)
+        ? body.message
+        : 'لا يمكن حذف القيمة لأن متغيراتها ما زالت مستخدمة';
+    case 'VARIANT_NOT_RESTORABLE':
+      return ARABIC_TEXT.test(body.message)
+        ? body.message
+        : 'لا يمكن استعادة المتغير كما هو';
     case 'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED':
       return 'هذا المتغير مرتبط بمتجرك، أكّد الحذف أولاً';
     case 'DUPLICATE_VARIANT_IN_REQUEST':

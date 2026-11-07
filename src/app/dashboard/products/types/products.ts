@@ -122,11 +122,47 @@ export interface VariantReshapeRetired {
   label: string;
 }
 
+export interface VariantReshapeRow {
+  variantId: number;
+  label: string;
+  storeLinkCount: number;
+}
+
+export interface VariantReshapeNamedRow extends VariantReshapeRow {
+  stockTotal: number;
+  openLines: number;
+}
+
+export interface VariantReshapeLinkedRow extends VariantReshapeRow {
+  optionName: string;
+}
+
 export interface VariantReshapePlan {
   merges: VariantReshapeMerge[];
   relinks: VariantReshapeRelink[];
   valueRemovals: VariantReshapeValueRemoval[];
   retired: VariantReshapeRetired[];
+  goingSoft: VariantReshapeRow[];
+  addedGoingSoft: VariantReshapeRow[];
+  namedInUse: VariantReshapeNamedRow[];
+  returning: VariantReshapeRow[];
+  linkedInPlace: VariantReshapeLinkedRow[];
+  leftAlone: VariantReshapeRow[];
+  stayingSoft: VariantReshapeRow[];
+}
+
+export interface VariantInUseWarehouse {
+  warehouseId: number;
+  name: string;
+  quantity: number;
+  hidden: boolean;
+}
+
+export interface VariantInUseRow {
+  variantId: number;
+  label: string;
+  openLines: number;
+  warehouses: VariantInUseWarehouse[];
 }
 
 export type VariantTargetIssueReason =
@@ -457,6 +493,21 @@ export interface ProductDetailSpecification {
   value: string;
 }
 
+export interface ProductDetailDeletedVariantLink {
+  storeId: number | null;
+  storeName: string | null;
+  externalId: string;
+}
+
+export interface ProductDetailDeletedVariant {
+  id: number;
+  label: string;
+  deletedAt: string;
+  deletedSku: string | null;
+  deletedBarcode: string | null;
+  storeLinks: ProductDetailDeletedVariantLink[];
+}
+
 export interface ProductDetail {
   id: number;
   name: string;
@@ -469,6 +520,7 @@ export interface ProductDetail {
   externalSources: ProductDetailExternalSource[];
   attributes: ProductDetailAttribute[];
   variants: ProductDetailVariant[];
+  deletedVariants: ProductDetailDeletedVariant[];
   specifications: ProductDetailSpecification[];
 }
 
@@ -523,11 +575,21 @@ export const PRODUCT_EDIT_ERROR_CODES = [
   'VARIANT_REMOVAL_TARGET_REQUIRED',
   'INVALID_VARIANT_TARGET',
   'VARIANT_MERGE_CONFLICT',
+  'VARIANT_UNAVAILABLE',
+  'OPTION_IN_USE',
+  'VARIANT_NOT_RESTORABLE',
 ] as const;
 
 export type ProductEditErrorCode = (typeof PRODUCT_EDIT_ERROR_CODES)[number];
 
 export type ProductApiErrorCode = ProductCreateErrorCode | ProductEditErrorCode;
+
+export interface ProductApiStoreLink {
+  provider: IntegrationProvider;
+  externalId: string;
+  storeId: number | null;
+  storeName: string | null;
+}
 
 export interface ProductApiErrorDetails {
   names?: string[];
@@ -539,7 +601,8 @@ export interface ProductApiErrorDetails {
   variantId?: number | null;
   variantIds?: number[];
   reason?: VariantDeleteBlocker | VariantDeleteConfirmation | string;
-  links?: ProductDetailExternalSource[];
+  links?: ProductApiStoreLink[];
+  rows?: VariantInUseRow[];
   missing?: string[][];
   limit?: number;
   productId?: number;

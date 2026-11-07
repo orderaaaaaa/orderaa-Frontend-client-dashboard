@@ -208,10 +208,11 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     if (!canConfirm || source === null) return;
     setSubmitError(null);
     const products: FollowupChangeProductInput[] = lines.map(
-      ({ productId, quantity, variants, customVariants }) => ({
+      ({ productId, quantity, variants, attributeOptionIds, customVariants }) => ({
         productId,
         quantity,
         variants,
+        attributeOptionIds: Object.values(attributeOptionIds),
         customVariants,
       }),
     );

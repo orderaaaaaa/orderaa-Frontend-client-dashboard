@@ -17,6 +17,7 @@ export interface FollowupChangeProductInput {
   productId: number;
   quantity: number;
   variants: FollowupChangeProductVariant[];
+  attributeOptionIds?: number[];
   customVariants?: FollowupCustomVariant[];
 }
 

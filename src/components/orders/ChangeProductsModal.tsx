@@ -396,10 +396,11 @@ export default function ChangeProductsModal({
   const handleConfirm = async () => {
     if (!canConfirm) return;
     const products: FollowupChangeProductInput[] = lines.map(
-      ({ productId, quantity, variants, customVariants }) => ({
+      ({ productId, quantity, variants, attributeOptionIds, customVariants }) => ({
         productId,
         quantity,
         variants,
+        attributeOptionIds: Object.values(attributeOptionIds),
         customVariants,
       }),
     );
