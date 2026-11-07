@@ -13,6 +13,7 @@ import api from '@/lib/api';
 import { useProductVariantsOptions } from '@/services/orders';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
+  listNamedGroups,
   selectionFromNames,
   type Selection,
   type DraftSummary,
@@ -118,7 +119,7 @@ function ProductAvailabilityBlock({
   onVariantSelect: (productId: number, attribute: string, option: string) => void;
 }) {
   const catalog = useProductVariantsOptions(productId);
-  const groups = catalog.data ?? [];
+  const groups = listNamedGroups(catalog.data ?? []);
   const selection = selectionFromNames(groups, names);
 
   const handleChange = (next: Selection) => {
