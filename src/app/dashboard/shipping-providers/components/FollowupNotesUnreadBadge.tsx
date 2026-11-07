@@ -16,7 +16,7 @@ export function UnreadNotesCountPill({ count, className }: { count: number; clas
       aria-hidden="true"
       className={cn('min-w-5 rounded-full px-1.5 text-[11px] leading-4', className)}
     >
-      {count > 9 ? '9+' : formatNumber(count)}
+      <span dir="ltr">{count > 9 ? '9+' : formatNumber(count)}</span>
     </Badge>
   );
 }
