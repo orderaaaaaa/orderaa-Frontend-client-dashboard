@@ -111,6 +111,7 @@ export interface ShipmentRowBase {
   address: string | null;
   returnShippingCost: number | null;
   awaitingCarrierReturn?: boolean;
+  unreadNoteCount?: number;
 }
 
 export interface InProcessShipment extends ShipmentRowBase {

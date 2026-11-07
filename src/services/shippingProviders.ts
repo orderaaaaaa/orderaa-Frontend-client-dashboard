@@ -105,6 +105,7 @@ export const useInProcessShipmentsQuery = (
     },
     enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
   });
 
 export const useInProcessCountsQuery = (
@@ -139,6 +140,7 @@ export const useReturnedShipmentsQuery = (
     },
     enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
   });
 
 export interface ActionSuccessToast {

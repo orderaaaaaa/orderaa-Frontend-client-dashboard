@@ -14,6 +14,7 @@ import {
   editFollowupNote,
   deleteFollowupNote,
   getFollowupActionEvents,
+  markFollowupNotesRead,
   type FollowupChangeProductsBody,
   type FollowupExchangeBody,
   type FollowupNotePartyValue,
@@ -100,6 +101,21 @@ export const useFollowupNotesQuery = (orderId: number, enabled: boolean = true) 
     queryFn: () => getFollowupNotes(orderId),
     enabled,
     staleTime: 0,
+  });
+};
+
+export const useMarkFollowupNotesReadMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, throughEntryId }: { orderId: number; throughEntryId: number }) =>
+      markFollowupNotesRead(orderId, throughEntryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === SHIPPING_PROVIDERS_KEY &&
+          (query.queryKey[2] === 'in-process' || query.queryKey[2] === 'returned'),
+      });
+    },
   });
 };
 
