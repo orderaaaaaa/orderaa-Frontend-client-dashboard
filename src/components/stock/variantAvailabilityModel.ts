@@ -42,6 +42,17 @@ export function namesFromSelection(
   return names;
 }
 
+export function listNamedGroups(groups: VariantOption[]): VariantOption[] {
+  return groups.map((group) => ({
+    ...group,
+    attribute: group.displayName || group.attribute,
+    options: group.options.map((option) => ({
+      ...option,
+      name: option.displayName || option.name,
+    })),
+  }));
+}
+
 export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[] {
   return groups.map((group) => ({
     attributeId: group.attributeId,

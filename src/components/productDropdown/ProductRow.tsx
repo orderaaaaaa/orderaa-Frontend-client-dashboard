@@ -7,6 +7,7 @@ import { missingAttributesOf } from '@/utils/variantSelection';
 import { useProductVariantsOptions, type VariantOption } from '@/services/orders';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
+  listNamedGroups,
   selectionFromNames,
   type Selection,
   type DraftSummary,
@@ -50,7 +51,7 @@ const RowAvailabilityPanel = ({
   onVariantSelect,
 }: RowAvailabilityPanelProps) => {
   const catalog = useProductVariantsOptions(product.id);
-  const groups = catalog.data ?? [];
+  const groups = listNamedGroups(catalog.data ?? []);
   const selection = selectionFromNames(
     groups,
     Object.fromEntries(selectedVariants.map((variant) => [variant.attribute, variant.option])),
