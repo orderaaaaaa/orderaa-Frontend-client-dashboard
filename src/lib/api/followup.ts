@@ -189,7 +189,6 @@ export interface FollowupNoteView {
   editedAt: string | null;
   canEdit: boolean;
   canDelete: boolean;
-  unread: boolean;
 }
 
 export interface FollowupLegacyNote {
@@ -205,6 +204,7 @@ export interface FollowupCarrierText {
   text: string;
   reason: string | null;
   repeats: number;
+  unread: boolean;
 }
 
 export interface FollowupCarrierContact {
@@ -228,12 +228,12 @@ export interface FollowupNoteDay {
 
 export interface FollowupNotesPage {
   today: string;
-  readThroughEntryId: number | null;
+  readThroughCarrierLogId: number | null;
   days: FollowupNoteDay[];
 }
 
 export interface FollowupNotesReadResponse {
-  lastReadEntryId: number | null;
+  lastReadCarrierLogId: number | null;
 }
 
 export interface CreateFollowupNoteBody {
@@ -273,10 +273,10 @@ export async function getFollowupNotes(orderId: number): Promise<FollowupNotesPa
 
 export async function markFollowupNotesRead(
   orderId: number,
-  throughEntryId: number
+  throughCarrierLogId: number
 ): Promise<FollowupNotesReadResponse> {
   const { data } = await http.post<FollowupNotesReadResponse>(`/orders/followup/${orderId}/notes/read`, {
-    throughEntryId,
+    throughCarrierLogId,
   });
   return data;
 }

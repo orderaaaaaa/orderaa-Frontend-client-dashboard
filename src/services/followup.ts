@@ -107,8 +107,8 @@ export const useFollowupNotesQuery = (orderId: number, enabled: boolean = true) 
 export const useMarkFollowupNotesReadMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ orderId, throughEntryId }: { orderId: number; throughEntryId: number }) =>
-      markFollowupNotesRead(orderId, throughEntryId),
+    mutationFn: ({ orderId, throughCarrierLogId }: { orderId: number; throughCarrierLogId: number }) =>
+      markFollowupNotesRead(orderId, throughCarrierLogId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
