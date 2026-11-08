@@ -57,6 +57,7 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **Loading state**: skeleton cards (`OrderCard.tsx`) matching the order card shape, shown during initial `isLoading`.
 - **Empty state**: `OrderCard` or list view shows "لا توجد طلبات" message per status tab when data length is zero.
 - **Error state**: error display with retry button mapped from React Query `isError` state in the page component.
+- **Card money** (T56) — `OrderCard` takes `money?: OrderCardMoney` (`Pick<Order, 'settlementAmount' | 'prepaid'>`, `allOrders/types/OrderProps.ts`); every list caller passes `money={order}`. `PrepaidBadge` (`components/orders/PrepaidBadge.tsx`) shows «مدفوع مسبقاً {amount} جنيه» (green, FULL) or «مدفوع جزئياً {amount} جنيه» (amber, PARTIAL). «محصل» comes only from `settlementAmount`, never from prepaid.
 
 ## Bulk Actions UX
 
@@ -80,6 +81,7 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **Change history card «سجل التعديلات»** (T14) — `components/OrderDetails/ChangeHistory/`, placed after the alerts panel, folded by default. The list fetches only on first open and stays mounted (`forceMount`, hidden when closed), so reopening does not refetch. Reads `GET /orders/:id/change-history` through `useOrderChangeHistory` (`services/orderChangeHistory.ts`, key `[ORDER_DETAILS, orderId, 'change-history']`, so every detail invalidation refreshes it). Values are formatted by the entry's `valueType`; REF values show their label snapshot, statuses go through `useStatusLabel`. Rendered only for holders of `orders:history:read` (T14b, R69; `useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ)` in `OrderDetailsInfo.tsx`), so no request is sent without it; still hidden on 403/404.
 - **Field labels** — `constants/orderFieldLabels.ts` is the single map of order field keys (catalog keys, `lines`, `line.*`, `customer.*`), change origins and order enum values (payment method/status, shipping type, settlement source). Use `orderFieldLabelOf` (falls back to the raw key). Actor-type labels stay in `constants/orderSystemFailures.ts`.
 - **Customer edits from the order page** pass `orderId` to `useUpdateCustomer`, which sends `PATCH /customers/:id?orderId=<id>` so the edit is recorded in that order's history.
+- **Prepaid and payment status** (T56) — «السعر و الدفع» shows the prepaid badge and an editable «المبلغ المدفوع مسبقاً» (`PATCH /orders/:id` with `prepaidAmount`; an empty field sends null). The payment-status select is read-only and shows `paymentStatusShown(order.prepaid, order.paymentStatus)` from `types/orders.ts`: a FULL or PARTIAL prepaid order shows «مدفوع» or «مدفوع جزئياً» whatever the stored status says. The amber partial line follows `prepaid.state`.
 
 ## Invoice Printing UX
 
@@ -88,6 +90,7 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **Print claims and confirmation (U6b, R84/R101)** — `components/FilterSection/index.tsx` owns the flow. The count modal (`PrintInvoicesModal`, 1..20) calls `POST /orders/print/claim-next`; printing the selection calls `POST /orders/print/claim`. Selected orders skipped as `PRINTED` are reprinted, `NOT_CONFIRMED` ones are printed unclaimed and marked on yes, and `CLAIMED_BY_OTHER` / `PARKED` / `NOT_FOUND` are toasted and not printed. After `window.print()` the invoices are kept and `PrintConfirmDialog` asks «هل تمت الطباعة؟»: it refreshes the claim on open and before each «إعادة الطباعة», «نعم» sends `PUT /orders/print/mark {ordersIds, printTimes}` plus one `POST /orders/print/reprint` for printed orders, and «لا» or closing sends `POST /orders/print/release`. Nothing is marked or counted without «نعم». A closed tab leaves the claim to expire after 10 minutes. The legacy `POST /orders/print {count}` (claims and marks in one call) is no longer used by the dashboard.
 - **Invoice formats**: A4 letter (`Invoice/` component) for standard printers, 100mm x 150mm thermal (`BostaInvoice/` component) for Bosta shipping labels — both rendered via `jspdf` + `jspdf-autotable`.
 - **Data transformation** — `invoiceMapper.ts` converts `Order` data into invoice-specific props. `invoiceLabels.ts` holds Arabic label constants.
+- **Prepaid on the slip** (T56) — `invoiceMapper` sets `prepaid` (amount, amountToCollect, state), takes `shipping.paymentStatus` from `paymentStatusShown`, and maps a FULL prepaid to shipmentStatus PAID. `Invoice` shows «مدفوع مسبقاً» and «المطلوب تحصيله» under the total bar only when prepaid exists; `BostaInvoice` prints `amountToCollect` as the COD amount when prepaid exists.
 - **Printer CSS** in global styles — `@media print` rules for `.a4-invoice`, `.bosta-invoice`, `.generic-invoice` classes.
 
 ## Barcode Scanner UX (expanded)
