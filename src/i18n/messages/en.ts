@@ -419,6 +419,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.table.unreadNotes': 'Unread notes: {n}',
   'inProcess.table.columns.code': 'Code',
   'inProcess.table.columns.customer': 'Customer',
+  'inProcess.table.columns.products': 'Products',
   'inProcess.table.columns.status': 'Status',
   'inProcess.table.columns.due': 'Due',
   'inProcess.table.columns.takenAt': 'Received on',

@@ -13,6 +13,7 @@ import {
   CustomerCell,
   DueCell,
   InProcessRowActions,
+  LineCountCell,
   ReturnedRowActions,
   ShipmentSelectCheckbox,
   StatusCell,
@@ -95,6 +96,9 @@ export function InProcessShipmentCards({
           />
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
+            <CardField label={t('inProcess.table.columns.products')}>
+              <LineCountCell count={row.lineCount} />
+            </CardField>
             <CardField label={t('inProcess.table.columns.window')}>
               {deliveryWindowTextOf(row.availableFrom, row.availableTo)}
             </CardField>
@@ -153,6 +157,9 @@ export function ReturnedShipmentCards({
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
+            <CardField label={t('inProcess.table.columns.products')}>
+              <LineCountCell count={row.lineCount} />
+            </CardField>
             <CardField label={t('inProcess.table.columns.address')}>
               {row.governorate ?? '—'}
               {row.city ? ` - ${row.city}` : ''}

@@ -433,6 +433,7 @@ const ar = {
   'inProcess.table.unreadNotes': 'ملاحظات غير مقروءة: {n}',
   'inProcess.table.columns.code': 'الكود',
   'inProcess.table.columns.customer': 'العميل',
+  'inProcess.table.columns.products': 'المنتجات',
   'inProcess.table.columns.status': 'الحالة',
   'inProcess.table.columns.due': 'الموعد',
   'inProcess.table.columns.takenAt': 'تاريخ الاستلام',

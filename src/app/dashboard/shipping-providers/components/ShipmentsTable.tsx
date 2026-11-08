@@ -228,6 +228,10 @@ export function CustomerCell({
   );
 }
 
+export function LineCountCell({ count }: { count: number }) {
+  return <span className={cn('tabular-nums', count === 0 && 'text-muted-foreground')}>{count}</span>;
+}
+
 export function StatusCell({ status, closure }: { status: OrderStatus; closure: FollowupClosure | null }) {
   const { t } = useI18n();
   return (
@@ -453,6 +457,9 @@ export function InProcessShipmentsTable({
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.customer')}
           </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-center')}>
+            {t('inProcess.table.columns.products')}
+          </th>
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.status')}
           </th>
@@ -515,6 +522,9 @@ export function InProcessShipmentsTable({
                   phones={row.customer.phones}
                   whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_CUSTOMER')}
                 />
+              </td>
+              <td className={cn(CELL_CLASS, 'text-center')}>
+                <LineCountCell count={row.lineCount} />
               </td>
               <td className={CELL_CLASS}>
                 <StatusCell status={row.status} closure={row.closure} />
@@ -596,6 +606,9 @@ export function ReturnedShipmentsTable({
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.customer')}
           </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-center')}>
+            {t('inProcess.table.columns.products')}
+          </th>
           <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.status')}
           </th>
@@ -626,6 +639,9 @@ export function ReturnedShipmentsTable({
             </td>
             <td className={CELL_CLASS}>
               <CustomerCell name={row.customer.name} phones={row.customer.phones} />
+            </td>
+            <td className={cn(CELL_CLASS, 'text-center')}>
+              <LineCountCell count={row.lineCount} />
             </td>
             <td className={CELL_CLASS}>
               <StatusCell status={row.status} closure={row.closure} />
