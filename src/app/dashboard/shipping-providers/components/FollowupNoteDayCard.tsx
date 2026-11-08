@@ -18,6 +18,7 @@ import { FollowupNoteItem } from './FollowupNoteItem';
 import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_CARRIER_CONTACTS_LABEL,
+  FOLLOWUP_CARRIER_REASON_SEPARATOR,
   FOLLOWUP_CARRIER_TEXTS_LABEL,
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
@@ -41,8 +42,12 @@ function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
   return (
     <ul className="flex flex-col gap-1">
       {texts.map((line) => (
-        <li key={`${line.at}-${line.text}`} className="break-words text-base leading-7 text-foreground">
+        <li
+          key={`${line.at}-${line.text}-${line.reason ?? ''}`}
+          className="break-words text-base leading-7 text-foreground"
+        >
           <span className="text-xs text-muted-foreground">{formatDateTime(line.at)}</span> {line.text}
+          {line.reason ? `${FOLLOWUP_CARRIER_REASON_SEPARATOR}${line.reason}` : ''}
           {repeatsSuffix(line.repeats)}
         </li>
       ))}
