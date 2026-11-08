@@ -245,41 +245,33 @@ export default function AddNewProductModal({
           </div>
 
           {selectedProduct &&
-            (isLoadingVariants ? (
-              <div className="flex-1 min-w-[200px] flex items-center justify-center">
-                <span className="text-gray-500">
-                  جاري تحميل الخيارات...
-                </span>
-              </div>
-            ) : variantOptions.length === 0 && !isErrorVariants ? (
+            !isLoadingVariants &&
+            variantOptions.length === 0 &&
+            !isErrorVariants && (
               <div className="flex-1 min-w-[200px] flex items-center justify-center">
                 <span className="text-gray-500">
                   لا توجد خيارات متاحة لهذا المنتج
                 </span>
               </div>
-            ) : (
-              null
-            ))}
+            )}
         </div>
 
         {selectedProduct && !isLoadingVariants && (
           <MissingAttributesHint missing={missingAttributes} />
         )}
 
-        {selectedProduct && !isLoadingVariants && (
+        {selectedProduct && (
           <div className="flex flex-col gap-2">
-            {(variantOptions.length > 0 || isErrorVariants) && (
-              <VariantAvailabilitySelector
-                productId={selectedProduct.id}
-                productName={selectedProduct.name}
-                variants={variantAvailability}
-                selection={selection}
-                onChange={setSelection}
-                availabilityLoading={isLoadingAvailability}
-                availabilityError={isErrorAvailability ? errorAvailability : null}
-                onRetry={() => void refetchAvailability()}
-              />
-            )}
+            <VariantAvailabilitySelector
+              productId={selectedProduct.id}
+              productName={selectedProduct.name}
+              variants={variantAvailability}
+              selection={selection}
+              onChange={setSelection}
+              availabilityLoading={isLoadingAvailability}
+              availabilityError={isErrorAvailability ? errorAvailability : null}
+              onRetry={() => void refetchAvailability()}
+            />
           </div>
         )}
       </div>

@@ -154,28 +154,22 @@ export default function AddSameTypeProductModal({
             </div>
           </div>
 
-          {isLoading ? (
-            <div className="flex-1 min-w-[200px] flex items-center justify-center">
-              <span className="text-gray-500">جاري تحميل الخيارات...</span>
-            </div>
-          ) : variantOptions.length === 0 && !isErrorCatalog ? (
+          {!isLoading && variantOptions.length === 0 && !isErrorCatalog ? (
             <div className="flex-1 min-w-[200px] flex items-center justify-center">
               <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
             </div>
           ) : null}
         </div>
-        {!isLoading && (variantOptions.length > 0 || isErrorCatalog) && (
-          <VariantAvailabilitySelector
-            productId={productId}
-            productName={productType}
-            variants={variantAvailability}
-            selection={selection}
-            onChange={setSelection}
-            availabilityLoading={isLoadingAvailability}
-            availabilityError={isErrorAvailability ? errorAvailability : null}
-            onRetry={() => void refetchAvailability()}
-          />
-        )}
+        <VariantAvailabilitySelector
+          productId={productId}
+          productName={productType}
+          variants={variantAvailability}
+          selection={selection}
+          onChange={setSelection}
+          availabilityLoading={isLoadingAvailability}
+          availabilityError={isErrorAvailability ? errorAvailability : null}
+          onRetry={() => void refetchAvailability()}
+        />
         {!isLoading && <MissingAttributesHint missing={missingAttributes} />}
       </div>
     </BaseModal>
