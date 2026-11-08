@@ -21,7 +21,9 @@ import {
 import {
   locationOptionsErrorTextOf,
   locationSelectOptionsOf,
+  type LocationOption,
 } from '@/types/locationOptions';
+import { normalizeArabic } from '@/utils/arabicNormalize';
 import {
   shippingCompanyIdOf,
   shippingCompanySelectOptionsOf,
@@ -62,6 +64,16 @@ const pickEnabledFields = (
   return Object.fromEntries(
     Object.entries(data).filter(([key]) => (allowedKeys as readonly string[]).includes(key))
   ) as ShippingData;
+};
+
+const exactMatchValueOf = (
+  options: LocationOption[],
+  text: string | null | undefined
+): string | null => {
+  const wanted = normalizeArabic(text ?? '');
+  if (!wanted) return null;
+  const matches = options.filter((option) => normalizeArabic(option.label) === wanted);
+  return matches.length === 1 ? matches[0].value : null;
 };
 
 interface EditShippingModalProps {
@@ -199,6 +211,13 @@ export default function EditShippingModal({
   const [oldCancelledByHand, setOldCancelledByHand] = useState(false);
   const [returnShippingCostError, setReturnShippingCostError] = useState('');
   const [shippingCompanyError, setShippingCompanyError] = useState('');
+  const [autoPicks, setAutoPicks] = useState<{ governorate: string | null; city: string | null }>({
+    governorate: null,
+    city: null,
+  });
+  const governorateSettledRef = React.useRef(false);
+  const citySettledRef = React.useRef(false);
+  const autoGovernorateRef = React.useRef<string | null>(null);
 
   const initialFromParsed = parseTime(initialData.availableFrom);
   const initialToParsed = parseTime(initialData.availableTo);
@@ -279,6 +298,9 @@ export default function EditShippingModal({
 
   const storedGovernorateText = initialData.governorate || initialData.externalGovernorate || '';
   const storedCityText = initialData.city || initialData.externalCity || '';
+  const governorateAutoShown =
+    autoPicks.governorate !== null && formData.governorateOption === autoPicks.governorate;
+  const cityAutoShown = autoPicks.city !== null && formData.cityOption === autoPicks.city;
 
   const hasChanges = useMemo(() => {
     const timeChanged =
@@ -290,8 +312,8 @@ export default function EditShippingModal({
     return (
       (companyEnabled && (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null)) ||
       (locationEnabled &&
-        ((formData.governorateOption ?? null) !== (initialData.governorateOption ?? null) ||
-          (formData.cityOption ?? null) !== (initialData.cityOption ?? null))) ||
+        ((formData.governorateOption ?? null) !== (autoPicks.governorate ?? initialData.governorateOption ?? null) ||
+          (formData.cityOption ?? null) !== (autoPicks.city ?? initialData.cityOption ?? null))) ||
       (addressEnabled && formData.address !== initialData.address) ||
       (returnCostEnabled && (formData.returnShippingCost ?? null) !== (initialData.returnShippingCost ?? null)) ||
       (deliveryWindowEnabled && timeChanged)
@@ -299,6 +321,7 @@ export default function EditShippingModal({
   }, [
     formData,
     initialData,
+    autoPicks,
     startHour,
     startPeriod,
     endHour,
@@ -347,9 +370,65 @@ export default function EditShippingModal({
       setStartPeriod(fromParsed.period);
       setEndHour(toParsed.hour);
       setEndPeriod(toParsed.period);
+      setAutoPicks({ governorate: null, city: null });
+      governorateSettledRef.current = false;
+      citySettledRef.current = false;
+      autoGovernorateRef.current = null;
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, initialData, defaultReturnShippingCost, costLocked, returnCostEnabled]);
+
+  useEffect(() => {
+    if (!isOpen || !locationEnabled || governorateSettledRef.current || !governoratesQuery.isSuccess) return;
+    governorateSettledRef.current = true;
+    if (initialData.governorateOption) return;
+    const value = exactMatchValueOf(
+      governoratesQuery.data?.options ?? [],
+      initialData.governorate || initialData.externalGovernorate
+    );
+    if (value === null) return;
+    autoGovernorateRef.current = value;
+    setAutoPicks((prev) => ({ ...prev, governorate: value }));
+    setFormData((prev) => (prev.governorateOption ? prev : { ...prev, governorateOption: value }));
+  }, [isOpen, locationEnabled, governoratesQuery.isSuccess, governoratesQuery.data, initialData]);
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !locationEnabled ||
+      citySettledRef.current ||
+      !citiesQuery.isSuccess ||
+      !selectedGovernorateOption
+    ) {
+      return;
+    }
+    if (
+      selectedGovernorateOption !== initialData.governorateOption &&
+      selectedGovernorateOption !== autoGovernorateRef.current
+    ) {
+      return;
+    }
+    citySettledRef.current = true;
+    if (initialData.cityOption) return;
+    const value = exactMatchValueOf(
+      citiesQuery.data?.options ?? [],
+      initialData.city || initialData.externalCity
+    );
+    if (value === null) return;
+    setAutoPicks((prev) => ({ ...prev, city: value }));
+    setFormData((prev) =>
+      prev.cityOption || prev.governorateOption !== selectedGovernorateOption
+        ? prev
+        : { ...prev, cityOption: value }
+    );
+  }, [
+    isOpen,
+    locationEnabled,
+    citiesQuery.isSuccess,
+    citiesQuery.data,
+    selectedGovernorateOption,
+    initialData,
+  ]);
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
@@ -418,6 +497,10 @@ export default function EditShippingModal({
       governorateOption: null,
       cityOption: null,
     });
+    governorateSettledRef.current = true;
+    citySettledRef.current = true;
+    autoGovernorateRef.current = null;
+    setAutoPicks({ governorate: null, city: null });
   };
 
   const handleGovernorateChange = (value: string) => {
@@ -427,6 +510,10 @@ export default function EditShippingModal({
       governorateOption: value || null,
       cityOption: null,
     });
+    governorateSettledRef.current = true;
+    citySettledRef.current = true;
+    autoGovernorateRef.current = null;
+    setAutoPicks({ governorate: null, city: null });
   };
 
   const handleCityChange = (value: string) => {
@@ -434,6 +521,8 @@ export default function EditShippingModal({
       ...formData,
       cityOption: value || null,
     });
+    citySettledRef.current = true;
+    setAutoPicks((prev) => ({ ...prev, city: null }));
   };
 
   return (
@@ -533,7 +622,7 @@ export default function EditShippingModal({
                 onRetry={() => void governoratesQuery.refetch()}
               />
             )}
-            {storedGovernorateText && !governorateDisplay && (
+            {storedGovernorateText && (!governorateDisplay || governorateAutoShown) && (
               <p className="text-xs text-muted-foreground">
                 المحفوظ حاليا: {storedGovernorateText}
               </p>
@@ -575,7 +664,7 @@ export default function EditShippingModal({
                 {locationOptionsErrorTextOf(citiesQuery.error, t('canonical.shipping.cityLoadError'))}
               </p>
             )}
-            {storedCityText && !cityDisplay && (
+            {storedCityText && (!cityDisplay || cityAutoShown) && (
               <p className="text-xs text-muted-foreground">المحفوظ حاليا: {storedCityText}</p>
             )}
           </div>
