@@ -238,6 +238,15 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
   };
 
   const failingProductIndex = row.failureProductIndex;
+  const storeLinkBlockedSourceIndexes = useMemo(
+    () =>
+      new Set(
+        row.products
+          .filter((product) => product.storeLinkBlocked)
+          .map((product) => product.index),
+      ),
+    [row],
+  );
 
   return (
     <form onSubmit={handleFormSubmit(onSubmit)} noValidate>
@@ -300,6 +309,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           errors={{ products: productsError || undefined, total: errors.total?.message }}
           failingProductIndex={failingProductIndex}
           incompleteLines={incompleteLines}
+          storeLinkBlockedSourceIndexes={storeLinkBlockedSourceIndexes}
         />
 
         <ShippingSection

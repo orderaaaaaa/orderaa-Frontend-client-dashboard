@@ -46,6 +46,7 @@ function OrderDetails({
   errors,
   failingProductIndex = null,
   incompleteLines,
+  storeLinkBlockedSourceIndexes,
 }: OrderDetailsProps) {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -189,6 +190,9 @@ function OrderDetails({
       failingProductIndex !== null &&
       row.sourceIndex === failingProductIndex &&
       !row.variantEdited;
+    const isStoreLinkBlocked =
+      row.sourceIndex !== undefined &&
+      (storeLinkBlockedSourceIndexes?.has(row.sourceIndex) ?? false);
     return (
       <div
         data-incomplete-variant={missing.length > 0 ? 'true' : undefined}
@@ -222,6 +226,11 @@ function OrderDetails({
                 {variant.attribute}: {variant.option}
               </span>
             ))}
+            {isStoreLinkBlocked && (
+              <span className="text-gray-600 text-xs">
+                لم يتغير ربط المتجر لهذا المنتج. لتغييره افتح مشاكل الربط.
+              </span>
+            )}
           </div>
         </div>
         {missing.length > 0 ? (
