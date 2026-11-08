@@ -14,6 +14,7 @@ export type CustomerReturnUnit = {
   orderProductId: number;
   productName: string | null;
   variantLabel: string | null;
+  variants: { label: string; value: string }[];
   sku: string | null;
   price: number;
   imageUrl: string | null;
@@ -67,6 +68,7 @@ export type CreateCustomerReturnPayload = {
   area?: string;
   address?: string;
   notes?: string;
+  returnShipmentContent: string;
 };
 
 export type CreateCustomerReturnResponse = {

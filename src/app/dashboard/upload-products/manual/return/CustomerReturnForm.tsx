@@ -35,6 +35,11 @@ import {
   refundValueOf,
   selectedUnitsOf,
 } from '@/utils/customerReturn/selection';
+import { customerReturnContentOf } from '@/utils/customerReturn/returnContent';
+import {
+  RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+  isBlankReturnShipmentContent,
+} from '@/utils/partialDelivery/returnShipmentContent';
 import type { Customer } from '@/app/dashboard/customers/types/customer';
 import type { CarrierSupportState } from '@/app/dashboard/upload-products/manual/types';
 import ConfirmationSection from '../ConfirmationSection';
@@ -58,7 +63,8 @@ type ReturnErrorKey =
   | 'shippingCompanyId'
   | 'governorateOption'
   | 'cityOption'
-  | 'address';
+  | 'address'
+  | 'returnContent';
 
 type ReturnErrors = Partial<Record<ReturnErrorKey, string>>;
 
@@ -95,6 +101,7 @@ const MISSING_FIELD_KEYS: Record<ReturnErrorKey, TranslationKey> = {
   governorateOption: 'customerReturn.field.governorate',
   cityOption: 'customerReturn.field.city',
   address: 'customerReturn.address.label',
+  returnContent: 'customerReturn.returnContent.label',
 };
 
 const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
@@ -104,6 +111,7 @@ const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   governorateOption: 'governorate',
   cityOption: 'city',
   address: 'return-address',
+  returnContent: 'return-content',
 };
 
 const matchLocationOption = (
@@ -133,6 +141,7 @@ function CustomerReturnForm() {
     useState<ReadonlySet<number>>(EMPTY_SELECTED_IDS);
   const [draft, setDraft] = useState<ReturnDraft>(EMPTY_DRAFT);
   const [errors, setErrors] = useState<ReturnErrors>({});
+  const [contentOverride, setContentOverride] = useState<string | null>(null);
   const [attention, setAttention] = useState<{
     orderId: number;
     code: string;
@@ -176,6 +185,13 @@ function CustomerReturnForm() {
 
   const selectedUnits = selectedUnitsOf(orders, selectedIds);
   const refundValue = refundValueOf(selectedUnits);
+  const prefill = customerReturnContentOf(selectedUnits);
+  const contentValue = contentOverride ?? prefill;
+  const sentContent =
+    contentOverride === null || isBlankReturnShipmentContent(contentOverride)
+      ? prefill
+      : contentOverride;
+  const contentTooLong = sentContent.length > RETURN_SHIPMENT_CONTENT_MAX_LENGTH;
   const selectedCarrier = carrierSupportById[draft.shippingCompanyId] ?? null;
   const selectedCompanyName =
     selectedCarrier?.name ??
@@ -249,6 +265,7 @@ function CustomerReturnForm() {
     setCustomer(next);
     setAttention(null);
     setSelectedIds(EMPTY_SELECTED_IDS);
+    setContentOverride(null);
     setDraft((current) => ({
       ...current,
       address: '',
@@ -268,7 +285,8 @@ function CustomerReturnForm() {
   };
 
   const handleToggleUnit = (orderProductId: number) => {
-    setErrors((current) => ({ ...current, units: undefined }));
+    setErrors((current) => ({ ...current, units: undefined, returnContent: undefined }));
+    setContentOverride(null);
     setSelectedIds((current) => {
       const next = new Set(current);
       if (next.has(orderProductId)) next.delete(orderProductId);
@@ -278,7 +296,8 @@ function CustomerReturnForm() {
   };
 
   const handleToggleOrder = (orderProductIds: number[], select: boolean) => {
-    setErrors((current) => ({ ...current, units: undefined }));
+    setErrors((current) => ({ ...current, units: undefined, returnContent: undefined }));
+    setContentOverride(null);
     setSelectedIds((current) => {
       const next = new Set(current);
       orderProductIds.forEach((id) =>
@@ -307,6 +326,13 @@ function CustomerReturnForm() {
     if (!draft.cityOption) next.cityOption = t('customerReturn.errors.city');
     if (!draft.address.trim())
       next.address = t('customerReturn.errors.address');
+    if (selectedUnits.length > 0 && isBlankReturnShipmentContent(sentContent)) {
+      next.returnContent = t('customerReturn.returnContent.required');
+    } else if (contentTooLong) {
+      next.returnContent = t('customerReturn.returnContent.tooLong', {
+        max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+      });
+    }
     return next;
   };
 
@@ -343,6 +369,7 @@ function CustomerReturnForm() {
         address: draft.address.trim(),
         ...(area && { area }),
         ...(notes && { notes }),
+        returnShipmentContent: sentContent,
       },
       {
         onSuccess: (created) => {
@@ -356,6 +383,7 @@ function CustomerReturnForm() {
             });
           }
           setSelectedIds(EMPTY_SELECTED_IDS);
+          setContentOverride(null);
           setDraft((current) => ({ ...current, notes: '' }));
           setErrors({});
         },
@@ -525,6 +553,48 @@ function CustomerReturnForm() {
                 className="w-full"
                 inputClassName="bg-background"
               />
+            </div>
+            <div
+              data-field-error="return-content"
+              className="flex flex-col gap-2"
+            >
+              <label
+                htmlFor="return-content-input"
+                className="font-medium text-[16px]"
+              >
+                {t('customerReturn.returnContent.label')}{' '}
+                <span className="text-destructive">*</span>
+              </label>
+              <Textarea
+                id="return-content-input"
+                name="returnContent"
+                value={contentValue}
+                onChange={(e) => {
+                  setContentOverride(e.target.value);
+                  setErrors((current) => ({ ...current, returnContent: undefined }));
+                }}
+                onBlur={() => {
+                  if (isBlankReturnShipmentContent(contentOverride)) setContentOverride(null);
+                }}
+                className="bg-background"
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('customerReturn.returnContent.counter', {
+                  count: sentContent.length,
+                  max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+                })}
+              </p>
+              {contentTooLong ? (
+                <p className="text-sm text-destructive">
+                  {t('customerReturn.returnContent.tooLong', {
+                    max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+                  })}
+                </p>
+              ) : (
+                errors.returnContent && (
+                  <p className="text-sm text-destructive">{errors.returnContent}</p>
+                )
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label
