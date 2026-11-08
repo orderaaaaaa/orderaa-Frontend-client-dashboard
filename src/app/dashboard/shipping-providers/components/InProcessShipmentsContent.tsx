@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import CopyButton from '@/components/ui/copy-button';
 import Input from '@/components/ui/Input';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -117,8 +118,10 @@ const readWorkState = (value: string | null): FollowupWorkState =>
 const readStatus = (value: string | null): InProcessStatus | undefined =>
   IN_PROCESS_STATUSES.find((status) => status === value);
 
-const readLateness = (value: string | null): LatenessFilter | undefined =>
-  LATENESS_FILTERS.find((filter) => filter === value);
+const readLateness = (value: string | null): LatenessFilter[] => {
+  const picked = new Set((value ?? '').split(','));
+  return LATENESS_FILTERS.filter((filter) => picked.has(filter));
+};
 
 const LATENESS_LABEL_KEYS: Record<LatenessFilter, TranslationKey> = {
   RED: 'inProcess.lateness.late',
@@ -418,7 +421,7 @@ function ListPagination({
 interface InProcessControlsProps {
   status: InProcessStatus | undefined;
   statusOptions: SelectOptions;
-  lateness: LatenessFilter | undefined;
+  lateness: LatenessFilter[];
   governorate: string;
   governorates: SelectOptions;
   city: string;
@@ -463,7 +466,7 @@ function InProcessControls({
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
   const dimWhenSearching = searchActive ? 'opacity-60' : undefined;
-  const latenessOptions: SelectOptions = LATENESS_FILTERS.map((key) => ({
+  const latenessOptions = LATENESS_FILTERS.map((key) => ({
     key,
     label: t(LATENESS_LABEL_KEYS[key]),
   }));
@@ -544,16 +547,18 @@ function InProcessControls({
             <label htmlFor="in-process-lateness" className="text-xs text-muted-foreground">
               {t('inProcess.filters.lateness')}
             </label>
-            <SearchableSelect
+            <MultiSelectDropdown
               id="in-process-lateness"
-              aria-label={t('inProcess.filters.lateness')}
-              value={lateness ?? ''}
-              onChange={(value) => onPatch({ lateness: value, page: '' })}
+              value={lateness}
+              onChange={(next) => {
+                const values = LATENESS_FILTERS.filter((filter) => next.includes(filter));
+                onPatch({ lateness: values.join(','), page: '' });
+              }}
               options={latenessOptions}
               placeholder={t('inProcess.filters.allLateness')}
-              clearable
               disabled={searchActive}
               widthClass="w-full"
+              summarizeSelection
               triggerClassName="h-10 py-0"
             />
           </div>
@@ -1083,6 +1088,7 @@ export function InProcessShipmentsContent({
   const to = searchParams.get('to') ?? '';
   const status = readStatus(searchParams.get('status'));
   const lateness = readLateness(searchParams.get('lateness'));
+  const latenessFilter = lateness.length > 0 ? lateness : undefined;
   const governorate = searchParams.get('governorate') ?? '';
   const city = searchParams.get('city') ?? '';
   const search = searchParams.get('search') ?? '';
@@ -1139,7 +1145,7 @@ export function InProcessShipmentsContent({
     from: from || undefined,
     to: to || undefined,
     status,
-    lateness,
+    lateness: latenessFilter,
     governorate: governorate || undefined,
     city: city || undefined,
     search: appliedSearch || undefined,
@@ -1164,7 +1170,7 @@ export function InProcessShipmentsContent({
   const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
   const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
 
-  const activeCount = [status, lateness, governorate, city, from, to, appliedSearch].filter(Boolean).length;
+  const activeCount = [status, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length;
   const searchActive = appliedSearch !== '';
 
   const countFilters: InProcessCountFilters = searchActive
@@ -1173,7 +1179,7 @@ export function InProcessShipmentsContent({
         from: from || undefined,
         to: to || undefined,
         status,
-        lateness,
+        lateness: latenessFilter,
         governorate: governorate || undefined,
         city: city || undefined,
       };

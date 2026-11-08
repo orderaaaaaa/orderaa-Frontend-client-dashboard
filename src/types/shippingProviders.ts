@@ -197,7 +197,7 @@ export interface InProcessFilters {
   from?: string;
   to?: string;
   status?: InProcessStatus;
-  lateness?: LatenessFilter;
+  lateness?: LatenessFilter[];
   governorate?: string;
   city?: string;
   search?: string;
