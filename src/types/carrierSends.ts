@@ -50,6 +50,7 @@ export interface CarrierSendView {
   claimedAt: string | null;
   closedAt: string | null;
   closedBy: { id: number; name: string } | null;
+  orderDeleted: boolean;
 }
 
 export interface CarrierSendSettlement {

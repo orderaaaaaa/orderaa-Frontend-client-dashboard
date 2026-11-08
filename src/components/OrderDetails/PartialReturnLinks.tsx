@@ -4,18 +4,20 @@ import { useRouter } from 'next/navigation';
 import { LiaRandomSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
+import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
 import type { Order } from '@/types/orders';
 
 interface PartialReturnLinksProps {
-  order: Pick<Order, 'returnOf' | 'partialReturns'>;
+  order: Pick<Order, 'returnOf' | 'partialReturns' | 'deletedParts'>;
 }
 
 export function PartialReturnLinks({ order }: PartialReturnLinksProps) {
   const router = useRouter();
   const returnOf = order.returnOf ?? null;
   const partialReturns = order.partialReturns ?? [];
+  const deletedParts = order.deletedParts ?? [];
 
-  if (!returnOf && partialReturns.length === 0) return null;
+  if (!returnOf && partialReturns.length === 0 && deletedParts.length === 0) return null;
 
   const openOrder = (id: number) => router.push(`/dashboard/orders/${id}`);
 
@@ -38,7 +40,7 @@ export function PartialReturnLinks({ order }: PartialReturnLinksProps) {
           </Button>
         </>
       )}
-      {partialReturns.length > 0 && (
+      {(partialReturns.length > 0 || deletedParts.length > 0) && (
         <>
           <span className="text-sm font-medium text-amber-700">طلبات المرتجع</span>
           {partialReturns.map((item) => (
@@ -53,6 +55,23 @@ export function PartialReturnLinks({ order }: PartialReturnLinksProps) {
                 {item.code}
               </Button>
             </CopyableCode>
+          ))}
+          {deletedParts.map((part) => (
+            <span key={part.id} className="inline-flex items-center gap-2">
+              <CopyableCode value={part.code} label="نسخ كود الطلب">
+                <span className="text-sm font-medium text-gray-700">{part.code}</span>
+              </CopyableCode>
+              <DeletedOrderChip />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => openOrder(part.id)}
+              >
+                عرض
+              </Button>
+            </span>
           ))}
         </>
       )}

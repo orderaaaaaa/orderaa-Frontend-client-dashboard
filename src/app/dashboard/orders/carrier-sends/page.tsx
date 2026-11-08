@@ -14,17 +14,21 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useCarrierSendsOpen } from '@/services/carrierSends';
 import type { CarrierSendView } from '@/types/carrierSends';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
+import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
 
 function CarrierSendRow({ row }: { row: CarrierSendView }) {
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-card p-4">
       <div className="flex flex-col gap-1">
-        <Link
-          href={`/dashboard/orders/${row.orderId}`}
-          className="font-bold text-primary-text hover:underline"
-        >
-          {row.orderCode}
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/dashboard/orders/${row.orderId}`}
+            className="font-bold text-primary-text hover:underline"
+          >
+            {row.orderCode}
+          </Link>
+          {row.orderDeleted && <DeletedOrderChip />}
+        </div>
         <span className="text-sm text-gray-700">
           {CARRIER_SEND_OPERATION_LABELS[row.operation]} · {row.targetCarrier}
         </span>

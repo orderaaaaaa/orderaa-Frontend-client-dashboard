@@ -12,6 +12,7 @@ import { CustomersDetailsHeader } from './CustomerModalComponents/CustomersDetai
 import CustomersDetailsShare from './CustomerModalComponents/CustomersDetailsShare';
 import CustomersDetailsTotalStats from './CustomerModalComponents/CustomersDetailsTotalStats';
 import { CustomersDetailsBlockHistory } from './CustomerModalComponents/CustomersDetailsBlockHistory';
+import { ORDER_LOOKUP_SURFACE, showsDeletedOrders } from '@/constants/orderReadScope';
 
 interface CustomerDetailsModalProps {
   customerId?: number;
@@ -105,7 +106,14 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
               cancelled={cancelled}
               returned={returned}
             />
-            <OrdersTab orders={data.orders} />
+            <OrdersTab
+              orders={data.orders}
+              deletedOrders={
+                showsDeletedOrders(ORDER_LOOKUP_SURFACE.CUSTOMER_DETAILS_HISTORY)
+                  ? data.deletedOrders
+                  : []
+              }
+            />
           </div>
         </div>
       )}

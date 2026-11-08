@@ -6,13 +6,18 @@ import { getStatusColor } from '../../../lib/getBadgeColor';
 import { formatAmount } from '../../../lib/formatAmount';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import CopyableCode from '@/components/ui/copyable-code';
-import { CustomerDetailOrder } from '../../../types/customer';
+import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
+import {
+  CustomerDetailDeletedOrder,
+  CustomerDetailOrder,
+} from '../../../types/customer';
 
 interface OrdersTabProps {
   orders: CustomerDetailOrder[];
+  deletedOrders: CustomerDetailDeletedOrder[];
 }
 
-const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
+const OrdersTab: React.FC<OrdersTabProps> = ({ orders, deletedOrders }) => {
   const { getStatusLabel } = useStatusLabel();
 
   const renderStatus = (status: string) => (
@@ -32,7 +37,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
         <h2 className="text-lg font-bold text-gray-900">سجل الطلبات</h2>
       </div>
 
-      {orders.length === 0 ? (
+      {orders.length === 0 && deletedOrders.length === 0 ? (
         <p className="text-center text-sm text-gray-400 py-6">
           لا توجد طلبات لهذا العميل
         </p>
@@ -66,6 +71,31 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                     ملاحظات: {order.notes}
                   </p>
                 )}
+              </li>
+            ))}
+            {deletedOrders.map((order) => (
+              <li
+                key={order.id}
+                className="bg-card border border-gray-100 rounded-xl p-4 flex flex-col gap-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="flex flex-wrap items-center gap-2 font-medium text-sm text-gray-800 break-all min-w-0">
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
+                    <DeletedOrderChip />
+                  </span>
+                  {renderStatus(order.status)}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600">
+                  <DateWithRelative value={order.createdAt} />
+                </div>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="text-gray-600">
+                    القطع: <span className="font-medium text-gray-900">—</span>
+                  </span>
+                  <span className="font-bold text-gray-900">
+                    {formatAmount(order.totalCost)}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
@@ -104,6 +134,28 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                   <div className="text-center text-gray-500 text-xs px-1">
                     {order.notes || '—'}
                   </div>
+                </div>
+              ))}
+              {deletedOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="grid grid-cols-6 items-center bg-card border border-gray-100 rounded-xl py-5 px-4"
+                >
+                  <div className="flex flex-col items-center gap-1 text-center text-gray-800 font-medium text-xs break-all px-1">
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
+                    <DeletedOrderChip />
+                  </div>
+                  <div className="text-center text-gray-600 text-xs">
+                    <DateWithRelative value={order.createdAt} />
+                  </div>
+                  <div className="flex justify-center">
+                    {renderStatus(order.status)}
+                  </div>
+                  <div className="text-center text-gray-800 text-xs">—</div>
+                  <div className="text-center text-gray-900 font-bold text-sm">
+                    {formatAmount(order.totalCost)}
+                  </div>
+                  <div className="text-center text-gray-500 text-xs px-1">—</div>
                 </div>
               ))}
             </div>

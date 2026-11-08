@@ -69,6 +69,16 @@ export interface CustomerDetail {
   createdAt: string;
   updatedAt: string;
   orders: CustomerDetailOrder[];
+  deletedOrders: CustomerDetailDeletedOrder[];
+}
+
+export interface CustomerDetailDeletedOrder {
+  id: number;
+  code: string;
+  status: string;
+  totalCost: number;
+  createdAt: string;
+  deletedAt: string;
 }
 
 export interface PaginationMeta {
