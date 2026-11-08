@@ -55,9 +55,9 @@ export function DateWithRelative({
   }
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    <span className={cn('flex flex-col', className)}>
       <DateText value={value} withTime={withTime} dayOnly={dayOnly} />
       {relative && <span className={RELATIVE_CLASS}>{relative}</span>}
-    </div>
+    </span>
   );
 }

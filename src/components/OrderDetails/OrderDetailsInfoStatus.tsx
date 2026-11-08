@@ -4,7 +4,7 @@ import { formatWeekdayDate } from '@/utils/format';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
-import { cairoDayKey, getTimeAgo } from '@/utils/timeAgo';
+import { cairoDayKey } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import {
   orderEventTitle,
@@ -117,7 +117,6 @@ interface MappedEvent {
   status: string;
   createdAt: string;
   rawDate: string;
-  time: string;
   eventType: string;
   note: string | null;
   employee?: { name: string; department?: string } | null;
@@ -218,7 +217,7 @@ function ChatBubble({
       >
         <p className="font-medium">{event.note || event.status}</p>
         <p className={clsx('text-xs mt-1', isAgent ? 'text-white/70' : 'text-gray-500')}>
-          {event.time}
+          <DateWithRelative value={event.createdAt} variant="inline" />
         </p>
       </div>
       {isAgent && (
@@ -302,7 +301,6 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       status: statusLabel,
       createdAt: event.createdAt,
       rawDate: cairoDayKey(createdDate),
-      time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',
       note: renderOrderEventNote(event.name, event.note),
       employee: event.employee,

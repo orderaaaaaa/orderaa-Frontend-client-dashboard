@@ -1,5 +1,6 @@
 import { formatDate, formatDateTime } from '@/utils/format';
 import React from 'react';
+import { cn } from '@/lib/utils';
 import {
   ORDER_PAYMENT_METHOD_LABELS,
   ORDER_PAYMENT_STATUS_LABELS,
@@ -116,6 +117,7 @@ export const formatChangeValue = (
 };
 
 const LTR_VALUE_TYPES: ReadonlySet<OrderChangeValueType> = new Set(['STRING_LIST']);
+const DATE_VALUE_TYPES: ReadonlySet<OrderChangeValueType> = new Set(['DATETIME', 'DATE']);
 
 export interface OrderChangeValueProps {
   valueType: OrderChangeValueType;
@@ -126,9 +128,11 @@ export interface OrderChangeValueProps {
 
 export function OrderChangeValue({ valueType, value, getStatusLabel, className }: OrderChangeValueProps) {
   const text = formatChangeValue(valueType, value, getStatusLabel);
-  const ltr = LTR_VALUE_TYPES.has(valueType) && text !== EMPTY_CHANGE_VALUE;
+  const hasText = text !== EMPTY_CHANGE_VALUE;
+  const isDate = DATE_VALUE_TYPES.has(valueType) && hasText;
+  const ltr = (LTR_VALUE_TYPES.has(valueType) && hasText) || isDate;
   return (
-    <span className={className} dir={ltr ? 'ltr' : undefined}>
+    <span className={cn(className, isDate && 'tabular-nums')} dir={ltr ? 'ltr' : undefined}>
       {text}
     </span>
   );
