@@ -100,16 +100,20 @@ const attributePairsOf = (selection: Selection): string =>
     .sort()
     .join(',');
 
+const customPairsOf = (customVariants: FollowupCustomVariant[]): string =>
+  customVariants
+    .map((custom) => `${custom.label.trim()}=${custom.value.trim()}`)
+    .sort()
+    .join(',');
+
+export const idLineKeyOf = (
+  productId: number,
+  attributeOptionIds: Selection,
+  customVariants: FollowupCustomVariant[],
+): string => [productId, attributePairsOf(attributeOptionIds), customPairsOf(customVariants)].join('|');
+
 export const lineSignatureOf = (line: ChangeProductsLine): string =>
-  [
-    line.productId,
-    attributePairsOf(line.attributeOptionIds),
-    line.customVariants
-      .map((custom) => `${custom.label.trim()}=${custom.value.trim()}`)
-      .sort()
-      .join(','),
-    line.quantity,
-  ].join('|');
+  `${idLineKeyOf(line.productId, line.attributeOptionIds, line.customVariants)}|${line.quantity}`;
 
 export const linesSignatureOf = (lines: ChangeProductsLine[]): string =>
   lines.map(lineSignatureOf).sort().join(';');
@@ -252,7 +256,7 @@ const seedLineOf = (
   const variants = variantsFromSelection(variantOptions, attributeOptionIds);
   const customVariants = orderProduct.customVariants ?? [];
   return {
-    key: lineKeyOf(orderProduct.productId, variants, customVariants),
+    key: idLineKeyOf(orderProduct.productId, attributeOptionIds, customVariants),
     rowId: nextLineRowId(),
     productId: orderProduct.productId,
     name: orderProduct.products.name,
@@ -358,7 +362,9 @@ export default function ChangeProductsModal({
     const target = lines.find((line) => line.key === key);
     if (!target) return;
     const updated = { ...target, ...patch };
-    const nextKey = lineKeyOf(updated.productId, updated.variants, updated.customVariants);
+    const nextKey = patch.variants
+      ? lineKeyOf(updated.productId, updated.variants, updated.customVariants)
+      : target.key;
     const others = lines.filter((line) => line.key !== key);
     const next = { ...updated, key: nextKey };
     setLines(
@@ -468,7 +474,11 @@ export default function ChangeProductsModal({
                     إضافة منتج
                   </Button>
                 </div>
-                {lines.length === 0 ? (
+                {lines.length === 0 && seedSignature === null ? (
+                  <div className="flex items-center justify-center py-6">
+                    <LiaSpinnerSolid className="size-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : lines.length === 0 ? (
                   <EmptyState
                     icon={
                       <span className="flex size-12 items-center justify-center rounded-xl bg-muted">

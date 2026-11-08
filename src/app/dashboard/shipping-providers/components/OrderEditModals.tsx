@@ -68,7 +68,9 @@ const addressBodyOf = (data: ShippingData, row: ShipmentRowBase): ShipmentAddres
         }
       : {}),
     ...(data.address !== undefined ? { address: data.address } : {}),
-    ...(!sameAreaText(data.area, row.area) ? { area: (data.area ?? '').trim() } : {}),
+    ...(data.area !== undefined && !sameAreaText(data.area, row.area)
+      ? { area: data.area.trim() }
+      : {}),
   };
 };
 

@@ -504,7 +504,8 @@ export function useOrderActions({
               ...(data.cityOption && { cityOption: data.cityOption }),
             }),
             address: data.address,
-            ...(!sameAreaText(data.area, order.area) && { area: (data.area ?? '').trim() }),
+            ...(data.area !== undefined &&
+              !sameAreaText(data.area, order.area) && { area: data.area.trim() }),
             returnShippingCost: data.returnShippingCost,
             ...(data.availableFrom && { availableFrom: data.availableFrom }),
             ...(data.availableTo && { availableTo: data.availableTo }),

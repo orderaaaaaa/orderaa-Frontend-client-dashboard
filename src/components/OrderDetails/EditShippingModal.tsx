@@ -72,7 +72,9 @@ const exactMatchValueOf = (
 ): string | null => {
   const wanted = normalizeArabic(text ?? '');
   if (!wanted) return null;
-  const matches = options.filter((option) => normalizeArabic(option.label) === wanted);
+  const matches = options.filter(
+    (option) => !option.stale && normalizeArabic(option.label) === wanted
+  );
   return matches.length === 1 ? matches[0].value : null;
 };
 
