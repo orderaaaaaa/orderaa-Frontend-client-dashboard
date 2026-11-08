@@ -1,6 +1,7 @@
 'use client';
 
-import { formatDate, formatNumber } from '@/utils/format';
+import { formatNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage } from 'lucide-react';
@@ -82,7 +83,7 @@ export default function PickupsPage() {
         <CheckCircle2 className="w-3.5 h-3.5" />
         روجعت
         {pickup.reviewedByName ? ` — ${pickup.reviewedByName}` : ''}
-        {` · ${formatDate(pickup.reviewedAt)}`}
+        <span>{' · '}<DateWithRelative value={pickup.reviewedAt} variant="inline" /></span>
       </span>
     ) : (
       <span className="text-xs font-semibold text-amber-600">
@@ -157,7 +158,7 @@ export default function PickupsPage() {
                     </CopyableCode>
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatDate(pickup.createdAt)}
+                    <DateWithRelative value={pickup.createdAt} variant="inline" />
                     {pickup.submittedByName
                       ? ` — ${pickup.submittedByName}`
                       : ''}

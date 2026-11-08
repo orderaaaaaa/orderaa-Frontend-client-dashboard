@@ -13,7 +13,7 @@ import {
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useCarrierSendsOpen } from '@/services/carrierSends';
 import type { CarrierSendView } from '@/types/carrierSends';
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 
 function CarrierSendRow({ row }: { row: CarrierSendView }) {
   return (
@@ -33,7 +33,7 @@ function CarrierSendRow({ row }: { row: CarrierSendView }) {
         <Badge variant="outline">{CARRIER_SEND_STATE_LABELS[row.state]}</Badge>
         {row.held && <Badge variant="secondary">محجوز</Badge>}
         {row.stale && <Badge variant="destructive">متأخر</Badge>}
-        <span className="text-xs text-gray-500">{formatDateTime(row.createdAt)}</span>
+        <DateWithRelative value={row.createdAt} className="text-xs text-gray-500" />
       </div>
     </li>
   );

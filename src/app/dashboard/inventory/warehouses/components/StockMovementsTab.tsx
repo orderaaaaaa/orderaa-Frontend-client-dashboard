@@ -1,6 +1,7 @@
 'use client';
 
-import { formatDateTime, formatStockNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { LiaExchangeAltSolid } from 'react-icons/lia';
 import CopyableCode from '@/components/ui/copyable-code';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -156,7 +157,7 @@ export function StockMovementsTab() {
                     className="border-b border-gray-100 hover:bg-gray-50/50"
                   >
                     <td className="py-2.5 px-3 whitespace-nowrap text-gray-600">
-                      {formatDateTime(movement.createdAt)}
+                      <DateWithRelative value={movement.createdAt} />
                     </td>
                     <td className="py-2.5 px-3">
                       <span

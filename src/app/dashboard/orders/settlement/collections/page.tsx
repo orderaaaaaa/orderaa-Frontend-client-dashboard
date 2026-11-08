@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -300,7 +300,7 @@ export default function CollectionsPage() {
 
                 <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
                   <span className="text-[11px] text-muted-foreground">
-                    {formatDate(batch.createdAt)}
+                    <DateWithRelative value={batch.createdAt} variant="inline" />
                     {batch.actorName ? ` — ${batch.actorName}` : ''}
                   </span>
                   {batch.status === 'OPEN' && (

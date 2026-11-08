@@ -17,7 +17,8 @@ import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStocktakesQuery } from '@/services/stocktake';
 import { useWarehouseOptions } from '@/services/warehouses';
-import { formatDateTime, formatStockNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import type {
   StocktakePersonDto,
   StocktakeStatusWire,
@@ -161,9 +162,7 @@ export function StocktakeListContent() {
       key: 'createdAt',
       header: 'تاريخ البدء',
       render: (_value, row) => (
-        <span dir="ltr" className="tabular-nums">
-          {formatDateTime(row.createdAt)}
-        </span>
+        <DateWithRelative value={row.createdAt} />
       ),
     },
     {
@@ -171,9 +170,7 @@ export function StocktakeListContent() {
       header: 'تاريخ الترحيل',
       render: (_value, row) =>
         row.postedAt ? (
-          <span dir="ltr" className="tabular-nums">
-            {formatDateTime(row.postedAt)}
-          </span>
+          <DateWithRelative value={row.postedAt} />
         ) : (
           <span className="text-muted-foreground">—</span>
         ),

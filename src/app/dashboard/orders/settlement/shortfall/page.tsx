@@ -10,6 +10,7 @@ import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate, formatNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
@@ -149,7 +150,7 @@ export default function ShortfallSettlementPage() {
     {
       key: 'settlementRecordedAt',
       header: 'تاريخ التحصيل',
-      render: (_value, row) => formatDate(row.settlementRecordedAt),
+      render: (_value, row) => <DateWithRelative value={row.settlementRecordedAt} />,
     },
     {
       key: 'totalCost',

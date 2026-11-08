@@ -1,6 +1,7 @@
 'use client';
 
-import { formatDate, formatNumber } from '@/utils/format';
+import { formatNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage, Images } from 'lucide-react';
@@ -85,7 +86,7 @@ export default function ReturnReceiptsPage() {
         <CheckCircle2 className="w-3.5 h-3.5" />
         روجعت
         {receipt.reviewedByName ? ` — ${receipt.reviewedByName}` : ''}
-        {` · ${formatDate(receipt.reviewedAt)}`}
+        <span>{' · '}<DateWithRelative value={receipt.reviewedAt} variant="inline" /></span>
       </span>
     ) : (
       <span className="text-xs font-semibold text-amber-600">
@@ -160,7 +161,7 @@ export default function ReturnReceiptsPage() {
                     إيصال #{receipt.id}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatDate(receipt.createdAt)}
+                    <DateWithRelative value={receipt.createdAt} variant="inline" />
                     {receipt.receivedByName
                       ? ` — ${receipt.receivedByName}`
                       : ''}

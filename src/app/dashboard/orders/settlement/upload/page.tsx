@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -564,7 +564,7 @@ export default function SettlementUploadPage() {
                           {
                             label: 'تاريخ التحصيل',
                             value: item.collectedAt
-                              ? formatDate(item.collectedAt)
+                              ? <DateWithRelative value={item.collectedAt} />
                               : '—',
                           },
                           {
@@ -645,7 +645,7 @@ export default function SettlementUploadPage() {
                             </td>
                             <td className="px-4 py-2">
                               {item.collectedAt
-                                ? formatDate(item.collectedAt)
+                                ? <DateWithRelative value={item.collectedAt} />
                                 : '—'}
                             </td>
                             <td className="px-4 py-2">

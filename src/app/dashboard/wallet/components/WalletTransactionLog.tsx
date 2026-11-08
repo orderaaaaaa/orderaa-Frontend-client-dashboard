@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useState } from 'react';
 import { useWalletTransactions } from '@/services/wallet';
 import { WalletTransaction, PaginationMeta } from '@/types/wallet';
@@ -147,7 +147,7 @@ function WalletTransactionLog() {
                 {/* التاريخ */}
                 <div className="text-gray-800 font-medium">
                   <span className="sr-only">التاريخ: </span>
-                  {formatDate(transaction.createdAt)}
+                  <DateWithRelative value={transaction.createdAt} />
                 </div>
 
                 {/* نوع المعاملة */}

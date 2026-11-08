@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
@@ -58,11 +58,6 @@ export const UNLINKED_REASON_LABEL: Record<UnlinkedVariantReason, string> = {
   MISSING_LIGHTFUNNELS_PRODUCT: 'لا يوجد معرّف منتج Lightfunnels',
   WAITING_FOR_FIRST_STOCK: 'بانتظار وصول أول مخزون',
 };
-
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : formatDateTime(date);
-}
 
 function useClampedPage(
   currentPage: number,
@@ -197,7 +192,7 @@ export function FailedPushList({
                 {row.sku && <span>SKU: <CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku}</CopyableCode></span>}
                 <span>الكمية: {row.quantity}</span>
                 <span>محاولة {row.attempts}</span>
-                <span>{formatTimestamp(row.updatedAt)}</span>
+                <DateWithRelative value={row.updatedAt} />
               </div>
               <div className="text-xs text-red-600">
                 {pushErrorLabel(row.lastErrorCode)}
@@ -321,7 +316,7 @@ export function PolicyLogList({
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                 {row.sku && <span>SKU: <CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku}</CopyableCode></span>}
-                <span>{formatTimestamp(row.updatedAt)}</span>
+                <DateWithRelative value={row.updatedAt} />
               </div>
               <div className="text-xs text-red-600">{pushErrorLabel(row.lastErrorCode)}</div>
             </div>
