@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
 import type { FollowupNoteView } from '@/lib/api/followup';
-import { DateWithRelative } from '@/components/ui/date-with-relative';
+import { DateWithRelative, RelativeTime } from '@/components/ui/date-with-relative';
 import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_NOTE_CANCEL_LABEL,
@@ -56,8 +56,13 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
 
   const meta = (
     <span>
-      {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - <DateWithRelative value={note.createdAt} variant="inline" />
-      {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
+      <DateWithRelative value={note.createdAt} variant="inline" />
+      {note.editedAt !== null && (
+        <>
+          {' - '}
+          {FOLLOWUP_NOTE_EDITED_TAG} · <RelativeTime value={note.editedAt} />
+        </>
+      )}
     </span>
   );
 
@@ -122,7 +127,12 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
     ) : undefined;
 
   return (
-    <NoteCard meta={meta} footer={footer} tone={FOLLOWUP_NOTE_PARTY_TONES[note.party]}>
+    <NoteCard
+      meta={meta}
+      footer={footer}
+      tone={FOLLOWUP_NOTE_PARTY_TONES[note.party]}
+      writer={note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER}
+    >
       {isEditing ? (
         <div className="flex flex-col gap-2">
           <Textarea

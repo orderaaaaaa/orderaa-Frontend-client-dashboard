@@ -195,6 +195,7 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
         <NoteCard
           key={legacy.id}
           variant="legacy"
+          writer={legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER}
           meta={
             <>
               <span className="rounded-full bg-muted px-2 py-0.5 font-semibold text-foreground">
@@ -202,7 +203,7 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
               </span>
               <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name] ?? legacy.name}</span>
               <span>
-                {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - <DateWithRelative value={legacy.createdAt} variant="inline" />
+                <DateWithRelative value={legacy.createdAt} variant="inline" />
               </span>
             </>
           }

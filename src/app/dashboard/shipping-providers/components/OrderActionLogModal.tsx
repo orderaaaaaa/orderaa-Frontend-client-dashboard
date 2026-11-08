@@ -40,7 +40,7 @@ import {
   FOLLOWUP_TODAY_LABEL,
   repeatsSuffix,
 } from './followupNotesConstants';
-import { NOTE_BODY_CLASS } from './NoteCard';
+import { NOTE_BODY_CLASS, NOTE_WRITER_CLASS } from './NoteCard';
 
 const FORBIDDEN_STATUS = 403;
 
@@ -98,7 +98,7 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
     <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-xs">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
         {!isCarrierEvent && (
-          <span className="break-words text-sm font-semibold text-foreground">
+          <span className={NOTE_WRITER_CLASS}>
             {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
           </span>
         )}

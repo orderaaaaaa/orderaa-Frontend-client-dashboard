@@ -4,16 +4,18 @@ import type { ReactNode } from 'react';
 import clsx from 'clsx';
 
 export const NOTE_BODY_CLASS = 'whitespace-pre-wrap break-words text-base leading-7 text-foreground';
+export const NOTE_WRITER_CLASS = 'break-words text-sm font-semibold text-foreground';
 
 interface NoteCardProps {
   meta: ReactNode;
   footer?: ReactNode;
   variant?: 'default' | 'legacy';
   tone?: string;
+  writer?: ReactNode;
   children: ReactNode;
 }
 
-export function NoteCard({ meta, footer, variant = 'default', tone, children }: NoteCardProps) {
+export function NoteCard({ meta, footer, variant = 'default', tone, writer, children }: NoteCardProps) {
   return (
     <li
       className={clsx(
@@ -27,6 +29,7 @@ export function NoteCard({ meta, footer, variant = 'default', tone, children }: 
           tone ? 'text-foreground-muted' : 'text-muted-foreground'
         )}
       >
+        {writer && <span className={NOTE_WRITER_CLASS}>{writer}</span>}
         {meta}
       </div>
       {children}

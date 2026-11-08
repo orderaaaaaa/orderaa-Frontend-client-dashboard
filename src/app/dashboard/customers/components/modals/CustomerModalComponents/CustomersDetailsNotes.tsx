@@ -1,4 +1,4 @@
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React from 'react';
 import { Else, If, Then } from 'react-if';
 import { NotesTabProps } from '../../../types/CustomersDetailsModal';
@@ -18,7 +18,7 @@ const NotesTab: React.FC<NotesTabProps> = ({ notes, createdAt }) => {
                   {note}
                 </p>
                 <p className="text-[10px] md:text-xs text-gray-400 mt-3 font-medium">
-                  نشر في: {formatDate(createdAt)}
+                  نشر في: <DateWithRelative value={createdAt} variant="inline" withTime={false} />
                 </p>
               </div>
             ))}
