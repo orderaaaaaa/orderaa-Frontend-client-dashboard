@@ -9,6 +9,7 @@ import { usePartialDelivery } from '@/services/logistics';
 import { isNoEditPartialDeliveryCarrier, type ShippingImplementation } from '@/types/shippingCompanies';
 import {
   RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+  isBlankReturnShipmentContent,
   returnShipmentContentOf,
   variantLabelOf,
 } from '@/utils/partialDelivery/returnShipmentContent';
@@ -101,20 +102,24 @@ export default function PartialDeliveryModal({
     shippingType === ShippingType.PARTIAL_RETURN ? totalCost : roundMoney(totalCost - refusedValue);
   const selectedSet = new Set(selectedIds);
   const refusedUnits = orderProducts.filter((op) => selectedSet.has(op.id));
-  const returnShipmentContent = contentOverride ?? returnShipmentContentOf(refusedUnits);
+  const prefill = returnShipmentContentOf(refusedUnits);
+  const contentValue = contentOverride ?? prefill;
+  const sentContent =
+    contentOverride === null || isBlankReturnShipmentContent(contentOverride) ? prefill : contentOverride;
+  const tooLong = sentContent.length > RETURN_SHIPMENT_CONTENT_MAX_LENGTH;
   const totalUnits = orderProducts.length;
   const refusesAll = totalUnits > 0 && selectedIds.length === totalUnits;
   const overrideValue = overridePrice === '' ? undefined : Number(overridePrice);
   const overrideInvalid =
     overrideValue !== undefined &&
     (!Number.isFinite(overrideValue) || overrideValue < 0);
-  const sendsCarrierEdit =
+  const splitSendsCarrierEdit =
     carrierImplementation === 'TURBO' &&
     hasActiveShippingId &&
     orderStatus !== 'DELIVERED' &&
     (shippingType !== ShippingType.PARTIAL_RETURN ||
       (overrideValue ?? calculatedPrice) !== totalCost ||
-      returnShipmentContent !== (parentReturnContent ?? ''));
+      sentContent !== (parentReturnContent ?? ''));
   const isNoEditCarrier =
     carrierImplementation !== undefined && isNoEditPartialDeliveryCarrier(carrierImplementation);
   const isPending = partialDelivery.isPending;
@@ -122,6 +127,7 @@ export default function PartialDeliveryModal({
   const setRefused = (group: VariantGroup, next: number) => {
     const clamped = Math.max(0, Math.min(group.rows.length, next));
     setRefusedByGroup((prev) => ({ ...prev, [group.key]: clamped }));
+    setContentOverride(null);
   };
 
   const handleReset = () => {
@@ -137,13 +143,13 @@ export default function PartialDeliveryModal({
   };
 
   const handleConfirm = () => {
-    if (selectedIds.length === 0 || refusesAll || overrideInvalid) return;
+    if (selectedIds.length === 0 || refusesAll || overrideInvalid || tooLong) return;
     partialDelivery.mutate(
       {
         orderId,
         returnedOrderProductIds: selectedIds,
         adjustedTotalCost: overrideValue,
-        returnShipmentContent,
+        returnShipmentContent: sentContent,
       },
       {
         onSuccess: () => {
@@ -162,7 +168,7 @@ export default function PartialDeliveryModal({
       onConfirm={handleConfirm}
       confirmText={isPending ? 'جاري التنفيذ...' : 'تأكيد'}
       confirmDisabled={
-        isPending || selectedIds.length === 0 || refusesAll || overrideInvalid
+        isPending || selectedIds.length === 0 || refusesAll || overrideInvalid || tooLong
       }
     >
       <div className="space-y-6">
@@ -176,7 +182,7 @@ export default function PartialDeliveryModal({
           </div>
         )}
 
-        {sendsCarrierEdit && (
+        {splitSendsCarrierEdit && (
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
             {t('partialDelivery.banner.followsCarrier')}
           </div>
@@ -291,14 +297,34 @@ export default function PartialDeliveryModal({
 
         <div className="flex flex-col gap-2">
           <label className="font-bold text-foreground">محتوى شحنة المرتجع</label>
-          <input
-            type="text"
-            value={returnShipmentContent}
-            maxLength={RETURN_SHIPMENT_CONTENT_MAX_LENGTH}
+          {shippingType === ShippingType.PARTIAL_RETURN &&
+            parentReturnContent !== null &&
+            !isBlankReturnShipmentContent(parentReturnContent) && (
+              <p className="text-xs text-muted-foreground">
+                {t('partialDelivery.returnContent.current', { note: parentReturnContent })}
+              </p>
+            )}
+          <textarea
+            rows={3}
+            value={contentValue}
             disabled={isPending}
             onChange={(e) => setContentOverride(e.target.value)}
-            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+            onBlur={() => {
+              if (isBlankReturnShipmentContent(contentOverride)) setContentOverride(null);
+            }}
+            className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 resize-y"
           />
+          <p className="text-xs text-muted-foreground">
+            {t('partialDelivery.returnContent.counter', {
+              count: sentContent.length,
+              max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+            })}
+          </p>
+          {tooLong && (
+            <p className="text-xs text-red-600">
+              {t('partialDelivery.returnContent.tooLong', { max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH })}
+            </p>
+          )}
         </div>
       </div>
     </BaseModal>

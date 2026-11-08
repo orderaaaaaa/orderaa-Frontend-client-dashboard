@@ -103,7 +103,7 @@ export const manualOrderSchema = manualOrderBaseSchema.superRefine((data, ctx) =
     if (requiresReturnContent && !data.shipping.returnShipmentContent?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'يرجى إدخال محتوى شحنة الاسترجاع',
+        message: 'اكتب محتوى شحنة المرتجع.',
         path: ['shipping', 'returnShipmentContent'],
       });
     }

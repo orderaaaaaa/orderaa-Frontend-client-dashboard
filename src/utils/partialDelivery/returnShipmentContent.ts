@@ -1,6 +1,9 @@
 import type { OrderProduct } from '@/types/orders';
 
-export const RETURN_SHIPMENT_CONTENT_MAX_LENGTH = 255;
+export const RETURN_SHIPMENT_CONTENT_MAX_LENGTH = 1000;
+
+export const isBlankReturnShipmentContent = (value: string | null | undefined): boolean =>
+  value == null || value.trim() === '';
 
 export const variantLabelOf = (op: OrderProduct) => {
   const attrs = (op.attributes ?? []).filter(
@@ -24,6 +27,5 @@ export const returnShipmentContentOf = (refusedUnits: OrderProduct[]): string =>
     const label = unitContentLabelOf(unit);
     countByLabel.set(label, (countByLabel.get(label) ?? 0) + 1);
   });
-  const content = Array.from(countByLabel, ([label, count]) => (count > 1 ? `${label} × ${count}` : label)).join('، ');
-  return content.slice(0, RETURN_SHIPMENT_CONTENT_MAX_LENGTH);
+  return Array.from(countByLabel, ([label, count]) => (count > 1 ? `${label} × ${count}` : label)).join('، ');
 };

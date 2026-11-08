@@ -19,6 +19,8 @@ const priceSchema = z.string().refine(
   { message: 'يجب إدخال أرقام فقط' }
 );
 
+const returnContentSchema = z.string().refine((v) => v.trim() !== '', 'اكتب محتوى شحنة المرتجع.');
+
 const prepaidSchema = z.string().refine(
   (val) => val === '' || /^\d+(\.\d{1,2})?$/.test(val),
   { message: 'أدخل مبلغاً صحيحاً بحد أقصى رقمين عشريين' }
@@ -158,6 +160,7 @@ export function PricingSection({
             label="محتوى شحنة الاسترجاع"
             value={order.returnShipmentContent ?? undefined}
             inputType="text"
+            validationSchema={returnContentSchema}
             onSave={async (value) => {
               if (onSaveReturnContent) {
                 await onSaveReturnContent(value);
