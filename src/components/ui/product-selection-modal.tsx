@@ -179,7 +179,8 @@ async function stagedCombosOf(
   queryClient: QueryClient,
   productId: number,
   groups: VariantOption[],
-): Promise<SelectedVariant[][]> {
+  fallbackToEveryCombo: boolean,
+): Promise<SelectedVariant[][] | null> {
   const everyCombo = groups.reduce<SelectedVariant[][]>(
     (acc, group) =>
       acc.flatMap((combo) =>
@@ -194,6 +195,7 @@ async function stagedCombosOf(
       ),
     [[]],
   );
+  const withoutCards = fallbackToEveryCombo ? everyCombo : null;
   try {
     const { variants } = await queryClient.fetchQuery(
       productAttributeOptionsQueryOptions(productId),
@@ -204,14 +206,14 @@ async function stagedCombosOf(
       const combo: SelectedVariant[] = [];
       for (const option of card.options) {
         const attribute = attributeNameById.get(option.attributeId);
-        if (attribute === undefined) return everyCombo;
+        if (attribute === undefined) return withoutCards;
         combo.push({ attribute, option: option.name, attributeOptionId: option.optionId });
       }
       cardCombos.push(combo);
     }
     return cardCombos;
   } catch {
-    return everyCombo;
+    return withoutCards;
   }
 }
 
@@ -354,7 +356,13 @@ export default function ProductSelectionModal({
       const groups = product?.variantOptions ?? [];
       if (!groups.length) return;
 
-      const combos = await stagedCombosOf(queryClient, productId, groups);
+      const combos = await stagedCombosOf(
+        queryClient,
+        productId,
+        groups,
+        availability === undefined,
+      );
+      if (combos === null) return;
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -372,7 +380,7 @@ export default function ProductSelectionModal({
         return next;
       });
     },
-    [products, queryClient],
+    [availability, products, queryClient],
   );
 
   const handleRemoveCombo = useCallback(
