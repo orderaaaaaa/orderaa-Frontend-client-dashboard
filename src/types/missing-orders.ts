@@ -78,6 +78,7 @@ export interface MissingOrderPrefillProduct {
   image: string | null;
   variants: MissingOrderPrefillVariant[];
   attributeOptionIds: number[] | null;
+  storeLinkBlocked: boolean;
   failing: boolean;
 }
 
