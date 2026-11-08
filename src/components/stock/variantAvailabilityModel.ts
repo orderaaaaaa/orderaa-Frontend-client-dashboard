@@ -1,3 +1,4 @@
+import type { AttributeOptionGroup, VariantCard } from '@/lib/api/products';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 import type { VariantOption } from '@/services/orders';
 import { readStoredLocale } from '@/i18n/locale';
@@ -42,15 +43,42 @@ export function namesFromSelection(
   return names;
 }
 
-export function catalogAttributesOf(groups: VariantOption[]): CatalogAttribute[] {
+export function catalogAttributesOf(groups: AttributeOptionGroup[]): CatalogAttribute[] {
   return groups.map((group) => ({
-    attributeId: group.attributeId,
-    attributeName: group.displayName || group.attribute,
+    attributeId: group.id,
+    attributeName: group.displayName || group.name,
     options: group.options.map((option) => ({
       optionId: option.id,
       optionName: option.displayName || option.name,
     })),
   }));
+}
+
+export function selectionOfCard(card: VariantCard): Selection {
+  const selection: Selection = {};
+  for (const option of card.options) selection[option.attributeId] = option.optionId;
+  return selection;
+}
+
+export function isCardSelected(card: VariantCard, selection: Selection): boolean {
+  return card.options.every((option) => selection[option.attributeId] === option.optionId);
+}
+
+export type CardNumbers =
+  | { kind: 'warning' }
+  | { kind: 'notSet' }
+  | { kind: 'out' }
+  | { kind: 'low'; available: number; required: number }
+  | { kind: 'enough'; available: number };
+
+export function cardNumbersOf(row: VariantAvailability): CardNumbers {
+  if (row.warning) return { kind: 'warning' };
+  if (row.available === null) return { kind: 'notSet' };
+  if (row.available <= 0) return { kind: 'out' };
+  if (row.available < row.required) {
+    return { kind: 'low', available: row.available, required: row.required };
+  }
+  return { kind: 'enough', available: row.available };
 }
 
 export type OptionState = 'ok' | 'low' | 'out' | 'notSet' | 'unknown' | 'warning';

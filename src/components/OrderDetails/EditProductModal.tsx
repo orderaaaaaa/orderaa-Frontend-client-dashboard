@@ -12,7 +12,6 @@ import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  catalogAttributesOf,
   namesFromSelection,
   probeQuantityOf,
   selectionFromIds,
@@ -129,14 +128,11 @@ export default function EditProductModal({
         <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
       ) : (
         <VariantAvailabilitySelector
+          productId={productId}
           productName={productName}
-          attributes={catalogAttributesOf(variantOptions)}
           variants={variantAvailability}
           selection={selection}
           onChange={setDraft}
-          isError={isErrorCatalog}
-          catalogError={isErrorCatalog ? catalogError : null}
-          onCatalogRetry={() => void refetchCatalog()}
           availabilityLoading={activeAvailability.isLoading}
           availabilityError={activeAvailability.isError ? activeAvailability.error : null}
           onRetry={() => void activeAvailability.refetch()}

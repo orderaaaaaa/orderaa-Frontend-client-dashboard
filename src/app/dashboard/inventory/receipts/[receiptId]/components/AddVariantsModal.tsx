@@ -64,6 +64,8 @@ const AddVariantsModal = memo(
       [data],
     );
 
+    const cards = useMemo(() => data?.variants ?? [], [data]);
+
     const [pickedPerGroup, setPickedPerGroup] = useState<Record<number, number | null>>({});
     const [staged, setStaged] = useState<SelectedVariant[]>([]);
     const [noAttrsQuantity, setNoAttrsQuantity] = useState<number>(1);
@@ -123,7 +125,7 @@ const AddVariantsModal = memo(
     }, [combo, isComboAdded]);
 
     /**
-     * Stages every combination the product has, so counting a full delivery is
+     * Stages every card of the product, so counting a full delivery is
      * one action instead of one pick per size and colour. Combos already staged
      * or already on the receipt are skipped, so pressing it twice is safe.
      *
@@ -133,16 +135,10 @@ const AddVariantsModal = memo(
     const handleAddAllVariants = useCallback(() => {
       if (groups.length === 0) return;
 
-      const combos = groups.reduce<VariantCombo[]>(
-        (acc, group) =>
-          acc.flatMap((combo) =>
-            group.options.map((option) => ({
-              attributeOptionIds: [...combo.attributeOptionIds, option.id],
-              attributeLabels: [...combo.attributeLabels, option.name],
-            })),
-          ),
-        [{ attributeOptionIds: [], attributeLabels: [] }],
-      );
+      const combos: VariantCombo[] = cards.map((card) => ({
+        attributeOptionIds: card.options.map((option) => option.optionId),
+        attributeLabels: card.options.map((option) => option.name),
+      }));
 
       setStaged((prev) => {
         const taken = new Set([
@@ -158,7 +154,7 @@ const AddVariantsModal = memo(
       });
 
       setPickedPerGroup({});
-    }, [groups, existingKeys]);
+    }, [groups, cards, existingKeys]);
 
     const handleRemoveStaged = useCallback((key: string) => {
       setStaged((prev) => prev.filter((v) => sortedKey(v.attributeOptionIds) !== key));

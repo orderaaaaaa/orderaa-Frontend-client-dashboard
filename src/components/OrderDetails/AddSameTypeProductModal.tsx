@@ -7,7 +7,6 @@ import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  catalogAttributesOf,
   probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
@@ -167,14 +166,11 @@ export default function AddSameTypeProductModal({
         </div>
         {!isLoading && (variantOptions.length > 0 || isErrorCatalog) && (
           <VariantAvailabilitySelector
+            productId={productId}
             productName={productType}
-            attributes={catalogAttributesOf(variantOptions)}
             variants={variantAvailability}
             selection={selection}
             onChange={setSelection}
-            isError={isErrorCatalog}
-            catalogError={isErrorCatalog ? catalogError : null}
-            onCatalogRetry={() => void refetchCatalog()}
             availabilityLoading={isLoadingAvailability}
             availabilityError={isErrorAvailability ? errorAvailability : null}
             onRetry={() => void refetchAvailability()}

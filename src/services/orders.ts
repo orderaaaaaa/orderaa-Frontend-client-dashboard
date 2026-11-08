@@ -19,7 +19,8 @@ import {
   useHeldUntilSettled,
 } from '@/lib/query/mutationSync';
 import http from '@/lib/api/http';
-import { getProductAttributeOptions } from '@/lib/api/products';
+import { getProductAttributeOptions, type GetProductAttributeOptionsResponse } from '@/lib/api/products';
+import { productAttributeOptionsQueryOptions } from '@/services/products';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import {
   CARRIER_SEND_NOT_SENT_WARNING,
@@ -483,9 +484,10 @@ export const resolveAttributeOptionIds = (
   );
 };
 
-const fetchProductVariantsOptions = async (productId: number) => {
-  const { options: attributeOptions } = await getProductAttributeOptions(productId);
-  return (attributeOptions || []).map((attribute, index) => ({
+const toVariantOptions = (
+  attributeOptions: GetProductAttributeOptionsResponse['options'] | undefined
+) =>
+  (attributeOptions || []).map((attribute, index) => ({
     attribute: attribute.name || `attribute_${index}`,
     attributeId: attribute.id,
     displayName: attribute.displayName,
@@ -495,13 +497,17 @@ const fetchProductVariantsOptions = async (productId: number) => {
       displayName: option.displayName,
     })),
   })) as VariantOption[];
+
+const fetchProductVariantsOptions = async (productId: number) => {
+  const { options: attributeOptions } = await getProductAttributeOptions(productId);
+  return toVariantOptions(attributeOptions);
 };
 
 export const useProductVariantsOptions = (productId: number | null) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
-    queryFn: () => fetchProductVariantsOptions(productId!),
+    ...productAttributeOptionsQueryOptions(productId),
     enabled: !!productId,
+    select: (data: GetProductAttributeOptionsResponse) => toVariantOptions(data.options),
   });
 };
 

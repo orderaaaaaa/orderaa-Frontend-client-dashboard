@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import clsx from 'clsx';
@@ -11,6 +12,7 @@ import { Checkbox } from './checkbox';
 import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
 import { useProductVariantsOptions } from '@/services/orders';
+import { productAttributeOptionsQueryOptions } from '@/services/products';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
   comboKeyOf,
@@ -173,6 +175,46 @@ function isValueDisabled(
   return addedCombos.some((combo) => comboKeyOfSelected(combo) === key);
 }
 
+async function stagedCombosOf(
+  queryClient: QueryClient,
+  productId: number,
+  groups: VariantOption[],
+): Promise<SelectedVariant[][]> {
+  const everyCombo = groups.reduce<SelectedVariant[][]>(
+    (acc, group) =>
+      acc.flatMap((combo) =>
+        group.optionDetails.map((option) => [
+          ...combo,
+          {
+            attribute: group.attribute,
+            option: option.name,
+            attributeOptionId: option.id,
+          },
+        ]),
+      ),
+    [[]],
+  );
+  try {
+    const { variants } = await queryClient.fetchQuery(
+      productAttributeOptionsQueryOptions(productId),
+    );
+    const attributeNameById = new Map(groups.map((group) => [group.attributeId, group.attribute]));
+    const cardCombos: SelectedVariant[][] = [];
+    for (const card of variants) {
+      const combo: SelectedVariant[] = [];
+      for (const option of card.options) {
+        const attribute = attributeNameById.get(option.attributeId);
+        if (attribute === undefined) return everyCombo;
+        combo.push({ attribute, option: option.name, attributeOptionId: option.optionId });
+      }
+      cardCombos.push(combo);
+    }
+    return cardCombos;
+  } catch {
+    return everyCombo;
+  }
+}
+
 export default function ProductSelectionModal({
   isOpen,
   onClose,
@@ -192,6 +234,7 @@ export default function ProductSelectionModal({
   const [currentSelection, setCurrentSelection] = useState<Map<number, Selection>>(new Map());
 
   const debouncedSearch = useDebounce(search, 300);
+  const queryClient = useQueryClient();
 
   const fetchProducts = useCallback(
     async (pageNum: number, searchQuery: string, append = false) => {
@@ -305,35 +348,13 @@ export default function ProductSelectionModal({
     [addedCombos, currentSelection, products],
   );
 
-  /**
-   * Adds every combination of the product's attribute options at once — buying
-   * from a supplier usually means taking every size and colour, and picking
-   * them one pair at a time is the tedium this removes.
-   *
-   * Combos already staged are skipped, so pressing it twice is safe; combos
-   * already on the invoice are filtered again by `handleConfirm`.
-   */
   const handleAddAllVariants = useCallback(
-    (productId: number) => {
+    async (productId: number) => {
       const product = products.find((p) => p.id === productId);
       const groups = product?.variantOptions ?? [];
       if (!groups.length) return;
 
-      // Cartesian product across the attributes, in attribute order.
-      const combos = groups.reduce<SelectedVariant[][]>(
-        (acc, group) =>
-          acc.flatMap((combo) =>
-            group.optionDetails.map((option) => [
-              ...combo,
-              {
-                attribute: group.attribute,
-                option: option.name,
-                attributeOptionId: option.id,
-              },
-            ]),
-          ),
-        [[]],
-      );
+      const combos = await stagedCombosOf(queryClient, productId, groups);
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -351,7 +372,7 @@ export default function ProductSelectionModal({
         return next;
       });
     },
-    [products],
+    [products, queryClient],
   );
 
   const handleRemoveCombo = useCallback(
@@ -573,7 +594,7 @@ export default function ProductSelectionModal({
                             variant="outline"
                             size="sm"
                             className="rounded-full text-xs h-7 px-4 max-sm:h-10"
-                            onClick={() => handleAddAllVariants(product.id)}
+                            onClick={() => void handleAddAllVariants(product.id)}
                           >
                             <LiaPlusSolid className="w-4 h-4" />
                             إضافة كل المتغيرات

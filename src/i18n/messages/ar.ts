@@ -169,6 +169,8 @@ const ar = {
   'orderDetails.variants.selectedSummary': 'الاختيار الحالي: {variant}',
   'orderDetails.variants.pickAll': 'اختر كل الخيارات لعرض التوفر الدقيق',
   'orderDetails.variants.noVariantRows': 'لا توجد بيانات مخزون لهذا المنتج بعد',
+  'orderDetails.variants.noCards': 'لا توجد متغيرات متاحة',
+  'orderDetails.variants.filterLabel': 'ابحث في المتغيرات',
   'orderDetails.variants.excludedLines': '{count} سطر بدون اختيار كامل غير محتسب في المخزون',
   'orderDetails.variants.loadError': 'تعذر تحميل المخزون المتاح',
   'orderDetails.productDetails.noSpecs': 'لا توجد مواصفات مسجلة لهذا المنتج',

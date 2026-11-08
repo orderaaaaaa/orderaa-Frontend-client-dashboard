@@ -15,7 +15,6 @@ import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { getAvailabilityRefusalMessage, refusalToastOptions } from '@/utils/apiError';
 import { VariantAvailabilitySelector } from '@/components/stock/VariantAvailabilitySelector';
 import {
-  catalogAttributesOf,
   probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
@@ -271,14 +270,11 @@ export default function AddNewProductModal({
           <div className="flex flex-col gap-2">
             {(variantOptions.length > 0 || isErrorVariants) && (
               <VariantAvailabilitySelector
+                productId={selectedProduct.id}
                 productName={selectedProduct.name}
-                attributes={catalogAttributesOf(variantOptions)}
                 variants={variantAvailability}
                 selection={selection}
                 onChange={setSelection}
-                isError={isErrorVariants}
-                catalogError={isErrorVariants ? errorVariants : null}
-                onCatalogRetry={() => void refetchVariants()}
                 availabilityLoading={isLoadingAvailability}
                 availabilityError={isErrorAvailability ? errorAvailability : null}
                 onRetry={() => void refetchAvailability()}

@@ -1,8 +1,7 @@
 import { useOrderlessVariantAvailabilityQuery } from '@/services/warehouses';
-import { useProductVariantsOptions } from '@/services/orders';
 import type { OrderlessAvailabilityTarget } from '@/lib/api/warehouses';
 import { VariantAvailabilitySelector } from './VariantAvailabilitySelector';
-import { catalogAttributesOf, type Selection } from './variantAvailabilityModel';
+import type { Selection } from './variantAvailabilityModel';
 
 interface OrderlessVariantAvailabilityPanelProps {
   productId: number;
@@ -29,7 +28,6 @@ export function OrderlessVariantAvailabilityPanel({
   className,
   excludedLines,
 }: OrderlessVariantAvailabilityPanelProps) {
-  const catalog = useProductVariantsOptions(productId);
   const availability = useOrderlessVariantAvailabilityQuery(
     productId,
     targetStatus,
@@ -37,19 +35,13 @@ export function OrderlessVariantAvailabilityPanel({
     draft,
   );
 
-  const attributes = catalogAttributesOf(catalog.data ?? []);
-
   return (
     <VariantAvailabilitySelector
+      productId={productId}
       productName={productName}
-      attributes={attributes}
       variants={availability.data ?? []}
       selection={selection}
       onChange={onChange}
-      isLoading={catalog.isLoading}
-      isError={catalog.isLoadingError}
-      catalogError={catalog.isLoadingError ? catalog.error : null}
-      onCatalogRetry={() => void catalog.refetch()}
       availabilityLoading={availability.isLoading}
       availabilityError={availability.isError ? availability.error : null}
       onRetry={() => void availability.refetch()}

@@ -13,8 +13,22 @@ export interface AttributeOptionGroup {
   options: AttributeOption[];
 }
 
+export interface VariantCardOption {
+  attributeId: number;
+  optionId: number;
+  name: string;
+  displayName: string;
+}
+
+export interface VariantCard {
+  id: number;
+  label: string;
+  options: VariantCardOption[];
+}
+
 export interface GetProductAttributeOptionsResponse {
   options: AttributeOptionGroup[];
+  variants: VariantCard[];
 }
 
 export async function getProductAttributeOptions(
