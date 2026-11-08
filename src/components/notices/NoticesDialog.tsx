@@ -19,8 +19,8 @@ import {
   useOrderNoticesInfiniteQuery,
 } from '@/services/orderNotices';
 import type { OrderNoticeDto } from '@/types/orderSystemFailures';
-import { formatDateTime, formatNumber } from '@/utils/format';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { formatNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 
 interface NoticesDialogProps {
   open: boolean;
@@ -126,7 +126,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
 }
 
 function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   return (
     <li
       className={cn(
@@ -156,10 +156,7 @@ function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean
       </div>
       <NoticeDetails notice={notice} />
       <p className="text-xs text-muted-foreground">
-        <span dir="ltr" className="tabular-nums">
-          {formatDateTime(notice.lastOccurredAt)}
-        </span>{' '}
-        · {getTimeAgo(notice.lastOccurredAt, locale)}
+        <DateWithRelative value={notice.lastOccurredAt} variant="inline" />
       </p>
     </li>
   );

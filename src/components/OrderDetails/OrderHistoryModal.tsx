@@ -1,12 +1,11 @@
 'use client';
 
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useMemo } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Order, OrderEvent } from '@/types/orders';
 import type { OrderChangeBatch } from '@/types/orderChangeHistory';
 import { PhoneOff, History, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -84,8 +83,7 @@ function OrderEventRow({
         <h3 className="text-base font-semibold text-foreground break-words">{statusLabel}</h3>
         {note !== statusLabel && <p className="text-sm text-primary-text break-words">{note}</p>}
         <p className="text-sm text-muted-foreground">
-          {formatDate(event.createdAt)}{' '}
-          <span className="text-xs text-muted-foreground">({getTimeAgo(event.createdAt)})</span>
+          <DateWithRelative value={event.createdAt} withTime={false} variant="inline" />
         </p>
       </div>
     </div>

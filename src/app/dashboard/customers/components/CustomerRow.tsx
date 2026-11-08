@@ -11,11 +11,11 @@ import { getStatusColor } from '../lib/getBadgeColor';
 import { formatAmount } from '../lib/formatAmount';
 import {
   blockReasonOf,
-  formatOrderDate,
   isActivationKey,
   toWhatsAppNumber,
 } from '../lib/contact';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { CustomerBadgeChip } from './CustomerBadgeChip';
@@ -142,7 +142,7 @@ export const CustomerRow = memo(function CustomerRow({
           <div className="inline-flex items-center gap-2">
             <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" aria-hidden />
             <span className="font-medium">
-              {formatOrderDate(customer.latestOrder?.createdAt)}
+              <DateWithRelative value={customer.latestOrder?.createdAt} />
             </span>
           </div>
         </td>

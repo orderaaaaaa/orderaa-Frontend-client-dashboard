@@ -1,6 +1,7 @@
 'use client';
 
-import { formatDate, formatWeekdayDate } from '@/utils/format';
+import { formatWeekdayDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
 import { cairoDayKey, getTimeAgo } from '@/utils/timeAgo';
@@ -33,8 +34,7 @@ interface EventCardProps {
   eventType: string;
   status: string;
   note: string | null;
-  date: string;
-  time: string;
+  createdAt: string;
   employee?: {
     name: string;
     department?: string;
@@ -57,8 +57,7 @@ function EventCard({
   eventType,
   status,
   note,
-  date,
-  time,
+  createdAt,
   employee,
   utmSource,
   pageName,
@@ -94,13 +93,7 @@ function EventCard({
         )}
 
         <p className="text-sm text-foreground break-words">
-          {date}
-          {time && (
-            <>
-              {' • '}
-              <span className="text-primary-text">{time}</span>
-            </>
-          )}
+          <DateWithRelative value={createdAt} withTime={false} variant="inline" />
         </p>
 
         {employee && (
@@ -122,7 +115,7 @@ const LOGISTICS_EVENT_NAMES = new Set(['SHIPPING', 'WITH_DRIVER', 'DELIVERED', '
 interface MappedEvent {
   id: number;
   status: string;
-  date: string;
+  createdAt: string;
   rawDate: string;
   time: string;
   eventType: string;
@@ -307,7 +300,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     return {
       id: event.id || index + 1,
       status: statusLabel,
-      date: formatDate(createdDate),
+      createdAt: event.createdAt,
       rawDate: cairoDayKey(createdDate),
       time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',
@@ -366,8 +359,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                       eventType={item.eventType}
                       status={item.status}
                       note={item.note}
-                      date={item.date}
-                      time={item.time}
+                      createdAt={item.createdAt}
                       employee={item.employee}
                       utmSource={item.utmSource}
                       pageName={item.pageName}
@@ -405,8 +397,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                 eventType={item.eventType}
                 status={item.status}
                 note={item.note}
-                date={item.date}
-                time={item.time}
+                createdAt={item.createdAt}
                 employee={item.employee}
                 utmSource={item.utmSource}
                 pageName={item.pageName}

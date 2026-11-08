@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useI18n } from '@/i18n/I18nProvider';
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { formatMoney } from '@/utils/formatMoney';
 import { selectableUnitIdsOf } from '@/utils/customerReturn/selection';
 import type {
@@ -152,9 +152,7 @@ function ReturnSourceOrderCard({
             {order.code}
           </span>
           <StatusBadge status={order.status} />
-          <span className="text-sm text-muted-foreground">
-            {formatDate(order.createdAt)}
-          </span>
+          <DateWithRelative value={order.createdAt} className="text-sm text-muted-foreground" />
           {order.shippingCompanyName && (
             <span className="text-sm text-muted-foreground">
               {order.shippingCompanyName}

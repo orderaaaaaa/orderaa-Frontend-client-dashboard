@@ -1,6 +1,7 @@
 'use client';
 
-import { formatDate, formatNumber, formatStockNumber } from '@/utils/format';
+import { formatNumber, formatStockNumber } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import {
@@ -13,7 +14,6 @@ import { formatMoney } from '@/utils/formatMoney';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
-import { getTimeAgo } from '@/utils/timeAgo';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { SupplierProduct, ProductTransaction } from '../types';
 import { useProductTransactionsQuery } from '@/services/suppliers';
@@ -31,15 +31,7 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
     key: 'createdAt',
     header: 'التاريخ',
-    render: (val) => {
-      const dateStr = val as string;
-      return (
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-800">{getTimeAgo(dateStr)}</span>
-          <span className="text-xs text-muted-foreground">{formatDate(dateStr)}</span>
-        </div>
-      );
-    },
+    render: (val) => <DateWithRelative value={val as string} className="items-center" />,
   },
   {
     key: 'quantity',

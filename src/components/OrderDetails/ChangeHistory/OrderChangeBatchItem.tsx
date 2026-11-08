@@ -1,9 +1,8 @@
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React from 'react';
 import { actorTypeLabelOf } from '@/constants/orderSystemFailures';
 import { orderChangeOriginLabelOf, orderFieldLabelOf } from '@/constants/orderFieldLabels';
 import type { OrderChangeBatch, OrderChangeEntry } from '@/types/orderChangeHistory';
-import { getTimeAgo } from '@/utils/timeAgo';
 import { OrderChangeValue, isLineValue, lineValueText } from './OrderChangeValue';
 
 const LINE_KIND_LABELS = {
@@ -78,9 +77,7 @@ export function OrderChangeBatchItem({ batch, getStatusLabel, lineProductNames }
             {orderChangeOriginLabelOf(batch.origin)}
           </span>
         </div>
-        <span className="text-xs text-muted-foreground">
-          {formatDateTime(batch.createdAt)} ({getTimeAgo(batch.createdAt)})
-        </span>
+        <DateWithRelative value={batch.createdAt} variant="inline" className="text-xs text-muted-foreground" />
       </div>
 
       <ul className="flex flex-col gap-1">

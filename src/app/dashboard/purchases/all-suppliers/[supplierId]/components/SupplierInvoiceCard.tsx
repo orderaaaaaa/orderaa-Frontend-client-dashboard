@@ -19,9 +19,8 @@ import {
 } from 'react-icons/lia';
 import { Checkbox } from '@/components/ui/checkbox';
 import CopyableCode from '@/components/ui/copyable-code';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { SupplierInvoice } from '../types';
-import { formatDate } from '@/utils/format';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import { invoiceTypeLabel, signedInvoiceAmount } from '../../../constants';
 
@@ -77,9 +76,8 @@ const SupplierInvoiceCard = memo(
         },
         {
           label: 'التاريخ والوقت',
-          value: getTimeAgo(invoice.createdAt),
+          value: <DateWithRelative value={invoice.createdAt} />,
           icon: LiaClockSolid,
-          subtitle: formatDate(invoice.createdAt),
         },
         {
           label: 'المبلغ الإجمالي',

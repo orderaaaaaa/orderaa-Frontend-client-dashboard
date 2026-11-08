@@ -1,4 +1,4 @@
-import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useState } from 'react';
 import { Copy, TriangleAlert, History } from 'lucide-react';
 import { Order, OrderLockedBy } from '@/types/orders';
@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
-import { getTimeAgo } from '@/utils/timeAgo';
 import { If, Then } from 'react-if';
 import { getRemainingTime } from '@/utils/getRemainingTime';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
@@ -39,9 +38,6 @@ const OrderDetailsCardId = ({
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const { shippingCompanies } = useShippingCompanies();
   const orderCompanyName = shippingCompanyNameOf(order.shippingCompanyRef);
-
-  const createdDate = new Date(order.createdAt);
-  const timeAgo = getTimeAgo(order.createdAt);
 
   const handleCopy = async (text: string) => {
     try {
@@ -86,7 +82,7 @@ const OrderDetailsCardId = ({
               />
             </h3>
             <p className="text-xs font-bold sm:mr-7 mb-4">
-              {formatDate(createdDate)} <span>{timeAgo}</span>
+              <DateWithRelative value={order.createdAt} withTime={false} variant="inline" />
             </p>
             <If condition={order.postponedUntil}>
               <Then>

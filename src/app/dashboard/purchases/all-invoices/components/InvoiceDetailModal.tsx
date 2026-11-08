@@ -5,10 +5,9 @@ import Image from 'next/image';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { formatMoney } from '@/utils/formatMoney';
 import { Invoice } from '../types';
-import { formatDate } from '@/utils/format';
 import { INVOICE_TYPE_LABEL } from '../../constants';
 
 interface InvoiceDetailModalProps {
@@ -39,7 +38,7 @@ const InvoiceDetailModal = memo(
         { label: 'نوع المعاملة', value: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type },
       ],
       [
-        { label: 'التاريخ و الوقت', value: getTimeAgo(invoice.createdAt), subtitle: formatDate(invoice.createdAt) },
+        { label: 'التاريخ و الوقت', value: <DateWithRelative value={invoice.createdAt} /> },
         { label: 'المبلغ', value: formatMoney(String(invoice.totalAmount)) },
       ],
     ];

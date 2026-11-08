@@ -35,7 +35,7 @@ import type {
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { CARRIER_SEND_NOT_SENT_WARNING } from '@/utils/manualOrder/carrierSend';
 import { OrderSystemFailureItem } from './SystemFailures/OrderSystemFailureItem';
 import { narrowFailureDetails } from './SystemFailures/details/guards';
@@ -215,7 +215,7 @@ function CarrierSendMarkerBlock({
           {marker.held && ' (محجوز)'}
         </p>
         <p className="text-xs text-gray-500">
-          {formatDateTime(marker.createdAt)} · {marker.targetCarrier}
+          <DateWithRelative value={marker.createdAt} variant="inline" /> · {marker.targetCarrier}
           {marker.carrierShippingId && ` · ${marker.carrierShippingId}`}
         </p>
         {marker.closeKind && <p className="text-xs text-gray-600">{CLOSE_KIND_LABELS[marker.closeKind]}</p>}

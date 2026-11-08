@@ -9,7 +9,6 @@ import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMapp
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { Invoice } from '../types';
-import { formatDate } from '@/utils/format';
 import { INVOICE_TYPE_LABEL } from '../../constants';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
 import { ReverseInvoiceModal } from './ReverseInvoiceModal';
@@ -117,9 +116,7 @@ const InvoiceCard = memo(
           select={select}
           isSelected={isSelected}
           onSelectionChange={onSelectionChange}
-          onTitleClick={onTitleClick}
-          formatDate={formatDate}
-          actions={actions}
+          onTitleClick={onTitleClick}          actions={actions}
         />
         {canReverse && (
           <ReverseInvoiceModal

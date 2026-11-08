@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { ActorChip } from './ActorChip';
 import { actorRefToChip, type ActorRef } from './actors';
 
@@ -55,12 +55,7 @@ export function AuditHistoryList<T extends { id: number }>({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-semibold text-foreground">{getAction(item)}</span>
-              <time
-                dateTime={getCreatedAt(item)}
-                className="text-sm tabular-nums text-muted-foreground"
-              >
-                {formatDateTime(getCreatedAt(item))}
-              </time>
+              <DateWithRelative value={getCreatedAt(item)} className="text-sm text-muted-foreground" />
             </div>
             <div>
               <ActorChip actor={actorRefToChip(getActor(item))} />

@@ -14,11 +14,11 @@ import { getStatusColor } from '../lib/getBadgeColor';
 import { formatAmount } from '../lib/formatAmount';
 import {
   blockReasonOf,
-  formatOrderDate,
   isActivationKey,
   toWhatsAppNumber,
 } from '../lib/contact';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { CustomerBadgeChip } from './CustomerBadgeChip';
@@ -157,9 +157,7 @@ export function CustomerCard({
               <LiaCalendarAltSolid size={18} className="text-primary-text shrink-0" aria-hidden />
               <span className="font-medium">
                 آخر طلب:{' '}
-                <span className="font-medium">
-                  {formatOrderDate(customer.latestOrder?.createdAt)}
-                </span>
+                <DateWithRelative value={customer.latestOrder?.createdAt} variant="inline" />
               </span>
             </div>
             <div className="flex items-center gap-2">

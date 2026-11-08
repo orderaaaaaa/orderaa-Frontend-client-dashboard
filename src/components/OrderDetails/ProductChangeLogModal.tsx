@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import BaseModal from '@/components/ui/base-modal';
 
 interface ProductChangeLogModalProps {
@@ -72,7 +72,7 @@ export default function ProductChangeLogModal({
           <tbody>
             {mockLogs.map((log) => (
               <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-600">{formatDateTime(log.createdAt)}</td>
+                <td className="px-4 py-3 text-gray-600"><DateWithRelative value={log.createdAt} /></td>
                 <td className="px-4 py-3 font-medium text-foreground">{log.employeeName}</td>
                 <td className="px-4 py-3">
                   <span

@@ -21,7 +21,6 @@ import ReceiptsActionsBar from './ReceiptsActionsBar';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
-import { formatDate } from '@/utils/format';
 import { employeeActor } from '@/components/audit/actors';
 import { INVOICE_LIST_TAB_OPTIONS, invoiceListTabToQuery } from '@/components/purchases/receivingStatus';
 
@@ -281,9 +280,7 @@ export function ReceiptsContent() {
               onSelectionChange={(checked) =>
                 handleSelectionChange(receipt.id, checked)
               }
-              titleHref={`/dashboard/inventory/receipts/${receipt.id}`}
-              formatDate={formatDate}
-              showAmount={false}
+              titleHref={`/dashboard/inventory/receipts/${receipt.id}`}              showAmount={false}
             />
           ))
         ) : (

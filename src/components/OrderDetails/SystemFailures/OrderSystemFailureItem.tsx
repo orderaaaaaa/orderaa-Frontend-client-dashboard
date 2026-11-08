@@ -1,6 +1,7 @@
 'use client';
 
 import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useState } from 'react';
 import { LiaCheckSolid, LiaChevronDownSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
@@ -116,9 +117,7 @@ export function OrderSystemFailureItem({
             </span>
           </>
         ) : (
-          <span>
-            {formatDateTime(failure.lastOccurredAt)} ({getTimeAgo(failure.lastOccurredAt, locale)})
-          </span>
+          <DateWithRelative value={failure.lastOccurredAt} variant="inline" />
         )}
       </div>
 
@@ -127,7 +126,7 @@ export function OrderSystemFailureItem({
           {failure.seenByName
             ? t('orderSystemFailures.item.seenBy', { name: failure.seenByName })
             : t('orderSystemFailures.item.seenDone')}{' '}
-          {formatDateTime(failure.seenAt)}
+          <DateWithRelative value={failure.seenAt} variant="inline" />
         </span>
       )}
 

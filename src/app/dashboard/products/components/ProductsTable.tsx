@@ -29,7 +29,7 @@ import LoadingAnimation from '@/components/ui/loadingAnimation';
 import ProductsTableMobile from './ProductsTableMobile';
 import { ProductThumbnailButton } from './ProductThumbnailButton';
 import { productEditHref, productGalleryImages } from '../utils/productLinks';
-import { getTimeAgo } from '@/utils';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useI18n } from '@/i18n/I18nProvider';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
@@ -180,7 +180,7 @@ function ProductsTable() {
         header: 'تاريخ الإنشاء',
         sortable: true,
         className: 'text-center text-sm text-gray-800',
-        render: (val) => getTimeAgo(val as string),
+        render: (val) => <DateWithRelative value={val as string} />,
       },
       {
         key: 'totalSold',

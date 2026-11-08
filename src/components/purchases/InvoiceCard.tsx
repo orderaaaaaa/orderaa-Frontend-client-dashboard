@@ -20,7 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import {
   INVOICE_LIFECYCLE,
   type InvoiceLifecycle,
@@ -147,7 +147,6 @@ interface InvoiceCardProps {
   onSelectionChange: (checked: boolean) => void;
   onTitleClick?: () => void;
   titleHref?: string;
-  formatDate: (dateStr: string) => string;
   showAmount?: boolean;
   actions?: ReactNode;
 }
@@ -160,7 +159,6 @@ const InvoiceCard = memo(
     onSelectionChange,
     onTitleClick,
     titleHref,
-    formatDate,
     showAmount = true,
     actions,
   }: InvoiceCardProps) => {
@@ -211,9 +209,8 @@ const InvoiceCard = memo(
         },
         {
           label: 'التاريخ والوقت',
-          value: getTimeAgo(invoice.createdAt),
+          value: <DateWithRelative value={invoice.createdAt} />,
           icon: LiaClockSolid,
-          subtitle: formatDate(invoice.createdAt),
         },
         {
           label: 'نوع الفاتورة',
@@ -232,7 +229,7 @@ const InvoiceCard = memo(
             ]
           : []),
       ],
-      [invoice, typeColors, typeLabel, amountText, formatDate, showAmount]
+      [invoice, typeColors, typeLabel, amountText, showAmount]
     );
 
     return (

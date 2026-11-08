@@ -16,12 +16,12 @@ import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMapp
 import { ActorChip } from '@/components/audit/ActorChip';
 import { employeeActor } from '@/components/audit/actors';
 import { Button } from '@/components/ui/button';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { formatMoney } from '@/utils/formatMoney';
 import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { SupplierInvoice, SupplierInvoiceItem } from '../types';
 import { exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
-import { formatDate, formatStockNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
 
 function buildProductColumns(
   products: SupplierInvoiceItem[],
@@ -114,12 +114,7 @@ export default function InvoiceDetailModal({
             <LiaClockSolid className="w-5 h-5 text-primary-text shrink-0" />
             <div className="flex flex-col">
               <span className="text-xs text-gray-900">تاريخ الإنشاء</span>
-              <span className="text-sm font-bold text-gray-800">
-                {getTimeAgo(invoice.createdAt)}
-              </span>
-              <span className="text-xs text-gray-900">
-                {formatDate(invoice.createdAt)}
-              </span>
+              <DateWithRelative value={invoice.createdAt} />
             </div>
           </div>
         </div>

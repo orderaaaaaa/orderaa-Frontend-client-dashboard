@@ -12,7 +12,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { CiBarcode } from 'react-icons/ci';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
@@ -208,9 +208,7 @@ export default function OrderCard({
               )}
               <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
 
-              <span className="text-xs text-primary-text whitespace-nowrap">
-                {getTimeAgo(createdAt)}
-              </span>
+              <DateWithRelative value={createdAt} />
               <If condition={isBlocked}>
                 <Then>
                   <Button
