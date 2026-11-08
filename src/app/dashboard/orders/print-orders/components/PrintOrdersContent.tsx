@@ -48,6 +48,10 @@ import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
@@ -129,7 +133,10 @@ export function PrintOrdersContent() {
   }, [filters.status, setPrintStatus]);
 
   const apiFilters = useMemo(() => {
-    const baseFilters = buildApiFiltersFromUrlState(filters);
+    const baseFilters = {
+      ...buildApiFiltersFromUrlState(filters),
+      ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.PRINT_ORDERS),
+    };
 
     if (printStatus === 'printed') {
       return { ...baseFilters, isPrinted: true };

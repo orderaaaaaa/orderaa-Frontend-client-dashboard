@@ -3,6 +3,10 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch, usePrefetchOrderDetails } from '@/services/orders';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 import { TimePeriod, calculateDateRangeFromPeriod, formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { useDebounce, useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
@@ -489,7 +493,10 @@ export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
       setIsEmpty(false);
 
       try {
-        const filters = buildApiFilters(status, fromDate, toDate, debouncedFormFilters);
+        const filters = {
+          ...buildApiFilters(status, fromDate, toDate, debouncedFormFilters),
+          ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.DETAILS_PAGE_FILTER_NAVIGATION),
+        };
         const response = await fetchOrdersForSearch(filters);
 
         if (abortControllerRef.current?.signal.aborted) {

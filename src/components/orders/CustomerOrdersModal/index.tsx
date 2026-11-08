@@ -21,6 +21,7 @@ import {
   warnParkedOrdersSkipped,
 } from '@/app/dashboard/orders/allOrders/utils/bulkStatusFeedback';
 import { isDeletedOrder } from '@/utils/deletedOrder';
+import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -41,7 +42,10 @@ export default function CustomerOrdersModal({
     data: ordersData,
     isLoading: loading,
     error: queryError,
-  } = useCustomerOrders(customerPhone, { enabled: isOpen && !!customerPhone });
+  } = useCustomerOrders(customerPhone, {
+    surface: ORDER_LOOKUP_SURFACE.CUSTOMER_ORDERS_MODAL,
+    enabled: isOpen && !!customerPhone,
+  });
 
   const orders = useMemo(() => ordersData?.data ?? [], [ordersData]);
   const liveOrders = useMemo(() => selectableOrdersOf(orders), [orders]);

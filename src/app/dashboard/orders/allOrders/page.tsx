@@ -54,6 +54,10 @@ import {
   warnParkedOrdersSkipped,
 } from './utils/bulkStatusFeedback';
 import { isDeletedOrder } from '@/utils/deletedOrder';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 
 function AllOrdersContent() {
   const queryClient = useQueryClient();
@@ -80,7 +84,10 @@ function AllOrdersContent() {
 
   // Build API filters from URL state
   const apiFilters = useMemo(() => {
-    return buildApiFiltersFromUrlState(filters);
+    return {
+      ...buildApiFiltersFromUrlState(filters),
+      ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.ALL_ORDERS),
+    };
   }, [filters]);
 
   // Build filter params string for navigation to order details (excludes page/limit)

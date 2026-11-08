@@ -1,5 +1,6 @@
 import type { CarrierSendBlock } from '@/types/carrierSends';
 import type { ShippingCompanyRef } from '@/types/shippingCompanies';
+import type { OrderReadScope } from '@/constants/orderReadScope';
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
@@ -600,6 +601,7 @@ export interface OrderEvent {
 export interface FilterOrdersDto {
   status?: string;
   search?: string;
+  readScope?: OrderReadScope;
   customerName?: string;
   customerPhone?: string;
   governorate?: string;

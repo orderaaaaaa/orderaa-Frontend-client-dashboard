@@ -13,6 +13,10 @@ import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
+  readScopeParamsOf,
+  type OrderLookupSurface,
+} from '@/constants/orderReadScope';
+import {
   invalidateAndWait,
   orderStatusKeys,
   readFreshQueryData,
@@ -250,10 +254,15 @@ export const usePrefetchOrderDetails = () => {
 // Fetch customer orders by phone number
 export const useCustomerOrders = (
   phone: string,
-  options?: { enabled?: boolean }
+  options: { surface: OrderLookupSurface; enabled?: boolean }
 ) => {
+  const scopeParams = readScopeParamsOf(options.surface);
   return useQuery({
-    queryKey: [QUERY_KEYS.CUSTOMER_ORDERS, phone] as QueryKey,
+    queryKey: [
+      QUERY_KEYS.CUSTOMER_ORDERS,
+      phone,
+      ...(scopeParams.readScope ? [scopeParams.readScope] : []),
+    ] as QueryKey,
     queryFn: async () => {
       const response = await http.get<PaginatedResponse<Order>>(
         '/orders/all-orders',
@@ -262,6 +271,7 @@ export const useCustomerOrders = (
             customerPhone: phone,
             limit: 1000,
             page: 1,
+            ...scopeParams,
           },
         }
       );

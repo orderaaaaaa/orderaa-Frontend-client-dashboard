@@ -12,6 +12,10 @@ import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useOrderDetailsNavigation } from '@/hooks/OrderDetails/useOrderDetailsNavigation';
 import { useOrderById } from '@/services/orders';
 import { useOrderLock } from '@/hooks/useOrderLock';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 import { DatePicker } from '@/components/ui/datepicker';
 import {
   Select,
@@ -67,7 +71,9 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     }
   };
 
-  const { statistics } = useOrderStatistics();
+  const { statistics } = useOrderStatistics(
+    readScopeParamsOf(ORDER_LOOKUP_SURFACE.DETAILS_PAGE_STATISTICS),
+  );
   const { options } = useFilterOptions();
 
   const {

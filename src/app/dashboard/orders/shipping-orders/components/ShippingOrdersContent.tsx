@@ -41,6 +41,10 @@ import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
@@ -100,7 +104,10 @@ export function ShippingOrdersContent() {
   } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
 
   const apiFilters = useMemo(() => {
-    const baseFilters = buildApiFiltersFromUrlState(filters);
+    const baseFilters = {
+      ...buildApiFiltersFromUrlState(filters),
+      ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.SHIPPING_ORDERS),
+    };
     if (selectedShippingCompany) {
       return { ...baseFilters, shippingCompanyId: selectedShippingCompany };
     }

@@ -12,6 +12,10 @@ import { findActiveHref, containsHref } from '@/utils/navigation';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
+import {
   Sidebar,
   TopBar,
   MainContent,
@@ -71,6 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             search: query,
             limit: 1,
             page: 1,
+            ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.HEADER_QUICK_JUMP),
           });
           if (response.data && response.data.length > 0) {
             const firstOrder = response.data[0];

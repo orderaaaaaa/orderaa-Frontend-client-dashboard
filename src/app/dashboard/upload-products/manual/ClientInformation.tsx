@@ -8,6 +8,7 @@ import { LiaPlusSolid, LiaTrashSolid, LiaExclamationTriangleSolid } from 'react-
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/utils/debounce';
 import { useCustomerOrders } from '@/services/orders';
+import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
 function ClientInformation({
@@ -30,6 +31,7 @@ function ClientInformation({
   const debouncedPhone = useDebounce(firstPhone, 500);
 
   const { data: ordersData } = useCustomerOrders(debouncedPhone, {
+    surface: ORDER_LOOKUP_SURFACE.MANUAL_ORDER_CLIENT_HISTORY,
     enabled: !!debouncedPhone,
   });
 

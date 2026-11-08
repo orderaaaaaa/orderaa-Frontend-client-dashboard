@@ -27,6 +27,10 @@ import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
+import {
+  ORDER_LOOKUP_SURFACE,
+  readScopeParamsOf,
+} from '@/constants/orderReadScope';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
@@ -79,6 +83,7 @@ export function CallCenterContent() {
     return {
       ...buildApiFiltersFromUrlState(filters),
       ...(shouldSendDepartment && { department }),
+      ...readScopeParamsOf(ORDER_LOOKUP_SURFACE.CALL_CENTER),
     };
   }, [filters, department]);
 
