@@ -5,7 +5,7 @@ import { Can } from '@/components/Can';
 import { useI18n } from '@/i18n/I18nProvider';
 import { PERMISSIONS } from '@/lib/permissions';
 import type { InProcessShipment, ReturnedShipment } from '@/types/shippingProviders';
-import { formatDate } from './formatNumber';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { latenessChipOf } from './LatenessChip';
 import {
   CodeCell,
@@ -93,7 +93,7 @@ export function InProcessShipmentCards({
             whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_CUSTOMER')}
           />
           <dl className="grid grid-cols-2 gap-3 text-sm">
-            <CardField label={t('inProcess.table.columns.takenAt')}>{formatDate(row.takenAt)}</CardField>
+            <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
             <CardField label={t('inProcess.table.columns.window')}>
               {deliveryWindowTextOf(row.availableFrom, row.availableTo)}
             </CardField>
@@ -149,7 +149,7 @@ export function ReturnedShipmentCards({
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />
           <dl className="grid grid-cols-2 gap-3 text-sm">
-            <CardField label={t('inProcess.table.columns.takenAt')}>{formatDate(row.takenAt)}</CardField>
+            <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
             <CardField label={t('inProcess.table.columns.address')}>
               {row.governorate ?? '—'}
               {row.city ? ` - ${row.city}` : ''}

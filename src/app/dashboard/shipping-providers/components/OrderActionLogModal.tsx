@@ -25,8 +25,8 @@ import { useFollowupActionEventsQuery } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import type { OrderChangeBatch } from '@/types/orderChangeHistory';
 import { getApiErrorStatus } from '@/utils/apiError';
-import { formatDate, formatDateTime } from '@/utils/format';
-import { getTimeAgo } from '@/utils/timeAgo';
+import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import {
   ACTION_EVENT_NAME_LABELS,
   ACTION_EVENT_SOURCE_LABELS,
@@ -105,7 +105,7 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
         <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary-text">{nameLabel}</span>
         <span>{ACTION_EVENT_SOURCE_LABELS[event.source] ?? ''}</span>
         <span className="ms-auto whitespace-nowrap">
-          {formatDateTime(event.createdAt)} ({getTimeAgo(event.createdAt)})
+          <DateWithRelative value={event.createdAt} variant="inline" />
           {repeatsSuffix(event.repeats)}
         </span>
       </div>

@@ -9,7 +9,8 @@ import { cn } from '@/lib/utils';
 import { formatDate, formatDateTime } from '@/utils/format';
 import { OrderStatus } from '@/types/orders';
 import { formatMoney } from '@/utils/formatMoney';
-import { getTimeAgoCompact, toCairoDayKey } from '@/utils/timeAgo';
+import { toCairoDayKey } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import {
   SALES_DERIVED_KIND_LABELS,
   SALES_EXCLUSION_REASON_LABELS,
@@ -92,8 +93,7 @@ function negateMoney(value: string | null): string | null {
 
 function deliveredAtText(row: SalesOrderRow): string | null {
   if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
-  if (!row.deliveredAt) return null;
-  return getTimeAgoCompact(toCairoDayKey(row.deliveredAt)) || null;
+  return null;
 }
 
 function deliveredAtExportText(row: SalesOrderRow): string | null {
@@ -189,6 +189,14 @@ function plainCopyLabelOf(set: SalesOrderSet, column: SalesOrderColumn): string 
 }
 
 function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: SalesOrderSet) {
+  if (column === 'createdAt') return <DateWithRelative value={row.createdAt} />;
+  if (column === 'settlementRecordedAt' && row.settlementRecordedAt) {
+    return <DateWithRelative value={row.settlementRecordedAt} />;
+  }
+  if (column === 'deliveredAt' && row.status !== OrderStatus.COLLECTED) {
+    const dayKey = toCairoDayKey(row.deliveredAt);
+    if (dayKey) return <DateWithRelative value={dayKey} dayOnly />;
+  }
   const text = salesOrderText(row, column);
   if (MONEY_COLUMNS.has(column)) return formatMoney(text);
   if (text === null || text === '') return '—';

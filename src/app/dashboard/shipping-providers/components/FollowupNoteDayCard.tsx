@@ -13,7 +13,8 @@ import type {
   FollowupNotePartyValue,
   FollowupNoteView,
 } from '@/lib/api/followup';
-import { formatDate, formatDateTime } from '@/utils/format';
+import { formatDate } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { FollowupNoteItem } from './FollowupNoteItem';
 import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
@@ -46,7 +47,7 @@ function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
           key={`${line.at}-${line.text}-${line.reason ?? ''}`}
           className="break-words text-base leading-7 text-foreground"
         >
-          <span className="text-xs text-muted-foreground">{formatDateTime(line.at)}</span> {line.text}
+          <DateWithRelative value={line.at} variant="inline" className="text-xs text-muted-foreground" /> {line.text}
           {line.reason ? (
             <>
               {` ${FOLLOWUP_CARRIER_REASON_SEPARATOR.trim()} `}
@@ -65,7 +66,7 @@ function CarrierContactList({ contacts }: { contacts: FollowupCarrierContact[] }
     <ul className="flex flex-col gap-1">
       {contacts.map((contact) => (
         <li key={`${contact.at}-${contact.name}-${contact.phone}`} className="break-words text-sm text-foreground">
-          <span className="text-xs text-muted-foreground">{formatDateTime(contact.at)}</span>{' '}
+          <DateWithRelative value={contact.at} variant="inline" className="text-xs text-muted-foreground" />{' '}
           {contact.name ?? FOLLOWUP_NOTE_NO_WRITER}
           {contact.phone && (
             <span dir="ltr" className="font-mono">
@@ -156,7 +157,7 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
               </span>
               <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name] ?? legacy.name}</span>
               <span>
-                {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(legacy.createdAt)}
+                {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - <DateWithRelative value={legacy.createdAt} variant="inline" />
               </span>
             </>
           }

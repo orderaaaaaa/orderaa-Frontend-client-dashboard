@@ -30,9 +30,9 @@ import {
   type ShipmentWhatsAppTemplateType,
 } from '@/types/shippingProviders';
 import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
-import { getTimeAgoCompact } from '@/utils/timeAgo';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { FollowupNotesUnreadBadge } from './FollowupNotesUnreadBadge';
-import { formatDate, formatNumber } from './formatNumber';
+import { formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
 import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
@@ -225,10 +225,7 @@ export function DueCell({
     <div className="flex flex-col items-start gap-1">
       <LatenessChip model={model} />
       {dueDay ? (
-        <div className="flex flex-col">
-          <span className="whitespace-nowrap">{formatDate(dueDay)}</span>
-          <span className={cn(SECONDARY_TEXT_CLASS, 'whitespace-nowrap')}>{getTimeAgoCompact(dueDay)}</span>
-        </div>
+        <DateWithRelative value={dueDay} dayOnly />
       ) : (
         <span className="text-muted-foreground">—</span>
       )}
@@ -491,7 +488,7 @@ export function InProcessShipmentsTable({
                   override={row.lateness?.override ?? null}
                 />
               </td>
-              <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
+              <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.takenAt} /></td>
               <td className={cn(CELL_CLASS, 'max-w-40 whitespace-normal')}>
                 {deliveryWindowTextOf(row.availableFrom, row.availableTo)}
               </td>
@@ -595,7 +592,7 @@ export function ReturnedShipmentsTable({
             <td className={CELL_CLASS}>
               <StatusCell status={row.status} closure={row.closure} />
             </td>
-            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.takenAt} /></td>
             <td className={cn(CELL_CLASS, 'max-w-40')}>
               <div className="flex flex-col items-start gap-0.5">
                 <span className="font-medium">{row.governorate ?? '—'}</span>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { FollowupExchangeCandidate } from '@/lib/api/followup';
 import { cn } from '@/lib/utils';
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { formatNumber } from './formatNumber';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 
@@ -88,7 +88,7 @@ export function ExchangeCandidateStep({
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 ps-7 text-xs text-muted-foreground">
                 <span>{`${formatNumber(candidate.totalCost, 2)} ${t('exchange.create.currency')}`}</span>
-                <span>{formatDateTime(candidate.createdAt)}</span>
+                <DateWithRelative value={candidate.createdAt} />
                 <span>{t('exchange.create.units', { count: unitCount })}</span>
               </div>
               {isBlocked && (

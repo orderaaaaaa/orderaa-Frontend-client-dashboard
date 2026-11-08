@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
 import type { FollowupNoteView } from '@/lib/api/followup';
-import { formatDateTime } from '@/utils/format';
+import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_NOTE_CANCEL_LABEL,
@@ -67,7 +67,7 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendin
 
   const meta = (
     <span>
-      {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(note.createdAt)}
+      {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - <DateWithRelative value={note.createdAt} variant="inline" />
       {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
       {isNew && (
         <Badge variant="destructive" className="ms-1">
