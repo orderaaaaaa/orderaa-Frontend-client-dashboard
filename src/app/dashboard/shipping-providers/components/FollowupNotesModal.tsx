@@ -91,6 +91,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
   const { mutate: markRead } = useMarkFollowupNotesReadMutation();
   const [newNoteIds, setNewNoteIds] = useState<ReadonlySet<number> | null>(null);
   const snapshotTakenRef = useRef(false);
+  const scrollPendingRef = useRef(false);
   const canAddNote = canManage && (notesData?.days.some((day) => day.canAddNotes) ?? false);
 
   useEffect(() => {
@@ -104,6 +105,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
       }
     }
     setNewNoteIds(ids);
+    if (ids.size > 0) scrollPendingRef.current = true;
     if (ids.size > 0 && notesData.readThroughEntryId !== null) {
       markRead({ orderId, throughEntryId: notesData.readThroughEntryId });
     }
@@ -142,6 +144,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
                 day={day}
                 canManage={canManage}
                 newNoteIds={newNoteIds ?? NO_NEW_NOTES}
+                scrollPendingRef={scrollPendingRef}
               />
             ))}
           </div>

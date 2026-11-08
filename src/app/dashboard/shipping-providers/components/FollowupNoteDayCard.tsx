@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { MessageSquareText } from 'lucide-react';
 import { LiaAngleDownSolid } from 'react-icons/lia';
@@ -81,6 +81,7 @@ function PartySection({
   carrierTexts,
   carrierContacts,
   newNoteIds,
+  scrollPendingRef,
 }: {
   party: FollowupNotePartyValue;
   notes: FollowupNoteView[];
@@ -89,6 +90,7 @@ function PartySection({
   carrierTexts: FollowupCarrierText[];
   carrierContacts: FollowupCarrierContact[];
   newNoteIds: ReadonlySet<number>;
+  scrollPendingRef: MutableRefObject<boolean>;
 }) {
   const showTexts = party !== 'CUSTOMER' && carrierTexts.length > 0;
   const showContacts = party === 'COURIER' && carrierContacts.length > 0;
@@ -112,6 +114,7 @@ function PartySection({
               note={note}
               canManage={canManage}
               isNew={newNoteIds.has(note.id)}
+              scrollPendingRef={scrollPendingRef}
             />
           ))}
         </ul>
@@ -163,9 +166,10 @@ interface FollowupNoteDayCardProps {
   day: FollowupNoteDay;
   canManage: boolean;
   newNoteIds: ReadonlySet<number>;
+  scrollPendingRef: MutableRefObject<boolean>;
 }
 
-export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds }: FollowupNoteDayCardProps) {
+export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds, scrollPendingRef }: FollowupNoteDayCardProps) {
   const [isOpen, setIsOpen] = useState(day.isToday);
   const openedForNewRef = useRef(false);
   const hasContent =
@@ -210,6 +214,7 @@ export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds }: Fol
                   carrierTexts={day.carrier.texts}
                   carrierContacts={day.carrier.contacts}
                   newNoteIds={newNoteIds}
+                  scrollPendingRef={scrollPendingRef}
                 />
               ))}
             </div>

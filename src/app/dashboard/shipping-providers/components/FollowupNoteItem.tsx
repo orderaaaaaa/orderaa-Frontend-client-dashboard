@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,10 +27,12 @@ interface FollowupNoteItemProps {
   note: FollowupNoteView;
   canManage: boolean;
   isNew: boolean;
+  scrollPendingRef: MutableRefObject<boolean>;
 }
 
-export function FollowupNoteItem({ orderId, note, canManage, isNew }: FollowupNoteItemProps) {
+export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendingRef }: FollowupNoteItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [draft, setDraft] = useState(note.body);
   const editMutation = useEditFollowupNoteMutation();
@@ -40,6 +42,12 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew }: FollowupNo
   const canEdit = canManage && note.canEdit;
   const canDelete = canManage && note.canDelete;
   const isBusy = editMutation.isPending || deleteMutation.isPending;
+
+  useEffect(() => {
+    if (!isNew || !scrollPendingRef.current) return;
+    scrollPendingRef.current = false;
+    bodyRef.current?.scrollIntoView({ block: 'center' });
+  }, [isNew, scrollPendingRef]);
 
   const startEdit = () => {
     setDraft(note.body);
@@ -162,7 +170,9 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew }: FollowupNo
           </div>
         </div>
       ) : (
-        <p className={NOTE_BODY_CLASS}>{note.body}</p>
+        <p ref={bodyRef} className={NOTE_BODY_CLASS}>
+          {note.body}
+        </p>
       )}
     </NoteCard>
   );
