@@ -91,11 +91,6 @@ function negateMoney(value: string | null): string | null {
   return value === null ? null : (-Number(value)).toFixed(2);
 }
 
-function deliveredAtText(row: SalesOrderRow): string | null {
-  if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
-  return null;
-}
-
 function deliveredAtExportText(row: SalesOrderRow): string | null {
   if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
   const dayKey = toCairoDayKey(row.deliveredAt);
@@ -111,7 +106,7 @@ function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | 
     case 'customerPhone':
       return row.customerPhone;
     case 'deliveredAt':
-      return deliveredAtText(row);
+      return row.status === OrderStatus.COLLECTED ? 'تم التحصيل' : null;
     case 'collectedAmount':
       return row.collectedAmount;
     case 'isCollected':

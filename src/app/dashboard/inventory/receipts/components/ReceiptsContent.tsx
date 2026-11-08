@@ -280,7 +280,8 @@ export function ReceiptsContent() {
               onSelectionChange={(checked) =>
                 handleSelectionChange(receipt.id, checked)
               }
-              titleHref={`/dashboard/inventory/receipts/${receipt.id}`}              showAmount={false}
+              titleHref={`/dashboard/inventory/receipts/${receipt.id}`}
+              showAmount={false}
             />
           ))
         ) : (

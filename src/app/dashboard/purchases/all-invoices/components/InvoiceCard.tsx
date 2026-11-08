@@ -116,7 +116,8 @@ const InvoiceCard = memo(
           select={select}
           isSelected={isSelected}
           onSelectionChange={onSelectionChange}
-          onTitleClick={onTitleClick}          actions={actions}
+          onTitleClick={onTitleClick}
+          actions={actions}
         />
         {canReverse && (
           <ReverseInvoiceModal

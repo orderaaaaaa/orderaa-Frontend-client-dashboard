@@ -9,7 +9,7 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { formatDate, formatNumber } from '@/utils/format';
+import { formatNumber } from '@/utils/format';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -117,7 +117,7 @@ export default function ShortfallSettlementPage() {
         {renderStatusPill(row)}
       </div>
       {[
-        { label: 'تاريخ التحصيل', value: formatDate(row.settlementRecordedAt) },
+        { label: 'تاريخ التحصيل', value: <DateWithRelative value={row.settlementRecordedAt} /> },
         { label: 'إجمالي الطلب', value: `${formatAmount(row.totalCost)} جنيه` },
         { label: 'مبلغ التحصيل', value: renderAmount(row) },
       ].map((field) => (

@@ -162,6 +162,8 @@ export default function OrderCard({
 
       {/* Content */}
       <div className="flex flex-col items-start px-6 gap-3 flex-grow min-w-0 w-full">
+        <DateWithRelative value={createdAt} className="text-xs" />
+
         {/* Code */}
         {code && code !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-start gap-2 max-w-full">
@@ -207,8 +209,6 @@ export default function OrderCard({
                 </Button>
               )}
               <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
-
-              <DateWithRelative value={createdAt} />
               <If condition={isBlocked}>
                 <Then>
                   <Button

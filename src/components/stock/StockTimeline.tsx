@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
 import { ActorChip } from '@/components/audit/ActorChip';
 import { OrderChip, orderHrefOf } from '@/components/stock/OrderChip';
@@ -18,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { StockTimelineReferenceDto, StockTimelineRowDto, StockTimelineWarehouseDto } from '@/lib/api/warehouses';
 import { formatDate, formatStockNumber, formatTime } from '@/utils/format';
+import { cairoDayKey } from '@/utils/timeAgo';
 
 interface StockTimelineProps {
   rows: StockTimelineRowDto[];
@@ -39,7 +39,7 @@ interface QuantityView {
   tone: string;
 }
 
-const dayKeyOf = (iso: string) => format(new Date(iso), 'yyyy-MM-dd');
+const dayKeyOf = (iso: string) => cairoDayKey(new Date(iso));
 
 const groupByDay = (rows: StockTimelineRowDto[]): DayGroup[] => {
   const groups: DayGroup[] = [];

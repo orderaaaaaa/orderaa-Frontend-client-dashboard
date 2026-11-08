@@ -1,7 +1,5 @@
 import { formatNumber as formatNumberValue } from '@/utils/format';
 
-export { formatDate } from '@/utils/format';
-
 export function formatNumber(
   value: number | string | null | undefined,
   fractionDigits = 0,
