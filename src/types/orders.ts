@@ -416,6 +416,7 @@ export interface Order {
   address?: string;
   externalGovernorate?: string | null;
   externalCity?: string | null;
+  area?: string | null;
   sourceGovernorate?: string | null;
   sourceCity?: string | null;
   governorateSourceRowId?: number | null;

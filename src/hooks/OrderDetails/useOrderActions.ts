@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { getApiErrorMessage, getOutOfStockBlock, refusalToastOptions } from '@/utils/apiError';
 import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
-import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
+import { sameAreaText, ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { SHIPPING_COMPANY_REQUIRED_MESSAGE } from '@/types/shippingCompanies';
 import {
@@ -504,6 +504,7 @@ export function useOrderActions({
               ...(data.cityOption && { cityOption: data.cityOption }),
             }),
             address: data.address,
+            ...(!sameAreaText(data.area, order.area) && { area: (data.area ?? '').trim() }),
             returnShippingCost: data.returnShippingCost,
             ...(data.availableFrom && { availableFrom: data.availableFrom }),
             ...(data.availableTo && { availableTo: data.availableTo }),
@@ -526,6 +527,7 @@ export function useOrderActions({
       order.shippingCompanyId,
       order.governorateOption,
       order.cityOption,
+      order.area,
       updateOrderMutation,
     ]
   );

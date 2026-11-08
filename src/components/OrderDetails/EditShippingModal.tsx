@@ -49,7 +49,7 @@ const ALL_SHIPPING_SECTIONS: readonly EditShippingSection[] = [
 const SECTION_FIELDS: Record<EditShippingSection, readonly (keyof ShippingData)[]> = {
   company: ['shippingCompanyId', 'shippingCompanyName', 'oldShipmentCancelledByHand'],
   location: ['governorate', 'city', 'governorateOption', 'cityOption', 'externalGovernorate', 'externalCity'],
-  address: ['address'],
+  address: ['address', 'area'],
   returnCost: ['returnShippingCost'],
   deliveryWindow: ['availableFrom', 'availableTo'],
 };
@@ -76,6 +76,9 @@ const exactMatchValueOf = (
   return matches.length === 1 ? matches[0].value : null;
 };
 
+export const sameAreaText = (a: string | null | undefined, b: string | null | undefined): boolean =>
+  (a ?? '').trim() === (b ?? '').trim();
+
 interface EditShippingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -100,6 +103,7 @@ export interface ShippingData {
   address?: string;
   externalGovernorate?: string | null;
   externalCity?: string | null;
+  area?: string;
   returnShippingCost?: number;
   availableFrom?: string;
   availableTo?: string;
@@ -314,7 +318,8 @@ export default function EditShippingModal({
       (locationEnabled &&
         ((formData.governorateOption ?? null) !== (autoPicks.governorate ?? initialData.governorateOption ?? null) ||
           (formData.cityOption ?? null) !== (autoPicks.city ?? initialData.cityOption ?? null))) ||
-      (addressEnabled && formData.address !== initialData.address) ||
+      (addressEnabled &&
+        (formData.address !== initialData.address || !sameAreaText(formData.area, initialData.area))) ||
       (returnCostEnabled && (formData.returnShippingCost ?? null) !== (initialData.returnShippingCost ?? null)) ||
       (deliveryWindowEnabled && timeChanged)
     );
@@ -674,6 +679,14 @@ export default function EditShippingModal({
 
         {addressEnabled && (
         <div className="flex flex-col gap-2">
+          <label className="font-bold text-foreground">المنطقة</label>
+          <input
+            type="text"
+            value={formData.area || ''}
+            onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+            className="w-full border border-input rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="أدخل المنطقة..."
+          />
           <label className="font-bold text-foreground">العنوان بالتفصيل</label>
           <textarea
             value={formData.address || ''}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
-import EditShippingModal, { type ShippingData } from '@/components/OrderDetails/EditShippingModal';
+import EditShippingModal, { sameAreaText, type ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
   CUSTOMER_PHONE_INVALID_CODE,
   CUSTOMER_PHONE_TAKEN_CODE,
@@ -50,6 +50,7 @@ const shippingDataOf = (row: ShipmentRowBase, shippingCompanyId: number): Shippi
   externalGovernorate: row.externalGovernorate,
   externalCity: row.externalCity,
   address: row.address ?? undefined,
+  area: row.area ?? undefined,
   returnShippingCost: row.returnShippingCost ?? undefined,
   availableFrom: row.availableFrom ?? undefined,
   availableTo: row.availableTo ?? undefined,
@@ -67,6 +68,7 @@ const addressBodyOf = (data: ShippingData, row: ShipmentRowBase): ShipmentAddres
         }
       : {}),
     ...(data.address !== undefined ? { address: data.address } : {}),
+    ...(!sameAreaText(data.area, row.area) ? { area: (data.area ?? '').trim() } : {}),
   };
 };
 
