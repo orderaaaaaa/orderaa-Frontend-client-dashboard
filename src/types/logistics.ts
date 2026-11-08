@@ -21,6 +21,10 @@ export interface GovernorateLogisticsConfigRow {
   nonReceiptCost: string | null;
 }
 
+export interface GovernorateWeekendDays {
+  weekendDays: number[];
+}
+
 export interface PartialDeliveryData {
   orderId: number;
   returnedOrderProductIds: number[];

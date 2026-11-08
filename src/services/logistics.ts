@@ -9,6 +9,7 @@ import http from '@/lib/api/http';
 import {
   GovernorateLogisticsConfig,
   GovernorateLogisticsConfigRow,
+  GovernorateWeekendDays,
   PartialDeliveryData,
   ExchangeData,
   ReturnRefundData,
@@ -55,6 +56,22 @@ export const useGovernorateLogisticsConfig = (shippingCompanyId?: number) => {
   });
 };
 
+export const useGovernorateWeekendDays = (shippingCompanyId?: number) => {
+  return useQuery({
+    queryKey: [
+      QUERY_KEYS.GOVERNORATE_WEEKEND_DAYS,
+      shippingCompanyId,
+    ] as QueryKey,
+    queryFn: async () => {
+      const { data } = await http.get<GovernorateWeekendDays>(
+        `/shipping/governorate-settings/${shippingCompanyId}/weekend-days`
+      );
+      return data;
+    },
+    enabled: !!shippingCompanyId,
+  });
+};
+
 /**
  * Replaces one carrier's rows. The backend upserts what is sent and deletes
  * only the governorates left out, so a carrier's accumulated shipping event
@@ -68,10 +85,15 @@ export const useUpdateGovernorateLogisticsConfig = () => {
       shippingCompanyId: number;
       rows: GovernorateLogisticsConfigRow[];
       confirmEmpty?: boolean;
+      weekendDays?: number[];
     }) => {
       const { data } = await http.put<GovernorateLogisticsConfig[]>(
         `/shipping/governorate-settings/${payload.shippingCompanyId}`,
-        { rows: payload.rows, confirmEmpty: payload.confirmEmpty }
+        {
+          rows: payload.rows,
+          confirmEmpty: payload.confirmEmpty,
+          weekendDays: payload.weekendDays,
+        }
       );
       return data;
     },
@@ -79,6 +101,12 @@ export const useUpdateGovernorateLogisticsConfig = () => {
       queryClient.invalidateQueries({
         queryKey: [
           QUERY_KEYS.GOVERNORATE_LOGISTICS_CONFIG,
+          variables.shippingCompanyId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          QUERY_KEYS.GOVERNORATE_WEEKEND_DAYS,
           variables.shippingCompanyId,
         ],
       });

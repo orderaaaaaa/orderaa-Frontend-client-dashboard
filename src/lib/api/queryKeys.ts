@@ -98,6 +98,7 @@ export const QUERY_KEYS = {
 
   // Logistics & Tracking
   GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',
+  GOVERNORATE_WEEKEND_DAYS: 'governorate-weekend-days',
   FOLLOWUP_NOTES: 'followup-notes',
   FOLLOWUP_ACTION_EVENTS: 'followup-action-events',
   FOLLOWUP_EXCHANGE_CANDIDATES: 'followup-exchange-candidates',

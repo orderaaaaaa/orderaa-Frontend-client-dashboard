@@ -5,9 +5,11 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import Input from '@/components/ui/Input';
 import {
   useGovernorateLogisticsConfig,
+  useGovernorateWeekendDays,
   useUpdateGovernorateLogisticsConfig,
 } from '@/services/logistics';
 import { useGovernoratesQuery } from '@/services/lookups';
@@ -41,8 +43,24 @@ const governorateConfigRowSchema = z
     }
   });
 
+const WEEKEND_DAY_OPTIONS = [
+  { iso: 6, label: 'السبت' },
+  { iso: 7, label: 'الأحد' },
+  { iso: 1, label: 'الاثنين' },
+  { iso: 2, label: 'الثلاثاء' },
+  { iso: 3, label: 'الأربعاء' },
+  { iso: 4, label: 'الخميس' },
+  { iso: 5, label: 'الجمعة' },
+];
+
+const WEEKEND_MAX_DAYS = 6;
+const WEEKEND_LIMIT_MESSAGE = 'يجب أن يبقى يوم عمل واحد على الأقل';
+
 const governorateConfigSchema = z.object({
   configs: z.array(governorateConfigRowSchema),
+  weekendDays: z
+    .array(z.number().int().min(1).max(7))
+    .max(WEEKEND_MAX_DAYS, WEEKEND_LIMIT_MESSAGE),
 });
 
 type GovernorateConfigFormData = z.infer<typeof governorateConfigSchema>;
@@ -56,7 +74,10 @@ type GovernorateConfigField = GovernorateConfigRow & {
   id: string;
 };
 
-export type GovernorateConfigDraft = Record<string, GovernorateConfigRow>;
+export type GovernorateConfigDraft = {
+  rows: Record<string, GovernorateConfigRow>;
+  weekendDays: number[] | null;
+};
 
 export interface GovernorateConfigDraftStore {
   get: (shippingCompanyId: number) => GovernorateConfigDraft | undefined;
@@ -73,6 +94,11 @@ const isSameRow = (a: GovernorateConfigRow, b: GovernorateConfigRow) =>
   isSameValue(a.shippingCost, b.shippingCost) &&
   isSameValue(a.nonReceiptCost, b.nonReceiptCost);
 
+const sortDays = (days: number[]) => [...days].sort((a, b) => a - b);
+
+const isSameDays = (a: number[], b: number[]) =>
+  a.length === b.length && a.every((day, index) => day === b[index]);
+
 interface GovernorateConfigTableProps {
   shippingCompanyId: number;
   onDirtyChange?: (shippingCompanyId: number, isDirty: boolean) => void;
@@ -86,6 +112,11 @@ export function GovernorateConfigTable({
 }: GovernorateConfigTableProps) {
   const { data: configs, isLoading: isConfigsLoading } =
     useGovernorateLogisticsConfig(shippingCompanyId);
+  const {
+    data: weekendData,
+    isLoading: isWeekendLoading,
+    isError: isWeekendError,
+  } = useGovernorateWeekendDays(shippingCompanyId);
   const { mutateAsync: updateConfig, isPending: isSaving } =
     useUpdateGovernorateLogisticsConfig();
   const {
@@ -97,6 +128,7 @@ export function GovernorateConfigTable({
   const [savedGovernorates, setSavedGovernorates] = useState<Set<string>>(new Set());
   const [confirmEmptyOpen, setConfirmEmptyOpen] = useState(false);
   const savedRowsRef = useRef<GovernorateConfigRow[] | null>(null);
+  const savedWeekendRef = useRef<number[] | null>(null);
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -113,10 +145,11 @@ export function GovernorateConfigTable({
     reset,
     watch,
     getValues,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<GovernorateConfigFormData>({
     resolver: zodResolver(governorateConfigSchema),
-    defaultValues: { configs: [] },
+    defaultValues: { configs: [], weekendDays: [] },
   });
 
   const { fields } = useFieldArray({
@@ -125,24 +158,35 @@ export function GovernorateConfigTable({
   });
 
   const watchedConfigs = watch('configs');
+  const watchedWeekendDays = watch('weekendDays');
 
   const syncDraft = useCallback(() => {
     const savedRows = savedRowsRef.current;
     if (!draftStore || !savedRows) return;
     const savedByGovernorate = new Map(savedRows.map((row) => [row.governorate, row]));
-    const draft: GovernorateConfigDraft = {};
+    const rows: Record<string, GovernorateConfigRow> = {};
     for (const row of getValues('configs') ?? []) {
       const saved = savedByGovernorate.get(row.governorate);
       if (!saved || !isSameRow(row, saved)) {
-        draft[row.governorate] = { ...row };
+        rows[row.governorate] = { ...row };
       }
     }
-    if (Object.keys(draft).length > 0) {
-      draftStore.set(shippingCompanyId, draft);
+    const savedWeekend = savedWeekendRef.current;
+    const formWeekend = sortDays(getValues('weekendDays') ?? []);
+    const weekendDays =
+      savedWeekend !== null && !isSameDays(formWeekend, savedWeekend) ? formWeekend : null;
+    if (Object.keys(rows).length > 0 || weekendDays !== null) {
+      draftStore.set(shippingCompanyId, { rows, weekendDays });
     } else {
       draftStore.remove(shippingCompanyId);
     }
   }, [draftStore, getValues, shippingCompanyId]);
+
+  const toggleWeekendDay = (day: number, checked: boolean) => {
+    const current = getValues('weekendDays') ?? [];
+    const next = checked ? [...current, day] : current.filter((value) => value !== day);
+    setValue('weekendDays', sortDays(next), { shouldDirty: true });
+  };
 
   useEffect(() => {
     const subscription = watch(() => syncDraft());
@@ -159,7 +203,7 @@ export function GovernorateConfigTable({
   }, [draftStore, isDirty, onDirtyChange, shippingCompanyId]);
 
   useEffect(() => {
-    if (isConfigsLoading || isGovernoratesLoading) return;
+    if (isConfigsLoading || isGovernoratesLoading || isWeekendLoading) return;
     const configByGovernorate = new Map(
       (configs ?? []).flatMap((c) => (c.governorateKey ? [[c.governorateKey, c] as const] : []))
     );
@@ -172,15 +216,21 @@ export function GovernorateConfigTable({
         nonReceiptCost: existing?.nonReceiptCost ?? '',
       };
     });
+    const savedWeekend = weekendData ? sortDays(weekendData.weekendDays) : null;
     const draft = draftStore?.get(shippingCompanyId);
     savedRowsRef.current = savedRows;
-    reset({ configs: savedRows });
+    savedWeekendRef.current = savedWeekend;
+    reset({ configs: savedRows, weekendDays: savedWeekend ?? [] });
     const pendingRows = savedRows.map((row) => {
-      const draftRow = draft?.[row.governorate];
+      const draftRow = draft?.rows[row.governorate];
       return draftRow && !isSameRow(draftRow, row) ? draftRow : row;
     });
-    if (pendingRows.some((row, index) => row !== savedRows[index])) {
-      reset({ configs: pendingRows }, { keepDefaultValues: true });
+    const pendingWeekend = draft?.weekendDays ?? null;
+    if (pendingRows.some((row, index) => row !== savedRows[index]) || pendingWeekend !== null) {
+      reset(
+        { configs: pendingRows, weekendDays: pendingWeekend ?? savedWeekend ?? [] },
+        { keepDefaultValues: true }
+      );
     }
     setSavedGovernorates(
       new Set((configs ?? []).flatMap((c) => (c.governorateKey ? [c.governorateKey] : [])))
@@ -191,8 +241,10 @@ export function GovernorateConfigTable({
     governorates,
     isConfigsLoading,
     isGovernoratesLoading,
+    isWeekendLoading,
     reset,
     shippingCompanyId,
+    weekendData,
   ]);
 
   const labelByKey = new Map(governorates.map((g) => [g.key, g.label]));
@@ -202,6 +254,9 @@ export function GovernorateConfigTable({
       (row) => row.firstAttemptDelay !== '' || row.shippingCost !== '' || row.nonReceiptCost !== '',
     );
     const submittedRows = data.configs.map((row) => ({ ...row }));
+    const submittedWeekend = sortDays(data.weekendDays);
+    const weekendChanged =
+      savedWeekendRef.current !== null && !isSameDays(submittedWeekend, savedWeekendRef.current);
     updateConfig(
       {
         shippingCompanyId,
@@ -212,10 +267,12 @@ export function GovernorateConfigTable({
           nonReceiptCost: row.nonReceiptCost === '' ? null : row.nonReceiptCost,
         })),
         confirmEmpty: confirmEmpty ? true : undefined,
+        weekendDays: weekendChanged ? submittedWeekend : undefined,
       },
     )
       .then(() => {
         savedRowsRef.current = submittedRows;
+        if (weekendChanged) savedWeekendRef.current = submittedWeekend;
         syncDraft();
         if (!isMountedRef.current) {
           onDirtyChange?.(shippingCompanyId, !!draftStore?.get(shippingCompanyId));
@@ -229,14 +286,18 @@ export function GovernorateConfigTable({
     const isEmpty = data.configs.every(
       (row) => row.firstAttemptDelay === '' && row.shippingCost === '' && row.nonReceiptCost === '',
     );
-    if (isEmpty) {
-      setConfirmEmptyOpen(true);
+    if (!isEmpty) {
+      send(data, false);
       return;
     }
-    send(data, false);
+    if ((configs ?? []).length === 0) {
+      send(data, true);
+      return;
+    }
+    setConfirmEmptyOpen(true);
   };
 
-  if (isConfigsLoading || isGovernoratesLoading) {
+  if (isConfigsLoading || isGovernoratesLoading || isWeekendLoading) {
     return <PageLoading size="sm" className="py-6 min-h-0" />;
   }
 
@@ -255,6 +316,35 @@ export function GovernorateConfigTable({
         }
       }}
     >
+      <div className="space-y-2">
+        <div>
+          <p className="text-sm font-semibold text-gray-700">أيام العطلة الأسبوعية</p>
+          <p className="text-xs text-gray-500">لا تُحسب أيام العطلة في موعد المتابعة</p>
+        </div>
+        {isWeekendError && <p className="text-sm text-red-600">تعذر تحميل أيام العطلة</p>}
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {WEEKEND_DAY_OPTIONS.map((day) => {
+            const checked = watchedWeekendDays.includes(day.iso);
+            const limitReached = !checked && watchedWeekendDays.length >= WEEKEND_MAX_DAYS;
+            const inputId = `weekend-day-${shippingCompanyId}-${day.iso}`;
+            return (
+              <div key={day.iso} className="flex items-center gap-2">
+                <Checkbox
+                  id={inputId}
+                  checked={checked}
+                  disabled={isWeekendError || limitReached}
+                  title={limitReached ? WEEKEND_LIMIT_MESSAGE : undefined}
+                  onCheckedChange={(state) => toggleWeekendDay(day.iso, state === true)}
+                />
+                <label htmlFor={inputId} className="text-sm text-gray-800 cursor-pointer">
+                  {day.label}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {!fields.length ? (
         <div className="text-center py-8 text-gray-500 text-sm">
           لا توجد محافظات متاحة حاليًا.
