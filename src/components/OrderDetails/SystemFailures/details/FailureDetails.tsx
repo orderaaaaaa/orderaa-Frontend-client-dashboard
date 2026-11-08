@@ -32,6 +32,7 @@ import { BypassedVariantsDetails } from './BypassedVariantsDetails';
 import { SkippedVariantsDetails } from './SkippedVariantsDetails';
 import { StockTransitionBlockedDetails } from './StockTransitionBlockedDetails';
 import { StoreUpdateDetails } from './StoreUpdateDetails';
+import { VariantGenerationGapDetails } from './VariantGenerationGapDetails';
 
 const labelOf = <K extends string>(labels: Record<K, string>, value: K) => labels[value] ?? value;
 
@@ -296,6 +297,13 @@ export function FailureDetails({
       );
     case 'SHADOW_ACTIVATION_FAILED':
       return <FailureReasonDetails reason={narrowed.details.reason} />;
+    case 'VARIANT_GENERATION_GAP':
+      return (
+        <VariantGenerationGapDetails
+          details={narrowed.details}
+          orderProducts={order.order_products ?? []}
+        />
+      );
     case 'STORE_UPDATE_FAILED':
       return (
         <div className="flex flex-col gap-3">
