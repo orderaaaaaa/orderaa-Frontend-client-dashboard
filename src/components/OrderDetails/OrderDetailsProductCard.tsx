@@ -448,6 +448,7 @@ function OrderDetailsProductCard({
           productName={editingProduct.product}
           availability={{ kind: 'order', orderId: order.id, quantity: editingProduct.quantity }}
           currentOptionIds={editingCurrentOptionIds}
+          currentLabel={editingProduct.attributes.map((attr) => attr.value).join(' / ')}
         />
       )}
 

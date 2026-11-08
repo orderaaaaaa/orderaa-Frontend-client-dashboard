@@ -32,6 +32,7 @@ export interface VariantAvailabilitySelectorProps {
   className?: string;
   excludedLines?: number;
   informationOnly?: boolean;
+  currentLabel?: string;
 }
 
 export function VariantAvailabilitySelector({
@@ -47,6 +48,7 @@ export function VariantAvailabilitySelector({
   className,
   excludedLines = 0,
   informationOnly = false,
+  currentLabel,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
   const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
@@ -90,6 +92,7 @@ export function VariantAvailabilitySelector({
     exact && refusal ? availableNumbersTextFor({ productName, row: exact }) : null;
   const summary = selectionLabel(attributes, selection);
   const someUnselected = Object.keys(selection).length < attributes.length;
+  const shownSummary = summary || (someUnselected ? currentLabel : undefined) || null;
   const allWarehouseNotSet =
     variants.length > 0 && variants.every((variant) => variant.available === null);
   const exactNotSet = exact !== null && exact.available === null;
@@ -123,9 +126,9 @@ export function VariantAvailabilitySelector({
         <p className="mb-2 text-sm text-muted-foreground">{t('common.loading')}</p>
       ) : null}
 
-      {summary ? (
+      {shownSummary ? (
         <p className="mb-2 text-sm text-foreground">
-          {t('orderDetails.variants.selectedSummary', { variant: summary })}
+          {t('orderDetails.variants.selectedSummary', { variant: shownSummary })}
         </p>
       ) : someUnselected ? (
         <p className="mb-2 text-sm text-muted-foreground">

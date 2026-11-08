@@ -38,7 +38,7 @@ export default function AddSameTypeProductModal({
   const {
     data: variantOptions = [],
     isLoading,
-    isLoadingError: isErrorCatalog,
+    isError: isErrorCatalog,
     error: catalogError,
     refetch: refetchCatalog,
   } = useProductVariantsOptions(isOpen ? productId : null);

@@ -38,6 +38,7 @@ interface EditProductModalProps {
   productName: string;
   availability: EditProductAvailability;
   currentOptionIds: number[];
+  currentLabel?: string;
 }
 
 export default function EditProductModal({
@@ -48,13 +49,14 @@ export default function EditProductModal({
   productName,
   availability,
   currentOptionIds,
+  currentLabel,
 }: EditProductModalProps) {
   const [draft, setDraft] = useState<Selection | null>(null);
 
   const {
     data: variantOptions = [],
     isLoading,
-    isLoadingError: isErrorCatalog,
+    isError: isErrorCatalog,
     error: catalogError,
     refetch: refetchCatalog,
   } = useProductVariantsOptions(isOpen ? productId : null);
@@ -137,6 +139,7 @@ export default function EditProductModal({
           availabilityError={activeAvailability.isError ? activeAvailability.error : null}
           onRetry={() => void activeAvailability.refetch()}
           informationOnly={!hasChanges}
+          currentLabel={currentLabel}
         />
       )}
       {!isLoading && (
