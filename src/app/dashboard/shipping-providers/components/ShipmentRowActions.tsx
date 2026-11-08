@@ -27,6 +27,7 @@ import { LiaEllipsisVSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import ChangeProductsModal from '@/components/orders/ChangeProductsModal';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
+import UndoPartialDeliveryDialog from '@/components/OrderDetails/ActionModals/UndoPartialDeliveryDialog';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
@@ -50,7 +51,7 @@ import { cn } from '@/lib/utils';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { PARTIAL_DELIVERY_CODES } from '@/utils/partialDelivery/partialDeliveryGate';
+import { PARTIAL_DELIVERY_CODES, undoPartialDeliveryActionOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import type { OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
@@ -143,6 +144,7 @@ export interface ShipmentRowActionsProps {
   carrierSupportsUpdate?: boolean;
   frozenReturnChild?: boolean;
   unreadNoteCount?: number;
+  returnChildCode?: string | null;
 }
 
 export function ShipmentRowActions({
@@ -167,6 +169,7 @@ export function ShipmentRowActions({
   carrierSupportsUpdate,
   frozenReturnChild = false,
   unreadNoteCount,
+  returnChildCode,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -176,6 +179,7 @@ export function ShipmentRowActions({
   const pendingActionRef = useRef<(() => void) | null>(null);
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
   const [isPartialOpen, setIsPartialOpen] = useState(false);
+  const [isUndoOpen, setIsUndoOpen] = useState(false);
   const [partialRequested, setPartialRequested] = useState(false);
   const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
   const [isExchangeOpen, setIsExchangeOpen] = useState(false);
@@ -221,6 +225,13 @@ export function ShipmentRowActions({
     blockedReason: sendAgain?.blockedReason ?? null,
     closure,
     resendSupported: carrierResendSupported,
+  });
+
+  const undoGate = undoPartialDeliveryActionOf({
+    locked: rowLocked,
+    status,
+    hasReturnChild: typeof returnChildCode === 'string',
+    childStatus: null,
   });
 
   const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);
@@ -302,6 +313,22 @@ export function ShipmentRowActions({
               partialDelivery.blockedReason ??
               (partialDelivery.pending ? t('inProcess.reason.loadingCarrier') : undefined),
             onSelect: () => setIsPartialOpen(true),
+          },
+        ]
+      : []),
+    ...(undoGate.visible
+      ? [
+          {
+            id: 'undoPartial',
+            labelKey: 'partialDelivery.undo.title' as const,
+            descriptionKey: 'inProcess.sheet.desc.undoPartial' as const,
+            icon: Undo2,
+            group: 'delivery' as const,
+            opensModal: true,
+            codes: PARTIAL_DELIVERY_CODES,
+            disabled: undoGate.blockedKey !== null,
+            disabledReason: undoGate.blockedKey === null ? undefined : t(undoGate.blockedKey),
+            onSelect: () => setIsUndoOpen(true),
           },
         ]
       : []),
@@ -707,6 +734,9 @@ export function ShipmentRowActions({
           carrierSupportsUpdate={carrierSupportsUpdate}
           onClose={() => setEditKind(null)}
         />
+      )}
+      {isUndoOpen && (
+        <UndoPartialDeliveryDialog isOpen onClose={() => setIsUndoOpen(false)} orderId={orderId} />
       )}
       {isPartialOpen && orderQuery.data && (
         <PartialDeliveryModal

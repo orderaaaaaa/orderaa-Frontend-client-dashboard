@@ -365,6 +365,7 @@ export function InProcessRowActions({
       carrierSupportsUpdate={carrierSupportsUpdate}
       frozenReturnChild={row.frozenReturnChild}
       unreadNoteCount={row.unreadNoteCount}
+      returnChildCode={row.returnChildCode}
       onOpenNotes={() => onOpenNotes(row.id)}
       onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
     />

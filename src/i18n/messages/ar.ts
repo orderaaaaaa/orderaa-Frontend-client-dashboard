@@ -478,6 +478,7 @@ const ar = {
   'inProcess.sheet.desc.late': 'تحديد حالة تأخر الشحنة',
   'inProcess.sheet.desc.deliveryWindow': 'تحديد الوقت المتاح للاستلام',
   'inProcess.sheet.desc.partial': 'تسليم جزء من منتجات الطلب',
+  'inProcess.sheet.desc.undoPartial': 'التراجع عن التسليم الجزئي وإعادة قطعه إلى الطلب',
   'inProcess.sheet.desc.changeProducts': 'تغيير منتجات الطلب',
   'inProcess.sheet.desc.close': 'إغلاق متابعة الطلب لليوم',
   'inProcess.sheet.desc.reopen': 'إلغاء إغلاق اليوم',

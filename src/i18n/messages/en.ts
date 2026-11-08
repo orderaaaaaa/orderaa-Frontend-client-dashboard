@@ -468,6 +468,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.sheet.desc.returnCost': 'Amount charged when the order is not received',
   'inProcess.sheet.desc.addPhone': 'Add a new number for the order customer',
   'inProcess.sheet.desc.partial': 'Deliver some of the order products',
+  'inProcess.sheet.desc.undoPartial': 'Undo the partial delivery and return its pieces to the order',
   'inProcess.sheet.desc.changeProducts': "Change the order's products",
   'inProcess.sheet.desc.close': 'Close order follow-up for today',
   'inProcess.sheet.desc.reopen': "Undo today's closure",
