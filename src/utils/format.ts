@@ -10,20 +10,22 @@ export interface FractionDigitsOptions {
   maxFractionDigits?: number;
 }
 
-const dateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
-  day: 'numeric',
-  month: 'long',
+const CAIRO_TIME_ZONE = 'Africa/Cairo';
+
+const dayMonthYearFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+  timeZone: CAIRO_TIME_ZONE,
+  day: '2-digit',
+  month: '2-digit',
   year: 'numeric',
 });
 
-const weekdayDateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+const weekdayFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+  timeZone: CAIRO_TIME_ZONE,
   weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
 });
 
 const timeFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+  timeZone: CAIRO_TIME_ZONE,
   hour: 'numeric',
   minute: '2-digit',
 });
@@ -58,14 +60,21 @@ export const toStockNumber = (value: unknown): number => (isFiniteNumber(value) 
 
 export const formatStockNumber = (value: unknown): string => formatNumber(toStockNumber(value));
 
+const formatDayMonthYear = (date: Date): string => {
+  const parts = dayMonthYearFormatter.formatToParts(date);
+  const partOf = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? '';
+  return [partOf('day'), partOf('month'), partOf('year')].join('/');
+};
+
 export const formatDate = (value: DateInput): string => {
   const date = toValidDate(value);
-  return date ? dateFormatter.format(date) : EMPTY_VALUE;
+  return date ? formatDayMonthYear(date) : EMPTY_VALUE;
 };
 
 export const formatWeekdayDate = (value: DateInput): string => {
   const date = toValidDate(value);
-  return date ? weekdayDateFormatter.format(date) : EMPTY_VALUE;
+  return date ? `${weekdayFormatter.format(date)} ${formatDayMonthYear(date)}` : EMPTY_VALUE;
 };
 
 export const formatTime = (value: DateInput): string => {
@@ -76,6 +85,6 @@ export const formatTime = (value: DateInput): string => {
 export const formatDateTime = (value: DateInput): string => {
   const date = toValidDate(value);
   return date
-    ? `${dateFormatter.format(date)}${DATE_TIME_SEPARATOR}${timeFormatter.format(date)}`
+    ? `${formatDayMonthYear(date)}${DATE_TIME_SEPARATOR}${timeFormatter.format(date)}`
     : EMPTY_VALUE;
 };
