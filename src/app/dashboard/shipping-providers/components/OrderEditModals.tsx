@@ -4,20 +4,23 @@ import { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import EditShippingModal, { sameAreaText, type ShippingData } from '@/components/OrderDetails/EditShippingModal';
+import { ORDER_FIELD_LABELS } from '@/constants/orderFieldLabels';
 import {
   CUSTOMER_PHONE_INVALID_CODE,
   CUSTOMER_PHONE_TAKEN_CODE,
   customerPhoneErrorCodeOf,
   useAddShipmentCustomerPhone,
   useUpdateShipmentAddress,
+  useUpdateShipmentPrepaid,
   useUpdateShipmentPrice,
   useUpdateShipmentReturnCost,
 } from '@/services/shippingProviders';
-import type { ShipmentAddressBody, ShipmentRowBase } from '@/types/shippingProviders';
+import type { ShipmentAddressBody, ShipmentPrepaidBody, ShipmentRowBase } from '@/types/shippingProviders';
 
-export type OrderEditKind = 'address' | 'price' | 'returnCost' | 'phone';
+export type OrderEditKind = 'address' | 'price' | 'returnCost' | 'phone' | 'prepaid';
 
 const PRICE_PATTERN = /^\d*\.?\d*$/;
+const PREPAID_PATTERN = /^\d+(\.\d{1,2})?$/;
 const LIGHT_PHONE_PATTERN = /^\+?\d+$/;
 
 const PHONE_ERROR_MESSAGES: Record<string, string> = {
@@ -183,6 +186,59 @@ function ShipmentPriceModal({
   );
 }
 
+function ShipmentPrepaidModal({
+  orderId,
+  shippingCompanyId,
+  row,
+  onClose,
+}: Omit<OrderEditModalProps, 'kind' | 'carrierSupportsUpdate'>) {
+  const initialValue = row.prepaid?.amount ?? '';
+  const [value, setValue] = useState(initialValue);
+  const updatePrepaid = useUpdateShipmentPrepaid(shippingCompanyId);
+
+  const isFormatValid = value === '' || PREPAID_PATTERN.test(value);
+  const isUnchanged = value === initialValue;
+
+  const handleConfirm = async () => {
+    if (!isFormatValid || isUnchanged) return;
+    const body: ShipmentPrepaidBody = { prepaidAmount: value === '' ? null : Number(value) };
+    await updatePrepaid
+      .mutateAsync({ orderId, body })
+      .then(onClose)
+      .catch(() => undefined);
+  };
+
+  return (
+    <BaseModal
+      isOpen
+      onClose={onClose}
+      title={ORDER_FIELD_LABELS.prepaidAmount}
+      onConfirm={handleConfirm}
+      confirmText="حفظ"
+      confirmDisabled={!isFormatValid || isUnchanged}
+      isLoading={updatePrepaid.isPending}
+      maxWidth="md:max-w-md"
+    >
+      <div className="flex flex-col gap-2">
+        <label htmlFor="shipment-prepaid-input" className="font-bold text-foreground">
+          {`${ORDER_FIELD_LABELS.prepaidAmount} (جنيه)`}
+        </label>
+        <Input
+          id="shipment-prepaid-input"
+          type="text"
+          inputMode="decimal"
+          dir="ltr"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="أدخل المبلغ"
+          error={isFormatValid ? undefined : 'أدخل مبلغاً صحيحاً بحد أقصى رقمين عشريين'}
+        />
+        <p className="text-xs text-muted-foreground">اترك الحقل فارغاً أو أدخل 0 لإلغاء المبلغ</p>
+      </div>
+    </BaseModal>
+  );
+}
+
 function ShipmentCustomerPhoneModal({
   orderId,
   shippingCompanyId,
@@ -289,6 +345,9 @@ export function OrderEditModal({
   }
   if (kind === 'price') {
     return <ShipmentPriceModal orderId={orderId} shippingCompanyId={shippingCompanyId} row={row} onClose={onClose} />;
+  }
+  if (kind === 'prepaid') {
+    return <ShipmentPrepaidModal orderId={orderId} shippingCompanyId={shippingCompanyId} row={row} onClose={onClose} />;
   }
   return (
     <ShipmentCustomerPhoneModal orderId={orderId} shippingCompanyId={shippingCompanyId} row={row} onClose={onClose} />

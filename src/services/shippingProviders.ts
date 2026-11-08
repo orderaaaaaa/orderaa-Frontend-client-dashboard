@@ -38,6 +38,7 @@ import type {
   ShipmentCustomerPhoneBody,
   ShipmentCustomerPhoneResponse,
   ShipmentPriceBody,
+  ShipmentPrepaidBody,
   SendAgainRecordResponse,
   ShipmentReturnCostBody,
   ShippingProviderType,
@@ -295,6 +296,19 @@ export const useUpdateShipmentReturnCost = (shippingCompanyId: number | undefine
       return data;
     },
     { success: 'تم تحديث تكلفة المرتجع', error: 'تعذر تحديث تكلفة المرتجع' },
+  );
+
+export const useUpdateShipmentPrepaid = (shippingCompanyId: number | undefined) =>
+  useShipmentEditMutation(
+    async ({ orderId, body }: { orderId: number; body: ShipmentPrepaidBody }) => {
+      const { data } = await http.patch<ShipmentEditResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/prepaid`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم تحديث المبلغ المدفوع مسبقاً', error: 'تعذر تحديث المبلغ المدفوع مسبقاً' },
+    { extraQueryKeys: [QUERY_KEYS.CUSTOMER_ORDERS, QUERY_KEYS.DELAYED_ORDERS] },
   );
 
 export const useAddShipmentCustomerPhone = (shippingCompanyId: number | undefined) =>

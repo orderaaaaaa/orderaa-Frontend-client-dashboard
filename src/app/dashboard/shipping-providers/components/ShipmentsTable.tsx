@@ -11,6 +11,7 @@ import CopyButton from '@/components/ui/copy-button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
+import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -554,7 +555,7 @@ export function InProcessShipmentsTable({
                 />
               </td>
               <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
-                {moneyTextOf(row.totalCost)}
+                <span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span>
               </td>
               <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
                 <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
@@ -654,7 +655,7 @@ export function ReturnedShipmentsTable({
               </div>
             </td>
             <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
-              {moneyTextOf(row.totalCost)}
+              <span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span>
             </td>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
               <ReturnedRowActions

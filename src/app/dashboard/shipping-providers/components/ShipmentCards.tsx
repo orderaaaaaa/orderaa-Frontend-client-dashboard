@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { Can } from '@/components/Can';
 import { useI18n } from '@/i18n/I18nProvider';
+import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 import { PERMISSIONS } from '@/lib/permissions';
 import type { InProcessShipment, ReturnedShipment } from '@/types/shippingProviders';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
@@ -113,7 +114,7 @@ export function InProcessShipmentCards({
                 whatsapp={findTemplate(row.whatsappTemplates ?? [], 'SHIPMENT_COURIER')}
               />
             </CardField>
-            <CardField label={t('inProcess.table.columns.total')}>{moneyTextOf(row.totalCost)}</CardField>
+            <CardField label={t('inProcess.table.columns.total')}><span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span></CardField>
             <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
               <CardField label={t('inProcess.table.columns.net')}>
                 <NetAmountCell row={row} layout="inline" />
@@ -164,7 +165,7 @@ export function ReturnedShipmentCards({
               {row.governorate ?? '—'}
               {row.city ? ` - ${row.city}` : ''}
             </CardField>
-            <CardField label={t('inProcess.table.columns.total')}>{moneyTextOf(row.totalCost)}</CardField>
+            <CardField label={t('inProcess.table.columns.total')}><span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span></CardField>
           </dl>
         </li>
       ))}

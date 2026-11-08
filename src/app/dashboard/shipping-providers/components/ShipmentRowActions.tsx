@@ -20,6 +20,7 @@ import {
   Send,
   Truck,
   Undo2,
+  Wallet,
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
@@ -371,6 +372,19 @@ export function ShipmentRowActions({
             disabledReason:
               rowLockedReason ?? (carrierSupportsUpdate === false ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined),
             onSelect: () => setEditKind('returnCost'),
+          },
+          {
+            id: 'editPrepaid',
+            labelKey: 'inProcess.action.prepaid' as const,
+            descriptionKey: 'inProcess.sheet.desc.prepaid' as const,
+            icon: Wallet,
+            group: 'orderEdit' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_CARRIERS_PREPAID_MANAGE],
+            disabled: rowLocked || carrierSupportsUpdate === false,
+            disabledReason:
+              rowLockedReason ?? (carrierSupportsUpdate === false ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined),
+            onSelect: () => setEditKind('prepaid'),
           },
           {
             id: 'editPhone',
