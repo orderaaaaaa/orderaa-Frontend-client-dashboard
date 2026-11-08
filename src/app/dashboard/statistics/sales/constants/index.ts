@@ -337,6 +337,7 @@ export type SalesOrderColumn =
   | 'cancelReason'
   | 'cancelNotes'
   | 'customerPhone'
+  | 'productLines'
   | 'deliveredAt'
   | 'collectedAmount'
   | 'isCollected'
@@ -370,6 +371,7 @@ export const SALES_ORDER_COLUMN_LABELS: Record<SalesOrderColumn, string> = {
   cancelReason: 'سبب الإلغاء',
   cancelNotes: 'ملاحظات الإلغاء',
   customerPhone: 'رقم الهاتف',
+  productLines: 'المنتجات',
   deliveredAt: 'تاريخ التسليم',
   collectedAmount: 'مبلغ التحصيل',
   isCollected: 'محصل',
@@ -394,12 +396,15 @@ export const SALES_DERIVED_KIND_LABELS: Record<SalesDerivedKind, string> = {
   PARTIAL_REMAINDER: 'متبقي جزئي',
   REPLACEMENT: 'بديل',
   EXCHANGE_RETURN: 'تبادل مرتجع',
+  EXCHANGE: 'استبدال',
+  CUSTOMER_RETURN: 'استرجاع',
 };
 
 const COMMON_ORDER_COLUMNS: readonly SalesOrderColumn[] = [
   'code',
   'customerName',
   'customerPhone',
+  'productLines',
   'governorate',
   'city',
   'deliveredAt',

@@ -65,9 +65,20 @@ export type SalesPieceSet = 'PIECES_SOLD' | 'PIECES_COST';
 
 export type SalesSubPageSet = SalesOrderSet | SalesPieceSet;
 
-export type SalesDerivedKind = 'PARTIAL_REMAINDER' | 'REPLACEMENT' | 'EXCHANGE_RETURN';
+export type SalesDerivedKind =
+  | 'PARTIAL_REMAINDER'
+  | 'REPLACEMENT'
+  | 'EXCHANGE_RETURN'
+  | 'EXCHANGE'
+  | 'CUSTOMER_RETURN';
 
 export type SalesExclusionReason = 'NO_FEE' | 'NO_COST' | 'NO_FEE_NO_COST';
+
+export interface SalesOrderProductLine {
+  productName: string;
+  variantLabel: string;
+  quantity: number;
+}
 
 export interface SalesOrderRow {
   orderId: number;
@@ -77,6 +88,7 @@ export interface SalesOrderRow {
   createdAt: string;
   customerName: string;
   customerPhone: string | null;
+  productLines: SalesOrderProductLine[];
   governorate: string | null;
   city: string | null;
   totalCost: string;

@@ -18,7 +18,7 @@ import {
   SALES_SUBPAGE_SETS,
   type SalesOrderColumn,
 } from '../constants';
-import type { SalesOrderRow, SalesOrderSet } from '../types';
+import type { SalesOrderProductLine, SalesOrderRow, SalesOrderSet } from '../types';
 import { STICKY_BODY_START, STICKY_HEADER, STICKY_HEADER_CORNER } from './tableClasses';
 
 interface SalesOrdersTableProps {
@@ -41,6 +41,7 @@ const MONEY_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
 const WRAPPING_COLUMNS: ReadonlySet<SalesOrderColumn> = new Set<SalesOrderColumn>([
   'customerName',
   'customerPhone',
+  'productLines',
   'governorate',
   'city',
   'carrierName',
@@ -87,6 +88,28 @@ function joinStoreAndPage(row: SalesOrderRow): string | null {
   return parts.length ? parts.join(' / ') : null;
 }
 
+function productLineText(line: SalesOrderProductLine): string {
+  const variant = line.variantLabel ? ` — ${line.variantLabel}` : '';
+  const quantity = line.quantity > 1 ? ` ×${line.quantity}` : '';
+  return `${line.productName}${variant}${quantity}`;
+}
+
+function productLineTexts(row: SalesOrderRow): string[] {
+  return row.productLines.map(productLineText);
+}
+
+function renderProductLines(row: SalesOrderRow) {
+  const lines = productLineTexts(row);
+  if (lines.length === 0) return '—';
+  return (
+    <div className="flex flex-col gap-1">
+      {lines.map((line, index) => (
+        <span key={index}>{line}</span>
+      ))}
+    </div>
+  );
+}
+
 function negateMoney(value: string | null): string | null {
   return value === null ? null : (-Number(value)).toFixed(2);
 }
@@ -105,6 +128,8 @@ function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | 
       return row.customerName;
     case 'customerPhone':
       return row.customerPhone;
+    case 'productLines':
+      return productLineTexts(row).join(' + ') || null;
     case 'deliveredAt':
       return row.status === OrderStatus.COLLECTED ? 'تم التحصيل' : null;
     case 'collectedAmount':
@@ -192,6 +217,7 @@ function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: Sale
     const dayKey = toCairoDayKey(row.deliveredAt);
     if (dayKey) return <DateWithRelative value={dayKey} dayOnly />;
   }
+  if (column === 'productLines') return renderProductLines(row);
   const text = salesOrderText(row, column);
   if (MONEY_COLUMNS.has(column)) return formatMoney(text);
   if (text === null || text === '') return '—';
