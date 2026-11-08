@@ -169,6 +169,7 @@ export function OrderActionModals({
           cityOption: order.cityOption ?? null,
           address: order.address,
           externalGovernorate: order.externalGovernorate,
+          externalCity: order.externalCity,
           returnShippingCost: order.returnShippingCost,
           availableFrom: order.availableFrom || order.timeFrom,
           availableTo: order.availableTo || order.timeTo,

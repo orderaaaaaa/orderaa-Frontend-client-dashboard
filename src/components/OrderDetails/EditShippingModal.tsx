@@ -46,7 +46,7 @@ const ALL_SHIPPING_SECTIONS: readonly EditShippingSection[] = [
 
 const SECTION_FIELDS: Record<EditShippingSection, readonly (keyof ShippingData)[]> = {
   company: ['shippingCompanyId', 'shippingCompanyName', 'oldShipmentCancelledByHand'],
-  location: ['governorate', 'city', 'governorateOption', 'cityOption', 'externalGovernorate'],
+  location: ['governorate', 'city', 'governorateOption', 'cityOption', 'externalGovernorate', 'externalCity'],
   address: ['address'],
   returnCost: ['returnShippingCost'],
   deliveryWindow: ['availableFrom', 'availableTo'],
@@ -87,6 +87,7 @@ export interface ShippingData {
   cityOption?: string | null;
   address?: string;
   externalGovernorate?: string | null;
+  externalCity?: string | null;
   returnShippingCost?: number;
   availableFrom?: string;
   availableTo?: string;
@@ -276,10 +277,8 @@ export default function EditShippingModal({
       ? initialData.city
       : undefined);
 
-  const storedGovernorateText = initialData.governorateOption
-    ? ''
-    : initialData.governorate || initialData.externalGovernorate || '';
-  const storedCityText = initialData.cityOption ? '' : initialData.city || '';
+  const storedGovernorateText = initialData.governorate || initialData.externalGovernorate || '';
+  const storedCityText = initialData.city || initialData.externalCity || '';
 
   const hasChanges = useMemo(() => {
     const timeChanged =
@@ -500,7 +499,7 @@ export default function EditShippingModal({
             <SearchableSelect
               id="edit-shipping-governorate"
               aria-label={t('canonical.shipping.governorateLabel')}
-              value={formData.governorateOption || ''}
+              value={governorateDisplay ? formData.governorateOption || '' : ''}
               displayValue={governorateDisplay}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
@@ -534,7 +533,7 @@ export default function EditShippingModal({
                 onRetry={() => void governoratesQuery.refetch()}
               />
             )}
-            {storedGovernorateText && !formData.governorateOption && (
+            {storedGovernorateText && !governorateDisplay && (
               <p className="text-xs text-muted-foreground">
                 المحفوظ حاليا: {storedGovernorateText}
               </p>
@@ -546,7 +545,7 @@ export default function EditShippingModal({
             <SearchableSelect
               id="edit-shipping-city"
               aria-label={t('canonical.shipping.cityLabel')}
-              value={formData.cityOption || ''}
+              value={cityDisplay ? formData.cityOption || '' : ''}
               displayValue={cityDisplay}
               onValueChange={handleCityChange}
               options={cityOptions}
@@ -576,7 +575,7 @@ export default function EditShippingModal({
                 {locationOptionsErrorTextOf(citiesQuery.error, t('canonical.shipping.cityLoadError'))}
               </p>
             )}
-            {storedCityText && !formData.cityOption && (
+            {storedCityText && !cityDisplay && (
               <p className="text-xs text-muted-foreground">المحفوظ حاليا: {storedCityText}</p>
             )}
           </div>

@@ -109,6 +109,8 @@ export interface ShipmentRowBase {
   governorateOption: string | null;
   cityOption: string | null;
   area: string | null;
+  externalGovernorate: string | null;
+  externalCity: string | null;
   address: string | null;
   returnShippingCost: number | null;
   lineCount: number;

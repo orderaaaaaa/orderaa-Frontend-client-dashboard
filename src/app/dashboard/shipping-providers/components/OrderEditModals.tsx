@@ -47,6 +47,8 @@ const shippingDataOf = (row: ShipmentRowBase, shippingCompanyId: number): Shippi
   city: row.city ?? undefined,
   governorateOption: row.governorateOption,
   cityOption: row.cityOption,
+  externalGovernorate: row.externalGovernorate,
+  externalCity: row.externalCity,
   address: row.address ?? undefined,
   returnShippingCost: row.returnShippingCost ?? undefined,
   availableFrom: row.availableFrom ?? undefined,
