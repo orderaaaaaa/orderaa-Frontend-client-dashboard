@@ -35,11 +35,11 @@ export function DateText({ value, withTime = true, dayOnly = false }: DateTextPr
   );
 }
 
-export function RelativeTime({ value, className }: { value: DateValue; className?: string }) {
+export function RelativeTime({ value, prefix, className }: { value: DateValue; prefix?: string; className?: string }) {
   const { locale } = useI18n();
   const relative = getTimeAgo(value, locale);
   if (!relative) return null;
-  return <span className={className}>{relative}</span>;
+  return <span className={className}>{prefix}{relative}</span>;
 }
 
 export function DateWithRelative({

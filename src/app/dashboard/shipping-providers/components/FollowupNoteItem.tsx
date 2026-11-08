@@ -60,7 +60,7 @@ export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemP
       {note.editedAt !== null && (
         <>
           {' - '}
-          {FOLLOWUP_NOTE_EDITED_TAG} · <RelativeTime value={note.editedAt} />
+          {FOLLOWUP_NOTE_EDITED_TAG}<RelativeTime value={note.editedAt} prefix=" · " />
         </>
       )}
     </span>
