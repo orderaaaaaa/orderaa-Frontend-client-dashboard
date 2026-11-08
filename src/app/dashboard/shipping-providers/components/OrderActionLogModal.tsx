@@ -2,7 +2,16 @@
 
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, Flag, History, Info, PhoneCall, Send, type LucideIcon } from 'lucide-react';
+import {
+  CircleAlert,
+  Flag,
+  History,
+  Info,
+  MessageSquareQuote,
+  PhoneCall,
+  Send,
+  type LucideIcon,
+} from 'lucide-react';
 import { OrderChangeBatchItem } from '@/components/OrderDetails/ChangeHistory/OrderChangeBatchItem';
 import BaseModal from '@/components/ui/base-modal';
 import { EmptyState } from '@/components/ui/state-panels';
@@ -38,6 +47,7 @@ const SOURCE_ICONS: Record<FollowupActionEventSource, LucideIcon> = {
   ORDER_EVENT: PhoneCall,
   LATE_MARK: Flag,
   CARRIER_SEND_AUDIT: Send,
+  CARRIER_EVENT: MessageSquareQuote,
 };
 
 const historyNoticeOf = (

@@ -18,7 +18,6 @@ import { FollowupNoteItem } from './FollowupNoteItem';
 import { NOTE_BODY_CLASS, NoteCard } from './NoteCard';
 import {
   FOLLOWUP_CARRIER_CONTACTS_LABEL,
-  FOLLOWUP_CARRIER_REPEAT_PREFIX,
   FOLLOWUP_CARRIER_TEXTS_LABEL,
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
@@ -28,6 +27,7 @@ import {
   FOLLOWUP_NOTE_PARTY_ORDER,
   FOLLOWUP_NOTES_EMPTY_DAY,
   FOLLOWUP_TODAY_LABEL,
+  repeatsSuffix,
 } from './followupNotesConstants';
 
 const formatDayKey = (key: string): string => {
@@ -36,9 +36,6 @@ const formatDayKey = (key: string): string => {
   const dayOfMonth = Number(key.slice(6, 8));
   return formatDate(new Date(Date.UTC(year, month - 1, dayOfMonth, 12)));
 };
-
-const repeatsSuffix = (repeats: number): string =>
-  repeats > 1 ? ` ${FOLLOWUP_CARRIER_REPEAT_PREFIX}${repeats}` : '';
 
 function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
   return (

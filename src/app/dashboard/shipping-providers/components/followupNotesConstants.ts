@@ -46,6 +46,10 @@ export const FOLLOWUP_LEGACY_TAG = 'سابق';
 export const FOLLOWUP_CARRIER_TEXTS_LABEL = 'حالات جهة الشحن';
 export const FOLLOWUP_CARRIER_CONTACTS_LABEL = 'بيانات المندوب';
 export const FOLLOWUP_CARRIER_REPEAT_PREFIX = '×';
+export const FOLLOWUP_CARRIER_REASON_SEPARATOR = ' — ';
+
+export const repeatsSuffix = (repeats: number): string =>
+  repeats > 1 ? ` ${FOLLOWUP_CARRIER_REPEAT_PREFIX}${repeats}` : '';
 
 export const FOLLOWUP_LEGACY_NAME_LABELS: Partial<Record<string, string>> = {
   ATTEMPTED: 'متابعة',
@@ -70,6 +74,7 @@ export const ACTION_EVENT_SOURCE_LABELS: Record<FollowupActionEventSource, strin
   ORDER_EVENT: 'إجراء متابعة',
   LATE_MARK: 'حالة التأخير',
   CARRIER_SEND_AUDIT: 'إجراء الشحن',
+  CARRIER_EVENT: 'ملاحظة شركة الشحن',
 };
 
 export { ACTION_EVENT_NAME_LABELS } from '@/constants/followupEventLabels';

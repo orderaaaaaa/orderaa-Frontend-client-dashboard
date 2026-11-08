@@ -202,6 +202,7 @@ export interface FollowupLegacyNote {
 export interface FollowupCarrierText {
   at: string;
   text: string;
+  reason: string | null;
   repeats: number;
 }
 
@@ -248,7 +249,7 @@ export interface FollowupNoteDeleteResponse {
   id: number;
 }
 
-export type FollowupActionEventSource = 'ORDER_EVENT' | 'LATE_MARK' | 'CARRIER_SEND_AUDIT';
+export type FollowupActionEventSource = 'ORDER_EVENT' | 'LATE_MARK' | 'CARRIER_SEND_AUDIT' | 'CARRIER_EVENT';
 
 export interface FollowupActionEvent {
   id: number;
@@ -257,6 +258,7 @@ export interface FollowupActionEvent {
   note: string | null;
   employeeName: string | null;
   createdAt: string;
+  repeats: number;
 }
 
 export interface FollowupActionEventsPage {
