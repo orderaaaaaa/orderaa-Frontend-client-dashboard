@@ -26,6 +26,7 @@ import {
   useProductsVariantsOptions,
   type VariantOption as CatalogueVariantOption,
 } from '@/services/orders';
+import { useProductCardsFailed } from '@/services/products';
 import { mapOrderProductToVariantInfo, type Order, type OrderProduct } from '@/types/orders';
 import { getAvailabilityRefusalMessage, refusalToastOptions } from '@/utils/apiError';
 import { formatMoney } from '@/utils/formatMoney';
@@ -291,6 +292,7 @@ export default function ChangeProductsModal({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [seedSignature, setSeedSignature] = useState<string | null>(null);
   const seededRef = useRef(false);
+  const cardsFailed = useProductCardsFailed(lines.map((line) => line.productId));
 
   const currentProducts = useMemo(
     () => (orderQuery.data ? currentProductsFromOrder(orderQuery.data) : []),
@@ -327,6 +329,7 @@ export default function ChangeProductsModal({
     !catalogueQuery.isPending &&
     lines.length > 0 &&
     lines.every(isLineComplete) &&
+    !cardsFailed &&
     !isTotalCostInvalid &&
     !isPending &&
     !isUnchanged;

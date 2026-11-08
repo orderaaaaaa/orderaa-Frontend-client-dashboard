@@ -1,4 +1,4 @@
-import { useQuery, QueryKey } from '@tanstack/react-query';
+import { useQuery, useQueries, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getProductAttributeOptions } from '@/lib/api/products';
 
@@ -12,6 +12,14 @@ export const useProductAttributeOptionsQuery = (productId: number | null | undef
   return useQuery({
     ...productAttributeOptionsQueryOptions(productId),
     enabled: !!productId,
+  });
+};
+
+export const useProductCardsFailed = (productIds: readonly number[]) => {
+  const uniqueIds = Array.from(new Set(productIds));
+  return useQueries({
+    queries: uniqueIds.map((productId) => productAttributeOptionsQueryOptions(productId)),
+    combine: (results) => results.some((result) => result.isError),
   });
 };
 

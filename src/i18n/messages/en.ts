@@ -154,7 +154,6 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.state.notSet': 'Warehouse not set',
   'orderDetails.variants.selectedSummary': 'Current choice: {variant}',
   'orderDetails.variants.pickAll': 'Choose every option to see exact availability',
-  'orderDetails.variants.noVariantRows': 'No stock data for this product yet',
   'orderDetails.variants.noCards': 'No variants available',
   'orderDetails.variants.filterLabel': 'Search variants',
   'orderDetails.variants.excludedLines': '{count} line(s) without a full selection are not counted',

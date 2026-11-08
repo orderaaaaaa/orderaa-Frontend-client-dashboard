@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useProductCardsFailed } from '@/services/products';
 import {
   draftForProductLines,
   isLineComplete,
@@ -74,6 +75,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   const [contentInput, setContentInput] = useState('');
   const [notes, setNotes] = useState('');
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const cardsFailed = useProductCardsFailed(lines.map((line) => line.productId));
 
   const source = candidates.find((candidate) => candidate.id === sourceId) ?? null;
   const returnedUnits = (source?.items ?? []).flatMap((item) => {
@@ -98,7 +100,8 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   const trimmedContent = contentValue.trim();
 
   const isSourceValid = source !== null && source.openExchangeCode === null;
-  const isProductsValid = returnedUnits.length > 0 && lines.length > 0 && lines.every(isLineComplete);
+  const isProductsValid =
+    returnedUnits.length > 0 && lines.length > 0 && lines.every(isLineComplete) && !cardsFailed;
   const isSummaryValid =
     isCodValid &&
     trimmedContent.length > 0 &&
