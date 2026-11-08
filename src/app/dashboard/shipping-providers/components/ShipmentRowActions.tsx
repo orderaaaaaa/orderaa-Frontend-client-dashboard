@@ -595,7 +595,9 @@ export function ShipmentRowActions({
             </span>
           )}
           {unreadCount > 0 && (
-            <span className="sr-only">{t('inProcess.table.unreadNotes', { n: formatNumber(unreadCount) })}</span>
+            <span className="sr-only">
+              {t('inProcess.table.unreadCarrierMessages', { n: formatNumber(unreadCount) })}
+            </span>
           )}
         </span>
       </Button>

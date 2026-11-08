@@ -27,7 +27,7 @@ export function UnreadNotesCountPill({ count, className }: { count: number; clas
 export function FollowupNotesUnreadBadge({ count, onOpen }: { count: number | undefined; onOpen: () => void }) {
   const { t } = useI18n();
   if (!count || count <= 0) return null;
-  const label = t('inProcess.table.unreadNotes', { n: formatNumber(count) });
+  const label = t('inProcess.table.unreadCarrierMessages', { n: formatNumber(count) });
   return (
     <Button
       type="button"

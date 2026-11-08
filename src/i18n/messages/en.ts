@@ -419,7 +419,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.table.copyPhone': 'Copy phone number',
   'inProcess.table.copyShippingCode': 'Copy shipping code',
   'inProcess.table.morePhones': 'Show all numbers ({n})',
-  'inProcess.table.unreadNotes': 'Unread notes: {n}',
+  'inProcess.table.unreadCarrierMessages': 'Unread carrier messages: {n}',
   'inProcess.table.columns.code': 'Code',
   'inProcess.table.columns.customer': 'Customer',
   'inProcess.table.columns.products': 'Products',
