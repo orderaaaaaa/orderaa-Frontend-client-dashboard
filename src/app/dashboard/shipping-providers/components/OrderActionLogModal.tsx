@@ -38,6 +38,7 @@ import {
   ACTION_LOG_TITLE,
   FOLLOWUP_NOTES_RETRY_LABEL,
   FOLLOWUP_TODAY_LABEL,
+  repeatsSuffix,
 } from './followupNotesConstants';
 import { NOTE_BODY_CLASS } from './NoteCard';
 
@@ -49,6 +50,8 @@ const SOURCE_ICONS: Record<FollowupActionEventSource, LucideIcon> = {
   CARRIER_SEND_AUDIT: Send,
   CARRIER_EVENT: MessageSquareQuote,
 };
+
+const DEFAULT_SOURCE_ICON = History;
 
 const historyNoticeOf = (
   canReadHistory: boolean,
@@ -89,17 +92,21 @@ const groupByDay = (entries: ActionLogEntry[]): DayGroup[] =>
 
 function ActionEventRow({ event }: { event: FollowupActionEvent }) {
   const nameLabel = ACTION_EVENT_NAME_LABELS[event.name] ?? event.name;
+  const isCarrierEvent = event.source === 'CARRIER_EVENT';
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 shadow-xs">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-        <span className="break-words text-sm font-semibold text-foreground">
-          {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
-        </span>
+        {!isCarrierEvent && (
+          <span className="break-words text-sm font-semibold text-foreground">
+            {event.employeeName ?? ACTION_LOG_SYSTEM_ACTOR}
+          </span>
+        )}
         <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary-text">{nameLabel}</span>
-        <span>{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
+        <span>{ACTION_EVENT_SOURCE_LABELS[event.source] ?? ''}</span>
         <span className="ms-auto whitespace-nowrap">
           {formatDateTime(event.createdAt)} ({getTimeAgo(event.createdAt)})
+          {repeatsSuffix(event.repeats)}
         </span>
       </div>
       {event.note && <p className={NOTE_BODY_CLASS}>{event.note}</p>}
@@ -274,7 +281,7 @@ function ActionLogContent({
                 {group.entries.map((entry, index) => (
                   <TimelineItem
                     key={entry.key}
-                    icon={entry.isHistory ? History : SOURCE_ICONS[entry.event.source]}
+                    icon={entry.isHistory ? History : (SOURCE_ICONS[entry.event.source] ?? DEFAULT_SOURCE_ICON)}
                     isLast={index === group.entries.length - 1}
                   >
                     {entry.isHistory ? (
