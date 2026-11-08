@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { PackageSearch } from 'lucide-react';
@@ -21,9 +21,14 @@ import type {
   FollowupCustomVariant,
 } from '@/lib/api/followup';
 import { useFollowupChangeProductsMutation } from '@/services/followup';
-import { orderDetailsQueryOptions } from '@/services/orders';
-import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
+import {
+  orderDetailsQueryOptions,
+  useProductsVariantsOptions,
+  type VariantOption as CatalogueVariantOption,
+} from '@/services/orders';
+import { mapOrderProductToVariantInfo, type Order, type OrderProduct } from '@/types/orders';
 import { getAvailabilityRefusalMessage, refusalToastOptions } from '@/utils/apiError';
+import { formatMoney } from '@/utils/formatMoney';
 import { useI18n } from '@/i18n/I18nProvider';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
@@ -45,6 +50,7 @@ export interface ChangeProductsLine {
   attributeOptionIds: Selection;
   customVariants: FollowupCustomVariant[];
   quantity: number;
+  unavailable: boolean;
 }
 
 interface CurrentProductRow {
@@ -85,7 +91,46 @@ export const mergeLines = <T extends ChangeProductsLine>(current: T[], incoming:
 };
 
 export const isLineComplete = (line: ChangeProductsLine): boolean =>
+  !line.unavailable &&
   line.variantOptions.every((option) => line.attributeOptionIds[option.attributeId] !== undefined);
+
+const attributePairsOf = (selection: Selection): string =>
+  Object.entries(selection)
+    .map(([attributeId, optionId]) => `${attributeId}:${optionId}`)
+    .sort()
+    .join(',');
+
+export const lineSignatureOf = (line: ChangeProductsLine): string =>
+  [
+    line.productId,
+    attributePairsOf(line.attributeOptionIds),
+    line.customVariants
+      .map((custom) => `${custom.label.trim()}=${custom.value.trim()}`)
+      .sort()
+      .join(','),
+    line.quantity,
+  ].join('|');
+
+export const linesSignatureOf = (lines: ChangeProductsLine[]): string =>
+  lines.map(lineSignatureOf).sort().join(';');
+
+export const selectionWithin = (variantOptions: VariantOption[], selection: Selection): Selection =>
+  Object.fromEntries(
+    Object.entries(selection).filter(([attributeId, optionId]) =>
+      variantOptions.some(
+        (option) =>
+          option.attributeId === Number(attributeId) &&
+          option.optionDetails.some((detail) => detail.id === optionId),
+      ),
+    ),
+  ) as Selection;
+
+const pickerOptionOf = (option: CatalogueVariantOption): VariantOption => ({
+  attribute: option.displayName,
+  attributeId: option.attributeId,
+  options: option.options.map((detail) => detail.displayName),
+  optionDetails: option.options.map((detail) => ({ id: detail.id, name: detail.displayName })),
+});
 
 export const missingAttributesOf = (line: ChangeProductsLine): string[] =>
   line.variantOptions
@@ -179,8 +224,55 @@ export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLi
       attributeOptionIds,
       customVariants: [],
       quantity: 1,
+      unavailable: false,
     };
   });
+
+const seedLineOf = (
+  orderProduct: OrderProduct,
+  catalogue: Map<number, CatalogueVariantOption[]>,
+): ChangeProductsLine => {
+  const loaded = catalogue.get(orderProduct.productId);
+  const variantOptions = (loaded ?? []).map(pickerOptionOf);
+  const attributes = orderProduct.attributes ?? [];
+  const attributeOptionIds: Selection = {};
+  attributes.forEach((attribute) => {
+    attributeOptionIds[attribute.id] = attribute.options.id;
+  });
+  const unavailable =
+    loaded === undefined ||
+    attributes.some(
+      (attribute) =>
+        !variantOptions.some(
+          (option) =>
+            option.attributeId === attribute.id &&
+            option.optionDetails.some((detail) => detail.id === attribute.options.id),
+        ),
+    );
+  const variants = variantsFromSelection(variantOptions, attributeOptionIds);
+  const customVariants = orderProduct.customVariants ?? [];
+  return {
+    key: lineKeyOf(orderProduct.productId, variants, customVariants),
+    rowId: nextLineRowId(),
+    productId: orderProduct.productId,
+    name: orderProduct.products.name,
+    variantOptions,
+    variants,
+    attributeOptionIds,
+    customVariants,
+    quantity: 1,
+    unavailable,
+  };
+};
+
+export const seedLinesOf = (
+  orderProducts: OrderProduct[],
+  catalogue: Map<number, CatalogueVariantOption[]>,
+): ChangeProductsLine[] =>
+  orderProducts.reduce<ChangeProductsLine[]>(
+    (lines, orderProduct) => mergeLines(lines, [seedLineOf(orderProduct, catalogue)]),
+    [],
+  );
 
 export default function ChangeProductsModal({
   isOpen,
@@ -193,26 +285,51 @@ export default function ChangeProductsModal({
   const [lines, setLines] = useState<ChangeProductsLine[]>([]);
   const [totalCostInput, setTotalCostInput] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [seedSignature, setSeedSignature] = useState<string | null>(null);
+  const seededRef = useRef(false);
 
   const currentProducts = useMemo(
     () => (orderQuery.data ? currentProductsFromOrder(orderQuery.data) : []),
     [orderQuery.data],
   );
 
+  const orderProductIds = useMemo(
+    () => (orderQuery.data?.order_products ?? []).map((orderProduct) => orderProduct.productId),
+    [orderQuery.data],
+  );
+  const catalogueQuery = useProductsVariantsOptions(orderProductIds);
+
+  useEffect(() => {
+    if (!isOpen || seededRef.current || !orderQuery.data || catalogueQuery.isPending) return;
+    seededRef.current = true;
+    const seeded = seedLinesOf(orderQuery.data.order_products, catalogueQuery.byProductId);
+    setSeedSignature(linesSignatureOf(seeded));
+    setLines((current) => (current.length === 0 ? seeded : mergeLines(seeded, current)));
+  }, [isOpen, orderQuery.data, catalogueQuery.isPending, catalogueQuery.byProductId]);
+
   const isPending = changeProductsMutation.isPending;
   const totalCost = totalCostInput.trim() === '' ? undefined : Number(totalCostInput);
   const isTotalCostInvalid =
     totalCost !== undefined &&
     (!Number.isFinite(totalCost) || totalCost < 0 || totalCost > MAX_TOTAL_COST);
+  const isUnchanged =
+    seedSignature !== null &&
+    linesSignatureOf(lines) === seedSignature &&
+    totalCostInput.trim() === '';
   const { t } = useI18n();
   const canConfirm =
     orderQuery.isSuccess &&
+    seedSignature !== null &&
+    !catalogueQuery.isPending &&
     lines.length > 0 &&
     lines.every(isLineComplete) &&
     !isTotalCostInvalid &&
-    !isPending;
+    !isPending &&
+    !isUnchanged;
 
   const resetForm = () => {
+    seededRef.current = false;
+    setSeedSignature(null);
     setLines([]);
     setTotalCostInput('');
     setIsPickerOpen(false);
@@ -236,7 +353,7 @@ export default function ChangeProductsModal({
 
   const handleUpdateLine = (
     key: string,
-    patch: Partial<Pick<ChangeProductsLine, 'variants' | 'quantity' | 'attributeOptionIds'>>,
+    patch: Partial<Pick<ChangeProductsLine, 'variants' | 'quantity' | 'attributeOptionIds' | 'unavailable'>>,
   ) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
@@ -254,9 +371,11 @@ export default function ChangeProductsModal({
   const handleSelectionChange = (key: string, next: Selection) => {
     const target = lines.find((line) => line.key === key);
     if (!target) return;
+    const selection = selectionWithin(target.variantOptions, next);
     handleUpdateLine(key, {
-      variants: variantsFromSelection(target.variantOptions, next),
-      attributeOptionIds: next,
+      variants: variantsFromSelection(target.variantOptions, selection),
+      attributeOptionIds: selection,
+      unavailable: false,
     });
   };
 
@@ -424,8 +543,12 @@ export default function ChangeProductsModal({
                           </div>
                         )}
 
-                        {!isLineComplete(line) && (
-                          <p className="text-sm text-destructive">{incompleteVariantMessageOf(missingAttributesOf(line))}</p>
+                        {line.unavailable ? (
+                          <p className="text-sm text-destructive">المنتج أو المتغير لم يعد موجودا</p>
+                        ) : (
+                          !isLineComplete(line) && (
+                            <p className="text-sm text-destructive">{incompleteVariantMessageOf(missingAttributesOf(line))}</p>
+                          )
                         )}
                       </div>
                     ))}
@@ -447,9 +570,17 @@ export default function ChangeProductsModal({
                   error={isTotalCostInvalid ? 'أدخل مبلغًا صحيحًا بين 0 و 9,999,999' : undefined}
                   disabled={isPending}
                 />
+                {orderQuery.data && (
+                  <p className="text-xs text-muted-foreground">
+                    الإجمالي الحالي {formatMoney(String(orderQuery.data.totalCost))}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   المبلغ يشمل الشحن. اتركه فارغًا لاستخدام سعر المنتجات مع الشحن كما هو.
                 </p>
+                {isUnchanged && lines.length > 0 && (
+                  <p className="text-sm text-muted-foreground">لم يتم تغيير المنتجات</p>
+                )}
               </div>
             </>
           )}
