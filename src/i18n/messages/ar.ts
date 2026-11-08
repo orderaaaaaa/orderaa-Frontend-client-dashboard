@@ -423,6 +423,8 @@ const ar = {
   'inProcess.filters.searchPlaceholder': 'الكود، رقم الشحنة، العميل أو الهاتف',
   'inProcess.filters.searchNotice': 'البحث يعرض كل الحالات ويتجاهل الفلاتر الأخرى',
   'inProcess.filters.allStatuses': 'كل الحالات',
+  'inProcess.filters.lateness': 'التأخير',
+  'inProcess.filters.allLateness': 'الكل',
   'inProcess.filters.allGovernorates': 'كل المحافظات',
   'inProcess.filters.allAreas': 'كل المناطق',
   'inProcess.filters.chooseGovernorateFirst': 'اختر المحافظة أولاً',

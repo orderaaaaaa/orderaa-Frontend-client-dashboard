@@ -409,6 +409,8 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.filters.searchPlaceholder': 'Code, shipment number, customer or phone',
   'inProcess.filters.searchNotice': 'Search shows all statuses and ignores the other filters',
   'inProcess.filters.allStatuses': 'All statuses',
+  'inProcess.filters.lateness': 'Lateness',
+  'inProcess.filters.allLateness': 'All',
   'inProcess.filters.allGovernorates': 'All governorates',
   'inProcess.filters.allAreas': 'All areas',
   'inProcess.filters.chooseGovernorateFirst': 'Choose a governorate first',

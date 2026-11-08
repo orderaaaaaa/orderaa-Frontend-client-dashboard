@@ -51,10 +51,12 @@ import type { ShippingImplementation } from '@/types/shippingCompanies';
 import type { FollowupClosure } from '@/types/logistics';
 import {
   IN_PROCESS_STATUSES,
+  LATENESS_FLAGS,
   type CarrierHeader,
   type InProcessCountFilters,
   type InProcessFilters,
   type InProcessStatus,
+  type LatenessFlag,
 } from '@/types/shippingProviders';
 import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
@@ -114,6 +116,15 @@ const readWorkState = (value: string | null): FollowupWorkState =>
 
 const readStatus = (value: string | null): InProcessStatus | undefined =>
   IN_PROCESS_STATUSES.find((status) => status === value);
+
+const readLateness = (value: string | null): LatenessFlag | undefined =>
+  LATENESS_FLAGS.find((flag) => flag === value);
+
+const LATENESS_LABEL_KEYS: Record<LatenessFlag, TranslationKey> = {
+  RED: 'inProcess.lateness.late',
+  YELLOW: 'inProcess.lateness.dueToday',
+  GREEN: 'inProcess.lateness.onTime',
+};
 
 const readLimit = (value: string | null): number => {
   if (value === null || !/^-?\d+$/.test(value)) return DEFAULT_PAGE_SIZE;
@@ -406,6 +417,7 @@ function ListPagination({
 interface InProcessControlsProps {
   status: InProcessStatus | undefined;
   statusOptions: SelectOptions;
+  lateness: LatenessFlag | undefined;
   governorate: string;
   governorates: SelectOptions;
   city: string;
@@ -428,6 +440,7 @@ interface InProcessControlsProps {
 function InProcessControls({
   status,
   statusOptions,
+  lateness,
   governorate,
   governorates,
   city,
@@ -449,6 +462,10 @@ function InProcessControls({
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
   const dimWhenSearching = searchActive ? 'opacity-60' : undefined;
+  const latenessOptions: SelectOptions = LATENESS_FLAGS.map((key) => ({
+    key,
+    label: t(LATENESS_LABEL_KEYS[key]),
+  }));
 
   return (
     <>
@@ -504,7 +521,7 @@ function InProcessControls({
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-status" className="text-xs text-muted-foreground">
               {t('inProcess.filters.status')}
@@ -516,6 +533,23 @@ function InProcessControls({
               onChange={(value) => onPatch({ status: value, page: '' })}
               options={statusOptions}
               placeholder={t('inProcess.filters.allStatuses')}
+              clearable
+              disabled={searchActive}
+              widthClass="w-full"
+              triggerClassName="h-10 py-0"
+            />
+          </div>
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
+            <label htmlFor="in-process-lateness" className="text-xs text-muted-foreground">
+              {t('inProcess.filters.lateness')}
+            </label>
+            <SearchableSelect
+              id="in-process-lateness"
+              aria-label={t('inProcess.filters.lateness')}
+              value={lateness ?? ''}
+              onChange={(value) => onPatch({ lateness: value, page: '' })}
+              options={latenessOptions}
+              placeholder={t('inProcess.filters.allLateness')}
               clearable
               disabled={searchActive}
               widthClass="w-full"
@@ -1047,6 +1081,7 @@ export function InProcessShipmentsContent({
   const from = searchParams.get('from') ?? '';
   const to = searchParams.get('to') ?? '';
   const status = readStatus(searchParams.get('status'));
+  const lateness = readLateness(searchParams.get('lateness'));
   const governorate = searchParams.get('governorate') ?? '';
   const city = searchParams.get('city') ?? '';
   const search = searchParams.get('search') ?? '';
@@ -1103,6 +1138,7 @@ export function InProcessShipmentsContent({
     from: from || undefined,
     to: to || undefined,
     status,
+    lateness,
     governorate: governorate || undefined,
     city: city || undefined,
     search: appliedSearch || undefined,
@@ -1127,7 +1163,7 @@ export function InProcessShipmentsContent({
   const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
   const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
 
-  const activeCount = [status, governorate, city, from, to, appliedSearch].filter(Boolean).length;
+  const activeCount = [status, lateness, governorate, city, from, to, appliedSearch].filter(Boolean).length;
   const searchActive = appliedSearch !== '';
 
   const countFilters: InProcessCountFilters = searchActive
@@ -1136,6 +1172,7 @@ export function InProcessShipmentsContent({
         from: from || undefined,
         to: to || undefined,
         status,
+        lateness,
         governorate: governorate || undefined,
         city: city || undefined,
       };
@@ -1154,6 +1191,7 @@ export function InProcessShipmentsContent({
     setSearchInput('');
     updateParams({
       status: '',
+      lateness: '',
       governorate: '',
       city: '',
       from: '',
@@ -1194,6 +1232,7 @@ export function InProcessShipmentsContent({
               <InProcessControls
                 status={status}
                 statusOptions={statusOptions}
+                lateness={lateness}
                 governorate={governorate}
                 governorates={governorates}
                 city={city}

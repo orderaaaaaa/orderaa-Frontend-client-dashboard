@@ -193,6 +193,7 @@ export interface InProcessFilters {
   from?: string;
   to?: string;
   status?: InProcessStatus;
+  lateness?: LatenessFlag;
   governorate?: string;
   city?: string;
   search?: string;
@@ -208,7 +209,7 @@ export interface ReturnedFilters {
 
 export type InProcessCountFilters = Pick<
   InProcessFilters,
-  'from' | 'to' | 'status' | 'governorate' | 'city' | 'search'
+  'from' | 'to' | 'status' | 'lateness' | 'governorate' | 'city' | 'search'
 >;
 
 export interface ShipmentCounts {
