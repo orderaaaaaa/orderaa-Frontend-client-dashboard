@@ -52,6 +52,7 @@ export interface ChangeProductsLine {
   customVariants: FollowupCustomVariant[];
   quantity: number;
   unavailable: boolean;
+  currentLabel?: string;
 }
 
 interface CurrentProductRow {
@@ -267,6 +268,7 @@ const seedLineOf = (
     customVariants,
     quantity: 1,
     unavailable,
+    currentLabel: attributes.map((attribute) => attribute.options.name).join(' / '),
   };
 };
 
@@ -551,8 +553,9 @@ export default function ChangeProductsModal({
                               quantity={probeQuantityOf(line.quantity)}
                               draft={draftForProduct(line.productId, line.key).draft}
                               excludedLines={draftForProduct(line.productId, line.key).excluded}
-                              selection={line.attributeOptionIds}
+                              selection={selectionWithin(line.variantOptions, line.attributeOptionIds)}
                               onChange={isPending ? undefined : (next) => handleSelectionChange(line.key, next)}
+                              currentLabel={line.currentLabel}
                             />
                           </div>
                         )}

@@ -14,6 +14,7 @@ interface OrderlessVariantAvailabilityPanelProps {
   maxHeightClassName?: string;
   className?: string;
   excludedLines?: number;
+  currentLabel?: string;
 }
 
 export function OrderlessVariantAvailabilityPanel({
@@ -27,6 +28,7 @@ export function OrderlessVariantAvailabilityPanel({
   maxHeightClassName,
   className,
   excludedLines,
+  currentLabel,
 }: OrderlessVariantAvailabilityPanelProps) {
   const availability = useOrderlessVariantAvailabilityQuery(
     productId,
@@ -48,6 +50,7 @@ export function OrderlessVariantAvailabilityPanel({
       maxHeightClassName={maxHeightClassName}
       className={className}
       excludedLines={excludedLines}
+      currentLabel={currentLabel}
     />
   );
 }
