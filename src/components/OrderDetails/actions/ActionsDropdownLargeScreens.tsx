@@ -15,6 +15,7 @@ import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown, type PartialDeliveryMenuAction } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export interface OrderActionsFooterProps {
   orderStatus: string;
@@ -49,6 +50,7 @@ export function OrderActionsFooterLargeScreens({
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
+  const { dir } = useI18n();
   const { hasPermission } = usePermissionCheck();
   const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
   const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
@@ -183,6 +185,7 @@ export function OrderActionsFooterLargeScreens({
               partialAction={partialAction}
               undoAction={undoAction}
               frozen={frozen}
+              className={dir === 'rtl' ? 'right-auto left-0' : undefined}
               onActionClick={handleActionClick}
             />
           </div>
