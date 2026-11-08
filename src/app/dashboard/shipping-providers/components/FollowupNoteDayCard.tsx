@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import clsx from 'clsx';
 import { MessageSquareText } from 'lucide-react';
 import { LiaAngleDownSolid } from 'react-icons/lia';
+import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/state-panels';
 import type {
   FollowupCarrierContact,
@@ -23,12 +24,14 @@ import {
   FOLLOWUP_CARRIER_TEXTS_LABEL,
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
+  FOLLOWUP_NEW_LINE_TAG,
   FOLLOWUP_NOTE_NO_WRITER,
   FOLLOWUP_NOTE_PARTY_HEADING_TONES,
   FOLLOWUP_NOTE_PARTY_LABELS,
   FOLLOWUP_NOTE_PARTY_ORDER,
   FOLLOWUP_NOTES_EMPTY_DAY,
   FOLLOWUP_TODAY_LABEL,
+  followupCarrierLineKey,
   repeatsSuffix,
 } from './followupNotesConstants';
 
@@ -39,24 +42,66 @@ const formatDayKey = (key: string): string => {
   return formatDate(new Date(Date.UTC(year, month - 1, dayOfMonth, 12)));
 };
 
-function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
+function CarrierTextItem({
+  line,
+  isNew,
+  scrollPendingRef,
+}: {
+  line: FollowupCarrierText;
+  isNew: boolean;
+  scrollPendingRef: MutableRefObject<boolean>;
+}) {
+  const itemRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (!isNew || !scrollPendingRef.current) return;
+    scrollPendingRef.current = false;
+    itemRef.current?.scrollIntoView({ block: 'center' });
+  }, [isNew, scrollPendingRef]);
+
+  return (
+    <li ref={itemRef} className="break-words text-base leading-7 text-foreground">
+      <DateWithRelative value={line.at} variant="inline" className="text-xs text-muted-foreground" /> {line.text}
+      {line.reason ? (
+        <>
+          {` ${FOLLOWUP_CARRIER_REASON_SEPARATOR.trim()} `}
+          <span>{line.reason}</span>
+        </>
+      ) : null}
+      {repeatsSuffix(line.repeats)}
+      {isNew && (
+        <Badge variant="destructive" className="ms-1">
+          {FOLLOWUP_NEW_LINE_TAG}
+        </Badge>
+      )}
+    </li>
+  );
+}
+
+function CarrierTextList({
+  dayKey,
+  texts,
+  newCarrierLineKeys,
+  scrollPendingRef,
+}: {
+  dayKey: string;
+  texts: FollowupCarrierText[];
+  newCarrierLineKeys: ReadonlySet<string>;
+  scrollPendingRef: MutableRefObject<boolean>;
+}) {
   return (
     <ul className="flex flex-col gap-1">
-      {texts.map((line) => (
-        <li
-          key={`${line.at}-${line.text}-${line.reason ?? ''}`}
-          className="break-words text-base leading-7 text-foreground"
-        >
-          <DateWithRelative value={line.at} variant="inline" className="text-xs text-muted-foreground" /> {line.text}
-          {line.reason ? (
-            <>
-              {` ${FOLLOWUP_CARRIER_REASON_SEPARATOR.trim()} `}
-              <span>{line.reason}</span>
-            </>
-          ) : null}
-          {repeatsSuffix(line.repeats)}
-        </li>
-      ))}
+      {texts.map((line) => {
+        const key = followupCarrierLineKey(dayKey, line);
+        return (
+          <CarrierTextItem
+            key={key}
+            line={line}
+            isNew={newCarrierLineKeys.has(key)}
+            scrollPendingRef={scrollPendingRef}
+          />
+        );
+      })}
     </ul>
   );
 }
@@ -86,18 +131,20 @@ function PartySection({
   notes,
   orderId,
   canManage,
+  dayKey,
   carrierTexts,
   carrierContacts,
-  newNoteIds,
+  newCarrierLineKeys,
   scrollPendingRef,
 }: {
   party: FollowupNotePartyValue;
   notes: FollowupNoteView[];
   orderId: number;
   canManage: boolean;
+  dayKey: string;
   carrierTexts: FollowupCarrierText[];
   carrierContacts: FollowupCarrierContact[];
-  newNoteIds: ReadonlySet<number>;
+  newCarrierLineKeys: ReadonlySet<string>;
   scrollPendingRef: MutableRefObject<boolean>;
 }) {
   const showTexts = party !== 'CUSTOMER' && carrierTexts.length > 0;
@@ -116,21 +163,19 @@ function PartySection({
       {notes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (
-            <FollowupNoteItem
-              key={note.id}
-              orderId={orderId}
-              note={note}
-              canManage={canManage}
-              isNew={newNoteIds.has(note.id)}
-              scrollPendingRef={scrollPendingRef}
-            />
+            <FollowupNoteItem key={note.id} orderId={orderId} note={note} canManage={canManage} />
           ))}
         </ul>
       )}
       {showTexts && (
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium text-muted-foreground">{FOLLOWUP_CARRIER_TEXTS_LABEL}</span>
-          <CarrierTextList texts={carrierTexts} />
+          <CarrierTextList
+            dayKey={dayKey}
+            texts={carrierTexts}
+            newCarrierLineKeys={newCarrierLineKeys}
+            scrollPendingRef={scrollPendingRef}
+          />
         </div>
       )}
       {showContacts && (
@@ -173,11 +218,17 @@ interface FollowupNoteDayCardProps {
   orderId: number;
   day: FollowupNoteDay;
   canManage: boolean;
-  newNoteIds: ReadonlySet<number>;
+  newCarrierLineKeys: ReadonlySet<string>;
   scrollPendingRef: MutableRefObject<boolean>;
 }
 
-export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds, scrollPendingRef }: FollowupNoteDayCardProps) {
+export function FollowupNoteDayCard({
+  orderId,
+  day,
+  canManage,
+  newCarrierLineKeys,
+  scrollPendingRef,
+}: FollowupNoteDayCardProps) {
   const [isOpen, setIsOpen] = useState(day.isToday);
   const openedForNewRef = useRef(false);
   const hasContent =
@@ -189,10 +240,10 @@ export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds, scrol
 
   useEffect(() => {
     if (openedForNewRef.current) return;
-    if (!day.notes.some((note) => newNoteIds.has(note.id))) return;
+    if (!day.carrier.texts.some((line) => newCarrierLineKeys.has(followupCarrierLineKey(day.day, line)))) return;
     openedForNewRef.current = true;
     setIsOpen(true);
-  }, [newNoteIds, day]);
+  }, [newCarrierLineKeys, day]);
 
   return (
     <div className="flex flex-col rounded-xl border border-border bg-card">
@@ -219,9 +270,10 @@ export function FollowupNoteDayCard({ orderId, day, canManage, newNoteIds, scrol
                   notes={day.notes.filter((note) => note.party === party)}
                   orderId={orderId}
                   canManage={canManage}
+                  dayKey={day.day}
                   carrierTexts={day.carrier.texts}
                   carrierContacts={day.carrier.contacts}
-                  newNoteIds={newNoteIds}
+                  newCarrierLineKeys={newCarrierLineKeys}
                   scrollPendingRef={scrollPendingRef}
                 />
               ))}

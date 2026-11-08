@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useDeleteFollowupNoteMutation, useEditFollowupNoteMutation } from '@/services/followup';
@@ -16,7 +15,6 @@ import {
   FOLLOWUP_NOTE_EDIT_LABEL,
   FOLLOWUP_NOTE_EDITED_TAG,
   FOLLOWUP_NOTE_MAX_LENGTH,
-  FOLLOWUP_NOTE_NEW_TAG,
   FOLLOWUP_NOTE_NO_WRITER,
   FOLLOWUP_NOTE_PARTY_TONES,
   FOLLOWUP_NOTE_SAVE_LABEL,
@@ -26,13 +24,10 @@ interface FollowupNoteItemProps {
   orderId: number;
   note: FollowupNoteView;
   canManage: boolean;
-  isNew: boolean;
-  scrollPendingRef: MutableRefObject<boolean>;
 }
 
-export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendingRef }: FollowupNoteItemProps) {
+export function FollowupNoteItem({ orderId, note, canManage }: FollowupNoteItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const bodyRef = useRef<HTMLParagraphElement>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [draft, setDraft] = useState(note.body);
   const editMutation = useEditFollowupNoteMutation();
@@ -42,12 +37,6 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendin
   const canEdit = canManage && note.canEdit;
   const canDelete = canManage && note.canDelete;
   const isBusy = editMutation.isPending || deleteMutation.isPending;
-
-  useEffect(() => {
-    if (!isNew || !scrollPendingRef.current) return;
-    scrollPendingRef.current = false;
-    bodyRef.current?.scrollIntoView({ block: 'center' });
-  }, [isNew, scrollPendingRef]);
 
   const startEdit = () => {
     setDraft(note.body);
@@ -69,11 +58,6 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendin
     <span>
       {note.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - <DateWithRelative value={note.createdAt} variant="inline" />
       {note.editedAt !== null && ` - ${FOLLOWUP_NOTE_EDITED_TAG}`}
-      {isNew && (
-        <Badge variant="destructive" className="ms-1">
-          {FOLLOWUP_NOTE_NEW_TAG}
-        </Badge>
-      )}
     </span>
   );
 
@@ -170,7 +154,7 @@ export function FollowupNoteItem({ orderId, note, canManage, isNew, scrollPendin
           </div>
         </div>
       ) : (
-        <p ref={bodyRef} className={NOTE_BODY_CLASS}>
+        <p className={NOTE_BODY_CLASS}>
           {note.body}
         </p>
       )}
