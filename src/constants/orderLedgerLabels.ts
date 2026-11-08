@@ -1,8 +1,9 @@
 import type { OrderChangeOrigin } from '@/types/orderChangeHistory';
+import type { OrderLedgerEntryKind } from '@/types/orderLedger';
 import { orderChangeOriginLabelOf } from '@/constants/orderFieldLabels';
 
 export const LEDGER_LIFECYCLE_LABELS: Record<
-  'ORDER_DELETION' | 'ORDER_RESTORE' | 'PART_RESTORE',
+  Exclude<OrderLedgerEntryKind, 'EVENT' | 'CHANGE'>,
   (part: { code: string } | null) => string
 > = {
   ORDER_DELETION: () => 'حذف الطلب',
