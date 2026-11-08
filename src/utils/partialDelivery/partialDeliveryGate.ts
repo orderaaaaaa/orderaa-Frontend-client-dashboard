@@ -47,6 +47,8 @@ export const partialDeliveryBlockReasonOf = ({
   return splitBlockReasonKeyOf({ lineCount, hasReturnChild });
 };
 
+const UNDO_PARTIAL_DELIVERY_STATUSES: readonly string[] = [...IN_PROCESS_STATUSES, 'DELIVERED'];
+
 const canSplitDelivered = ({
   status,
   carrierImplementation,
@@ -112,3 +114,23 @@ export const mustOpenSplitPopup = ({
   (['WAITING_FOR_APPROVAL', 'SHIPPING', 'WITH_DRIVER'] as readonly string[]).includes(status) &&
   lineCount >= 2 &&
   !hasReturnChild;
+
+export const undoPartialDeliveryActionOf = ({
+  locked,
+  status,
+  hasReturnChild,
+  childStatus,
+}: {
+  locked: boolean;
+  status: string;
+  hasReturnChild: boolean;
+  childStatus: string | null;
+}): PartialDeliveryAction => {
+  if (!UNDO_PARTIAL_DELIVERY_STATUSES.includes(status) || !hasReturnChild) {
+    return { visible: false, blockedKey: null };
+  }
+  if (childStatus !== null && childStatus !== 'RETURNED_DELIVERED') {
+    return { visible: false, blockedKey: null };
+  }
+  return { visible: true, blockedKey: locked ? PARTIAL_DELIVERY_BLOCK_REASON_KEYS.locked : null };
+};

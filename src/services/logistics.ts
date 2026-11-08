@@ -15,13 +15,21 @@ import {
   OrderProductChangeLog,
 } from '@/types/logistics';
 import { toast } from 'react-toastify';
-import { recordPartialDelivery, recordReturnRefund } from '@/lib/api/order';
+import {
+  getPartialDeliveryUndoPreview,
+  recordPartialDelivery,
+  recordReturnRefund,
+  undoPartialDelivery,
+} from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { invalidateStockViews } from '@/services/warehouses';
 import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
 import {
   CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
+  carrierSendNotSentWarningAfter,
 } from '@/utils/manualOrder/carrierSend';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
@@ -113,6 +121,46 @@ export const usePartialDelivery = () => {
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, 'تعذر تنفيذ التسليم الجزئي'));
+    },
+  });
+};
+
+export const useUndoPartialDeliveryPreview = (orderId: number, enabled: boolean) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId, 'partial-undo-preview'] as QueryKey,
+    queryFn: () => getPartialDeliveryUndoPreview(orderId),
+    enabled,
+    staleTime: 0,
+  });
+
+export const useUndoPartialDelivery = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderId: number) => undoPartialDelivery(orderId),
+    onSuccess: (result, orderId) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
+      invalidateStockViews(queryClient);
+      if (
+        carrierSendNeedsAttention(result.carrierSend) ||
+        (result.carrierEditDue && result.carrierSend === null)
+      ) {
+        toast.warning(carrierSendNotSentWarningAfter('تم التراجع عن التسليم الجزئي'));
+      } else {
+        toast.success(translate(readStoredLocale(), 'partialDelivery.undo.done'));
+      }
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, 'تعذر التراجع عن التسليم الجزئي'));
     },
   });
 };

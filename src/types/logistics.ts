@@ -1,4 +1,4 @@
-import { OrderStatus } from './orders';
+import { OrderStatus, ShippingType } from './orders';
 import type { CarrierSendBlock } from './manual-order';
 
 /** Mirrors the backend GovernorateSettingResponseDto. */
@@ -39,6 +39,28 @@ export interface PartialDeliveryResponse {
   baseOrder: PartialDeliveryOrderSummary;
   returnOrder: PartialDeliveryOrderSummary;
   movedOrderProductIds: number[];
+  carrierSend: CarrierSendBlock | null;
+}
+
+export interface PartialUndoPreview {
+  childCode: string;
+  totalBefore: number;
+  totalAfter: number;
+  totalBeforeSplit: number | null;
+  path: 'IN_TRANSIT' | 'DELIVERED';
+  sendsCarrierEdit: boolean;
+}
+
+export interface PartialUndoResponse {
+  parentOrder: {
+    id: number;
+    code: string;
+    status: OrderStatus;
+    totalCost: number;
+    shippingType: ShippingType;
+  };
+  removedReturnOrder: { id: number; code: string };
+  carrierEditDue: boolean;
   carrierSend: CarrierSendBlock | null;
 }
 

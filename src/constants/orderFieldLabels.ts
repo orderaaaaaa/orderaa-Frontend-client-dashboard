@@ -90,6 +90,7 @@ export const ORDER_CHANGE_ORIGIN_LABELS: Record<OrderChangeOrigin, string> = {
   SETTLEMENT_AMOUNT_EDIT: 'تعديل مبلغ التسوية',
   SETTLEMENT_ADJUST: 'تسوية يدوية',
   PARTIAL_DELIVERY: 'تسليم جزئي',
+  PARTIAL_DELIVERY_UNDO: 'تراجع عن تسليم جزئي',
   FOLLOWUP_CHANGE_PRODUCTS: 'متابعة: تغيير المنتجات',
   FOLLOWUP_EXCHANGE: 'متابعة: استبدال',
   SHIPPING_PROVIDER_DELIVERY_WINDOW: 'شركة الشحن: وقت التوصيل',

@@ -3,6 +3,8 @@ import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, Order
 import type {
   PartialDeliveryData,
   PartialDeliveryResponse,
+  PartialUndoPreview,
+  PartialUndoResponse,
   ReturnRefundData,
   ReturnRefundResponse,
 } from '@/types/logistics';
@@ -193,6 +195,16 @@ export async function recordPartialDelivery({
     `/orders/${orderId}/partial-delivery`,
     body
   );
+  return response.data;
+}
+
+export async function getPartialDeliveryUndoPreview(orderId: number): Promise<PartialUndoPreview> {
+  const response = await api.get<PartialUndoPreview>(`/orders/${orderId}/partial-delivery/undo-preview`);
+  return response.data;
+}
+
+export async function undoPartialDelivery(orderId: number): Promise<PartialUndoResponse> {
+  const response = await api.post<PartialUndoResponse>(`/orders/${orderId}/partial-delivery/undo`);
   return response.data;
 }
 
