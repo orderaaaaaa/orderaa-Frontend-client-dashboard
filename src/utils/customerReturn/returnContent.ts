@@ -13,10 +13,12 @@ export const customerReturnContentOf = (units: CustomerReturnUnit[]): string =>
         {
           name,
           variantLabel: variantPartsLabelOf(
-            unit.variants.map((variant) => ({
-              name: variant.label,
-              value: variant.value,
-            })),
+            unit.variants
+              .filter((variant) => variant.label.trim() && variant.value.trim())
+              .map((variant) => ({
+                name: variant.label,
+                value: variant.value,
+              })),
           ),
         },
       ];

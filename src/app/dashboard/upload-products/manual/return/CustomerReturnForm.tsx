@@ -278,6 +278,7 @@ function CustomerReturnForm() {
       ...current,
       customer: undefined,
       units: undefined,
+      returnContent: undefined,
       address: undefined,
       governorateOption: undefined,
       cityOption: undefined,
