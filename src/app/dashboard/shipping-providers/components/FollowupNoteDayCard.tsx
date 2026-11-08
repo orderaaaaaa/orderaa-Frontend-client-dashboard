@@ -47,7 +47,12 @@ function CarrierTextList({ texts }: { texts: FollowupCarrierText[] }) {
           className="break-words text-base leading-7 text-foreground"
         >
           <span className="text-xs text-muted-foreground">{formatDateTime(line.at)}</span> {line.text}
-          {line.reason ? `${FOLLOWUP_CARRIER_REASON_SEPARATOR}${line.reason}` : ''}
+          {line.reason ? (
+            <>
+              {` ${FOLLOWUP_CARRIER_REASON_SEPARATOR.trim()} `}
+              <span>{line.reason}</span>
+            </>
+          ) : null}
           {repeatsSuffix(line.repeats)}
         </li>
       ))}
