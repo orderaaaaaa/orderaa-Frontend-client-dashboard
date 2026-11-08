@@ -157,6 +157,14 @@ export enum ShippingType {
   PARTIAL_RETURN = 'PARTIAL_RETURN',
 }
 
+export enum DerivedOrderKind {
+  PARTIAL_REMAINDER = 'PARTIAL_REMAINDER',
+  REPLACEMENT = 'REPLACEMENT',
+  EXCHANGE_RETURN = 'EXCHANGE_RETURN',
+  EXCHANGE = 'EXCHANGE',
+  CUSTOMER_RETURN = 'CUSTOMER_RETURN',
+}
+
 // Order Format Enum
 export enum OrderFormat {
   APP = 'APP',
@@ -483,6 +491,7 @@ export interface Order {
   whatsappTemplates?: WhatsappTemplate[];
   returnOfOrderId?: number | null;
   returnOf?: OrderReturnOfRef | null;
+  derivedKind?: DerivedOrderKind | null;
   partialReturns?: OrderPartialReturnRef[];
   frozenReturnChild?: boolean;
 }

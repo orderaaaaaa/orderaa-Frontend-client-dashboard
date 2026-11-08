@@ -70,6 +70,7 @@ export const orderPagePartialActionOf = ({
   lineCount,
   hasReturnChild,
   frozen,
+  isCustomerReturn,
   carrierImplementation,
   settlementAmount,
   hasActiveShippingId,
@@ -78,11 +79,12 @@ export const orderPagePartialActionOf = ({
   lineCount: number;
   hasReturnChild: boolean;
   frozen: boolean;
+  isCustomerReturn: boolean;
   carrierImplementation: ShippingImplementation | undefined;
   settlementAmount: string | null;
   hasActiveShippingId: boolean;
 }): PartialDeliveryAction => {
-  if (frozen) return { visible: false, blockedKey: null };
+  if (frozen || isCustomerReturn) return { visible: false, blockedKey: null };
   const inTransit = (IN_PROCESS_STATUSES as readonly string[]).includes(status);
   if (!inTransit && !canSplitDelivered({ status, carrierImplementation, settlementAmount, hasActiveShippingId })) {
     return { visible: false, blockedKey: null };
@@ -98,6 +100,7 @@ export const mustOpenSplitPopup = ({
   status,
   lineCount,
   hasReturnChild,
+  isCustomerReturn,
 }: {
   requestedType: string;
   currentType: string | undefined;
@@ -106,9 +109,11 @@ export const mustOpenSplitPopup = ({
   status: string;
   lineCount: number;
   hasReturnChild: boolean;
+  isCustomerReturn: boolean;
 }): boolean =>
   requestedType === 'PARTIAL_RETURN' &&
   currentType !== 'PARTIAL_RETURN' &&
+  !isCustomerReturn &&
   carrierImplementation === 'TURBO' &&
   hasActiveShippingId &&
   (['WAITING_FOR_APPROVAL', 'SHIPPING', 'WITH_DRIVER'] as readonly string[]).includes(status) &&

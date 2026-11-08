@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Order, FilterOrdersDto } from '@/types/orders';
+import { DerivedOrderKind, Order, FilterOrdersDto } from '@/types/orders';
 import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
@@ -202,12 +202,14 @@ function OrderDetailsInfoComponent({
   const lineCount = order.order_products.length;
   const hasReturnChild = (order.partialReturns ?? []).some((item) => item.lineCount > 0);
   const hasActiveShippingId = order.shipping_ids?.some((row) => row.isActive) ?? false;
+  const isCustomerReturn = order.derivedKind === DerivedOrderKind.CUSTOMER_RETURN;
 
   const partialGate = orderPagePartialActionOf({
     status: order.status,
     lineCount,
     hasReturnChild,
     frozen,
+    isCustomerReturn,
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
     hasActiveShippingId,
@@ -377,6 +379,7 @@ function OrderDetailsInfoComponent({
         status: order.status,
         lineCount,
         hasReturnChild,
+        isCustomerReturn,
       })
     ) {
       if (!hasAllPermissions(PARTIAL_DELIVERY_CODES)) {
