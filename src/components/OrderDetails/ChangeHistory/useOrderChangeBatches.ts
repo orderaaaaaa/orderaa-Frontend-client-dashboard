@@ -2,19 +2,12 @@ import { useMemo } from 'react';
 import { useOrderChangeHistory } from '@/services/orderChangeHistory';
 import type { Order } from '@/types/orders';
 import { getApiErrorStatus } from '@/utils/apiError';
+import { lineProductNamesOf } from './lineProductNames';
 
 const HIDDEN_ERROR_STATUSES = new Set([403, 404]);
 
 export function useOrderChangeBatches(order: Order, enabled: boolean) {
-  const lineProductNames = useMemo(
-    () =>
-      new Map(
-        (order.order_products ?? []).flatMap((line) =>
-          line.products?.name ? [[line.id, line.products.name] as const] : []
-        )
-      ),
-    [order.order_products]
-  );
+  const lineProductNames = useMemo(() => lineProductNamesOf(order), [order]);
 
   const query = useOrderChangeHistory(order.id, enabled);
 

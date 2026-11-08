@@ -4,18 +4,17 @@ import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useMemo } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Order, OrderEvent } from '@/types/orders';
-import type { OrderChangeBatch } from '@/types/orderChangeHistory';
 import { PhoneOff, History, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
-import { useHasPermission } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
 import { OrderChangeBatchItem } from './ChangeHistory/OrderChangeBatchItem';
 import {
   OrderChangeHistoryError,
-  OrderChangeHistoryLoadMore,
   OrderChangeHistorySkeleton,
 } from './ChangeHistory/OrderChangeHistoryStates';
-import { useOrderChangeBatches } from './ChangeHistory/useOrderChangeBatches';
+import { lineProductNamesOf } from './ChangeHistory/lineProductNames';
+import { OrderLedgerLifecycleRow } from './Ledger/OrderLedgerLifecycleRow';
+import { useOrderLedger } from '@/services/orderLedger';
+import { ORDER_LEDGER_ENTRY_KIND, type OrderLedgerEntry } from '@/types/orderLedger';
 import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
 
 interface OrderHistoryModalProps {
@@ -58,16 +57,14 @@ const getEventIcon = (eventType?: string) => {
   }
 };
 
-type HistoryEntry =
-  | { key: string; at: string; kind: 'batch'; batch: OrderChangeBatch }
-  | { key: string; at: string; kind: 'event'; event: OrderEvent };
-
 function OrderEventRow({
   event,
   getStatusLabel,
+  withTime,
 }: {
   event: OrderEvent;
   getStatusLabel: (status: string) => string;
+  withTime: boolean;
 }) {
   const statusLabel = event.name
     ? (orderEventLabelOf(event.name) ?? getStatusLabel(event.name))
@@ -83,68 +80,66 @@ function OrderEventRow({
         <h3 className="text-base font-semibold text-foreground break-words">{statusLabel}</h3>
         {note !== statusLabel && <p className="text-sm text-primary-text break-words">{note}</p>}
         <p className="text-sm text-muted-foreground">
-          <DateWithRelative value={event.createdAt} withTime={false} variant="inline" />
+          <DateWithRelative value={event.createdAt} withTime={withTime} variant="inline" />
         </p>
       </div>
     </div>
   );
 }
 
-function OrderHistoryList({ order }: { order: Order }) {
-  const { getStatusLabel } = useStatusLabel();
-  const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
-  const { query, batches, lineProductNames, isFailed, isLoading } = useOrderChangeBatches(
-    order,
-    canReadHistory
-  );
-
-  const entries = useMemo<HistoryEntry[]>(
-    () =>
-      [
-        ...batches.map((batch): HistoryEntry => ({
-          key: `batch-${batch.id}`,
-          at: batch.createdAt,
-          kind: 'batch',
-          batch,
-        })),
-        ...(order.order_events ?? []).map((event): HistoryEntry => ({
-          key: `event-${event.id}`,
-          at: event.createdAt,
-          kind: 'event',
-          event,
-        })),
-      ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()),
-    [batches, order.order_events]
-  );
-
-  if (entries.length === 0 && !isLoading && !isFailed) {
-    return <div className="text-center text-gray-500 py-8">لا توجد أحداث لهذا الطلب</div>;
+function renderLedgerEntry(
+  entry: OrderLedgerEntry,
+  getStatusLabel: (status: string) => string,
+  lineProductNames: ReadonlyMap<number, string>
+) {
+  if (entry.kind === ORDER_LEDGER_ENTRY_KIND.EVENT && entry.event) {
+    return (
+      <OrderEventRow
+        key={entry.key}
+        event={entry.event}
+        getStatusLabel={getStatusLabel}
+        withTime
+      />
+    );
   }
+  if (entry.kind === ORDER_LEDGER_ENTRY_KIND.CHANGE && entry.change) {
+    return (
+      <OrderChangeBatchItem
+        key={entry.key}
+        batch={entry.change}
+        getStatusLabel={getStatusLabel}
+        lineProductNames={lineProductNames}
+      />
+    );
+  }
+  if (entry.lifecycle) {
+    return <OrderLedgerLifecycleRow key={entry.key} entry={entry} />;
+  }
+  return null;
+}
+
+function OrderHistoryList({ order, isOpen }: { order: Order; isOpen: boolean }) {
+  const { getStatusLabel } = useStatusLabel();
+  const ledger = useOrderLedger(order.id, isOpen);
+  const lineProductNames = useMemo(() => lineProductNamesOf(order), [order]);
+  const entries = ledger.data?.entries ?? [];
 
   return (
     <div className="flex flex-col gap-4">
-      {isLoading && <OrderChangeHistorySkeleton />}
-      {isFailed && (
-        <OrderChangeHistoryError isRefetching={query.isRefetching} onRetry={() => query.refetch()} />
-      )}
-      {entries.map((entry) =>
-        entry.kind === 'batch' ? (
-          <OrderChangeBatchItem
-            key={entry.key}
-            batch={entry.batch}
-            getStatusLabel={getStatusLabel}
-            lineProductNames={lineProductNames}
-          />
-        ) : (
-          <OrderEventRow key={entry.key} event={entry.event} getStatusLabel={getStatusLabel} />
-        )
-      )}
-      {query.hasNextPage && (
-        <OrderChangeHistoryLoadMore
-          isFetchingNextPage={query.isFetchingNextPage}
-          onLoadMore={() => query.fetchNextPage()}
+      {ledger.isLoading && <OrderChangeHistorySkeleton />}
+      {ledger.isError && (
+        <OrderChangeHistoryError
+          isRefetching={ledger.isRefetching}
+          onRetry={() => ledger.refetch()}
         />
       )}
+      {ledger.data && !ledger.data.changesVisible && (
+        <p className="text-sm text-muted-foreground">سجل تعديل الحقول يحتاج صلاحية عرض السجل</p>
+      )}
+      {ledger.data && entries.length === 0 && (
+        <div className="text-center text-gray-500 py-8">لا توجد أحداث لهذا الطلب</div>
+      )}
+      {entries.map((entry) => renderLedgerEntry(entry, getStatusLabel, lineProductNames))}
     </div>
   );
 }
@@ -159,7 +154,7 @@ export default function OrderHistoryModal({ isOpen, onClose, order }: OrderHisto
       maxWidth="w-[900px]"
     >
       <div className="py-8 px-4">
-        <OrderHistoryList order={order} />
+        <OrderHistoryList order={order} isOpen={isOpen} />
       </div>
     </BaseModal>
   );

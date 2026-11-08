@@ -64,7 +64,8 @@ export type OrderTrackedField =
   | 'delegatePhone'
   | 'isPrinted'
   | 'isShadowed'
-  | 'parkedAt';
+  | 'parkedAt'
+  | 'deletedAt';
 
 export type OrderLineChangeField =
   | 'lines'

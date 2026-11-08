@@ -55,6 +55,7 @@ export const ORDER_FIELD_LABELS: Record<OrderChangeField, string> = {
   isPrinted: 'تمت الطباعة',
   isShadowed: 'محجوب (رصيد غير كافٍ)',
   parkedAt: 'تاريخ التعليق',
+  deletedAt: 'تاريخ الحذف',
   lines: 'المنتجات',
   'line.variant': 'خيار المنتج',
   'line.price': 'سعر المنتج',

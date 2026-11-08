@@ -4,6 +4,9 @@ import { ACTION_EVENT_NAME_LABELS } from '@/constants/followupEventLabels';
 export const ORDER_EVENT_LABELS = {
   SHIPPING_COMPANY_CHANGED: 'تغيير شركة الشحن',
   EXCHANGE: 'استبدال',
+  PARTIAL_RETURN_SPLIT: 'تقسيم تسليم جزئي',
+  PARTIAL_RETURN_SPLIT_IN_TRANSIT: 'تقسيم تسليم جزئي أثناء الشحن',
+  PARTIAL_RETURN_SPLIT_UNDONE: 'تراجع عن التقسيم',
 } as const;
 
 export type OrderEventLabelKey = keyof typeof ORDER_EVENT_LABELS;
