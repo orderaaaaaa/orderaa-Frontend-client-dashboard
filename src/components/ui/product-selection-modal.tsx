@@ -12,7 +12,7 @@ import { Checkbox } from './checkbox';
 import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
 import { useProductVariantsOptions } from '@/services/orders';
-import { productAttributeOptionsQueryOptions } from '@/services/products';
+import { productAttributeOptionsQueryOptions, useProductCardsFailed } from '@/services/products';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
 import {
   comboKeyOf,
@@ -103,6 +103,31 @@ function resolveCombo(
     combo.push({ attribute: group.attribute, option: detail.name, attributeOptionId: detail.id });
   }
   return combo;
+}
+
+function AddAllVariantsButton({
+  productId,
+  availabilityPath,
+  onAdd,
+}: {
+  productId: number;
+  availabilityPath: boolean;
+  onAdd: (productId: number) => void;
+}) {
+  const cardsFailed = useProductCardsFailed(availabilityPath ? [productId] : []);
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="rounded-full text-xs h-7 px-4 max-sm:h-10"
+      disabled={cardsFailed}
+      onClick={() => onAdd(productId)}
+    >
+      <LiaPlusSolid className="w-4 h-4" />
+      إضافة كل المتغيرات
+    </Button>
+  );
 }
 
 function ProductAvailabilityBlock({
@@ -597,16 +622,11 @@ export default function ProductSelectionModal({
                         ))}
 
                         <div className="flex items-center gap-2 w-fit self-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full text-xs h-7 px-4 max-sm:h-10"
-                            onClick={() => void handleAddAllVariants(product.id)}
-                          >
-                            <LiaPlusSolid className="w-4 h-4" />
-                            إضافة كل المتغيرات
-                          </Button>
+                          <AddAllVariantsButton
+                            productId={product.id}
+                            availabilityPath={availability !== undefined}
+                            onAdd={(productId) => void handleAddAllVariants(productId)}
+                          />
 
                           <Button
                             type="button"
