@@ -62,6 +62,7 @@ import { formatNumber } from './formatNumber';
 import { OrderActionLogModal } from './OrderActionLogModal';
 import { InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
 import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
+import { UnknownShippingCostCount } from './UnknownShippingCostCount';
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 25;
@@ -679,6 +680,7 @@ function InProcessList({
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const netAmount = data?.summary.netAmount;
+  const unknownShippingCostCount = data?.summary.unknownShippingCostCount;
   const implementation = shippingCompanies.find(
     (company) => company.id === shippingCompanyId,
   )?.implementation;
@@ -783,6 +785,9 @@ function InProcessList({
               iconBgClassName="bg-primary/10 text-primary-text"
               label={t('inProcess.kpi.netInProcess')}
               value={isError || netAmount == null ? '—' : formatNumber(netAmount, 2) + ' جنيه'}
+              hint={
+                isError ? undefined : <UnknownShippingCostCount count={unknownShippingCostCount} />
+              }
             />
           )}
         </Can>

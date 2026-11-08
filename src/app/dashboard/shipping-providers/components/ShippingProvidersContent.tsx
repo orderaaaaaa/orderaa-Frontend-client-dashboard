@@ -21,6 +21,7 @@ import { AddProviderModal } from './AddProviderModal';
 import { CarrierDetail } from './CarrierDetail';
 import { formatNumber } from './formatNumber';
 import { RateBadge } from './RateBadge';
+import { UnknownShippingCostCount } from './UnknownShippingCostCount';
 
 type TypeFilter = 'ALL' | 'COMPANY' | 'DELEGATE';
 
@@ -233,6 +234,7 @@ export function ShippingProvidersContent() {
                         <span className="min-w-0 break-words text-lg font-bold text-foreground">
                           {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
                         </span>
+                        <UnknownShippingCostCount count={carrier.inProcessUnknownShippingCostCount} />
                       </div>
                     </Can>
 

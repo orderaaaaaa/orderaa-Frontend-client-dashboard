@@ -61,6 +61,40 @@ export const moneyTextOf = (value: number | string | null | undefined): string =
 export const deliveryWindowTextOf = (from: string | null, to: string | null): string =>
   from && to ? `${formatDisplayTime(from)} - ${formatDisplayTime(to)}` : '—';
 
+export function NetAmountCell({
+  row,
+  layout,
+}: {
+  row: Pick<InProcessShipment, 'netAmount' | 'shippingCostUnknown'>;
+  layout: 'tooltip' | 'inline';
+}) {
+  const { t } = useI18n();
+  if (row.shippingCostUnknown !== true || row.netAmount === undefined) return moneyTextOf(row.netAmount);
+  const text = t('inProcess.net.unknownShippingCost');
+  const reason = t('inProcess.net.unknownShippingCostReason', { amount: moneyTextOf(row.netAmount) });
+  if (layout === 'inline') {
+    return (
+      <span className="flex flex-col gap-0.5">
+        <span className="text-muted-foreground">{text}</span>
+        <span className={SECONDARY_TEXT_CLASS}>{reason}</span>
+      </span>
+    );
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          tabIndex={0}
+          className="inline-flex rounded-md text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          {text}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{reason}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function useInProcessCarrier(shippingCompanyId: number) {
   const { shippingCompanies, isLoading } = useShippingCompanies();
   const company = shippingCompanies.find((candidate) => candidate.id === shippingCompanyId);
@@ -510,7 +544,7 @@ export function InProcessShipmentsTable({
               </td>
               <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
                 <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
-                  {moneyTextOf(row.netAmount)}
+                  <NetAmountCell row={row} layout="tooltip" />
                 </td>
               </Can>
               <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>

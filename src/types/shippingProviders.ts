@@ -37,6 +37,7 @@ export interface CarrierStats {
   deliveryRate: number | null;
   returnRate: number | null;
   inProcessNetAmount?: string;
+  inProcessUnknownShippingCostCount?: number;
 }
 
 export interface LocationStats {
@@ -119,6 +120,7 @@ export interface InProcessShipment extends ShipmentRowBase {
   courierName: string | null;
   courierPhone: string | null;
   netAmount?: string;
+  shippingCostUnknown?: boolean;
 }
 
 export type SendAgainBlockedReason =
@@ -161,6 +163,7 @@ export interface CarrierHeader {
 
 export interface InProcessSummary {
   netAmount?: string;
+  unknownShippingCostCount?: number;
 }
 
 export interface InProcessShipmentsPage {

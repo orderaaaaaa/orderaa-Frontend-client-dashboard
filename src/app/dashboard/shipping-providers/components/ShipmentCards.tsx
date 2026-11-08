@@ -18,6 +18,7 @@ import {
   StatusCell,
   deliveryWindowTextOf,
   findTemplate,
+  NetAmountCell,
   moneyTextOf,
   useInProcessCarrier,
   useIsBulkClosable,
@@ -110,7 +111,9 @@ export function InProcessShipmentCards({
             </CardField>
             <CardField label={t('inProcess.table.columns.total')}>{moneyTextOf(row.totalCost)}</CardField>
             <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
-              <CardField label={t('inProcess.table.columns.net')}>{moneyTextOf(row.netAmount)}</CardField>
+              <CardField label={t('inProcess.table.columns.net')}>
+                <NetAmountCell row={row} layout="inline" />
+              </CardField>
             </Can>
           </dl>
         </li>

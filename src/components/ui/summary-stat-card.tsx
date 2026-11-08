@@ -7,6 +7,7 @@ interface SummaryStatCardProps {
   iconBgClassName: string
   label: string
   value: number | string
+  hint?: React.ReactNode
   className?: string
   onClick?: () => void
 }
@@ -16,6 +17,7 @@ function SummaryStatCard({
   iconBgClassName,
   label,
   value,
+  hint,
   className,
   onClick,
 }: SummaryStatCardProps) {
@@ -32,6 +34,7 @@ function SummaryStatCard({
       <div className="flex flex-col min-w-0 text-start">
         <span className="block mb-1 text-sm font-medium text-muted-foreground">{label}</span>
         <div className="text-xl sm:text-2xl font-bold break-words text-foreground">{value}</div>
+        {hint}
       </div>
     </>
   )
