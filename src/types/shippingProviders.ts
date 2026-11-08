@@ -65,6 +65,10 @@ export const LATENESS_FLAGS = ['RED', 'YELLOW', 'GREEN'] as const;
 
 export type LatenessFlag = (typeof LATENESS_FLAGS)[number];
 
+export const LATENESS_FILTERS = [...LATENESS_FLAGS, 'NONE'] as const;
+
+export type LatenessFilter = (typeof LATENESS_FILTERS)[number];
+
 export const LATE_MARK_KINDS = ['LATE', 'ON_TIME', 'AUTO'] as const;
 
 export type LateMarkKind = (typeof LATE_MARK_KINDS)[number];
@@ -193,7 +197,7 @@ export interface InProcessFilters {
   from?: string;
   to?: string;
   status?: InProcessStatus;
-  lateness?: LatenessFlag;
+  lateness?: LatenessFilter;
   governorate?: string;
   city?: string;
   search?: string;

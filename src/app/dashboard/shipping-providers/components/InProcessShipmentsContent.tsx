@@ -51,12 +51,12 @@ import type { ShippingImplementation } from '@/types/shippingCompanies';
 import type { FollowupClosure } from '@/types/logistics';
 import {
   IN_PROCESS_STATUSES,
-  LATENESS_FLAGS,
+  LATENESS_FILTERS,
   type CarrierHeader,
   type InProcessCountFilters,
   type InProcessFilters,
   type InProcessStatus,
-  type LatenessFlag,
+  type LatenessFilter,
 } from '@/types/shippingProviders';
 import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
@@ -117,13 +117,14 @@ const readWorkState = (value: string | null): FollowupWorkState =>
 const readStatus = (value: string | null): InProcessStatus | undefined =>
   IN_PROCESS_STATUSES.find((status) => status === value);
 
-const readLateness = (value: string | null): LatenessFlag | undefined =>
-  LATENESS_FLAGS.find((flag) => flag === value);
+const readLateness = (value: string | null): LatenessFilter | undefined =>
+  LATENESS_FILTERS.find((filter) => filter === value);
 
-const LATENESS_LABEL_KEYS: Record<LatenessFlag, TranslationKey> = {
+const LATENESS_LABEL_KEYS: Record<LatenessFilter, TranslationKey> = {
   RED: 'inProcess.lateness.late',
   YELLOW: 'inProcess.lateness.dueToday',
   GREEN: 'inProcess.lateness.onTime',
+  NONE: 'inProcess.lateness.none',
 };
 
 const readLimit = (value: string | null): number => {
@@ -417,7 +418,7 @@ function ListPagination({
 interface InProcessControlsProps {
   status: InProcessStatus | undefined;
   statusOptions: SelectOptions;
-  lateness: LatenessFlag | undefined;
+  lateness: LatenessFilter | undefined;
   governorate: string;
   governorates: SelectOptions;
   city: string;
@@ -462,7 +463,7 @@ function InProcessControls({
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
   const dimWhenSearching = searchActive ? 'opacity-60' : undefined;
-  const latenessOptions: SelectOptions = LATENESS_FLAGS.map((key) => ({
+  const latenessOptions: SelectOptions = LATENESS_FILTERS.map((key) => ({
     key,
     label: t(LATENESS_LABEL_KEYS[key]),
   }));
