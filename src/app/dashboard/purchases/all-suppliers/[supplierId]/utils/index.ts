@@ -16,14 +16,6 @@ function sanitizeHtml(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-function formatExcelDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
 export function exportSupplierInvoicesToExcel(
   invoices: SupplierInvoice[],
   supplierName: string,
@@ -34,7 +26,7 @@ export function exportSupplierInvoicesToExcel(
     'رقم الفاتورة': inv.code,
     'انشأ بواسطة': employeeDisplayName(inv.createdByEmployee),
     'عدد الاصناف': inv.products.length,
-    'التاريخ': formatExcelDate(inv.createdAt),
+    'التاريخ': formatDate(inv.createdAt),
     'المبلغ': inv.totalAmount,
     'نوع الفاتورة': INVOICE_TYPE_LABEL[inv.type] ?? inv.type,
   }));

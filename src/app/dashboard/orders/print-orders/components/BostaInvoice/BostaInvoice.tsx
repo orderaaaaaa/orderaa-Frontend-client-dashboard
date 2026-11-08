@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { InvoiceProps, InvoiceProduct } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
 import { ShippingType } from '@/types/orders';
+import { formatDate } from '@/utils/format';
 
 export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];
@@ -37,13 +38,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
     ?? storeInfo.defaultReturnShippingCost
     ?? 0;
 
-  const createdDate = data.createdAt
-    ? new Date(data.createdAt).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
-    : '-';
+  const createdDate = data.createdAt ? formatDate(data.createdAt) : '-';
 
   const customerNotes = data.shippingNotes || 'no notes';
 

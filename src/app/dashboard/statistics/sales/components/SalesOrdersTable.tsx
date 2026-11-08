@@ -98,7 +98,8 @@ function deliveredAtText(row: SalesOrderRow): string | null {
 
 function deliveredAtExportText(row: SalesOrderRow): string | null {
   if (row.status === OrderStatus.COLLECTED) return 'تم التحصيل';
-  return toCairoDayKey(row.deliveredAt);
+  const dayKey = toCairoDayKey(row.deliveredAt);
+  return dayKey ? formatDate(dayKey) : null;
 }
 
 function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | null {

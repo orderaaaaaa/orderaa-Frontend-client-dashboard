@@ -79,14 +79,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
       if (showTimeSelect) {
         return format(date, 'dd/MM/yyyy h:mm aa', { locale: ar });
       }
-      return format(
-        date,
-        dateFormat
-          .replace('dd', 'd')
-          .replace('MM', 'M')
-          .replace('yyyy', 'yyyy'),
-        { locale: ar }
-      );
+      return format(date, dateFormat, { locale: ar });
     };
 
     const handleClear = (e: React.MouseEvent) => {

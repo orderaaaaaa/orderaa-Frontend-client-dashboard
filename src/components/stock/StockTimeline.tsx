@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { ArrowLeft } from 'lucide-react';
 import { ActorChip } from '@/components/audit/ActorChip';
 import { OrderChip, orderHrefOf } from '@/components/stock/OrderChip';
@@ -18,7 +17,7 @@ import { EmptyState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { StockTimelineReferenceDto, StockTimelineRowDto, StockTimelineWarehouseDto } from '@/lib/api/warehouses';
-import { formatStockNumber, formatTime } from '@/utils/format';
+import { formatDate, formatStockNumber, formatTime } from '@/utils/format';
 
 interface StockTimelineProps {
   rows: StockTimelineRowDto[];
@@ -42,8 +41,6 @@ interface QuantityView {
 
 const dayKeyOf = (iso: string) => format(new Date(iso), 'yyyy-MM-dd');
 
-const dayLabelOf = (iso: string) => format(new Date(iso), 'd MMMM yyyy', { locale: ar });
-
 const groupByDay = (rows: StockTimelineRowDto[]): DayGroup[] => {
   const groups: DayGroup[] = [];
   rows.forEach((row) => {
@@ -52,7 +49,7 @@ const groupByDay = (rows: StockTimelineRowDto[]): DayGroup[] => {
     if (last && last.key === key) {
       last.rows.push(row);
     } else {
-      groups.push({ key, label: dayLabelOf(row.createdAt), rows: [row] });
+      groups.push({ key, label: formatDate(row.createdAt), rows: [row] });
     }
   });
   return groups;

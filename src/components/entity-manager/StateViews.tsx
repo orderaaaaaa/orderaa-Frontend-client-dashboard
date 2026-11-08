@@ -18,6 +18,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { pluralAr } from '@/i18n/pluralAr';
 import type { TranslationKey } from '@/i18n/translate';
 import { cn } from '@/lib/utils';
+import { formatDateTime } from '@/utils/format';
 
 export function QueueSkeleton({ rows = 6 }: { rows?: number }) {
   const { t } = useI18n();
@@ -159,20 +160,11 @@ interface StaleBannerProps {
   failedCount?: number;
 }
 
-const STALE_DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-});
-
 export function StaleBanner({ lastSuccessAt }: StaleBannerProps) {
   const { t } = useI18n();
   const parsed = new Date(lastSuccessAt);
   if (Number.isNaN(parsed.getTime())) return null;
-  const date = STALE_DATE_FORMAT.format(parsed);
+  const date = formatDateTime(parsed);
   return (
     <div role="status" className="flex items-start gap-2 rounded-md border bg-warning/15 p-3 text-sm text-foreground">
       <Clock className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />

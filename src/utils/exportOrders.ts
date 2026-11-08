@@ -2,6 +2,7 @@ import { Order } from '@/types/orders';
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
+import { formatDate } from '@/utils/format';
 
 export interface ExportOrderData {
     'كود الطلب': string;
@@ -61,13 +62,7 @@ export function exportInArabicFormat(
             .join(', '),
         'السعر الإجمالي': order.totalCost,
         'عدد المحاولات': order.numberOfTriesToReach,
-        'تاريخ الإنشاء': (() => {
-            const d = new Date(order.createdAt);
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}-${month}-${year}`;
-        })(),
+        'تاريخ الإنشاء': formatDate(order.createdAt),
         'الملاحظات': order.notes || '',
         'سبب الإلغاء': order.cancelReason || '',
         'ملاحظات الإلغاء': order.cancelNotes || '',
