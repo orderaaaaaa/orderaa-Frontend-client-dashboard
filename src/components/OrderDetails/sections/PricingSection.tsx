@@ -5,15 +5,23 @@ import { EditableTextField } from '../fields/EditableTextField';
 import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
-import { Order } from '@/types/orders';
+import { Order, paymentStatusShown } from '@/types/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE } from '@/types/shippingCompanies';
+import { useI18n } from '@/i18n/I18nProvider';
+import { ORDER_FIELD_LABELS } from '@/constants/orderFieldLabels';
+import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 
 // Validation schema for price fields - only numbers allowed
 const priceSchema = z.string().refine(
   (val) => val === '' || /^\d*\.?\d*$/.test(val),
   { message: 'يجب إدخال أرقام فقط' }
+);
+
+const prepaidSchema = z.string().refine(
+  (val) => val === '' || /^\d+(\.\d{1,2})?$/.test(val),
+  { message: 'أدخل مبلغاً صحيحاً بحد أقصى رقمين عشريين' }
 );
 
 /**
@@ -49,6 +57,7 @@ export function PricingSection({
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly;
   const priceLocked = order.shippingCompanyRef?.carrierSupportsUpdate === false;
+  const { t } = useI18n();
 
   // T8. Every amount is a decimal string from the API and is rendered as-is —
   // parsing it into a number to do arithmetic here would put money through a
@@ -57,7 +66,13 @@ export function PricingSection({
 
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
-      <h2 className="text-primary-text font-semibold">السعر و الدفع</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-primary-text font-semibold">السعر و الدفع</h2>
+        <PrepaidBadge prepaid={order.prepaid} />
+      </div>
+      {order.paidWithoutAmount && (
+        <p className="text-xs text-muted-foreground">{t('prepaid.paidWithoutAmount')}</p>
+      )}
 
       {order.isCollected && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-3">
@@ -80,7 +95,7 @@ export function PricingSection({
             </span>
           </div>
 
-          {order.isPartiallyPaid && (
+          {(order.prepaid ? order.prepaid.state === 'PARTIAL' : order.isPartiallyPaid) && (
             <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
               مدفوع جزئياً — ما زال هناك مبلغ مستحق
             </span>
@@ -97,6 +112,18 @@ export function PricingSection({
           validationSchema={priceSchema}
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
+          }}
+          canEdit={canEdit && !priceLocked}
+          readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
+        />
+        <EditableTextField
+          label={ORDER_FIELD_LABELS.prepaidAmount}
+          value={order.prepaidAmount ?? undefined}
+          icon={LiaFileInvoiceDollarSolid}
+          inputType="number"
+          validationSchema={prepaidSchema}
+          onSave={async (value) => {
+            await onUpdate('prepaidAmount', value === '' ? null : Number(value));
           }}
           canEdit={canEdit && !priceLocked}
           readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
@@ -149,11 +176,11 @@ export function PricingSection({
           canEdit={canEdit}
         />
         <PaymentStatusSelect
-          value={order.paymentStatus}
+          value={paymentStatusShown(order.prepaid, order.paymentStatus)}
           onChange={async (value) => {
             await onUpdate('paymentStatus', value);
           }}
-          canEdit={canEdit}
+          canEdit={false}
         />
       </div>
     </div>
