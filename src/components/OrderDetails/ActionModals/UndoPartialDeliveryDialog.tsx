@@ -7,7 +7,6 @@ import { useUndoPartialDelivery, useUndoPartialDeliveryPreview } from '@/service
 import type { PartialUndoPreview } from '@/types/logistics';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatNumber } from '@/utils/format';
-import { carrierSendNeedsAttention, carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 
 type Translate = ReturnType<typeof useI18n>['t'];
 
@@ -29,7 +28,18 @@ const undoMessageOf = (preview: PartialUndoPreview, t: Translate): string => {
       : t('partialDelivery.undo.bodyInTransit', money),
   ];
   if (preview.path === 'IN_TRANSIT') {
-    lines.push(t(preview.sendsCarrierEdit ? 'partialDelivery.undo.carrier' : 'partialDelivery.undo.noCarrier'));
+    lines.push(t('partialDelivery.undo.noCarrier'));
+    if (
+      preview.carrierHoldsSplitValues &&
+      (preview.totalBefore !== preview.totalAfter || preview.shippingTypeBefore !== preview.shippingTypeAfter)
+    ) {
+      lines.push(
+        t('partialDelivery.undo.carrierHolds', {
+          before: formatNumber(preview.totalBefore),
+          after: formatNumber(preview.totalAfter),
+        }),
+      );
+    }
   }
   if (preview.totalBeforeSplit !== null && preview.totalAfter > preview.totalBeforeSplit) {
     lines.push(
@@ -49,11 +59,7 @@ export default function UndoPartialDeliveryDialog({ orderId, isOpen, onClose }: 
   const title = t('partialDelivery.undo.title');
 
   const handleConfirm = async () => {
-    const result = await undo.mutateAsync(orderId);
-    if (carrierSendNeedsAttention(result.carrierSend) || (result.carrierEditDue && result.carrierSend === null)) {
-      toast.warning(carrierSendNotSentWarningAfter('تم التراجع عن التسليم الجزئي'));
-      return;
-    }
+    await undo.mutateAsync(orderId);
     toast.success(t('partialDelivery.undo.done'));
   };
 

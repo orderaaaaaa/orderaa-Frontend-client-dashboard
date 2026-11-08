@@ -31,8 +31,7 @@ export type ShippingDispatchFailureCode =
   | 'SHIPMENT_UPDATE_NOT_SENT'
   | 'SHIPMENT_OUTCOME_UNKNOWN'
   | 'OLD_SHIPMENT_STILL_LIVE'
-  | 'SHIPMENT_CANCEL_AT_CARRIER'
-  | 'PARTIAL_UNDO_CARRIER_EDIT_NOT_SENT';
+  | 'SHIPMENT_CANCEL_AT_CARRIER';
 
 export type AutomationFailureCode =
   | 'AUTOMATION_NOT_SENT'
@@ -273,13 +272,6 @@ export type ShipmentUpdateNotSentDetails = ShipmentCarrierSendDetails;
 
 export type ShipmentOutcomeUnknownDetails = ShipmentCarrierSendDetails;
 
-export interface PartialUndoCarrierEditNotSentDetails {
-  removedReturnOrderCode: string;
-  reason: 'CLAIM_LOST' | 'SEND_NEEDS_ATTENTION';
-  markerId: number | null;
-  carrierCode: string | null;
-}
-
 export interface ShipmentCancelAtCarrierDetails {
   shippingCompanyId: number;
   carrierName: string;
@@ -506,7 +498,6 @@ export interface OrderSystemFailureDetailsByCode {
   SHIPMENT_OUTCOME_UNKNOWN: ShipmentOutcomeUnknownDetails;
   OLD_SHIPMENT_STILL_LIVE: OldShipmentStillLiveDetails;
   SHIPMENT_CANCEL_AT_CARRIER: ShipmentCancelAtCarrierDetails;
-  PARTIAL_UNDO_CARRIER_EDIT_NOT_SENT: PartialUndoCarrierEditNotSentDetails;
   AUTOMATION_NOT_SENT: AutomationNotSentDetails;
   AUTOMATION_SEND_FAILED: AutomationSendFailedDetails;
   AUTOMATION_MAPPING_NOT_SAVED: AutomationMappingNotSavedDetails;

@@ -48,7 +48,9 @@ export interface PartialUndoPreview {
   totalAfter: number;
   totalBeforeSplit: number | null;
   path: 'IN_TRANSIT' | 'DELIVERED';
-  sendsCarrierEdit: boolean;
+  shippingTypeBefore: ShippingType;
+  shippingTypeAfter: ShippingType;
+  carrierHoldsSplitValues: boolean;
 }
 
 export interface PartialUndoResponse {
@@ -60,8 +62,6 @@ export interface PartialUndoResponse {
     shippingType: ShippingType;
   };
   removedReturnOrder: { id: number; code: string };
-  carrierEditDue: boolean;
-  carrierSend: CarrierSendBlock | null;
 }
 
 export interface ExchangeData {

@@ -32,7 +32,6 @@ import type {
   OrderSystemFailureDetailsByCode,
   VariantGenerationGapDetails,
   PartialReturnRuleMissingDetails,
-  PartialUndoCarrierEditNotSentDetails,
   ScheduledTransitionFailedDetails,
   ShadowActivationFailedDetails,
   ShipmentCancelAtCarrierDetails,
@@ -284,13 +283,6 @@ const isOldShipmentStillLive = (value: unknown): value is OldShipmentStillLiveDe
   typeof value.newCompanyId === 'number' &&
   isString(value.shippingId);
 
-const isPartialUndoCarrierEditNotSent = (value: unknown): value is PartialUndoCarrierEditNotSentDetails =>
-  isRecord(value) &&
-  isString(value.removedReturnOrderCode) &&
-  (value.reason === 'CLAIM_LOST' || value.reason === 'SEND_NEEDS_ATTENTION') &&
-  (typeof value.markerId === 'number' || value.markerId === null) &&
-  isStringOrNull(value.carrierCode);
-
 const isShipmentCancelAtCarrier = (value: unknown): value is ShipmentCancelAtCarrierDetails =>
   isRecord(value) &&
   typeof value.shippingCompanyId === 'number' &&
@@ -491,8 +483,6 @@ export function narrowFailureDetails(
       return isOldShipmentStillLive(details) ? { code, details } : null;
     case 'SHIPMENT_CANCEL_AT_CARRIER':
       return isShipmentCancelAtCarrier(details) ? { code, details } : null;
-    case 'PARTIAL_UNDO_CARRIER_EDIT_NOT_SENT':
-      return isPartialUndoCarrierEditNotSent(details) ? { code, details } : null;
     case 'AUTOMATION_NOT_SENT':
       return isAutomationNotSent(details) ? { code, details } : null;
     case 'AUTOMATION_SEND_FAILED':
