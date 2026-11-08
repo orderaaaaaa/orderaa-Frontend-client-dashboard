@@ -3,7 +3,7 @@ import type {
   ShippingImplementation,
 } from '@/types/shippingCompanies';
 import type { FollowupClosure, FollowupWorkState } from '@/types/logistics';
-import { OrderStatus } from '@/types/orders';
+import { OrderPrepaid, OrderStatus } from '@/types/orders';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import type { CarrierCapabilityReason } from '@/types/shippingCompanies';
 
@@ -116,6 +116,7 @@ export interface ShipmentRowBase {
   lineCount: number;
   returnChildCode: string | null;
   frozenReturnChild: boolean;
+  prepaid: OrderPrepaid | null;
   unreadNoteCount?: number;
 }
 
@@ -247,6 +248,10 @@ export interface ShipmentAddressBody {
 
 export interface ShipmentPriceBody {
   totalCost: number;
+}
+
+export interface ShipmentPrepaidBody {
+  prepaidAmount: number | null;
 }
 
 export interface ShipmentReturnCostBody {

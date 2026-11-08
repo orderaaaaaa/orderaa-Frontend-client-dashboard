@@ -370,6 +370,16 @@ export interface OrderShippingId {
   createdAt: string;
 }
 
+export type PrepaidState = 'FULL' | 'PARTIAL';
+
+export interface OrderPrepaid {
+  state: PrepaidState;
+  amount: string;
+  amountToCollect: string;
+}
+
+export const paymentStatusShown = (prepaid: OrderPrepaid | null | undefined, stored: string | undefined) => (prepaid ? (prepaid.state === 'FULL' ? 'مدفوع' : 'مدفوع جزئياً') : stored);
+
 // Order Interface
 export interface Order {
   id: number;
@@ -405,6 +415,8 @@ export interface Order {
   settlementRecordedAt?: string | null;
   settlementResolved?: boolean;
   prepaidAmount?: string | null;
+  prepaid?: OrderPrepaid | null;
+  paidWithoutAmount?: boolean;
   collectedAmount?: string | null;
   suppliedAmount?: string | null;
   isCollected?: boolean;

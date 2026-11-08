@@ -492,6 +492,7 @@ const ar = {
   'inProcess.sheet.desc.address': 'المحافظة والمدينة والعنوان التفصيلي',
   'inProcess.sheet.desc.price': 'إجمالي مبلغ الطلب',
   'inProcess.sheet.desc.returnCost': 'مبلغ الإلغاء عند عدم الاستلام',
+  'inProcess.sheet.desc.prepaid': 'المبلغ الذي دفعه العميل قبل التوصيل',
   'inProcess.sheet.desc.addPhone': 'إضافة رقم جديد لعميل الطلب',
   'inProcess.action.notes': 'الملاحظات',
   'inProcess.action.log': 'سجل الإجراءات',
@@ -501,6 +502,7 @@ const ar = {
   'inProcess.action.address': 'تغيير العنوان',
   'inProcess.action.price': 'تغيير السعر',
   'inProcess.action.returnCost': 'تكلفة المرتجع',
+  'inProcess.action.prepaid': 'إضافة مبلغ مدفوع مسبقاً',
   'inProcess.action.addPhone': 'إضافة رقم هاتف',
   'inProcess.reason.locked': 'الطلب مغلق في المتابعة',
   'inProcess.reason.alreadyClosed': 'الطلب له إغلاق قائم، أعد فتحه أولاً',
@@ -1040,6 +1042,9 @@ const ar = {
   'customerReturn.field.company': 'شركة الشحن',
   'customerReturn.field.governorate': 'المحافظة',
   'customerReturn.field.city': 'المدينة',
+  'prepaid.badge.full': 'مدفوع مسبقاً {amount} جنيه',
+  'prepaid.badge.partial': 'مدفوع جزئياً {amount} جنيه',
+  'prepaid.paidWithoutAmount': 'الحالة مدفوع بدون مبلغ، شركة الشحن تحصّل الإجمالي كاملاً',
 } as const;
 
 export default ar;

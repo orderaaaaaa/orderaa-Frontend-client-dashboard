@@ -470,6 +470,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.sheet.desc.address': 'Governorate, city and full address',
   'inProcess.sheet.desc.price': 'Order total amount',
   'inProcess.sheet.desc.returnCost': 'Amount charged when the order is not received',
+  'inProcess.sheet.desc.prepaid': 'Amount the customer paid before delivery',
   'inProcess.sheet.desc.addPhone': 'Add a new number for the order customer',
   'inProcess.sheet.desc.partial': 'Deliver some of the order products',
   'inProcess.sheet.desc.undoPartial': 'Undo the partial delivery and return its pieces to the order',
@@ -487,6 +488,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.action.address': 'Change address',
   'inProcess.action.price': 'Change price',
   'inProcess.action.returnCost': 'Return cost',
+  'inProcess.action.prepaid': 'Add prepaid amount',
   'inProcess.action.addPhone': 'Add phone number',
   'inProcess.reason.locked': 'The order is closed in follow-up',
   'inProcess.reason.alreadyClosed': 'The order already has a closure; reopen it first',
@@ -1026,6 +1028,9 @@ const en: Record<keyof typeof ar, string> = {
   'customerReturn.field.company': 'Shipping company',
   'customerReturn.field.governorate': 'Governorate',
   'customerReturn.field.city': 'City',
+  'prepaid.badge.full': 'Prepaid {amount} EGP',
+  'prepaid.badge.partial': 'Partly prepaid {amount} EGP',
+  'prepaid.paidWithoutAmount': 'Status is paid with no amount; the carrier collects the full total',
 };
 
 export default en;
