@@ -28,6 +28,7 @@ export interface OrderActionsFooterProps {
   isNavigatingPrevious?: boolean;
   isBusy?: boolean;
   partialAction: PartialDeliveryMenuAction;
+  undoAction: PartialDeliveryMenuAction;
   frozen?: boolean;
 }
 
@@ -43,6 +44,7 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingPrevious = false,
   isBusy = false,
   partialAction,
+  undoAction,
   frozen = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
@@ -179,6 +181,7 @@ export function OrderActionsFooterLargeScreens({
               orderStatus={orderStatus}
               lastEventStatus={lastEventStatus}
               partialAction={partialAction}
+              undoAction={undoAction}
               frozen={frozen}
               onActionClick={handleActionClick}
             />

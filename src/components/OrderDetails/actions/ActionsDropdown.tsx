@@ -19,6 +19,7 @@ import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { PARTIAL_DELIVERY_CODES } from '@/utils/partialDelivery/partialDeliveryGate';
+import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 
 interface ActionOption {
@@ -53,6 +54,7 @@ export interface ActionsDropdownProps {
   orderStatus: string;
   lastEventStatus?: string;
   partialAction: PartialDeliveryMenuAction;
+  undoAction: PartialDeliveryMenuAction;
   frozen: boolean;
   className?: string;
   onActionClick: (label: string, action: string) => void;
@@ -63,22 +65,35 @@ export function ActionsDropdown({
   orderStatus,
   lastEventStatus,
   partialAction,
+  undoAction,
   frozen,
   className,
   onActionClick,
 }: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
   const { visible: partialVisible, blockedReason: partialBlockedReason } = partialAction;
+  const { visible: undoVisible, blockedReason: undoBlockedReason } = undoAction;
+  const { t } = useI18n();
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
   const { hasPermission, hasAllPermissions } = usePermissionCheck();
   const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
   const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
+  const arrowOptionsWithUndo = useMemo<ActionOption[]>(() => {
+    const partialIndex = arrowOptions.findIndex((option) => option.action === 'partial_delivery');
+    const undoOption: ActionOption = {
+      label: t('partialDelivery.undo.title'),
+      action: 'undo_partial_delivery',
+      icon: <LiaUndoAltSolid className="w-5 h-5" />,
+    };
+    return [...arrowOptions.slice(0, partialIndex + 1), undoOption, ...arrowOptions.slice(partialIndex + 1)];
+  }, [t]);
+
   const filteredOptions = useMemo(() => {
     if (frozen) {
       return canUpdate ? postShippingOptions.filter((option) => option.action === 'return_refund') : [];
     }
-    const base = arrowOptions.filter((option) => {
+    const base = arrowOptionsWithUndo.filter((option) => {
       if (option.action === 'cancel') {
         return canCancel;
       }
@@ -87,6 +102,9 @@ export function ActionsDropdown({
       }
       if (option.action === 'partial_delivery') {
         return partialVisible && hasAllPermissions(PARTIAL_DELIVERY_CODES);
+      }
+      if (option.action === 'undo_partial_delivery') {
+        return undoVisible && hasAllPermissions(PARTIAL_DELIVERY_CODES);
       }
       if (option.action === 'stop_operation') {
         return orderStatus === 'CONFIRMED';
@@ -105,7 +123,7 @@ export function ActionsDropdown({
     }
 
     return base;
-  }, [frozen, orderStatus, lastEventStatus, partialVisible, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
+  }, [frozen, orderStatus, lastEventStatus, partialVisible, undoVisible, arrowOptionsWithUndo, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
 
   if (!isOpen || filteredOptions.length === 0) return null;
 
@@ -118,7 +136,12 @@ export function ActionsDropdown({
       dir="rtl"
     >
       {filteredOptions.map((option) => {
-        const blockedReason = option.action === 'partial_delivery' ? partialBlockedReason : null;
+        const blockedReason =
+          option.action === 'partial_delivery'
+            ? partialBlockedReason
+            : option.action === 'undo_partial_delivery'
+              ? undoBlockedReason
+              : null;
         return (
           <Button
             key={option.action}

@@ -22,14 +22,11 @@ import {
   undoPartialDelivery,
 } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { readStoredLocale } from '@/i18n/locale';
-import { translate } from '@/i18n/translate';
 import { invalidateStockViews } from '@/services/warehouses';
 import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
 import {
   CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
-  carrierSendNotSentWarningAfter,
 } from '@/utils/manualOrder/carrierSend';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
@@ -138,7 +135,7 @@ export const useUndoPartialDelivery = () => {
 
   return useMutation({
     mutationFn: (orderId: number) => undoPartialDelivery(orderId),
-    onSuccess: (result, orderId) => {
+    onSuccess: (_, orderId) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
       });
@@ -150,14 +147,6 @@ export const useUndoPartialDelivery = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
       queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
       invalidateStockViews(queryClient);
-      if (
-        carrierSendNeedsAttention(result.carrierSend) ||
-        (result.carrierEditDue && result.carrierSend === null)
-      ) {
-        toast.warning(carrierSendNotSentWarningAfter('تم التراجع عن التسليم الجزئي'));
-      } else {
-        toast.success(translate(readStoredLocale(), 'partialDelivery.undo.done'));
-      }
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, 'تعذر التراجع عن التسليم الجزئي'));

@@ -31,6 +31,7 @@ import {
   PARTIAL_DELIVERY_CODES,
   mustOpenSplitPopup,
   orderPagePartialActionOf,
+  undoPartialDeliveryActionOf,
 } from '@/utils/partialDelivery/partialDeliveryGate';
 import { useI18n } from '@/i18n/I18nProvider';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -121,6 +122,7 @@ function OrderDetailsInfoComponent({
     'returnRefund',
     'postShippingCancel',
     'partialDelivery',
+    'undoPartialDelivery',
     'resend',
     'late',
   ]);
@@ -215,6 +217,18 @@ function OrderDetailsInfoComponent({
     blockedReason: partialGate.blockedKey === null ? null : t(partialGate.blockedKey),
   };
 
+  const undoChild = (order.partialReturns ?? []).find((item) => item.lineCount > 0);
+  const undoGate = undoPartialDeliveryActionOf({
+    locked: false,
+    status: order.status,
+    hasReturnChild: undoChild !== undefined,
+    childStatus: undoChild?.status ?? null,
+  });
+  const undoAction = {
+    visible: undoGate.visible,
+    blockedReason: undoGate.blockedKey === null ? null : t(undoGate.blockedKey),
+  };
+
   const handleConfirmClick = () =>
     runWhenLockSettles(() =>
       setConfirmationDialog({
@@ -277,6 +291,9 @@ function OrderDetailsInfoComponent({
         break;
       case 'partial_delivery':
         modals.partialDelivery.open();
+        break;
+      case 'undo_partial_delivery':
+        modals.undoPartialDelivery.open();
         break;
       case 'resend':
         console.log('[Resend] action triggered for order:', order.id);
@@ -442,6 +459,7 @@ function OrderDetailsInfoComponent({
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           isBusy={actions.isTransitioning}
           partialAction={partialAction}
+          undoAction={undoAction}
         />
       </div>
 
@@ -459,6 +477,7 @@ function OrderDetailsInfoComponent({
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           isBusy={actions.isTransitioning}
           partialAction={partialAction}
+          undoAction={undoAction}
         />
       </div>
 

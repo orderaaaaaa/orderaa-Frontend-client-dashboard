@@ -7,7 +7,7 @@ import { LiaCheckCircle } from 'react-icons/lia';
 interface SimpleConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void | Promise<void>;
+  onConfirm?: () => void | Promise<void>;
   title: string;
   message: string;
   confirmText?: string;
@@ -25,7 +25,7 @@ export default function SimpleConfirmationModal({
 }: SimpleConfirmationModalProps) {
   const handleConfirm = async () => {
     try {
-      await onConfirm();
+      await onConfirm?.();
       // Only close if the operation succeeded
       onClose();
     } catch (error) {
@@ -39,7 +39,7 @@ export default function SimpleConfirmationModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      onConfirm={handleConfirm}
+      onConfirm={onConfirm ? handleConfirm : undefined}
       confirmText={confirmText}
       cancelText={cancelText}
       maxWidth="w-[500px]"

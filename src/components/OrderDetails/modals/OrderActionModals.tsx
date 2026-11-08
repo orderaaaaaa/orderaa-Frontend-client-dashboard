@@ -21,6 +21,7 @@ import {
   PostShippingCancelModal,
   PartialDeliveryModal,
 } from '../ActionModals';
+import UndoPartialDeliveryDialog from '../ActionModals/UndoPartialDeliveryDialog';
 
 export interface OrderActionModalsProps {
   modals: ModalStates;
@@ -288,6 +289,12 @@ export function OrderActionModals({
         orderStatus={order.status}
         hasActiveShippingId={order.shipping_ids?.some((row) => row.isActive) ?? false}
         parentReturnContent={order.returnShipmentContent ?? null}
+      />
+
+      <UndoPartialDeliveryDialog
+        isOpen={modals.undoPartialDelivery.isOpen}
+        onClose={modals.undoPartialDelivery.close}
+        orderId={order.id}
       />
     </>
   );
