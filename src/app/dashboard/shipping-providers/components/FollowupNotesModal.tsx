@@ -24,6 +24,7 @@ import {
   FOLLOWUP_NOTES_LOADING,
   FOLLOWUP_NOTES_RETRY_LABEL,
   FOLLOWUP_NOTES_TITLE,
+  followupCarrierLineKey,
 } from './followupNotesConstants';
 
 interface FollowupNotesModalProps {
@@ -31,7 +32,7 @@ interface FollowupNotesModalProps {
   onClose: () => void;
 }
 
-const NO_NEW_NOTES: ReadonlySet<number> = new Set<number>();
+const NO_NEW_CARRIER_LINES: ReadonlySet<string> = new Set<string>();
 
 function AddFollowupNoteForm({ orderId }: { orderId: number }) {
   const [party, setParty] = useState<FollowupNotePartyValue>('CUSTOMER');
@@ -89,7 +90,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
   const notesQuery = useFollowupNotesQuery(orderId, true);
   const { data: notesData, isFetchedAfterMount, isFetching, isError } = notesQuery;
   const { mutate: markRead } = useMarkFollowupNotesReadMutation();
-  const [newNoteIds, setNewNoteIds] = useState<ReadonlySet<number> | null>(null);
+  const [newCarrierLineKeys, setNewCarrierLineKeys] = useState<ReadonlySet<string> | null>(null);
   const snapshotTakenRef = useRef(false);
   const scrollPendingRef = useRef(false);
   const canAddNote = canManage && (notesData?.days.some((day) => day.canAddNotes) ?? false);
@@ -98,16 +99,16 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
     if (snapshotTakenRef.current) return;
     if (!notesData || !isFetchedAfterMount || isFetching || isError) return;
     snapshotTakenRef.current = true;
-    const ids = new Set<number>();
+    const keys = new Set<string>();
     for (const day of notesData.days) {
-      for (const note of day.notes) {
-        if (note.unread) ids.add(note.id);
+      for (const line of day.carrier.texts) {
+        if (line.unread) keys.add(followupCarrierLineKey(day.day, line));
       }
     }
-    setNewNoteIds(ids);
-    if (ids.size > 0) scrollPendingRef.current = true;
-    if (ids.size > 0 && notesData.readThroughEntryId !== null) {
-      markRead({ orderId, throughEntryId: notesData.readThroughEntryId });
+    setNewCarrierLineKeys(keys);
+    if (keys.size > 0) scrollPendingRef.current = true;
+    if (keys.size > 0 && notesData.readThroughCarrierLogId !== null) {
+      markRead({ orderId, throughCarrierLogId: notesData.readThroughCarrierLogId });
     }
   }, [notesData, isFetchedAfterMount, isFetching, isError, markRead, orderId]);
 
@@ -143,7 +144,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
                 orderId={orderId}
                 day={day}
                 canManage={canManage}
-                newNoteIds={newNoteIds ?? NO_NEW_NOTES}
+                newCarrierLineKeys={newCarrierLineKeys ?? NO_NEW_CARRIER_LINES}
                 scrollPendingRef={scrollPendingRef}
               />
             ))}

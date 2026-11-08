@@ -1,4 +1,4 @@
-import type { FollowupActionEventSource, FollowupNotePartyValue } from '@/lib/api/followup';
+import type { FollowupActionEventSource, FollowupCarrierText, FollowupNotePartyValue } from '@/lib/api/followup';
 
 export const FOLLOWUP_NOTE_MAX_LENGTH = 2000;
 
@@ -50,6 +50,9 @@ export const FOLLOWUP_CARRIER_REASON_SEPARATOR = ' — ';
 
 export const repeatsSuffix = (repeats: number): string =>
   repeats > 1 ? ` ${FOLLOWUP_CARRIER_REPEAT_PREFIX}${repeats}` : '';
+
+export const followupCarrierLineKey = (day: string, line: FollowupCarrierText): string =>
+  `${day}|${line.at}|${line.text}|${line.reason ?? ''}`;
 
 export const FOLLOWUP_LEGACY_NAME_LABELS: Partial<Record<string, string>> = {
   ATTEMPTED: 'متابعة',
