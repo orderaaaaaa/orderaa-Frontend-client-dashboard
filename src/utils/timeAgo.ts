@@ -1,17 +1,47 @@
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
 import { translate, type TranslationKey } from '@/i18n/translate';
 
-const UNIT_KEYS: Record<'day' | 'hour' | 'minute', readonly [TranslationKey, TranslationKey]> = {
-  day: ['timeAgo.unit.day.one', 'timeAgo.unit.day.other'],
-  hour: ['timeAgo.unit.hour.one', 'timeAgo.unit.hour.other'],
-  minute: ['timeAgo.unit.minute.one', 'timeAgo.unit.minute.other'],
+type TimeUnit = 'day' | 'hour' | 'minute';
+type UnitForm = 'one' | 'two' | 'few' | 'many' | 'other';
+
+const UNIT_KEYS: Record<TimeUnit, Record<UnitForm, TranslationKey>> = {
+  day: {
+    one: 'timeAgo.unit.day.one',
+    two: 'timeAgo.unit.day.two',
+    few: 'timeAgo.unit.day.few',
+    many: 'timeAgo.unit.day.many',
+    other: 'timeAgo.unit.day.other',
+  },
+  hour: {
+    one: 'timeAgo.unit.hour.one',
+    two: 'timeAgo.unit.hour.two',
+    few: 'timeAgo.unit.hour.few',
+    many: 'timeAgo.unit.hour.many',
+    other: 'timeAgo.unit.hour.other',
+  },
+  minute: {
+    one: 'timeAgo.unit.minute.one',
+    two: 'timeAgo.unit.minute.two',
+    few: 'timeAgo.unit.minute.few',
+    many: 'timeAgo.unit.minute.many',
+    other: 'timeAgo.unit.minute.other',
+  },
 };
 
-const amountOf = (locale: Locale, count: number, unit: keyof typeof UNIT_KEYS) =>
-  translate(locale, 'timeAgo.amount', {
-    count,
-    unit: translate(locale, UNIT_KEYS[unit][count === 1 ? 0 : 1]),
-  });
+const arabicPluralRules = new Intl.PluralRules('ar');
+
+const unitFormOf = (locale: Locale, count: number): UnitForm => {
+  if (locale !== 'ar') return count === 1 ? 'one' : 'other';
+  const category = arabicPluralRules.select(count);
+  return category === 'zero' ? 'other' : category;
+};
+
+const amountOf = (locale: Locale, count: number, unit: TimeUnit): string => {
+  const form = unitFormOf(locale, count);
+  const unitText = translate(locale, UNIT_KEYS[unit][form]);
+  if (form === 'two') return unitText;
+  return translate(locale, 'timeAgo.amount', { count, unit: unitText });
+};
 
 function parseDate(dateInput: string | Date): Date {
   if (typeof dateInput === 'string') {
