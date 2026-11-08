@@ -1,8 +1,11 @@
 import {
+  Order,
   OrderEvent,
   OrderProductVariantInfo,
   ShippingType,
 } from '@/types/orders';
+
+export type OrderCardMoney = Pick<Order, 'settlementAmount' | 'prepaid'>;
 
 export interface OrderCardProps {
   id: number;
@@ -35,9 +38,7 @@ export interface OrderCardProps {
   cancelReason?: string | null;
   cancelNotes?: string | null;
   /** T8: decimal strings from the API, shown as-is. */
-  collectedAmount?: string | null;
-  isCollected?: boolean;
-  isPartiallyPaid?: boolean;
+  money?: OrderCardMoney;
   isPrinted?: boolean;
   printCount?: number;
   disableNavigation?: boolean;

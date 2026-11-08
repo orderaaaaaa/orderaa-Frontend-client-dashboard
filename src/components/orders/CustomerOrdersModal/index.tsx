@@ -245,9 +245,7 @@ export default function CustomerOrdersModal({
                 }
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
-                collectedAmount={order.collectedAmount}
-                isCollected={order.isCollected}
-                isPartiallyPaid={order.isPartiallyPaid}
+                money={order}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
                 unreadNoticeCount={order.unreadNoticeCount}

@@ -28,6 +28,7 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { IconType } from 'react-icons';
 import { NoticeBadge } from '@/components/notices/NoticeBadge';
 import { NoticesDialog } from '@/components/notices/NoticesDialog';
+import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 
@@ -67,9 +68,7 @@ export default function OrderCard({
   cancelReason,
   cancelNotes,
   postponedUntil,
-  collectedAmount,
-  isCollected = false,
-  isPartiallyPaid = false,
+  money,
   isPrinted = false,
   printCount = 0,
   disableNavigation = false,
@@ -368,19 +367,12 @@ export default function OrderCard({
             <span className="text-base font-medium text-foreground">
               {price} جنيه
             </span>
-            {/* T8. Absence is the common case and the card is already dense,
-                so an uncollected order shows nothing at all. مدفوع جزئياً is
-                visually distinct from محصل so staff keep chasing the balance. */}
-            {isPartiallyPaid ? (
-              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                <LiaExclamationCircleSolid className="w-3.5 h-3.5" />
-                مدفوع جزئياً{collectedAmount ? ` ${collectedAmount}` : ''}
-              </span>
-            ) : isCollected ? (
+            <PrepaidBadge prepaid={money?.prepaid} />
+            {typeof money?.settlementAmount === 'string' && (
               <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                محصل{collectedAmount ? ` ${collectedAmount} جنيه` : ''}
+                محصل {money.settlementAmount} جنيه
               </span>
-            ) : null}
+            )}
             {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {
               const badge = SHIPPING_TYPE_BADGE[shippingType];
               return (

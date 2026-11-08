@@ -280,9 +280,7 @@ function DelayedOrdersContent() {
                 select={false}
                 status={order.status}
                 createdAt={order.createdAt}
-                collectedAmount={order.collectedAmount}
-                isCollected={order.isCollected}
-                isPartiallyPaid={order.isPartiallyPaid}
+                money={order}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
                 unreadNoticeCount={order.unreadNoticeCount}
