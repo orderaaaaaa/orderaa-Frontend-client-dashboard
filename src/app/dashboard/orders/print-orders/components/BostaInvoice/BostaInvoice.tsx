@@ -120,7 +120,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
           <div className="flex flex-row items-center gap-3 px-2 py-1 text-[8px] border-e border-black">
             <div className="flex flex-row items-center gap-1">
               <p className="font-bold">{labels.codAmount}: </p>
-              <p className="text-[11px] font-bold">{data.totalPrice}</p>
+              <p className="text-[11px] font-bold">{data.prepaid ? data.prepaid.amountToCollect : data.totalPrice}</p>
               <p className="text-[9px]">{currency}</p>
             </div>
             <div className="flex flex-row gap-1 items-center font-bold">

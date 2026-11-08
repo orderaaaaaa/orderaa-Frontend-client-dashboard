@@ -1,4 +1,4 @@
-import { Order, OrderStatus, mapOrderProductToVariantInfo } from '@/types/orders';
+import { Order, OrderStatus, mapOrderProductToVariantInfo, paymentStatusShown } from '@/types/orders';
 import { InvoiceData, InvoiceLanguage, InvoiceProduct } from '../types/invoice';
 
 export function mapOrderToInvoice(
@@ -39,8 +39,8 @@ export function mapOrderToInvoice(
     shipping: {
       allowOpenShipment: true,
       paymentMethod: order.paymentMethod || (language === 'ar' ? 'الدفع عند الاستلام' : 'Cash on delivery'),
-      paymentStatus: order.paymentStatus || (language === 'ar' ? 'غير مدفوع' : 'unpaid'),
-      shipmentStatus: isCOD ? 'COD' : (isPaid ? 'PAID' : 'COD'),
+      paymentStatus: paymentStatusShown(order.prepaid, order.paymentStatus) || (language === 'ar' ? 'غير مدفوع' : 'unpaid'),
+      shipmentStatus: order.prepaid?.state === 'FULL' ? 'PAID' : (isCOD ? 'COD' : (isPaid ? 'PAID' : 'COD')),
     },
     schedule: {
       timeFrom: order.timeFrom,
@@ -61,6 +61,9 @@ export function mapOrderToInvoice(
     createdAt: order.createdAt,
     shippingType: order.shippingType,
     isResend: order.status === OrderStatus.RETURN_RESEND_PENDING,
+    prepaid: order.prepaid
+      ? { amount: order.prepaid.amount, amountToCollect: order.prepaid.amountToCollect, state: order.prepaid.state }
+      : undefined,
   };
 }
 

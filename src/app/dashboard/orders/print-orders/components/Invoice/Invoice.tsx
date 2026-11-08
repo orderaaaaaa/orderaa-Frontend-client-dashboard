@@ -20,6 +20,9 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
   const getPaymentStatusDisplay = () => {
     const status = data.shipping.paymentStatus?.toLowerCase();
+    if (data.prepaid && status === 'مدفوع جزئياً') {
+      return labels.partiallyPaid;
+    }
     if (status === 'paid' || status === 'مدفوع') {
       return labels.paid;
     }
@@ -249,6 +252,13 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           {labels.totalPrice}:{" "}{data.totalPrice} EGP
         </p>
       </div>
+
+      {data.prepaid && (
+        <div className="grid grid-cols-2 items-center text-[9px] font-bold mb-1 border-y border-black py-1">
+          <span>{labels.prepaidAmount} {data.prepaid.amount} {labels.currency}</span>
+          <span>{labels.amountToCollect} {data.prepaid.amountToCollect} {labels.currency}</span>
+        </div>
+      )}
 
       {/* Non-Receipt Penalty & Product Count */}
       <div className="grid grid-cols-2 items-center text-[9px] font-bold mb-1 border-y border-black py-1">

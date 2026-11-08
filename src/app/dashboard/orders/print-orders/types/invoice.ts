@@ -1,4 +1,4 @@
-import { ShippingType } from '@/types/orders';
+import { PrepaidState, ShippingType } from '@/types/orders';
 
 export type InvoiceLanguage = 'ar' | 'en';
 
@@ -63,6 +63,7 @@ export interface InvoiceData {
   createdAt?: string;
   shippingType?: ShippingType;
   isResend?: boolean;
+  prepaid?: { amount: string; amountToCollect: string; state: PrepaidState };
 }
 
 export interface InvoiceLabels {
@@ -115,6 +116,10 @@ export interface InvoiceLabels {
   return: string;
   partialReturn: string;
   resend: string;
+  prepaidAmount: string;
+  amountToCollect: string;
+  partiallyPaid: string;
+  currency: string;
 }
 
 export interface InvoiceProps {
