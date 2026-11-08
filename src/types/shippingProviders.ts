@@ -65,7 +65,7 @@ export const LATENESS_FLAGS = ['RED', 'YELLOW', 'GREEN'] as const;
 
 export type LatenessFlag = (typeof LATENESS_FLAGS)[number];
 
-export const LATENESS_FILTERS = [...LATENESS_FLAGS, 'NONE'] as const;
+export const LATENESS_FILTERS = ['GREEN', 'YELLOW', 'RED', 'NONE'] as const;
 
 export type LatenessFilter = (typeof LATENESS_FILTERS)[number];
 
