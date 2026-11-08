@@ -364,6 +364,8 @@ const ar = {
   'orderSystemFailures.label.STORE_UPDATE_NO_CREATION_BASELINE': 'وصل تحديث من المتجر ولم يتم تطبيقه لعدم وجود بيانات الإنشاء للمقارنة',
   'orderSystemFailures.label.STORE_UPDATE_CREATION_STOCK_SHORTAGE': 'وصل تحديث من المتجر ولم يتم تطبيقه لعدم كفاية المخزون',
   'orderSystemFailures.label.STORE_UPDATE_FAILED': 'فشل تطبيق تحديث من المتجر',
+  'orderSystemFailures.label.VARIANT_GENERATION_GAP': 'توجد متغيرات بدون بطاقة فيها مخزون أو طلبات مفتوحة',
+  'products.gapReport.banner': 'بعض المتغيرات بدون بطاقة ولديها مخزون أو طلبات مفتوحة: {rows}',
   'orderSystemFailures.label.fallback': 'عطل في النظام',
   'timeAgo.now': 'الآن',
   'timeAgo.ago': 'منذ {value}',

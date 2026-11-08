@@ -62,7 +62,8 @@ export type OrderSystemFailureCode =
   | 'ORDER_SHADOWED'
   | 'SHADOW_ACTIVATION_FAILED'
   | StoreUpdateNotAppliedCode
-  | 'STORE_UPDATE_FAILED';
+  | 'STORE_UPDATE_FAILED'
+  | 'VARIANT_GENERATION_GAP';
 
 export type FailureActorType =
   | 'EMPLOYEE'
@@ -480,6 +481,11 @@ export interface StoreUpdateFailedDetails {
   reason: FailureReason;
 }
 
+export interface VariantGenerationGapDetails {
+  productId: number;
+  rows: { variantId: number; label: string }[];
+}
+
 export interface OrderSystemFailureDetailsByCode {
   CARRIER_STATUS_UNMAPPED: CarrierStatusUnmappedDetails;
   CARRIER_STATUS_IGNORED_STALE: CarrierStatusIgnoredStaleDetails;
@@ -521,6 +527,7 @@ export interface OrderSystemFailureDetailsByCode {
   STORE_UPDATE_NO_CREATION_BASELINE: StoreUpdateNotAppliedDetails;
   STORE_UPDATE_CREATION_STOCK_SHORTAGE: StoreUpdateNotAppliedDetails;
   STORE_UPDATE_FAILED: StoreUpdateFailedDetails;
+  VARIANT_GENERATION_GAP: VariantGenerationGapDetails;
 }
 
 export type FailureDetailsRecord = Record<string, unknown>;

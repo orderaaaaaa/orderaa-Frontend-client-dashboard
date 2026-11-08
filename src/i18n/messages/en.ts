@@ -350,6 +350,8 @@ const en: Record<keyof typeof ar, string> = {
   'orderSystemFailures.label.STORE_UPDATE_NO_CREATION_BASELINE': 'An update arrived from the store and was not applied: there is no creation data to compare with',
   'orderSystemFailures.label.STORE_UPDATE_CREATION_STOCK_SHORTAGE': 'An update arrived from the store and was not applied because stock is insufficient',
   'orderSystemFailures.label.STORE_UPDATE_FAILED': 'Applying an update from the store failed',
+  'orderSystemFailures.label.VARIANT_GENERATION_GAP': 'Some variants have no card but hold stock or open orders',
+  'products.gapReport.banner': 'Some variants have no card but hold stock or open orders: {rows}',
   'orderSystemFailures.label.fallback': 'System failure',
   'timeAgo.now': 'Just now',
   'timeAgo.ago': '{value} ago',

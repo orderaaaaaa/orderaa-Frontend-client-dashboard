@@ -30,6 +30,7 @@ import type {
   OrderSystemFailure,
   OrderSystemFailureCode,
   OrderSystemFailureDetailsByCode,
+  VariantGenerationGapDetails,
   PartialReturnRuleMissingDetails,
   PartialUndoCarrierEditNotSentDetails,
   ScheduledTransitionFailedDetails,
@@ -438,6 +439,14 @@ const isStoreUpdateNotApplied = (value: unknown): value is StoreUpdateNotApplied
 const isStoreUpdateFailed = (value: unknown): value is StoreUpdateFailedDetails =>
   isRecord(value) && isString(value.provider) && isFailureReason(value.reason);
 
+const isVariantGenerationGap = (value: unknown): value is VariantGenerationGapDetails =>
+  isRecord(value) &&
+  typeof value.productId === 'number' &&
+  Array.isArray(value.rows) &&
+  value.rows.every(
+    (row) => isRecord(row) && typeof row.variantId === 'number' && isString(row.label)
+  );
+
 export function narrowFailureDetails(
   failure: Pick<OrderSystemFailure, 'code' | 'details'>
 ): NarrowedFailureDetails | null {
@@ -520,6 +529,8 @@ export function narrowFailureDetails(
       return isStoreUpdateNotApplied(details) ? { code, details } : null;
     case 'STORE_UPDATE_FAILED':
       return isStoreUpdateFailed(details) ? { code, details } : null;
+    case 'VARIANT_GENERATION_GAP':
+      return isVariantGenerationGap(details) ? { code, details } : null;
   }
 }
 

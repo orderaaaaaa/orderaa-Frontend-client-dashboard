@@ -56,6 +56,7 @@ export const ORDER_SYSTEM_FAILURE_LABEL_KEYS: Record<OrderSystemFailureCode, Tra
   STORE_UPDATE_NO_CREATION_BASELINE: 'orderSystemFailures.label.STORE_UPDATE_NO_CREATION_BASELINE',
   STORE_UPDATE_CREATION_STOCK_SHORTAGE: 'orderSystemFailures.label.STORE_UPDATE_CREATION_STOCK_SHORTAGE',
   STORE_UPDATE_FAILED: 'orderSystemFailures.label.STORE_UPDATE_FAILED',
+  VARIANT_GENERATION_GAP: 'orderSystemFailures.label.VARIANT_GENERATION_GAP',
 };
 
 export const ORDER_SYSTEM_FAILURE_FALLBACK_LABEL_KEY: TranslationKey = 'orderSystemFailures.label.fallback';

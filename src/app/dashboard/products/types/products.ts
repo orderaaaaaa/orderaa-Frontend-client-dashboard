@@ -481,6 +481,17 @@ export interface ProductDetailDeletedVariant {
   storeLinks: ProductDetailDeletedVariantLink[];
 }
 
+export interface ProductDetailGapReportRow {
+  variantId: number;
+  label: string;
+  stockTotal: number;
+  openLines: number;
+}
+
+export interface ProductDetailGapReport {
+  rows: ProductDetailGapReportRow[];
+}
+
 export interface ProductDetail {
   id: number;
   name: string;
@@ -494,6 +505,7 @@ export interface ProductDetail {
   attributes: ProductDetailAttribute[];
   variants: ProductDetailVariant[];
   deletedVariants: ProductDetailDeletedVariant[];
+  gapReport: ProductDetailGapReport | null;
   specifications: ProductDetailSpecification[];
 }
 

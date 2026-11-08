@@ -16,6 +16,7 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSIONS } from '@/lib/permissions';
 import { uploadFile } from '@/lib/api/upload';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useProductAttributeOptionsQuery } from '@/services/products';
 import {
   useDeleteVariant,
@@ -30,6 +31,7 @@ import { productKeys } from '../../hooks/queryKeys';
 import type {
   ProductApiStoreLink,
   ProductDetail,
+  ProductDetailGapReport,
   ProductDetailVariant,
   VariantReshapePlan,
 } from '../../types/products';
@@ -129,6 +131,25 @@ function CurationNotice({ detail }: { detail: ProductDetail }) {
     >
       <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
       <span>سيتم حفظ نسختك ولن تستبدلها المزامنة بعد أول حفظ</span>
+    </div>
+  );
+}
+
+function GapReportNotice({ report }: { report: ProductDetailGapReport }) {
+  const { t } = useI18n();
+  return (
+    <div
+      role="status"
+      className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+    >
+      <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <span>
+        {t('products.gapReport.banner', {
+          rows: report.rows
+            .map((row) => `${row.label} (${row.stockTotal})`)
+            .join(', '),
+        })}
+      </span>
     </div>
   );
 }
@@ -582,6 +603,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       </div>
 
       <CurationNotice detail={detail} />
+
+      {detail.gapReport && <GapReportNotice report={detail.gapReport} />}
 
       {!canUpdate && (
         <div
