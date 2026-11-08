@@ -1,3 +1,5 @@
+export const RETURNED_IN_COMPANY_TEXT = 'text-fuchsia-700';
+
 const DEFAULT_COLOR = 'bg-gray-50 text-gray-600 border border-gray-200';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -15,7 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
 
   DELIVERED: 'bg-green-50 text-[#49c116] border border-green-200',
   COLLECTED: 'bg-green-50 text-[#15803d] border border-green-200',
-  RETURNED_DELIVERED: 'bg-green-50 text-[#49c116] border border-green-200',
+  RETURNED_DELIVERED: `bg-fuchsia-50 ${RETURNED_IN_COMPANY_TEXT} border border-fuchsia-200`,
   RETURNED_COLLECTED: 'bg-pink-50 text-[#ec4899] border border-pink-200',
   RETURNED_SETTLED: 'bg-pink-50 text-[#db2777] border border-pink-200',
   RETURNED_FINAL: 'bg-rose-50 text-[#be123c] dark:bg-danger-tint dark:text-danger-text border border-rose-200 dark:border-danger-border',

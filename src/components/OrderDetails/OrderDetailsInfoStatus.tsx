@@ -12,6 +12,7 @@ import {
 } from '@/lib/orderEventNote';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
+import { RETURNED_IN_COMPANY_TEXT } from '@/app/dashboard/customers/lib/getBadgeColor';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { ORDER_STATUSES } from '@/lib/generated/permission-codes';
@@ -50,6 +51,8 @@ const getIconColorFromClasses = (classes: string): string => {
   if (classes.includes('text-[#ff9800]')) return 'text-[#ff9800]';
   if (classes.includes('text-primary-text')) return 'text-primary-text';
   if (classes.includes('text-purple-700')) return 'text-purple-700';
+  if (classes.includes(RETURNED_IN_COMPANY_TEXT))
+    return RETURNED_IN_COMPANY_TEXT;
   return 'text-gray-600';
 };
 
