@@ -35,6 +35,7 @@ import {
 } from '@/utils/partialDelivery/partialDeliveryGate';
 import { useI18n } from '@/i18n/I18nProvider';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -166,8 +167,9 @@ function OrderDetailsInfoComponent({
     }
   }, [isLockPending, isLockedByOther, deferredIntent]);
 
+  const deleted = isDeletedOrder(order);
   const { data: stockAvailability } = useOrderStockAvailabilityQuery(
-    order.id
+    deleted ? undefined : order.id
   );
   const stockWarning = useMemo(() => {
     const notSet =
@@ -199,6 +201,7 @@ function OrderDetailsInfoComponent({
   }, [order.order_events]);
 
   const frozen = order.frozenReturnChild === true;
+  const readOnly = frozen || deleted;
   const lineCount = order.order_products.length;
   const hasReturnChild = (order.partialReturns ?? []).some((item) => item.lineCount > 0);
   const hasActiveShippingId = order.shipping_ids?.some((row) => row.isActive) ?? false;
@@ -208,7 +211,7 @@ function OrderDetailsInfoComponent({
     status: order.status,
     lineCount,
     hasReturnChild,
-    frozen,
+    frozen: readOnly,
     isCustomerReturn,
     carrierImplementation: order.shippingCompanyRef?.implementation,
     settlementAmount: order.settlementAmount ?? null,
@@ -418,7 +421,7 @@ function OrderDetailsInfoComponent({
         <CustomerDataSection
           order={order}
           onUpdate={updateField}
-          readOnly={frozen}
+          readOnly={readOnly}
         />
 
         <PricingSection
@@ -427,7 +430,7 @@ function OrderDetailsInfoComponent({
           onShippingTypeSelect={handleShippingTypeSelect}
           pendingShippingType={pendingShippingType}
           onSaveReturnContent={handleSaveReturnContent}
-          readOnly={frozen}
+          readOnly={readOnly}
         />
 
         <ShippingSection
@@ -435,7 +438,7 @@ function OrderDetailsInfoComponent({
           governorate={order.governorate}
           city={order.city}
           address={order.address}
-          onEditClick={frozen ? undefined : modals.shipping.open}
+          onEditClick={readOnly ? undefined : modals.shipping.open}
           externalGovernorate={order.externalGovernorate}
           externalCity={order.externalCity}
           sourceGovernorate={order.sourceGovernorate}
@@ -444,11 +447,11 @@ function OrderDetailsInfoComponent({
 
         <PackagingNotesSection
           packagingNotes={order.packagingNotes}
-          onAddClick={frozen ? undefined : modals.packagingNotes.open}
+          onAddClick={readOnly ? undefined : modals.packagingNotes.open}
         />
       </div>
 
-      <div className="md:hidden">
+      {!deleted && <div className="md:hidden">
         <OrderActionsFooter
           frozen={frozen}
           orderStatus={order.status}
@@ -464,9 +467,9 @@ function OrderDetailsInfoComponent({
           partialAction={partialAction}
           undoAction={undoAction}
         />
-      </div>
+      </div>}
 
-      <div className="hidden md:block">
+      {!deleted && <div className="hidden md:block">
         <OrderActionsFooterLargeScreens
           frozen={frozen}
           orderStatus={order.status}
@@ -482,9 +485,9 @@ function OrderDetailsInfoComponent({
           partialAction={partialAction}
           undoAction={undoAction}
         />
-      </div>
+      </div>}
 
-      <OrderActionModals
+      {!deleted && <OrderActionModals
         modals={modals}
         order={order}
         actions={actions}
@@ -499,7 +502,7 @@ function OrderDetailsInfoComponent({
         }
         onConfirmAction={handleConfirmAction}
         onError={(message) => setErrorModal({ isOpen: true, message })}
-      />
+      />}
 
       <ErrorModal
         isOpen={errorModal.isOpen}

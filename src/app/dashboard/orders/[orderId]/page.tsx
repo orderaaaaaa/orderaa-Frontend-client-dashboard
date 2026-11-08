@@ -27,6 +27,7 @@ import { Breadcrumb } from '@/components/dashboard-layout';
 import { OrderLockedModal } from '@/components/OrderDetails/modals/OrderLockedModal';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const parsedOrderId = parseInt(params.orderId);
@@ -41,6 +42,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   } = useOrderById(orderId);
 
   const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
+  const deleted = order ? isDeletedOrder(order) : false;
 
   const {
     isLockedByOther,
@@ -52,9 +54,9 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     isForceUnlocking,
   } = useOrderLock({
     orderId,
-    lockedBy: liveData?.locked_by,
+    lockedBy: deleted ? null : liveData?.locked_by,
     lockedByUpdatedAt: dataUpdatedAt,
-    enabled: !!order,
+    enabled: !!order && !deleted,
   });
 
   const handleForceUnlock = async () => {

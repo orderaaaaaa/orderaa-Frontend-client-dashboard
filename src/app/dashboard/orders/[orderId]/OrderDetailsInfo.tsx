@@ -10,6 +10,7 @@ import { CarrierSendPanel } from '@/components/OrderDetails/CarrierSendPanel';
 import OrderChangeHistoryCard from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryCard';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 interface OrderDetailsInfoProps {
   order: Order;
@@ -48,6 +49,7 @@ function OrderDetailsInfo({
   isLockPending,
 }: OrderDetailsInfoProps) {
   const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
+  const deleted = isDeletedOrder(order);
 
   return (
     <section className="mx-auto mt-3 p-4 bg-card rounded-lg shadow-sm">
@@ -60,13 +62,13 @@ function OrderDetailsInfo({
         isForceUnlocking={isForceUnlocking}
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
-      <OrderSystemFailuresPanel order={order} />
-      <CarrierSendPanel order={order} />
-      {canReadHistory && <OrderChangeHistoryCard order={order} />}
+      {!deleted && <OrderSystemFailuresPanel order={order} />}
+      {!deleted && <CarrierSendPanel order={order} />}
+      {canReadHistory && !deleted && <OrderChangeHistoryCard order={order} />}
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
-        readOnly={order.frozenReturnChild === true}
+        readOnly={order.frozenReturnChild === true || deleted}
       />
       <OrderDetailsInfoComponent
         order={order}

@@ -49,9 +49,11 @@ import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
+  selectableOrdersOf,
   splitParkedOrders,
   warnParkedOrdersSkipped,
 } from './utils/bulkStatusFeedback';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 function AllOrdersContent() {
   const queryClient = useQueryClient();
@@ -174,7 +176,8 @@ function AllOrdersContent() {
 
   const { options } = useFilterOptions();
 
-  const orders = ordersData?.data ?? [];
+  const orders = useMemo(() => ordersData?.data ?? [], [ordersData]);
+  const selectableOrders = useMemo(() => selectableOrdersOf(orders), [orders]);
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
 
   const {
@@ -187,7 +190,15 @@ function AllOrdersContent() {
     handleOrderSelect: selectOrder,
     handleSelectAllToggle: toggleAllVisible,
     clearSelections,
-  } = usePrintOrderBulk({ orders });
+  } = usePrintOrderBulk({ orders: selectableOrders });
+
+  useEffect(() => {
+    for (const order of orders) {
+      if (isDeletedOrder(order) && selectedOrderIds.includes(order.id)) {
+        selectOrder(order.id, false);
+      }
+    }
+  }, [orders, selectedOrderIds, selectOrder]);
 
   const handleOrderSelect = useCallback(
     (orderId: number, checked: boolean) => {
@@ -505,6 +516,7 @@ function AllOrdersContent() {
                 }
                 id={order.id}
                 code={order.code}
+                isDeleted={isDeletedOrder(order)}
                 name={order.customers.name}
                 phoneNumbers={order.customers.phone_numbers}
                 government={

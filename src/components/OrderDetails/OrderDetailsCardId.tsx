@@ -1,9 +1,13 @@
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Copy, TriangleAlert, History } from 'lucide-react';
 import { Order, OrderLockedBy } from '@/types/orders';
 import { toast } from 'react-toastify';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
+import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
+import { Button } from '@/components/ui/button';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
 import { If, Then } from 'react-if';
@@ -38,6 +42,7 @@ const OrderDetailsCardId = ({
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const { shippingCompanies } = useShippingCompanies();
   const orderCompanyName = shippingCompanyNameOf(order.shippingCompanyRef);
+  const deleted = isDeletedOrder(order);
 
   const handleCopy = async (text: string) => {
     try {
@@ -76,6 +81,7 @@ const OrderDetailsCardId = ({
               />
               {/* order code */}
               {order.code}
+              {deleted && <DeletedOrderChip />}
               <History
                 onClick={() => setIsHistoryModalOpen(true)}
                 className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary-text border-1 border-primary/40"
@@ -84,6 +90,34 @@ const OrderDetailsCardId = ({
             <p className="text-xs font-bold sm:mr-7 mb-4">
               <DateWithRelative value={order.createdAt} withTime={false} variant="inline" />
             </p>
+            {deleted && (
+              <div className="flex flex-col items-start gap-2 mb-4 max-w-md rounded-xl border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-700">
+                <p>
+                  {order.derivedFrom ? (
+                    <>
+                      هذا الطلب محذوف — أُلغي بالتراجع عن التسليم الجزئي للطلب{' '}
+                      <Link
+                        href={`/dashboard/orders/${order.derivedFrom.id}`}
+                        className="font-bold text-primary-text underline"
+                      >
+                        #{order.derivedFrom.code}
+                      </Link>{' '}
+                      وعادت قطعه إليه. للعرض فقط.
+                    </>
+                  ) : (
+                    'هذا الطلب محذوف. للعرض فقط.'
+                  )}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsHistoryModalOpen(true)}
+                >
+                  سجل الطلب
+                </Button>
+              </div>
+            )}
             <If condition={order.postponedUntil}>
               <Then>
                 <p className="flex items-center gap-1 text-sm md:text-base font-bold  mb-4 bg-amber-50 py-2 px-3 rounded-2xl text-amber-500">

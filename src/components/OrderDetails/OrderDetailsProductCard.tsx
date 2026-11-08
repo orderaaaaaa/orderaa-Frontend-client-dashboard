@@ -34,6 +34,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { StockAvailabilityBadge } from './StockAvailabilityBadge';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 import Image from 'next/image';
 import CopyableCode from '@/components/ui/copyable-code';
 import ProductReturnOfChip from './ProductReturnOfChip';
@@ -63,7 +64,7 @@ function OrderDetailsProductCard({
   const canManageProducts = hasPermission(PERMISSION_CODES.ORDERS_PRODUCTS_MANAGE) && !readOnly;
 
   const { data: availability } = useOrderStockAvailabilityQuery(
-    order.id,
+    isDeletedOrder(order) ? undefined : order.id,
     NEXT_STOCK_TARGET
   );
   const availabilityByLine = new Map(

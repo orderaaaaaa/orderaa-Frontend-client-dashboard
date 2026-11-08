@@ -29,6 +29,7 @@ import { IconType } from 'react-icons';
 import { NoticeBadge } from '@/components/notices/NoticeBadge';
 import { NoticesDialog } from '@/components/notices/NoticesDialog';
 import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
+import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 
@@ -79,6 +80,7 @@ export default function OrderCard({
   events,
   parkedAt,
   unreadNoticeCount = 0,
+  isDeleted = false,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
@@ -86,6 +88,7 @@ export default function OrderCard({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isNoticesOpen, setIsNoticesOpen] = useState(false);
   const canAcknowledgeNotices = useHasPermissionStrict(PERMISSION_CODES.ORDERS_NOTICES_ACKNOWLEDGE);
+  const selectable = select && !isDeleted;
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelectionChange?.(e.target.checked);
   };
@@ -95,7 +98,7 @@ export default function OrderCard({
     : `/dashboard/orders/${id}`;
 
   const handleToggleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!select || !toggleOnCardClick) return;
+    if (!selectable || !toggleOnCardClick) return;
     if (!e.currentTarget.contains(e.target as Node)) return;
     const interactive = (e.target as HTMLElement).closest(CARD_INTERACTIVE_SELECTOR);
     if (interactive && e.currentTarget.contains(interactive)) return;
@@ -103,7 +106,7 @@ export default function OrderCard({
   };
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (select && toggleOnCardClick) {
+    if (selectable && toggleOnCardClick) {
       e.preventDefault();
       onSelectionChange?.(!isSelected);
       return;
@@ -114,7 +117,7 @@ export default function OrderCard({
   };
 
   const handleLinkAuxClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (e.button !== 1 || !select || !toggleOnCardClick) return;
+    if (e.button !== 1 || !selectable || !toggleOnCardClick) return;
     e.preventDefault();
     onSelectionChange?.(!isSelected);
   };
@@ -148,7 +151,7 @@ export default function OrderCard({
     >
       {/* Checkbox – top right */}
       <div className="flex justify-start mb-1 px-4 pt-3">
-        {select && (
+        {selectable && (
           <input
             type="checkbox"
             checked={isSelected}
@@ -171,6 +174,7 @@ export default function OrderCard({
             </CopyableCode>
             <span className="text-base font-normal text-foreground flex-shrink-0">الكود :</span>
             <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
+            {isDeleted && <DeletedOrderChip />}
           </div>
         )}
 
@@ -188,7 +192,7 @@ export default function OrderCard({
 
             <div
               className={`flex absolute left-5 z-[2] flex-col-reverse items-center gap-3
-                ${select ? 'top-10' : 'top-5'}
+                ${selectable ? 'top-10' : 'top-5'}
                 `}
             >
               {repeatCount > 1 && (
@@ -207,7 +211,9 @@ export default function OrderCard({
                   </span>
                 </Button>
               )}
-              <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
+              {!isDeleted && (
+                <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
+              )}
               <If condition={isBlocked}>
                 <Then>
                   <Button
@@ -529,12 +535,14 @@ export default function OrderCard({
           )}
         </div>
       </BaseModal>
-      <NoticesDialog
-        open={isNoticesOpen}
-        onOpenChange={setIsNoticesOpen}
-        orderId={id}
-        canAcknowledge={canAcknowledgeNotices}
-      />
+      {!isDeleted && (
+        <NoticesDialog
+          open={isNoticesOpen}
+          onOpenChange={setIsNoticesOpen}
+          orderId={id}
+          canAcknowledge={canAcknowledgeNotices}
+        />
+      )}
       {!disableNavigation && (
         <a
           href={cardUrl}

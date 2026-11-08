@@ -48,4 +48,5 @@ export interface OrderCardProps {
   events?: OrderEvent[];
   parkedAt: string | null;
   unreadNoticeCount?: number;
+  isDeleted?: boolean;
 }

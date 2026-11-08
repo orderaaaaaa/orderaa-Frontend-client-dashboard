@@ -507,6 +507,8 @@ export interface Order {
   derivedKind?: DerivedOrderKind | null;
   partialReturns?: OrderPartialReturnRef[];
   frozenReturnChild?: boolean;
+  derivedFrom?: { id: number; code: string } | null;
+  deletedParts?: DeletedOrderPart[];
 }
 
 export interface OrderReturnOfRef {
@@ -519,6 +521,13 @@ export interface OrderPartialReturnRef {
   code: string;
   status: OrderStatus;
   lineCount: number;
+}
+
+export interface DeletedOrderPart {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  deletedAt: string;
 }
 
 export interface OrderLockedBy {

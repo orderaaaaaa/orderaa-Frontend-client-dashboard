@@ -16,9 +16,11 @@ import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
+  selectableOrdersOf,
   splitParkedOrders,
   warnParkedOrdersSkipped,
 } from '@/app/dashboard/orders/allOrders/utils/bulkStatusFeedback';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -41,7 +43,8 @@ export default function CustomerOrdersModal({
     error: queryError,
   } = useCustomerOrders(customerPhone, { enabled: isOpen && !!customerPhone });
 
-  const orders = ordersData?.data ?? [];
+  const orders = useMemo(() => ordersData?.data ?? [], [ordersData]);
+  const liveOrders = useMemo(() => selectableOrdersOf(orders), [orders]);
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
   const { data: orderStatuses } = useOrderStatusesQuery();
@@ -63,14 +66,22 @@ export default function CustomerOrdersModal({
   }, [orderStatuses]);
 
   const selectedOrders = useMemo(() => {
-    return orders.filter((order: Order) => selectedOrderIds.includes(order.id));
-  }, [orders, selectedOrderIds]);
+    return liveOrders.filter((order: Order) => selectedOrderIds.includes(order.id));
+  }, [liveOrders, selectedOrderIds]);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedOrderIds([]);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const liveIds = new Set(liveOrders.map((order) => order.id));
+    setSelectedOrderIds((prev) => {
+      const next = prev.filter((id) => liveIds.has(id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [liveOrders]);
 
   const handleCheckboxChange = useCallback(
     (orderId: number, checked: boolean) => {
@@ -86,12 +97,12 @@ export default function CustomerOrdersModal({
 
   const handleSelectAllToggle = useCallback(() => {
     if (isBulkUpdating) return;
-    if (selectedOrderIds.length === orders.length && orders.length > 0) {
+    if (selectedOrderIds.length === liveOrders.length && liveOrders.length > 0) {
       setSelectedOrderIds([]);
     } else {
-      setSelectedOrderIds(orders.map((o: Order) => o.id));
+      setSelectedOrderIds(liveOrders.map((o: Order) => o.id));
     }
-  }, [orders, selectedOrderIds, isBulkUpdating]);
+  }, [liveOrders, selectedOrderIds, isBulkUpdating]);
 
   const handleExportExcel = useCallback(() => {
     try {
@@ -178,13 +189,13 @@ export default function CustomerOrdersModal({
       isLoading={isBulkUpdating}
     >
       <div className="relative">
-        {orders.length > 0 && !loading && !error && (
+        {liveOrders.length > 0 && !loading && !error && (
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-red-600">
                 <LiaExclamationTriangleSolid className="w-5 h-5" />
                 <span className="text-sm font-bold">
-                  إجمالي الطلبات: {orders.length}
+                  إجمالي الطلبات: {liveOrders.length}
                 </span>
               </div>
               <Button
@@ -194,13 +205,13 @@ export default function CustomerOrdersModal({
                 size="sm"
                 className="px-4 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-brand-hover transition-colors"
               >
-                {selectedOrderIds.length === orders.length && orders.length > 0 ? (
+                {selectedOrderIds.length === liveOrders.length && liveOrders.length > 0 ? (
                   'إلغاء تحديد الكل'
                 ) : (
                   <span className="flex items-center gap-2">
                     تحديد الكل
                     <span className="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                      {orders.length}
+                      {liveOrders.length}
                     </span>
                   </span>
                 )}
@@ -236,6 +247,7 @@ export default function CustomerOrdersModal({
                   handleCheckboxChange(order.id, checked)
                 }
                 code={order.code}
+                isDeleted={isDeletedOrder(order)}
                 name={order.customers.name}
                 phoneNumbers={order.customers.phone_numbers}
                 government={
@@ -257,7 +269,7 @@ export default function CustomerOrdersModal({
                 address={order.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
-                repeatCount={orders.length}
+                repeatCount={liveOrders.length}
                 showAllItems
                 events={order.order_events}
                 isBlocked={order.customers.isBlocked}

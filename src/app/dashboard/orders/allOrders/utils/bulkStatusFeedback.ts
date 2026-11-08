@@ -1,5 +1,6 @@
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
+import { isDeletedOrder } from '@/utils/deletedOrder';
 
 const CODES_SHOWN = 5;
 
@@ -18,6 +19,12 @@ export function splitParkedOrders<T extends Pick<Order, 'parkedAt'>>(
     (order.parkedAt ? parked : actionable).push(order);
   }
   return { actionable, parked };
+}
+
+export function selectableOrdersOf<T extends Pick<Order, 'deletedAt'>>(
+  orders: T[]
+): T[] {
+  return orders.filter((order) => !isDeletedOrder(order));
 }
 
 export function warnParkedOrdersSkipped(parked: Pick<Order, 'code'>[]) {
