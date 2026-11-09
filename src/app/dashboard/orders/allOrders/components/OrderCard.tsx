@@ -10,6 +10,7 @@ import {
   TriangleAlert,
   FileText,
   Truck,
+  CalendarClock,
 } from 'lucide-react';
 import { CiBarcode } from 'react-icons/ci';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
@@ -164,7 +165,13 @@ export default function OrderCard({
 
       {/* Content */}
       <div className="flex flex-col items-start px-6 gap-3 flex-grow min-w-0 w-full">
-        <DateWithRelative value={createdAt} className="text-xs" />
+        <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+          <DateWithRelative value={createdAt} variant="inline" className="text-sm text-muted-foreground leading-6 min-w-0" />
+          <CalendarClock
+            className="w-[18px] h-[18px] flex-shrink-0 mt-[3px]"
+            style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
+          />
+        </div>
 
         {/* Code */}
         {code && code !== 'غير محدد' && (
