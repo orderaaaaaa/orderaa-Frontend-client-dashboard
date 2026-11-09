@@ -315,10 +315,12 @@ export default function PartialDeliveryModal({
             className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 resize-y"
           />
           <p className="text-xs text-muted-foreground">
-            {t('partialDelivery.returnContent.counter', {
-              count: sentContent.length,
-              max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
-            })}
+            <span dir="ltr" className="tabular-nums">
+              {t('partialDelivery.returnContent.counter', {
+                count: sentContent.length,
+                max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+              })}
+            </span>
           </p>
           {tooLong && (
             <p className="text-xs text-red-600">
