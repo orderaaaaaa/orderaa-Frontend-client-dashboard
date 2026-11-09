@@ -317,7 +317,7 @@ export default function PartialDeliveryModal({
           <p className="text-xs text-muted-foreground">
             <span dir="ltr" className="tabular-nums">
               {t('partialDelivery.returnContent.counter', {
-                count: sentContent.length,
+                count: contentValue.length,
                 max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
               })}
             </span>
