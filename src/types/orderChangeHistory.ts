@@ -45,6 +45,7 @@ export type OrderTrackedField =
   | 'cancelReason'
   | 'cancelNotes'
   | 'shippingCompanyId'
+  | 'returnOfOrderId'
   | 'shippingType'
   | 'canOpenShipment'
   | 'shipmentContent'

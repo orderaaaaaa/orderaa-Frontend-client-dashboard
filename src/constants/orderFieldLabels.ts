@@ -35,6 +35,7 @@ export const ORDER_FIELD_LABELS: Record<OrderChangeField, string> = {
   cancelReason: 'سبب الإلغاء',
   cancelNotes: 'ملاحظات الإلغاء',
   shippingCompanyId: 'شركة الشحن',
+  returnOfOrderId: 'الطلب الأصلي للتسليم الجزئي',
   shippingType: 'نوع الشحن',
   canOpenShipment: 'السماح بفتح الشحنة',
   shipmentContent: 'محتوى الشحنة',
