@@ -19,6 +19,7 @@ import { ActorChip } from '@/components/audit/ActorChip';
 import { employeeActor } from '@/components/audit/actors';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
 import { Badge } from '@/components/ui/badge';
+import { DateText } from '@/components/ui/date-with-relative';
 import { Button } from '@/components/ui/button';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -45,7 +46,6 @@ import BaseModal from '@/components/ui/base-modal';
 import { VariantCountsList } from '@/components/purchases/variantCounts';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useSupplierInvoiceByIdQuery } from '@/services/suppliers';
-import { formatDateTime } from '@/utils/format';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { roundMoney } from '@/utils/money';
 import { InvoiceHistoryTab } from './InvoiceHistoryTab';
@@ -122,7 +122,7 @@ function InvoiceSettlementsPanel({ invoice }: { invoice: SupplierInvoiceApiItem 
           {
             key: 'createdAt',
             header: 'التاريخ',
-            render: (value: unknown) => <span dir="ltr" className="tabular-nums">{formatDateTime(String(value))}</span>,
+            render: (value: unknown) => <DateText value={String(value)} />,
           },
           {
             key: 'isReversal',
@@ -164,9 +164,7 @@ function InvoiceDetailsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
               {getDepartmentLabel(closerDepartment)}
             </span>
           )}
-          <span dir="ltr" className="block text-sm font-normal tabular-nums text-muted-foreground">
-            {formatDateTime(invoice.closedAt)}
-          </span>
+          <DateText value={invoice.closedAt} className="block text-sm font-normal text-muted-foreground" />
         </DetailField>
       )}
       <DetailField label="المورد">
@@ -207,16 +205,16 @@ function InvoiceDetailsPanel({ invoice }: { invoice: SupplierInvoiceApiItem }) {
       </DetailField>
       <DetailField label="تاريخ الاعتماد">
         {invoice.approvedAt ? (
-          <span dir="ltr" className="tabular-nums">{formatDateTime(invoice.approvedAt)}</span>
+          <DateText value={invoice.approvedAt} />
         ) : (
           '—'
         )}
       </DetailField>
       <DetailField label="تاريخ الإنشاء">
-        <span dir="ltr" className="tabular-nums">{formatDateTime(invoice.createdAt)}</span>
+        <DateText value={invoice.createdAt} />
       </DetailField>
       <DetailField label="آخر تعديل">
-        <span dir="ltr" className="tabular-nums">{formatDateTime(invoice.updatedAt)}</span>
+        <DateText value={invoice.updatedAt} />
       </DetailField>
       <DetailField label="صور الفاتورة">
         {invoice.images.length > 0 ? (

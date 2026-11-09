@@ -31,7 +31,7 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
     key: 'createdAt',
     header: 'التاريخ',
-    render: (val) => <DateWithRelative value={val as string} className="items-center" />,
+    render: (val) => <DateWithRelative value={val as string} />,
   },
   {
     key: 'quantity',

@@ -88,3 +88,10 @@ export const formatDateTime = (value: DateInput): string => {
     ? `${formatDayMonthYear(date)}${DATE_TIME_SEPARATOR}${timeFormatter.format(date)}`
     : EMPTY_VALUE;
 };
+
+export const formatWeekdayDateTime = (value: DateInput): string => {
+  const date = toValidDate(value);
+  return date
+    ? `${weekdayFormatter.format(date)} ${formatDayMonthYear(date)}${DATE_TIME_SEPARATOR}${timeFormatter.format(date)}`
+    : EMPTY_VALUE;
+};

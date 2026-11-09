@@ -55,9 +55,9 @@ export function AuditHistoryList<T extends { id: number }>({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-semibold text-foreground">{getAction(item)}</span>
-              <time dateTime={getCreatedAt(item)} className="text-sm tabular-nums text-muted-foreground">
+              <span className="text-sm tabular-nums text-muted-foreground">
                 <DateWithRelative value={getCreatedAt(item)} />
-              </time>
+              </span>
             </div>
             <div>
               <ActorChip actor={actorRefToChip(getActor(item))} />
