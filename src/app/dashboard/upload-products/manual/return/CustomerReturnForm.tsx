@@ -580,10 +580,12 @@ function CustomerReturnForm() {
                 className="bg-background"
               />
               <p className="text-xs text-muted-foreground">
-                {t('customerReturn.returnContent.counter', {
-                  count: sentContent.length,
-                  max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
-                })}
+                <span dir="ltr" className="tabular-nums">
+                  {t('customerReturn.returnContent.counter', {
+                    count: contentValue.length,
+                    max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+                  })}
+                </span>
               </p>
               {contentTooLong ? (
                 <p className="text-sm text-destructive">
