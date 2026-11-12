@@ -43,8 +43,6 @@ const FILTERS: { value: StatusFilter; label: string }[] = [
 const ORIGIN_LABELS: { key: keyof SettlementOriginCounts; label: string }[] = [
   { key: 'delivered', label: 'مُسلَّم' },
   { key: 'returned', label: 'مرتجع' },
-  { key: 'withDrivers', label: 'مع المندوب' },
-  { key: 'other', label: 'أخرى' },
 ];
 
 const BATCHES_PAGE_SIZE = 20;
@@ -289,7 +287,7 @@ export default function CollectionsPage() {
                   </div>
                 </div>
 
-                <dl className="grid grid-cols-4 gap-2 border-t border-gray-100 pt-2">
+                <dl className="grid grid-cols-2 gap-2 border-t border-gray-100 pt-2">
                   {ORIGIN_LABELS.map(({ key, label }) => (
                     <div key={key} className="flex flex-col items-center gap-0.5">
                       <dt className="text-[10px] text-muted-foreground">{label}</dt>
