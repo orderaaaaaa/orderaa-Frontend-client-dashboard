@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/state-panels';
 import { useIntegrations } from '@/app/dashboard/integrations/hooks/useIntegrations';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { VariantCard } from '@/lib/api/products';
 import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
 import {
@@ -84,9 +86,10 @@ function UnlinkedItemRow({
 }) {
   const { t } = useI18n();
   const pickedProduct = useMergeProductDetails(pick ? [pick.productId] : []);
-  const variantOptions = (pickedProduct.details[0]?.variants ?? []).map((variant) => ({
+  const variantCards: VariantCard[] = (pickedProduct.details[0]?.variants ?? []).map((variant) => ({
     id: variant.id,
     label: variantDisplayLabel(variant),
+    options: [],
   }));
 
   return (
@@ -127,17 +130,27 @@ function UnlinkedItemRow({
           }
           onSelect={(productId) => onPickChange({ productId, variantId: null })}
         />
-        {item.externalVariantId !== null && (
-          <ItemSelect
-            value={pick?.variantId ?? null}
-            options={variantOptions}
-            placeholder={t('linkIssues.unlinked.pickVariant')}
-            ariaLabel={t('linkIssues.unlinked.pickVariant')}
-            disabled={!pick}
-            onChange={(variantId) => pick && onPickChange({ productId: pick.productId, variantId })}
-          />
-        )}
       </div>
+      {item.externalVariantId !== null && (
+        <div>
+          {!pick ? (
+            <p className="text-xs text-gray-500">{t('linkIssues.unlinked.pickVariant')}</p>
+          ) : pickedProduct.isPending ? (
+            <p className="text-xs text-gray-500">{t('common.loading')}</p>
+          ) : variantCards.length === 0 ? (
+            <p className="text-xs text-gray-500">{t('orderDetails.variants.noCards')}</p>
+          ) : (
+            <VariantCards
+              cards={variantCards}
+              rows={[]}
+              selection={{}}
+              selectedCardIds={new Set(pick.variantId !== null ? [pick.variantId] : [])}
+              onSelect={(card) => pick && onPickChange({ productId: pick.productId, variantId: card.id })}
+              scrollClassName="max-h-72"
+            />
+          )}
+        </div>
+      )}
       {item.externalVariantId !== null && pick !== null && pick.variantId === null && (
         <p className="text-xs text-amber-700">{t('linkIssues.unlinked.variantRequired')}</p>
       )}
