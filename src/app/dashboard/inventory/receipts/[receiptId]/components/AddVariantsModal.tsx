@@ -1,19 +1,18 @@
 'use client';
 
 import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import clsx from 'clsx';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
+import { useI18n } from '@/i18n/I18nProvider';
+import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
+import { isCardSelected, selectionOfCard, type Selection } from '@/components/stock/variantAvailabilityModel';
 import { useProductAttributeOptionsQuery } from '@/services/products';
+import type { VariantCard } from '@/lib/api/products';
 import { AttributeOptionGroup, SelectedVariant } from '../types';
 
 const EMPTY_VARIANTS: SelectedVariant[] = [];
-
-function displayGroupName(name: string): string {
-  return name.trim().toLowerCase() === 'variant' ? 'متغير' : name;
-}
 
 interface AddVariantsModalProps {
   isOpen: boolean;
@@ -55,6 +54,7 @@ function buildCombo(
 
 const AddVariantsModal = memo(
   ({ isOpen, onClose, productId, productName, existingVariants = EMPTY_VARIANTS, onSave }: AddVariantsModalProps) => {
+    const { t } = useI18n();
     const { data, isLoading } = useProductAttributeOptionsQuery(isOpen ? productId : undefined);
     const groups = useMemo(
       () =>
@@ -95,12 +95,20 @@ const AddVariantsModal = memo(
       setStaged([]);
     }, [isOpen, isLoading, groups]);
 
-    const handlePick = useCallback((groupId: number, optionId: number) => {
-      setPickedPerGroup((prev) => ({
-        ...prev,
-        [groupId]: prev[groupId] === optionId ? null : optionId,
-      }));
-    }, []);
+    const pickedSelection = useMemo(() => {
+      const selection: Selection = {};
+      for (const [groupId, optionId] of Object.entries(pickedPerGroup)) {
+        if (optionId != null) selection[Number(groupId)] = optionId;
+      }
+      return selection;
+    }, [pickedPerGroup]);
+
+    const pick = useCallback(
+      (card: VariantCard) => {
+        setPickedPerGroup(isCardSelected(card, pickedSelection) ? {} : selectionOfCard(card));
+      },
+      [pickedSelection],
+    );
 
     const combo = useMemo(() => buildCombo(pickedPerGroup, groups), [pickedPerGroup, groups]);
 
@@ -209,30 +217,17 @@ const AddVariantsModal = memo(
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {groups.map((group) => (
-                <div key={group.id} className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-600 shrink-0">{displayGroupName(group.name)} :</span>
-                  {group.options.map((option) => {
-                    const isPicked = pickedPerGroup[group.id] === option.id;
-                    return (
-                      <Button
-                        key={option.id}
-                        variant="outline"
-                        size="sm"
-                        className={clsx(
-                          'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
-                          isPicked
-                            ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
-                            : 'bg-card text-gray-700 border-gray-300 hover:border-primary hover:text-primary-text',
-                        )}
-                        onClick={() => handlePick(group.id, option.id)}
-                      >
-                        {option.name}
-                      </Button>
-                    );
-                  })}
-                </div>
-              ))}
+              {cards.length === 0 ? (
+                <p className="text-sm text-gray-500">{t('orderDetails.variants.noCards')}</p>
+              ) : (
+                <VariantCards
+                  cards={cards}
+                  rows={[]}
+                  selection={pickedSelection}
+                  onSelect={pick}
+                  scrollClassName={CARD_SCROLL_CLASS}
+                />
+              )}
 
               <div className="flex justify-start gap-2">
                 <Button
