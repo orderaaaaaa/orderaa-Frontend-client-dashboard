@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { VariantCard } from '@/lib/api/products';
 import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
 import {
@@ -15,7 +17,6 @@ import {
 import { LINK_ISSUE_TYPE } from '../types/linkIssues';
 import type { RetiredLinkIssue, RetiredLinkPreviewParams } from '../types/linkIssues';
 import { linkIssueErrorMessage } from '../utils/linkIssueErrors';
-import { ItemSelect } from './ItemSelect';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, StoreLinkBadges, VariantRefCard } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
@@ -30,9 +31,9 @@ function RetiredLinkRow({
   const { t } = useI18n();
   const details = useMergeProductDetails([issue.variant.productId]);
   const dismiss = useDismissLinkIssue();
-  const options = (details.details[0]?.variants ?? [])
+  const variantCards: VariantCard[] = (details.details[0]?.variants ?? [])
     .filter((variant) => variant.id !== issue.variant.variantId)
-    .map((variant) => ({ id: variant.id, label: variantDisplayLabel(variant) }));
+    .map((variant) => ({ id: variant.id, label: variantDisplayLabel(variant), options: [] }));
   const [targetId, setTargetId] = useState<number | null>(issue.suggestedTarget?.variantId ?? null);
 
   const handleDismiss = async () => {
@@ -78,16 +79,20 @@ function RetiredLinkRow({
       <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={issue.variant} />
       <div className="space-y-1">
         <p className="text-xs font-medium text-gray-500">{t('linkIssues.retired.target')}</p>
-        <ItemSelect
-          value={targetId}
-          options={options}
-          onChange={setTargetId}
-          placeholder={
-            issue.suggestedTarget ? issue.suggestedTarget.label : t('linkIssues.retired.noTarget')
-          }
-          disabled={details.isPending || options.length === 0}
-          ariaLabel={t('linkIssues.retired.target')}
-        />
+        {details.isPending ? (
+          <p className="text-xs text-gray-500">{t('common.loading')}</p>
+        ) : variantCards.length === 0 ? (
+          <p className="text-xs text-gray-500">{t('linkIssues.retired.noTarget')}</p>
+        ) : (
+          <VariantCards
+            cards={variantCards}
+            rows={[]}
+            selection={{}}
+            selectedCardIds={new Set(targetId !== null ? [targetId] : [])}
+            onSelect={(card) => setTargetId(card.id)}
+            scrollClassName="max-h-72"
+          />
+        )}
       </div>
       {issue.suggestedTarget && (
         <div className="space-y-1">
