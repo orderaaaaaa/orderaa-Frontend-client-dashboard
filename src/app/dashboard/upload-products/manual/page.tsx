@@ -27,8 +27,20 @@ import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useSto
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
+import { normalizePhoneNumber } from '@/utils/phone';
+import {
+  resolveLatestOrderFill,
+  type LocationPresetDropped,
+} from '@/utils/latestOrderFill';
 
 const DIRTY = { shouldDirty: true } as const;
+
+const FILL_DROPPED_LABELS: Record<LocationPresetDropped, string> = {
+  company: 'شركة الشحن',
+  governorate: 'المحافظة',
+  city: 'المدينة',
+};
 
 function NewOrderForm() {
   const queryClient = useQueryClient();
@@ -39,6 +51,7 @@ function NewOrderForm() {
   const {
     handleSubmit: handleFormSubmit,
     watch,
+    getValues,
     setValue,
     formState: { errors, isSubmitting, isDirty },
     reset,
@@ -93,6 +106,68 @@ function NewOrderForm() {
   }, []);
 
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [fillPending, setFillPending] = useState(false);
+
+  const handleFillFromOrder = async () => {
+    const startPhones = getValues('customer.phoneNumbers');
+    const startFirstPhone = normalizePhoneNumber(startPhones[0] ?? '');
+    const lookupPhone = startPhones.find((p) => p.trim().length >= 8) || '';
+
+    setFillPending(true);
+    try {
+      const fill = await resolveLatestOrderFill(
+        queryClient,
+        lookupPhone,
+        { phone: startFirstPhone },
+        ORDER_LOOKUP_SURFACE.MANUAL_ORDER_CLIENT_HISTORY
+      );
+      if (!fill) {
+        toast.error('تعذر ملء البيانات');
+        return;
+      }
+
+      const currentPhones = getValues('customer.phoneNumbers');
+      if (normalizePhoneNumber(currentPhones[0] ?? '') !== startFirstPhone) return;
+
+      setValue(
+        'shipping.shippingCompanyId',
+        fill.shippingCompanyId !== undefined ? String(fill.shippingCompanyId) : '',
+        DIRTY
+      );
+      setValue('shipping.governorateOption', fill.governorateOption ?? '', DIRTY);
+      setValue('shipping.cityOption', fill.cityOption ?? '', DIRTY);
+      clearErrors([
+        'shipping.shippingCompanyId',
+        'shipping.governorateOption',
+        'shipping.cityOption',
+      ]);
+
+      setValue('customer.name', fill.name, DIRTY);
+      setValue('customer.address', fill.address ?? '', DIRTY);
+      clearErrors(['customer.name', 'customer.address']);
+
+      if (currentPhones.length < 2 || (currentPhones[1] ?? '').trim() === '') {
+        const otherPhone = [...fill.phones]
+          .sort()
+          .find((phone) => normalizePhoneNumber(phone) !== startFirstPhone);
+        if (otherPhone !== undefined) {
+          setValue('customer.phoneNumbers', [currentPhones[0] ?? '', otherPhone], DIRTY);
+          clearErrors('customer.phoneNumbers');
+        }
+      }
+
+      const successMessage = `تم ملء البيانات من الطلب ${fill.row.code}`;
+      if (fill.dropped.length > 0) {
+        toast.warning(
+          `${successMessage} — اختر ${fill.dropped.map((field) => FILL_DROPPED_LABELS[field]).join('/')}`
+        );
+      } else {
+        toast.success(successMessage);
+      }
+    } finally {
+      setFillPending(false);
+    }
+  };
 
   const formValues = watch();
   const hasUnsavedChanges =
@@ -245,6 +320,8 @@ function NewOrderForm() {
           onNotesChange={(v) => {
             setValue('customer.notes', v, DIRTY);
           }}
+          onFillFromOrder={handleFillFromOrder}
+          fillPending={fillPending}
           errors={{
             name: errors.customer?.name?.message,
             phoneNumbers: errors.customer?.phoneNumbers?.message,

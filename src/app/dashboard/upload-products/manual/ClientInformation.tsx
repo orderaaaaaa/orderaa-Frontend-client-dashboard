@@ -10,6 +10,14 @@ import { useDebounce } from '@/utils/debounce';
 import { useCustomerOrders } from '@/services/orders';
 import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
+import type { Order } from '@/types/orders';
+import { normalizePhoneNumber } from '@/utils/phone';
+import { latestMatchingOrderOf } from '@/utils/latestOrderFill';
+
+type ClientInformationFillProps = {
+  onFillFromOrder?: (row: Order) => void | Promise<void>;
+  fillPending?: boolean;
+};
 
 function ClientInformation({
   name,
@@ -21,7 +29,9 @@ function ClientInformation({
   onAddressChange,
   onNotesChange,
   errors,
-}: ClientInformationProps) {
+  onFillFromOrder,
+  fillPending = false,
+}: ClientInformationProps & ClientInformationFillProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const firstPhone = useMemo(
@@ -36,6 +46,12 @@ function ClientInformation({
   });
 
   const existingOrdersCount = ordersData?.data?.length ?? 0;
+
+  const fillRow = onFillFromOrder
+    ? latestMatchingOrderOf(ordersData?.data ?? [], {
+        phone: normalizePhoneNumber(debouncedPhone),
+      })
+    : null;
 
   const handlePhoneChange = (index: number, value: string) => {
     const updated = [...phoneNumbers];
@@ -137,6 +153,19 @@ function ClientInformation({
                   <span className="text-sm text-amber-700 font-medium">
                     هذا العميل لديه {existingOrdersCount} طلب سابق
                   </span>
+                  {fillRow && onFillFromOrder && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      loading={fillPending}
+                      disabled={fillPending}
+                      onClick={() => onFillFromOrder(fillRow)}
+                      className="text-primary-text hover:text-primary-text hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold"
+                    >
+                      ملء البيانات
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     variant="ghost"
