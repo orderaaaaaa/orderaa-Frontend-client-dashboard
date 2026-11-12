@@ -9,6 +9,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 import { OverlayLayerContext } from './overlay-layer';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { useVisualViewportHeight } from '@/hooks/useVisualViewportHeight';
 
 export const ModalContainerContext = React.createContext<HTMLElement | null>(
   null
@@ -37,6 +38,12 @@ interface BaseModalProps {
   confirmErrorFallback?: string;
   onEscapeKeyDown?: (event: KeyboardEvent) => void;
   footer?: ReactNode;
+  headerContent?: ReactNode;
+  subheader?: ReactNode;
+  mobileFullScreen?: boolean;
+  bodyClassName?: string;
+  onOpenAutoFocus?: (event: Event) => void;
+  onCloseAutoFocus?: (event: Event) => void;
 }
 
 export default function BaseModal({
@@ -59,11 +66,18 @@ export default function BaseModal({
   confirmErrorFallback = 'حدث خطأ، حاول مرة أخرى',
   onEscapeKeyDown,
   footer,
+  headerContent,
+  subheader,
+  mobileFullScreen = false,
+  bodyClassName,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
 }: BaseModalProps) {
   const { t } = useI18n();
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
   const [contentEl, setContentEl] = useState<HTMLElement | null>(null);
+  useVisualViewportHeight(mobileFullScreen ? contentEl : null);
 
   const handleConfirm = async () => {
     if (onConfirm && !isLoading && !confirmDisabled) {
@@ -100,8 +114,12 @@ export default function BaseModal({
             'w-[95vw] sm:w-[90vw]',
             maxWidth,
             height,
-            'max-sm:w-[95vw]'
+            'max-sm:w-[95vw]',
+            mobileFullScreen &&
+              'max-sm:inset-0 max-sm:left-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:w-full max-sm:max-w-none max-sm:max-h-none max-sm:h-[var(--vvh,100dvh)] max-sm:top-[var(--vv-offset,0px)] max-sm:rounded-none max-sm:border-0 max-sm:data-[state=open]:zoom-in-100'
           )}
+          onOpenAutoFocus={onOpenAutoFocus}
+          onCloseAutoFocus={onCloseAutoFocus}
           onPointerDownOutside={(e) => {
             if (isLoading || isToastTarget(e.target)) e.preventDefault();
           }}
@@ -115,10 +133,22 @@ export default function BaseModal({
         >
           <OverlayLayerContext.Provider value={true}>
             <ModalContainerContext.Provider value={contentEl}>
-              <div className="flex shrink-0 items-center gap-3 rounded-t-2xl border-b border-border bg-card px-5 py-4 sm:px-6">
-                <DialogPrimitive.Title className="min-w-0 flex-1 text-start text-lg font-semibold break-words text-foreground">
-                  {title}
-                </DialogPrimitive.Title>
+              <div
+                className={cn(
+                  'flex shrink-0 items-center gap-3 rounded-t-2xl border-b border-border bg-card px-5 py-4 sm:px-6',
+                  mobileFullScreen && 'max-sm:rounded-none'
+                )}
+              >
+                {headerContent ? (
+                  <>
+                    <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+                    <div className="min-w-0 flex-1">{headerContent}</div>
+                  </>
+                ) : (
+                  <DialogPrimitive.Title className="min-w-0 flex-1 text-start text-lg font-semibold break-words text-foreground">
+                    {title}
+                  </DialogPrimitive.Title>
+                )}
 
                 <DialogPrimitive.Close
                   disabled={isLoading}
@@ -133,16 +163,38 @@ export default function BaseModal({
                 {title}
               </DialogPrimitive.Description>
 
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
+              {subheader !== undefined && (
+                <div className="shrink-0 border-b border-border bg-card px-5 pb-3 sm:px-6">{subheader}</div>
+              )}
+
+              <div
+                className={
+                  bodyClassName
+                    ? cn('min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6', bodyClassName)
+                    : 'min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6'
+                }
+              >
+                {children}
+              </div>
 
               {footer !== undefined && (
-                <div className="flex shrink-0 flex-col gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
+                <div
+                  className={cn(
+                    'flex shrink-0 flex-col gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6',
+                    mobileFullScreen && 'max-sm:rounded-none'
+                  )}
+                >
                   {footer}
                 </div>
               )}
 
               {footer === undefined && showFooter && (
-                <div className="flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
+                <div
+                  className={cn(
+                    'flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6',
+                    mobileFullScreen && 'max-sm:rounded-none'
+                  )}
+                >
                   <Button
                     variant="outline"
                     onClick={onClose}
