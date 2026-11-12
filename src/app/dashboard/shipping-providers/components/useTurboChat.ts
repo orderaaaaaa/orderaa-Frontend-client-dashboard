@@ -8,7 +8,13 @@ import {
   useMarkCarrierChatSeenMutation,
   useSendCarrierChatMessageMutation,
 } from '@/services/carrierChat';
-import type { CarrierChatMessage, CarrierChatThread } from '@/types/carrierChat';
+import {
+  CARRIER_CHAT_ERROR_CODES,
+  CARRIER_CHAT_SOCKET_STATE,
+  type CarrierChatMessage,
+  type CarrierChatSocketState,
+  type CarrierChatThread,
+} from '@/types/carrierChat';
 import { CHAT_POLL_INTERVAL_MS, CHAT_SEEN_DEBOUNCE_MS } from './followupNotesConstants';
 
 export interface PendingChatSend {
@@ -30,6 +36,7 @@ export interface TurboChatView {
   isLoading: boolean;
   isError: boolean;
   errorCode: string | null;
+  authFailed: boolean;
   refetch: () => void;
   socketState: CarrierChatConnectionState;
   lastSyncedAt: string | null;
@@ -67,10 +74,29 @@ export const useCoarsePointer = (): boolean =>
 
 export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurboChatOptions): TurboChatView {
   const socket = useOrderChatSocket(orderId, isActive);
+  const liveState: CarrierChatConnectionState =
+    socket.state === 'connected' && socket.carrierStatus === CARRIER_CHAT_SOCKET_STATE.DEGRADED
+      ? 'reconnecting'
+      : socket.state;
   const query = useCarrierChatThreadQuery(orderId, {
     enabled,
-    refetchInterval: isActive && socket.state !== 'connected' ? CHAT_POLL_INTERVAL_MS : false,
+    refetchInterval: isActive && liveState !== 'connected' ? CHAT_POLL_INTERVAL_MS : false,
   });
+  const refetchThread = query.refetch;
+  const previousCarrierStatus = useRef<CarrierChatSocketState | null>(null);
+
+  useEffect(() => {
+    const status = socket.carrierStatus;
+    const previous = previousCarrierStatus.current;
+    previousCarrierStatus.current = status;
+    if (status === CARRIER_CHAT_SOCKET_STATE.AUTH_FAILED && previous !== status) void refetchThread();
+    if (
+      status === CARRIER_CHAT_SOCKET_STATE.OK &&
+      (previous === CARRIER_CHAT_SOCKET_STATE.AUTH_FAILED || previous === CARRIER_CHAT_SOCKET_STATE.DEGRADED)
+    ) {
+      void refetchThread();
+    }
+  }, [socket.carrierStatus, refetchThread]);
   const sendMutation = useSendCarrierChatMessageMutation();
   const seenMutation = useMarkCarrierChatSeenMutation();
   const queryClient = useQueryClient();
@@ -144,19 +170,24 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
     void sendText(message.text, message.logId);
   };
 
+  const errorCode = carrierChatErrorCodeOf(query.error);
+  const authFailed =
+    socket.carrierStatus === CARRIER_CHAT_SOCKET_STATE.AUTH_FAILED || errorCode === CARRIER_CHAT_ERROR_CODES.AUTH_FAILED;
+
   return {
     thread,
     unreadKey: unreadKey ?? null,
     isLoading: query.isLoading,
     isError: query.isError,
-    errorCode: carrierChatErrorCodeOf(query.error),
+    errorCode,
+    authFailed,
     refetch: () => {
       void query.refetch();
     },
-    socketState: socket.state,
+    socketState: liveState,
     lastSyncedAt: socket.lastSyncedAt ?? syncedAt ?? null,
     pending,
-    canCompose: canManage && thread !== undefined && thread.carrierCanSend,
+    canCompose: canManage && thread !== undefined && thread.carrierCanSend && !authFailed,
     canRetry: canManage,
     sendText,
     retry,

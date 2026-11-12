@@ -86,17 +86,18 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
     );
   }
 
+  if (chat.authFailed) {
+    const link: ReactNode = canReadIntegrations ? (
+      <Link href="/dashboard/link-shipping-company" className="font-medium text-primary-text underline-offset-2 hover:underline">
+        {CHAT_AUTH_LINK_LABEL}
+      </Link>
+    ) : undefined;
+    return <EmptyState title={CHAT_AUTH_ERROR_LABEL} description={CHAT_AUTH_HINT_LABEL} action={link} />;
+  }
+
   if (thread === undefined && chat.isError) {
     if (chat.errorCode === CARRIER_CHAT_ERROR_CODES.NOT_AVAILABLE) {
       return <EmptyState title={CHAT_UNAVAILABLE_LABEL} />;
-    }
-    if (chat.errorCode === CARRIER_CHAT_ERROR_CODES.AUTH_FAILED) {
-      const link: ReactNode = canReadIntegrations ? (
-        <Link href="/dashboard/link-shipping-company" className="font-medium text-primary-text underline-offset-2 hover:underline">
-          {CHAT_AUTH_LINK_LABEL}
-        </Link>
-      ) : undefined;
-      return <EmptyState title={CHAT_AUTH_ERROR_LABEL} description={CHAT_AUTH_HINT_LABEL} action={link} />;
     }
     return (
       <div className="flex flex-col items-center gap-3 py-6">
