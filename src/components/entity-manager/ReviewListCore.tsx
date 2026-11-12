@@ -293,7 +293,7 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
               hasSelectedItems={selection.ids.size > 0 && canManage}
             />
           )}
-          {bulkBar && selection.ids.size > 0 && (
+          {bulkBar && rowIds.some((id) => selection.ids.has(id)) && (
             <div aria-hidden="true" className="h-[calc(7rem_+_env(safe-area-inset-bottom))]" />
           )}
         </TabsContent>

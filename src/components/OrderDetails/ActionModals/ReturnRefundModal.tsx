@@ -110,10 +110,10 @@ export default function ReturnRefundModal({
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-foreground">
-            المنتج المرتجع <span className="text-red-600">*</span>
-          </label>
-          <div className="flex flex-col gap-2">
+          <p id="refund-lines-label" className="font-bold text-foreground">
+            المنتجات المرتجعة <span className="text-red-600">*</span>
+          </p>
+          <div role="group" aria-labelledby="refund-lines-label" className="flex flex-col gap-2">
             {orderProducts.map((op) => (
               <label
                 key={op.id}
@@ -121,7 +121,7 @@ export default function ReturnRefundModal({
                 aria-checked={isSelected(op.id)}
                 tabIndex={0}
                 className={clsx(
-                  'flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all',
+                  'flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                   isSelected(op.id)
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-primary/40 hover:bg-primary/5'
