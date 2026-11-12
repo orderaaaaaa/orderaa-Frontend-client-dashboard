@@ -726,6 +726,9 @@ export default function EditShippingModal({
           {costLocked && (
             <p className="text-sm text-destructive">{CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE}</p>
           )}
+          <p className="text-xs text-amber-600">
+            مع بوستا: يجب أن تكون 0 أو 15 جنيهًا على الأقل مع تفعيل «فتح الشحنة»، وإلا تُرفض الشحنة.
+          </p>
         </div>
         )}
 

@@ -156,6 +156,11 @@ export function ShippingSection({
           className="w-full max-w-sm"
           error={errors.defaultReturnShippingCost?.message}
         />
+        {watch('canOpenShipment') && (
+          <p className="text-xs sm:text-sm text-amber-600">
+            مع بوستا: يجب أن تكون 0 أو 15 جنيهًا على الأقل، وإلا تُرفض الشحنة.
+          </p>
+        )}
       </div>
     </div>
   );
