@@ -8,12 +8,15 @@ interface ScopeChipsProps {
   storeIds: string[];
   carrierKeys: string[];
   pageNames: string[];
+  utmSources: string[];
   storeOptions?: FilterOption[];
   carrierOptions?: FilterOption[];
   pageOptions?: FilterOption[];
+  sourceOptions?: FilterOption[];
   onRemoveStore: (key: string) => void;
   onRemoveCarrier: (key: string) => void;
   onRemovePage: (key: string) => void;
+  onRemoveSource: (key: string) => void;
   className?: string;
 }
 
@@ -25,18 +28,22 @@ export function ScopeChips({
   storeIds,
   carrierKeys,
   pageNames,
+  utmSources,
   storeOptions,
   carrierOptions,
   pageOptions,
+  sourceOptions,
   onRemoveStore,
   onRemoveCarrier,
   onRemovePage,
+  onRemoveSource,
   className,
 }: ScopeChipsProps) {
   const entries: Array<{ key: string; label: string; onRemove: () => void }> = [
     ...storeIds.map((key) => ({ key: `store:${key}`, label: labelFor(storeOptions, key), onRemove: () => onRemoveStore(key) })),
     ...carrierKeys.map((key) => ({ key: `carrier:${key}`, label: labelFor(carrierOptions, key), onRemove: () => onRemoveCarrier(key) })),
     ...pageNames.map((key) => ({ key: `page:${key}`, label: labelFor(pageOptions, key), onRemove: () => onRemovePage(key) })),
+    ...utmSources.map((key) => ({ key: `source:${key}`, label: labelFor(sourceOptions, key), onRemove: () => onRemoveSource(key) })),
   ];
 
   if (!entries.length) return null;

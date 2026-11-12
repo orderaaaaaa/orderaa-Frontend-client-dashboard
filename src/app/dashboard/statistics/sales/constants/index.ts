@@ -264,6 +264,7 @@ export const SALES_COPY = {
   storePlaceholder: 'المتاجر',
   carrierPlaceholder: 'شركات الشحن',
   pagePlaceholder: 'الصفحات',
+  sourcePlaceholder: 'المصادر',
   filterOptionsErrorMessage: 'تعذر تحميل الخيارات',
   approvedOnlyLabel: 'الفواتير المغلقة فقط',
   purchasesClosedChip: 'المغلقة فقط',

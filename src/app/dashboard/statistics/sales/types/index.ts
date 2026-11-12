@@ -182,6 +182,7 @@ export interface SalesStatisticsFilterOptions {
   stores: FilterOption[];
   carriers: FilterOption[];
   pages: FilterOption[];
+  sources: FilterOption[];
 }
 
 export interface SalesStatisticsParams {
@@ -190,5 +191,6 @@ export interface SalesStatisticsParams {
   storeIds?: number[];
   carrierKeys?: string[];
   pageNames?: string[];
+  utmSources?: string[];
   approvedOnly: boolean;
 }

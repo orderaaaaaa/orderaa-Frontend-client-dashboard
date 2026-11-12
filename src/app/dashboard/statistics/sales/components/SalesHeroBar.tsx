@@ -18,9 +18,11 @@ interface SalesHeroBarProps {
   storeIds: string[];
   carrierKeys: string[];
   pageNames: string[];
+  utmSources: string[];
   onStoreIdsChange: (values: string[]) => void;
   onCarrierKeysChange: (values: string[]) => void;
   onPageNamesChange: (values: string[]) => void;
+  onUtmSourcesChange: (values: string[]) => void;
   approvedOnly: boolean;
   onApprovedOnlyChange: (value: boolean) => void;
   onClearScope: () => void;
@@ -41,9 +43,11 @@ export function SalesHeroBar({
   storeIds,
   carrierKeys,
   pageNames,
+  utmSources,
   onStoreIdsChange,
   onCarrierKeysChange,
   onPageNamesChange,
+  onUtmSourcesChange,
   approvedOnly,
   onApprovedOnlyChange,
   onClearScope,
@@ -120,6 +124,19 @@ export function SalesHeroBar({
             summarizeSelection
             triggerClassName="py-3 rounded-lg min-h-[44px]"
           />
+          <MultiSelectDropdown
+            value={utmSources}
+            onChange={onUtmSourcesChange}
+            options={filterOptions?.sources ?? []}
+            placeholder={SALES_COPY.sourcePlaceholder}
+            emptyMessage={emptyMessage}
+            loading={filterOptionsLoading}
+            showSelectAll
+            widthClass="w-full sm:w-[200px]"
+            overlayOnMobile
+            summarizeSelection
+            triggerClassName="py-3 rounded-lg min-h-[44px]"
+          />
 
           <div className="flex items-center gap-2">
             <Switch checked={approvedOnly} onCheckedChange={onApprovedOnlyChange} />
@@ -141,12 +158,15 @@ export function SalesHeroBar({
           storeIds={storeIds}
           carrierKeys={carrierKeys}
           pageNames={pageNames}
+          utmSources={utmSources}
           storeOptions={filterOptions?.stores}
           carrierOptions={filterOptions?.carriers}
           pageOptions={filterOptions?.pages}
+          sourceOptions={filterOptions?.sources}
           onRemoveStore={(key) => onStoreIdsChange(storeIds.filter((id) => id !== key))}
           onRemoveCarrier={(key) => onCarrierKeysChange(carrierKeys.filter((id) => id !== key))}
           onRemovePage={(key) => onPageNamesChange(pageNames.filter((id) => id !== key))}
+          onRemoveSource={(key) => onUtmSourcesChange(utmSources.filter((id) => id !== key))}
         />
       </div>
     </div>

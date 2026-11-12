@@ -94,6 +94,7 @@ function SalesStatisticsView() {
     storeIds,
     carrierKeys,
     pageNames,
+    utmSources,
     approvedOnly,
     selectionCount,
     setFromDate,
@@ -102,6 +103,7 @@ function SalesStatisticsView() {
     setStoreIds,
     setCarrierKeys,
     setPageNames,
+    setUtmSources,
     setApprovedOnly,
     clearScope,
   } = useSalesStatisticsUrlFilters();
@@ -148,9 +150,11 @@ function SalesStatisticsView() {
       storeIds={storeIds}
       carrierKeys={carrierKeys}
       pageNames={pageNames}
+      utmSources={utmSources}
       onStoreIdsChange={setStoreIds}
       onCarrierKeysChange={setCarrierKeys}
       onPageNamesChange={setPageNames}
+      onUtmSourcesChange={setUtmSources}
       approvedOnly={approvedOnly}
       onApprovedOnlyChange={setApprovedOnly}
       onClearScope={clearScope}

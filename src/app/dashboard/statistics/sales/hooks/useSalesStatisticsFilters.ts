@@ -11,6 +11,7 @@ export interface SalesStatisticsFiltersState {
   storeIds: string[];
   carrierKeys: string[];
   pageNames: string[];
+  utmSources: string[];
   approvedOnly: boolean;
 }
 
@@ -23,6 +24,7 @@ export interface UseSalesStatisticsFiltersResult extends SalesStatisticsFiltersS
   setStoreIds: (values: string[]) => void;
   setCarrierKeys: (values: string[]) => void;
   setPageNames: (values: string[]) => void;
+  setUtmSources: (values: string[]) => void;
   setApprovedOnly: (value: boolean) => void;
   clearScope: () => void;
 }
@@ -42,6 +44,7 @@ function buildInitialState(): SalesStatisticsFiltersState {
     storeIds: [],
     carrierKeys: [],
     pageNames: [],
+    utmSources: [],
     approvedOnly: true,
   };
 }
@@ -49,7 +52,7 @@ function buildInitialState(): SalesStatisticsFiltersState {
 export function buildSalesParams(
   state: Pick<
     SalesStatisticsFiltersState,
-    'fromDate' | 'toDate' | 'storeIds' | 'carrierKeys' | 'pageNames' | 'approvedOnly'
+    'fromDate' | 'toDate' | 'storeIds' | 'carrierKeys' | 'pageNames' | 'utmSources' | 'approvedOnly'
   >,
 ): SalesStatisticsParams | null {
   const from = formatDateToLocalDate(state.fromDate);
@@ -60,6 +63,7 @@ export function buildSalesParams(
   if (state.storeIds.length) params.storeIds = state.storeIds.map(Number);
   if (state.carrierKeys.length) params.carrierKeys = state.carrierKeys;
   if (state.pageNames.length) params.pageNames = state.pageNames;
+  if (state.utmSources.length) params.utmSources = state.utmSources;
   return params;
 }
 
@@ -84,6 +88,7 @@ export function buildSalesSubPageHref(
   params.storeIds?.forEach((id) => search.append('storeIds', String(id)));
   params.carrierKeys?.forEach((key) => search.append('carrierKeys', key));
   params.pageNames?.forEach((name) => search.append('pageNames', name));
+  params.utmSources?.forEach((source) => search.append('utmSources', source));
   return `${base}?${search.toString()}`;
 }
 
@@ -110,6 +115,7 @@ export function parseSalesSearchParams(
     storeIds: readList(searchParams.storeIds),
     carrierKeys: readList(searchParams.carrierKeys),
     pageNames: readList(searchParams.pageNames),
+    utmSources: readList(searchParams.utmSources),
   };
 
   const fromDate = parseIsoDate(readFirst(searchParams.from));
@@ -152,6 +158,7 @@ export function serializeSalesUrlState(state: SalesStatisticsFiltersState): stri
   state.storeIds.forEach((id) => search.append('storeIds', id));
   state.carrierKeys.forEach((key) => search.append('carrierKeys', key));
   state.pageNames.forEach((name) => search.append('pageNames', name));
+  state.utmSources.forEach((source) => search.append('utmSources', source));
   return search.toString();
 }
 
@@ -200,13 +207,18 @@ function useSalesFilterActions(commit: (update: SalesFilterUpdate) => void) {
     [commit],
   );
 
+  const setUtmSources = useCallback(
+    (values: string[]) => commit((prev) => ({ ...prev, utmSources: values })),
+    [commit],
+  );
+
   const setApprovedOnly = useCallback(
     (value: boolean) => commit((prev) => ({ ...prev, approvedOnly: value })),
     [commit],
   );
 
   const clearScope = useCallback(
-    () => commit((prev) => ({ ...prev, storeIds: [], carrierKeys: [], pageNames: [] })),
+    () => commit((prev) => ({ ...prev, storeIds: [], carrierKeys: [], pageNames: [], utmSources: [] })),
     [commit],
   );
 
@@ -217,6 +229,7 @@ function useSalesFilterActions(commit: (update: SalesFilterUpdate) => void) {
     setStoreIds,
     setCarrierKeys,
     setPageNames,
+    setUtmSources,
     setApprovedOnly,
     clearScope,
   };
@@ -228,7 +241,8 @@ function useSalesFilterResult(
 ): UseSalesStatisticsFiltersResult {
   const params = useMemo(() => buildSalesParams(state), [state]);
   const actions = useSalesFilterActions(commit);
-  const selectionCount = state.storeIds.length + state.carrierKeys.length + state.pageNames.length;
+  const selectionCount =
+    state.storeIds.length + state.carrierKeys.length + state.pageNames.length + state.utmSources.length;
 
   return {
     ...state,

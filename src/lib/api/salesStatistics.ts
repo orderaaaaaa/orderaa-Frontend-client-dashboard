@@ -9,7 +9,7 @@ import type {
 } from '@/app/dashboard/statistics/sales/types';
 
 function buildQueryParams(params: SalesStatisticsParams) {
-  const { from, to, storeIds, carrierKeys, pageNames, approvedOnly } = params;
+  const { from, to, storeIds, carrierKeys, pageNames, utmSources, approvedOnly } = params;
   return {
     from,
     to,
@@ -17,6 +17,7 @@ function buildQueryParams(params: SalesStatisticsParams) {
     ...(storeIds && storeIds.length ? { storeIds } : {}),
     ...(carrierKeys && carrierKeys.length ? { carrierKeys } : {}),
     ...(pageNames && pageNames.length ? { pageNames } : {}),
+    ...(utmSources && utmSources.length ? { utmSources } : {}),
   };
 }
 

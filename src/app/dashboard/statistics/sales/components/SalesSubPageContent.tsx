@@ -84,6 +84,7 @@ function buildFilterSummary(
       value: labelsFor(filterOptions?.carriers, params.carrierKeys),
     },
     { label: SALES_COPY.pagePlaceholder, value: labelsFor(filterOptions?.pages, params.pageNames) },
+    { label: SALES_COPY.sourcePlaceholder, value: labelsFor(filterOptions?.sources, params.utmSources) },
   ];
 }
 
@@ -120,6 +121,7 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
     storeIds,
     carrierKeys,
     pageNames,
+    utmSources,
     approvedOnly,
     selectionCount,
     setFromDate,
@@ -128,6 +130,7 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
     setStoreIds,
     setCarrierKeys,
     setPageNames,
+    setUtmSources,
     setApprovedOnly,
     clearScope,
   } = useSalesStatisticsUrlFilters();
@@ -161,9 +164,11 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
       storeIds={storeIds}
       carrierKeys={carrierKeys}
       pageNames={pageNames}
+      utmSources={utmSources}
       onStoreIdsChange={setStoreIds}
       onCarrierKeysChange={setCarrierKeys}
       onPageNamesChange={setPageNames}
+      onUtmSourcesChange={setUtmSources}
       approvedOnly={approvedOnly}
       onApprovedOnlyChange={setApprovedOnly}
       onClearScope={clearScope}
@@ -184,6 +189,7 @@ function SalesSubPageView({ set }: SalesSubPageContentProps) {
         storeIds,
         carrierKeys,
         pageNames,
+        utmSources,
         approvedOnly,
       })}`}
       className="inline-flex w-fit items-center gap-2 rounded text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
