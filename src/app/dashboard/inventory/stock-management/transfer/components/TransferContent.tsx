@@ -149,6 +149,7 @@ export function TransferContent() {
                     onShortage={applyShortage}
                     onDone={clearLines}
                     onCancel={clearLines}
+                    actionsPlacement="page"
                   />
                 )}
               </section>

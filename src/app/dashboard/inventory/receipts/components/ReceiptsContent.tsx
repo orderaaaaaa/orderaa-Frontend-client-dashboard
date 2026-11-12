@@ -17,7 +17,6 @@ import { INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
 import ReceiptsHeader from './ReceiptsHeader';
 import ReceiptsSearchBar from './ReceiptsSearchBar';
 import ReceiptsFilterBar from './ReceiptsFilterBar';
-import ReceiptsActionsBar from './ReceiptsActionsBar';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
@@ -331,12 +330,6 @@ export function ReceiptsContent() {
           hasSelectedItems={showActionsBar}
         />
       </div>
-
-      <ReceiptsActionsBar
-        selectedCount={selectedIds.length}
-        isVisible={showActionsBar}
-      />
-
     </div>
   );
 }

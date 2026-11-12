@@ -46,6 +46,7 @@ export function TransferStockModal({
             onClose();
           }}
           onCancel={onClose}
+          actionsPlacement="modal"
         />
       )}
     </BaseModal>

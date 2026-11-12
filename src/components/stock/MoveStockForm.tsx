@@ -5,6 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
 import { VariantLabel } from '@/components/stock/VariantLabel';
 import { WarehouseSelect } from '@/components/stock/WarehouseSelect';
@@ -46,6 +48,7 @@ interface MoveStockFormProps {
   onCancel(): void;
   onRemoveLine?(variantId: number): void;
   onShortage?(lines: { variantId: number; available: number }[]): void;
+  actionsPlacement?: 'inline' | 'page' | 'modal';
 }
 
 export function MoveStockForm({
@@ -56,6 +59,7 @@ export function MoveStockForm({
   onCancel,
   onRemoveLine,
   onShortage,
+  actionsPlacement = 'inline',
 }: MoveStockFormProps) {
   const [internalToWarehouseId, setInternalToWarehouseId] = useState<number | null>(null);
   const [quantities, setQuantities] = useState<Record<number, string>>({});
@@ -184,6 +188,18 @@ export function MoveStockForm({
     }
   };
 
+  const totalText = `إجمالي القطع: ${movingTotal} · عدد المتغيرات: ${movingLines.length}`;
+  const cancelButton = (
+    <Button type="button" variant="outline" onClick={onCancel} disabled={transferMutation.isPending}>
+      إلغاء
+    </Button>
+  );
+  const submitButton = (
+    <Button type="submit" disabled={!canSubmit} loading={transferMutation.isPending}>
+      تنفيذ النقل
+    </Button>
+  );
+
   return (
     <form onSubmit={onSubmit} onKeyDown={onFormKeyDown} className="@container flex flex-col gap-4" noValidate>
       {destination ? (
@@ -305,19 +321,30 @@ export function MoveStockForm({
         />
       </label>
 
-      <div className="flex flex-col gap-3 border-t border-border pt-4">
-        <p className="text-sm text-muted-foreground">
-          {`إجمالي القطع: ${movingTotal} · عدد المتغيرات: ${movingLines.length}`}
-        </p>
-        <div className="flex items-center justify-between gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={transferMutation.isPending}>
-            إلغاء
-          </Button>
-          <Button type="submit" disabled={!canSubmit} loading={transferMutation.isPending}>
-            تنفيذ النقل
-          </Button>
+      {actionsPlacement === 'page' ? (
+        <StickyFormFooter status={totalText}>
+          {cancelButton}
+          {submitButton}
+        </StickyFormFooter>
+      ) : actionsPlacement === 'modal' ? (
+        <ModalStickyFooter>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">{totalText}</p>
+            <div className="flex items-center justify-between gap-2">
+              {cancelButton}
+              {submitButton}
+            </div>
+          </div>
+        </ModalStickyFooter>
+      ) : (
+        <div className="flex flex-col gap-3 border-t border-border pt-4">
+          <p className="text-sm text-muted-foreground">{totalText}</p>
+          <div className="flex items-center justify-between gap-2">
+            {cancelButton}
+            {submitButton}
+          </div>
         </div>
-      </div>
+      )}
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { toast } from 'react-toastify';
 import { formatStockNumber, toStockNumber } from '@/utils/format';
 import { Button } from '@/components/ui/button';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { isInvalidCountInput } from '@/components/stock/CountSheetTable';
 import { VarianceChip } from '@/components/stock/VarianceChip';
@@ -279,19 +280,21 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
         </table>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-        <p className="text-sm text-muted-foreground">
-          <span dir="ltr" className="font-semibold tabular-nums text-foreground">{changedCount}</span> سطر بفرق
-        </p>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-            إلغاء
-          </Button>
-          <Button type="submit" disabled={!canSubmit} loading={isPending}>
-            حفظ التسوية
-          </Button>
+      <ModalStickyFooter>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            <span dir="ltr" className="font-semibold tabular-nums text-foreground">{changedCount}</span> سطر بفرق
+          </p>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+              إلغاء
+            </Button>
+            <Button type="submit" disabled={!canSubmit} loading={isPending}>
+              حفظ التسوية
+            </Button>
+          </div>
         </div>
-      </div>
+      </ModalStickyFooter>
     </form>
   );
 }

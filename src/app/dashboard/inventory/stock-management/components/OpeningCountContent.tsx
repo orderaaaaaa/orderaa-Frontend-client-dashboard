@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import {
   CountSheetTable,
   isInvalidCountInput,
@@ -273,16 +274,21 @@ export function OpeningCountContent() {
         />
       )}
 
-      <div className="flex justify-end">
-        <Button
-          onClick={onSubmit}
-          disabled={!canSave}
-          className="disabled:bg-primary disabled:text-primary-foreground disabled:hover:bg-primary"
-          loading={isPreparing || adjustMutation.isPending}
+      {hasWarehouse && (
+        <StickyFormFooter
+          isDirty={Object.keys(edits).length > 0}
+          isSaving={isPreparing || adjustMutation.isPending}
         >
-          حفظ الجرد
-        </Button>
-      </div>
+          <Button
+            onClick={onSubmit}
+            disabled={!canSave}
+            className="disabled:bg-primary disabled:text-primary-foreground disabled:hover:bg-primary"
+            loading={isPreparing || adjustMutation.isPending}
+          >
+            حفظ الجرد
+          </Button>
+        </StickyFormFooter>
+      )}
     </div>
   );
 }
