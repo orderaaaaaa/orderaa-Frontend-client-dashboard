@@ -28,7 +28,7 @@ import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
-import { normalizePhoneNumber } from '@/utils/phone';
+import { lookupPhoneOf, normalizePhoneNumber } from '@/utils/phone';
 import {
   resolveLatestOrderFill,
   type LocationPresetDropped,
@@ -110,15 +110,15 @@ function NewOrderForm() {
 
   const handleFillFromOrder = async () => {
     const startPhones = getValues('customer.phoneNumbers');
-    const startFirstPhone = normalizePhoneNumber(startPhones[0] ?? '');
-    const lookupPhone = startPhones.find((p) => p.trim().length >= 8) || '';
+    const lookupPhone = lookupPhoneOf(startPhones);
+    const startLookupPhone = normalizePhoneNumber(lookupPhone);
 
     setFillPending(true);
     try {
       const fill = await resolveLatestOrderFill(
         queryClient,
         lookupPhone,
-        { phone: startFirstPhone },
+        { phone: startLookupPhone },
         ORDER_LOOKUP_SURFACE.MANUAL_ORDER_CLIENT_HISTORY
       );
       if (!fill) {
@@ -127,7 +127,7 @@ function NewOrderForm() {
       }
 
       const currentPhones = getValues('customer.phoneNumbers');
-      if (normalizePhoneNumber(currentPhones[0] ?? '') !== startFirstPhone) return;
+      if (normalizePhoneNumber(lookupPhoneOf(currentPhones)) !== startLookupPhone) return;
 
       setValue(
         'shipping.shippingCompanyId',
@@ -147,9 +147,10 @@ function NewOrderForm() {
       clearErrors(['customer.name', 'customer.address']);
 
       if (currentPhones.length < 2 || (currentPhones[1] ?? '').trim() === '') {
+        const formPhones = new Set(currentPhones.map((phone) => normalizePhoneNumber(phone)));
         const otherPhone = [...fill.phones]
           .sort()
-          .find((phone) => normalizePhoneNumber(phone) !== startFirstPhone);
+          .find((phone) => !formPhones.has(normalizePhoneNumber(phone)));
         if (otherPhone !== undefined) {
           setValue('customer.phoneNumbers', [currentPhones[0] ?? '', otherPhone], DIRTY);
           clearErrors('customer.phoneNumbers');

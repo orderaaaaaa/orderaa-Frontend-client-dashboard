@@ -8,3 +8,6 @@ export const normalizePhoneNumber = (phone: string) => {
   if (digits.length === 10 && !digits.startsWith('0')) digits = `0${digits}`;
   return digits;
 };
+
+export const lookupPhoneOf = (phones: string[]): string =>
+  phones.find((phone) => phone.trim().length >= 8) || '';

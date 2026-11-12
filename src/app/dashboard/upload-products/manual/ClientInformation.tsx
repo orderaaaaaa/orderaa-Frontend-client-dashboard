@@ -11,7 +11,7 @@ import { useCustomerOrders } from '@/services/orders';
 import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import type { Order } from '@/types/orders';
-import { normalizePhoneNumber } from '@/utils/phone';
+import { lookupPhoneOf, normalizePhoneNumber } from '@/utils/phone';
 import { latestMatchingOrderOf } from '@/utils/latestOrderFill';
 
 type ClientInformationFillProps = {
@@ -34,10 +34,7 @@ function ClientInformation({
 }: ClientInformationProps & ClientInformationFillProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const firstPhone = useMemo(
-    () => phoneNumbers.find((p) => p.trim().length >= 8) || '',
-    [phoneNumbers]
-  );
+  const firstPhone = useMemo(() => lookupPhoneOf(phoneNumbers), [phoneNumbers]);
   const debouncedPhone = useDebounce(firstPhone, 500);
 
   const { data: ordersData } = useCustomerOrders(debouncedPhone, {
