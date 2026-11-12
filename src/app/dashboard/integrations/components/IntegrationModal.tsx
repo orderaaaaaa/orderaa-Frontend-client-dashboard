@@ -421,7 +421,7 @@ const IntegrationModal = ({
                     />
                   </div>
 
-                  <ModalStickyFooter>
+                  <ModalStickyFooter className="-mx-6 -mb-6 px-6 sm:-mx-6 sm:px-6 rounded-b-xl">
                     <div className="flex gap-3 pt-2">
                       <Button
                         type="submit"
@@ -484,7 +484,7 @@ const IntegrationModal = ({
                     )}
                   </div>
 
-                  <ModalStickyFooter>
+                  <ModalStickyFooter className="-mx-6 -mb-6 px-6 sm:-mx-6 sm:px-6 rounded-b-xl">
                     <div className="flex gap-3 pt-2">
                       <Button
                         type="submit"
@@ -563,7 +563,7 @@ const IntegrationModal = ({
                     />
                   </div>
 
-                  <ModalStickyFooter>
+                  <ModalStickyFooter className="-mx-6 -mb-6 px-6 sm:-mx-6 sm:px-6 rounded-b-xl">
                     <div className="flex gap-3 pt-2">
                       <Button
                         type="submit"

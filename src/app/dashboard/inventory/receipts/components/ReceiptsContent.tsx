@@ -137,8 +137,6 @@ export function ReceiptsContent() {
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
 
-  const showActionsBar = select && selectedIds.length > 0;
-
   const handleToggleSelect = useCallback(() => {
     setSelect((prev) => {
       if (prev) {
@@ -327,7 +325,6 @@ export function ReceiptsContent() {
           onNext={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
           currentPageSize={pageSize}
           onPageSizeChange={handlePageSizeChange}
-          hasSelectedItems={showActionsBar}
         />
       </div>
     </div>

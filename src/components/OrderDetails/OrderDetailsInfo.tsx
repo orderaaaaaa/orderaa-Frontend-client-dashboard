@@ -251,7 +251,7 @@ function OrderDetailsInfoComponent({
   const menuItems = orderMenuItemsOf({
     availability,
     partialVisible: partialAction.visible && partialDeliveryPermitted,
-    undoVisible: undoAction.visible && partialDeliveryPermitted,
+    undoVisible: undoAction.visible && partialDeliveryPermitted && !frozen,
   });
 
   const handleConfirmClick = () =>

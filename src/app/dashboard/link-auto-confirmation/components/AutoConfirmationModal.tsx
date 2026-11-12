@@ -348,14 +348,13 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
             )}
           </div>
         </div>
-        {!isSaving && !form.formState.isValid && (
-          <p id="submit-disabled-reason" className="text-xs text-gray-500">
-            أكمل الحقول المطلوبة لتفعيل الزر
-          </p>
-        )}
-
         <ModalStickyFooter>
-          <div className="flex gap-3 pt-4">
+          {!isSaving && !form.formState.isValid && (
+            <p id="submit-disabled-reason" className="text-xs text-gray-500">
+              أكمل الحقول المطلوبة لتفعيل الزر
+            </p>
+          )}
+          <div className="flex gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
