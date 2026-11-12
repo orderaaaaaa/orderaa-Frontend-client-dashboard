@@ -32,3 +32,5 @@ export function followupTargetOf(
     panel,
   };
 }
+
+export type FollowupOpenHandler = (target: FollowupTarget, opener: HTMLElement | null) => void;

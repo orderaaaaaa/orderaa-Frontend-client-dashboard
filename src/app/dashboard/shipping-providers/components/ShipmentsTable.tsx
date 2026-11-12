@@ -34,6 +34,7 @@ import {
 import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { FollowupNotesUnreadBadge } from './FollowupNotesUnreadBadge';
+import { FOLLOWUP_PANELS, followupTargetOf, type FollowupOpenHandler, type FollowupPanel } from './followupPanels';
 import { formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
 import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
@@ -120,12 +121,12 @@ export function CodeCell({
   code,
   shippingCode,
   unreadNoteCount,
-  onOpenNotes,
+  onOpenFollowup,
 }: {
   code: string;
   shippingCode: string | null;
   unreadNoteCount: number | undefined;
-  onOpenNotes: () => void;
+  onOpenFollowup: (panel: FollowupPanel, opener: HTMLElement | null) => void;
 }) {
   const { t } = useI18n();
   return (
@@ -134,7 +135,10 @@ export function CodeCell({
         <CopyableCode value={code} label="نسخ كود الطلب">
           <span className="font-mono font-semibold text-foreground">{code}</span>
         </CopyableCode>
-        <FollowupNotesUnreadBadge count={unreadNoteCount} onOpen={onOpenNotes} />
+        <FollowupNotesUnreadBadge
+          count={unreadNoteCount}
+          onOpen={(opener) => onOpenFollowup(FOLLOWUP_PANELS.NOTES, opener)}
+        />
       </div>
       <CopyableCode value={shippingCode} label={t('inProcess.table.copyShippingCode')}>
         <span className={cn('font-mono', SECONDARY_TEXT_CLASS)}>{shippingCode ?? '—'}</span>
@@ -329,15 +333,13 @@ export function InProcessRowActions({
   shippingCompanyId,
   carrier,
   carrierSupportsUpdate,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: {
   row: InProcessShipment;
   shippingCompanyId: number;
   carrier: InProcessCarrier;
   carrierSupportsUpdate?: boolean;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }) {
   const { t } = useI18n();
   const locked = isLockedRow(row);
@@ -372,8 +374,7 @@ export function InProcessRowActions({
       frozenReturnChild={row.frozenReturnChild}
       unreadNoteCount={row.unreadNoteCount}
       returnChildCode={row.returnChildCode}
-      onOpenNotes={() => onOpenNotes(row.id)}
-      onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
+      onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
     />
   );
 }
@@ -381,13 +382,11 @@ export function InProcessRowActions({
 export function ReturnedRowActions({
   row,
   carrierResendSupported,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: {
   row: ReturnedShipment;
   carrierResendSupported?: boolean;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -401,8 +400,7 @@ export function ReturnedRowActions({
         carrierResendSupported={carrierResendSupported}
         frozenReturnChild={row.frozenReturnChild}
         unreadNoteCount={row.unreadNoteCount}
-        onOpenNotes={() => onOpenNotes(row.id)}
-        onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
+        onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />
     </div>
   );
@@ -410,12 +408,10 @@ export function ReturnedRowActions({
 
 export function DeliveredRowActions({
   row,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: {
   row: DeliveredShipment;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -428,8 +424,7 @@ export function DeliveredRowActions({
         frozenReturnChild={row.frozenReturnChild}
         unreadNoteCount={row.unreadNoteCount}
         hideFinalActions
-        onOpenNotes={() => onOpenNotes(row.id)}
-        onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
+        onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />
     </div>
   );
@@ -439,8 +434,7 @@ export interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
   shippingCompanyId: number;
   carrierSupportsUpdate?: boolean;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
   selection?: ShipmentSelection;
 }
 
@@ -448,8 +442,7 @@ export function InProcessShipmentsTable({
   shipments,
   shippingCompanyId,
   carrierSupportsUpdate,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
   selection,
 }: InProcessShipmentsTableProps) {
   const { t } = useI18n();
@@ -541,7 +534,7 @@ export function InProcessShipmentsTable({
                     code={row.code}
                     shippingCode={row.shippingCode}
                     unreadNoteCount={row.unreadNoteCount}
-                    onOpenNotes={() => onOpenNotes(row.id)}
+                    onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
                   />
                 </div>
               </td>
@@ -596,9 +589,7 @@ export function InProcessShipmentsTable({
                   shippingCompanyId={shippingCompanyId}
                   carrier={carrier}
                   carrierSupportsUpdate={carrierSupportsUpdate}
-                  onOpenNotes={onOpenNotes}
-                  onOpenActionLog={onOpenActionLog}
-                />
+                  onOpenFollowup={onOpenFollowup}                />
               </td>
             </tr>
           );
@@ -611,15 +602,13 @@ export function InProcessShipmentsTable({
 export interface ReturnedShipmentsTableProps {
   shipments: ReturnedShipment[];
   shippingCompanyId: number;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }
 
 export function ReturnedShipmentsTable({
   shipments,
   shippingCompanyId,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: ReturnedShipmentsTableProps) {
   const { t } = useI18n();
   const carrier = useInProcessCarrier(shippingCompanyId);
@@ -666,7 +655,7 @@ export function ReturnedShipmentsTable({
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
-                onOpenNotes={() => onOpenNotes(row.id)}
+                onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </td>
             <td className={CELL_CLASS}>
@@ -693,9 +682,7 @@ export function ReturnedShipmentsTable({
               <ReturnedRowActions
                 row={row}
                 carrierResendSupported={carrier.capabilities?.resend.supported}
-                onOpenNotes={onOpenNotes}
-                onOpenActionLog={onOpenActionLog}
-              />
+                onOpenFollowup={onOpenFollowup}              />
             </td>
           </tr>
         ))}
@@ -706,11 +693,10 @@ export function ReturnedShipmentsTable({
 
 export interface DeliveredShipmentsTableProps {
   shipments: DeliveredShipment[];
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }
 
-export function DeliveredShipmentsTable({ shipments, onOpenNotes, onOpenActionLog }: DeliveredShipmentsTableProps) {
+export function DeliveredShipmentsTable({ shipments, onOpenFollowup }: DeliveredShipmentsTableProps) {
   const { t } = useI18n();
 
   return (
@@ -758,7 +744,7 @@ export function DeliveredShipmentsTable({ shipments, onOpenNotes, onOpenActionLo
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
-                onOpenNotes={() => onOpenNotes(row.id)}
+                onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </td>
             <td className={CELL_CLASS}>
@@ -785,7 +771,7 @@ export function DeliveredShipmentsTable({ shipments, onOpenNotes, onOpenActionLo
               <span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span>
             </td>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
-              <DeliveredRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
+              <DeliveredRowActions row={row} onOpenFollowup={onOpenFollowup} />
             </td>
           </tr>
         ))}

@@ -8,6 +8,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import type { DeliveredShipment, InProcessShipment, ReturnedShipment } from '@/types/shippingProviders';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { latenessChipOf } from './LatenessChip';
+import { followupTargetOf } from './followupPanels';
 import {
   CodeCell,
   CourierCell,
@@ -51,8 +52,7 @@ export function InProcessShipmentCards({
   shipments,
   shippingCompanyId,
   carrierSupportsUpdate,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
   selection,
 }: InProcessShipmentCardsProps) {
   const { t } = useI18n();
@@ -76,7 +76,7 @@ export function InProcessShipmentCards({
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
-                onOpenNotes={() => onOpenNotes(row.id)}
+                onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </div>
             <InProcessRowActions
@@ -84,9 +84,7 @@ export function InProcessShipmentCards({
               shippingCompanyId={shippingCompanyId}
               carrier={carrier}
               carrierSupportsUpdate={carrierSupportsUpdate}
-              onOpenNotes={onOpenNotes}
-              onOpenActionLog={onOpenActionLog}
-            />
+              onOpenFollowup={onOpenFollowup}            />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <DueCell
@@ -134,8 +132,7 @@ export function InProcessShipmentCards({
 export function ReturnedShipmentCards({
   shipments,
   shippingCompanyId,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: ReturnedShipmentCardsProps) {
   const { t } = useI18n();
   const carrier = useInProcessCarrier(shippingCompanyId);
@@ -149,14 +146,12 @@ export function ReturnedShipmentCards({
               code={row.code}
               shippingCode={row.shippingCode}
               unreadNoteCount={row.unreadNoteCount}
-              onOpenNotes={() => onOpenNotes(row.id)}
+              onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
             />
             <ReturnedRowActions
               row={row}
               carrierResendSupported={carrier.capabilities?.resend.supported}
-              onOpenNotes={onOpenNotes}
-              onOpenActionLog={onOpenActionLog}
-            />
+              onOpenFollowup={onOpenFollowup}            />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />
@@ -178,7 +173,7 @@ export function ReturnedShipmentCards({
   );
 }
 
-export function DeliveredShipmentCards({ shipments, onOpenNotes, onOpenActionLog }: DeliveredShipmentCardsProps) {
+export function DeliveredShipmentCards({ shipments, onOpenFollowup }: DeliveredShipmentCardsProps) {
   const { t } = useI18n();
 
   return (
@@ -190,9 +185,9 @@ export function DeliveredShipmentCards({ shipments, onOpenNotes, onOpenActionLog
               code={row.code}
               shippingCode={row.shippingCode}
               unreadNoteCount={row.unreadNoteCount}
-              onOpenNotes={() => onOpenNotes(row.id)}
+              onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
             />
-            <DeliveredRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
+            <DeliveredRowActions row={row} onOpenFollowup={onOpenFollowup} />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />

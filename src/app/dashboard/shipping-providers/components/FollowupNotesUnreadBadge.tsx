@@ -24,7 +24,13 @@ export function UnreadNotesCountPill({ count, className }: { count: number; clas
   );
 }
 
-export function FollowupNotesUnreadBadge({ count, onOpen }: { count: number | undefined; onOpen: () => void }) {
+export function FollowupNotesUnreadBadge({
+  count,
+  onOpen,
+}: {
+  count: number | undefined;
+  onOpen: (opener: HTMLElement) => void;
+}) {
   const { t } = useI18n();
   if (!count || count <= 0) return null;
   const label = t('inProcess.table.unreadCarrierMessages', { n: formatNumber(count) });
@@ -35,9 +41,9 @@ export function FollowupNotesUnreadBadge({ count, onOpen }: { count: number | un
       className="h-auto gap-1 p-0"
       title={label}
       aria-label={label}
-      onClick={(event: MouseEvent) => {
+      onClick={(event: MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();
-        onOpen();
+        onOpen(event.currentTarget);
       }}
     >
       <MessageSquareText aria-hidden="true" className="size-4 text-muted-foreground" />

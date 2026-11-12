@@ -72,10 +72,10 @@ import {
 import type { ExportFilterEntry } from '@/lib/excel/export-rows';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { useDebounce } from '@/utils/debounce';
-import { FollowupNotesModal } from './FollowupNotesModal';
+import { OrderFollowupDialog } from './OrderFollowupDialog';
+import type { FollowupOpenHandler, FollowupTarget } from './followupPanels';
 import { deliveredExportColumns, exportShipmentsToExcel, inProcessExportColumns, returnedExportColumns } from './exportShipments';
 import { formatNumber } from './formatNumber';
-import { OrderActionLogModal } from './OrderActionLogModal';
 import { DeliveredShipmentCards, InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
 import { DeliveredShipmentsTable, InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
 import { toDeliveredParams, toReturnedParams } from './shipmentParams';
@@ -238,9 +238,9 @@ interface ViewSwitchProps {
   counts: ShipmentTabCounts;
 }
 
-interface ActionLogTarget {
-  orderId: number;
-  orderCode: string;
+interface FollowupState {
+  target: FollowupTarget;
+  opener: HTMLElement | null;
 }
 
 interface ListProps {
@@ -257,8 +257,7 @@ interface InProcessListProps extends ListProps {
   hasActiveFilters: boolean;
   onClearAll: () => void;
   controls: (exportTotal: number | undefined) => ReactNode;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }
 
 interface ListHeaderProps {
@@ -785,8 +784,7 @@ function InProcessList({
   hasActiveFilters,
   onClearAll,
   controls,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: InProcessListProps) {
   const { t } = useI18n();
   const { hasPermission } = usePermissionCheck();
@@ -977,8 +975,7 @@ function InProcessList({
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
                     carrierSupportsUpdate={data?.carrier.carrierSupportsUpdate}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                     selection={selection}
                   />
                 )}
@@ -989,8 +986,7 @@ function InProcessList({
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
                     carrierSupportsUpdate={data?.carrier.carrierSupportsUpdate}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                     selection={selection}
                   />
                 )}
@@ -1058,8 +1054,7 @@ interface ReturnedListProps extends ListProps {
   hasActiveFilters: boolean;
   onClearAll: () => void;
   controls: (exportTotal: number | undefined) => ReactNode;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }
 
 function ReturnedList({
@@ -1073,8 +1068,7 @@ function ReturnedList({
   hasActiveFilters,
   onClearAll,
   controls,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: ReturnedListProps) {
   const { t } = useI18n();
   const { shippingCompanies } = useShippingCompanies();
@@ -1153,8 +1147,7 @@ function ReturnedList({
                   <ReturnedShipmentsTable
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                   />
                 )}
               </div>
@@ -1163,8 +1156,7 @@ function ReturnedList({
                   <ReturnedShipmentCards
                     shipments={shipments}
                     shippingCompanyId={shippingCompanyId}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                   />
                 )}
               </div>
@@ -1189,8 +1181,7 @@ interface DeliveredListProps extends ListProps {
   hasActiveFilters: boolean;
   onClearAll: () => void;
   controls: (exportTotal: number | undefined) => ReactNode;
-  onOpenNotes: (orderId: number) => void;
-  onOpenActionLog: (orderId: number, orderCode: string) => void;
+  onOpenFollowup: FollowupOpenHandler;
 }
 
 function DeliveredList({
@@ -1204,8 +1195,7 @@ function DeliveredList({
   hasActiveFilters,
   onClearAll,
   controls,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
 }: DeliveredListProps) {
   const { t } = useI18n();
   const { shippingCompanies } = useShippingCompanies();
@@ -1283,8 +1273,7 @@ function DeliveredList({
                 {data && (
                   <DeliveredShipmentsTable
                     shipments={shipments}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                   />
                 )}
               </div>
@@ -1292,8 +1281,7 @@ function DeliveredList({
                 {data && (
                   <DeliveredShipmentCards
                     shipments={shipments}
-                    onOpenNotes={onOpenNotes}
-                    onOpenActionLog={onOpenActionLog}
+                    onOpenFollowup={onOpenFollowup}
                   />
                 )}
               </div>
@@ -1447,9 +1435,10 @@ export function InProcessShipmentsContent({
   };
 
   const isInProcess = view === 'in-process';
-  const [notesOrderId, setNotesOrderId] = useState<number | null>(null);
-  const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
-  const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
+  const { shippingCompanies } = useShippingCompanies();
+  const carrierName = shippingCompanies.find((company) => company.id === shippingCompanyId)?.name ?? '';
+  const [followup, setFollowup] = useState<FollowupState | null>(null);
+  const openFollowup: FollowupOpenHandler = (target, opener) => setFollowup({ target, opener });
 
   const activeCount = isInProcess
     ? [inProcessStatus, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length
@@ -1637,8 +1626,7 @@ export function InProcessShipmentsContent({
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
             controls={renderControls}
-            onOpenNotes={setNotesOrderId}
-            onOpenActionLog={openActionLog}
+            onOpenFollowup={openFollowup}
           />
         )}
         {view === 'returned' && (
@@ -1653,8 +1641,7 @@ export function InProcessShipmentsContent({
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
             controls={renderControls}
-            onOpenNotes={setNotesOrderId}
-            onOpenActionLog={openActionLog}
+            onOpenFollowup={openFollowup}
           />
         )}
         {view === 'delivered' && (
@@ -1669,23 +1656,17 @@ export function InProcessShipmentsContent({
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
             controls={renderControls}
-            onOpenNotes={setNotesOrderId}
-            onOpenActionLog={openActionLog}
+            onOpenFollowup={openFollowup}
           />
         )}
       </div>
-      {notesOrderId !== null && (
-        <FollowupNotesModal
-          key={notesOrderId}
-          orderId={notesOrderId}
-          onClose={() => setNotesOrderId(null)}
-        />
-      )}
-      {actionLog !== null && (
-        <OrderActionLogModal
-          orderId={actionLog.orderId}
-          orderCode={actionLog.orderCode}
-          onClose={() => setActionLog(null)}
+      {followup !== null && (
+        <OrderFollowupDialog
+          key={followup.target.orderId}
+          target={followup.target}
+          carrierName={carrierName}
+          opener={followup.opener}
+          onClose={() => setFollowup(null)}
         />
       )}
     </div>

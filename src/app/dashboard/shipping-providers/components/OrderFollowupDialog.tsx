@@ -39,6 +39,7 @@ export function OrderFollowupDialog({ target, carrierName, opener, onClose }: Or
   const [body, setBody] = useState('');
   const [party, setParty] = useState<FollowupNotePartyValue>('CUSTOMER');
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [addedToken, setAddedToken] = useState(0);
   const canAddNote = useCanAddFollowupNote(target.orderId, visited.has(FOLLOWUP_PANELS.NOTES));
   const hasDraft = body.trim().length > 0;
 
@@ -85,6 +86,7 @@ export function OrderFollowupDialog({ target, carrierName, opener, onClose }: Or
           party={party}
           onBodyChange={setBody}
           onPartyChange={setParty}
+          onAdded={() => setAddedToken((current) => current + 1)}
         />
       </div>
     ) : undefined;
@@ -123,7 +125,11 @@ export function OrderFollowupDialog({ target, carrierName, opener, onClose }: Or
       >
         {visited.has(FOLLOWUP_PANELS.NOTES) && (
           <TabsContent value={FOLLOWUP_PANELS.NOTES} forceMount hidden={panel !== FOLLOWUP_PANELS.NOTES}>
-            <FollowupNotesPanel orderId={target.orderId} isActive={panel === FOLLOWUP_PANELS.NOTES} />
+            <FollowupNotesPanel
+              orderId={target.orderId}
+              isActive={panel === FOLLOWUP_PANELS.NOTES}
+              addedToken={addedToken}
+            />
           </TabsContent>
         )}
         {visited.has(FOLLOWUP_PANELS.EVENTS) && (

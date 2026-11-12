@@ -58,6 +58,7 @@ import type { OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
+import { FOLLOWUP_PANELS, type FollowupPanel } from './followupPanels';
 import CreateReturnFromOrderModal from './CreateReturnFromOrderModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
@@ -137,8 +138,7 @@ export interface ShipmentRowActionsProps {
   availableFrom?: string | null;
   availableTo?: string | null;
   rowLocked?: boolean;
-  onOpenNotes?: () => void;
-  onOpenActionLog?: () => void;
+  onOpenFollowup?: (panel: FollowupPanel, opener: HTMLElement | null) => void;
   sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
   carrierResendSupported?: boolean;
   exchangeCarrier?: ExchangeCarrierAccess;
@@ -163,8 +163,7 @@ export function ShipmentRowActions({
   availableFrom,
   availableTo,
   rowLocked = false,
-  onOpenNotes,
-  onOpenActionLog,
+  onOpenFollowup,
   sendAgain,
   carrierResendSupported,
   exchangeCarrier,
@@ -241,7 +240,7 @@ export function ShipmentRowActions({
 
   const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);
   const actions: RowAction[] = [
-    ...(onOpenNotes
+    ...(onOpenFollowup
       ? [
           {
             id: 'notes',
@@ -254,11 +253,11 @@ export function ShipmentRowActions({
             codes: [PERMISSIONS.FOLLOWUP_READ],
             disabled: false,
             count: unreadNoteCount,
-            onSelect: onOpenNotes,
+            onSelect: () => onOpenFollowup?.(FOLLOWUP_PANELS.NOTES, triggerRef.current),
           },
         ]
       : []),
-    ...(onOpenActionLog
+    ...(onOpenFollowup
       ? [
           {
             id: 'log',
@@ -270,7 +269,7 @@ export function ShipmentRowActions({
             survivesPending: true,
             codes: [PERMISSIONS.FOLLOWUP_READ],
             disabled: false,
-            onSelect: onOpenActionLog,
+            onSelect: () => onOpenFollowup?.(FOLLOWUP_PANELS.EVENTS, triggerRef.current),
           },
         ]
       : []),
@@ -636,6 +635,7 @@ export function ShipmentRowActions({
               className="size-11 sm:size-11"
               aria-label={t('inProcess.sheet.actionsFor', { code: orderCode })}
               aria-haspopup="dialog"
+              data-followup-opener={orderId}
             >
               <LiaEllipsisVSolid className="size-5 text-muted-foreground" />
             </Button>

@@ -196,9 +196,10 @@ export function useCanAddFollowupNote(orderId: number, enabled: boolean) {
 interface FollowupNotesPanelProps {
   orderId: number;
   isActive: boolean;
+  addedToken?: number;
 }
 
-export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProps) {
+export function FollowupNotesPanel({ orderId, isActive, addedToken = 0 }: FollowupNotesPanelProps) {
   const { hasPermission } = usePermissionCheck();
   const canManage = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_NOTE_MANAGE);
   const notesQuery = useFollowupNotesQuery(orderId, true);
@@ -208,6 +209,21 @@ export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProp
   const [bulk, setBulk] = useState<{ open: boolean; id: number } | null>(null);
   const snapshotTakenRef = useRef(false);
   const scrollPendingRef = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  const addedSeenRef = useRef(addedToken);
+  const addedScrollPendingRef = useRef(false);
+
+  useEffect(() => {
+    if (addedToken === addedSeenRef.current) return;
+    addedSeenRef.current = addedToken;
+    addedScrollPendingRef.current = true;
+  }, [addedToken]);
+
+  useEffect(() => {
+    if (!addedScrollPendingRef.current || isFetching) return;
+    addedScrollPendingRef.current = false;
+    listRef.current?.scrollIntoView({ block: 'start' });
+  }, [notesData, isFetching]);
 
   useEffect(() => {
     if (!isActive || snapshotTakenRef.current) return;
@@ -254,7 +270,7 @@ export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProp
   };
 
   return (
-    <div className="flex flex-col gap-3" dir="rtl">
+    <div ref={listRef} className="flex flex-col gap-3" dir="rtl">
       {days.length > FOLLOWUP_EXPAND_ALL_THRESHOLD && (
         <div className="flex justify-start">
           <Button type="button" variant="link" size="sm" className="h-7 px-0 text-xs" onClick={toggleAll}>
