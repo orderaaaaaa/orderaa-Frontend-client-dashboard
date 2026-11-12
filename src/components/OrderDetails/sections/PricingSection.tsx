@@ -43,6 +43,7 @@ export interface PricingSectionProps {
   isCustomerReturn?: boolean;
   className?: string;
   readOnly?: boolean;
+  fieldsReadOnly?: boolean;
 }
 
 /**
@@ -61,10 +62,12 @@ export function PricingSection({
   isCustomerReturn = false,
   className = '',
   readOnly = false,
+  fieldsReadOnly = false,
 }: PricingSectionProps) {
   // Every field here saves through PATCH /orders/:id (`orders:update`).
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly;
+  const canEditFields = canEdit && !fieldsReadOnly;
   const priceLocked = order.shippingCompanyRef?.carrierSupportsUpdate === false;
   const returnPriceEditable =
     canEdit &&
@@ -139,7 +142,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
           }}
-          canEdit={canEdit && !priceLocked && !isCustomerReturn}
+          canEdit={canEditFields && !priceLocked && !isCustomerReturn}
           readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
         />
         <EditableTextField
@@ -151,7 +154,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('prepaidAmount', value === '' ? null : Number(value));
           }}
-          canEdit={canEdit && !priceLocked && !isCustomerReturn}
+          canEdit={canEditFields && !priceLocked && !isCustomerReturn}
           readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
         />
         <EditableTextField
@@ -163,7 +166,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('shippingCost', Number(value));
           }}
-          canEdit={canEdit && !isCustomerReturn}
+          canEdit={canEditFields && !isCustomerReturn}
         />
         <ShippingTypeSelect
           value={pendingShippingType || order.shippingType}
@@ -174,7 +177,7 @@ export function PricingSection({
               onUpdate('shippingType', value);
             }
           }}
-          canEdit={canEdit}
+          canEdit={canEditFields}
         />
         {(() => {
           const effectiveType = pendingShippingType ?? order.shippingType;
@@ -192,7 +195,7 @@ export function PricingSection({
                 await onUpdate('returnShipmentContent', value);
               }
             }}
-            canEdit={canEdit}
+            canEdit={canEditFields}
           />
         )}
         <PaymentMethodSelect
@@ -200,7 +203,7 @@ export function PricingSection({
           onChange={async (value) => {
             await onUpdate('paymentMethod', value);
           }}
-          canEdit={canEdit && !isCustomerReturn}
+          canEdit={canEditFields && !isCustomerReturn}
         />
         <PaymentStatusSelect
           value={paymentStatusShown(order.prepaid, order.paymentStatus)}

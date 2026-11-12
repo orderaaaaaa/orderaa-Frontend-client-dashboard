@@ -442,6 +442,7 @@ function OrderDetailsInfoComponent({
           order={order}
           onUpdate={updateField}
           readOnly={readOnly}
+          orderReadOnly={!availability.orderFieldsEditable}
         />
 
         <PricingSection
@@ -452,6 +453,7 @@ function OrderDetailsInfoComponent({
           onSaveReturnContent={handleSaveReturnContent}
           isCustomerReturn={isCustomerReturn}
           readOnly={readOnly}
+          fieldsReadOnly={!availability.orderFieldsEditable}
         />
 
         <ShippingSection
@@ -459,7 +461,7 @@ function OrderDetailsInfoComponent({
           governorate={order.governorate}
           city={order.city}
           address={order.address}
-          onEditClick={readOnly ? undefined : modals.shipping.open}
+          onEditClick={readOnly || !availability.shippingEditable ? undefined : modals.shipping.open}
           externalGovernorate={order.externalGovernorate}
           externalCity={order.externalCity}
           sourceGovernorate={order.sourceGovernorate}
@@ -468,7 +470,7 @@ function OrderDetailsInfoComponent({
 
         <PackagingNotesSection
           packagingNotes={order.packagingNotes}
-          onAddClick={readOnly ? undefined : modals.packagingNotes.open}
+          onAddClick={readOnly || !availability.orderFieldsEditable ? undefined : modals.packagingNotes.open}
         />
       </div>
 

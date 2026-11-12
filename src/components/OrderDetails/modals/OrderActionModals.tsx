@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Order } from '@/types/orders';
+import { DerivedOrderKind, Order } from '@/types/orders';
 import { ModalStates } from '@/hooks/OrderDetails/useModalState';
 import { OrderActionsState } from '@/hooks/OrderDetails/useOrderActions';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
-import EditShippingModal, { ShippingData } from '../EditShippingModal';
+import EditShippingModal, { CUSTOMER_RETURN_SHIPPING_SECTIONS, ShippingData } from '../EditShippingModal';
 import { attestedIntegrationShipmentOf, orderHasCustomerPhone } from '@/utils/orderShippingSwitch';
 import BaseModal from '@/components/ui/base-modal';
 import {
@@ -48,6 +48,7 @@ export function OrderActionModals({
   onError,
 }: OrderActionModalsProps) {
   const [newPackagingNote, setNewPackagingNote] = useState('');
+  const isCustomerReturn = order.derivedKind === DerivedOrderKind.CUSTOMER_RETURN;
 
   // Handlers for modals that need to close on success
   const handleUrgentConfirm = async (data: { shippingCost?: number; urgentDate: string }) => {
@@ -160,6 +161,7 @@ export function OrderActionModals({
         customerHasPhone={orderHasCustomerPhone(order)}
         carrierSupportsUpdate={order.shippingCompanyRef?.carrierSupportsUpdate}
         oldIntegrationShipment={attestedIntegrationShipmentOf(order)}
+        sections={isCustomerReturn ? CUSTOMER_RETURN_SHIPPING_SECTIONS : undefined}
         initialData={{
           shippingCompanyId: order.shippingCompanyId ?? null,
           shippingCompanyName: order.shippingCompanyRef?.name,

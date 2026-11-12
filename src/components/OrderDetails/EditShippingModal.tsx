@@ -46,6 +46,9 @@ const ALL_SHIPPING_SECTIONS: readonly EditShippingSection[] = [
   'deliveryWindow',
 ];
 
+export const CUSTOMER_RETURN_SHIPPING_SECTIONS: readonly EditShippingSection[] =
+  ALL_SHIPPING_SECTIONS.filter((section) => section !== 'returnCost');
+
 const SECTION_FIELDS: Record<EditShippingSection, readonly (keyof ShippingData)[]> = {
   company: ['shippingCompanyId', 'shippingCompanyName', 'oldShipmentCancelledByHand'],
   location: ['governorate', 'city', 'governorateOption', 'cityOption', 'externalGovernorate', 'externalCity'],

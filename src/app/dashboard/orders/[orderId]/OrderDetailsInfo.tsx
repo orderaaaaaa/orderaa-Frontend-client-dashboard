@@ -1,10 +1,11 @@
 import React from 'react';
-import { Order, OrderLockedBy, FilterOrdersDto } from '@/types/orders';
+import { DerivedOrderKind, Order, OrderLockedBy, FilterOrdersDto } from '@/types/orders';
 
 import OrderDetailsCardId from '@/components/OrderDetails/OrderDetailsCardId';
 import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoStatus';
 import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProductCard';
 import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
+import { orderActionAvailabilityOf } from '@/components/OrderDetails/actions/orderActionAvailability';
 import OrderSystemFailuresPanel from '@/components/OrderDetails/SystemFailures/OrderSystemFailuresPanel';
 import { CarrierSendPanel } from '@/components/OrderDetails/CarrierSendPanel';
 import OrderChangeHistoryCard from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryCard';
@@ -50,6 +51,12 @@ function OrderDetailsInfo({
 }: OrderDetailsInfoProps) {
   const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
   const deleted = isDeletedOrder(order);
+  const { productsEditable } = orderActionAvailabilityOf({
+    status: order.status,
+    isCustomerReturn: order.derivedKind === DerivedOrderKind.CUSTOMER_RETURN,
+    frozen: order.frozenReturnChild === true,
+    actionable: !order.isShadowed && !order.parkedAt,
+  });
 
   return (
     <section className="mx-auto mt-3 p-4 bg-card rounded-lg shadow-sm">
@@ -68,7 +75,7 @@ function OrderDetailsInfo({
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
-        readOnly={order.frozenReturnChild === true || deleted}
+        readOnly={order.frozenReturnChild === true || deleted || !productsEditable}
       />
       <OrderDetailsInfoComponent
         order={order}

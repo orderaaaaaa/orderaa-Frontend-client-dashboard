@@ -47,6 +47,7 @@ export interface CustomerDataSectionProps {
   onPhoneUpdate?: (phoneNumbers: string[]) => void;
   className?: string;
   readOnly?: boolean;
+  orderReadOnly?: boolean;
 }
 
 export function CustomerDataSection({
@@ -55,13 +56,14 @@ export function CustomerDataSection({
   onPhoneUpdate,
   className = '',
   readOnly = false,
+  orderReadOnly = false,
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
   const { hasPermission } = usePermissionCheck();
   // Customer name / phones go to PATCH /customers/:id (`customers:update`),
   // the order note goes to PATCH /orders/:id (`orders:update`).
   const canUpdateCustomer = hasPermission(PERMISSION_CODES.CUSTOMERS_UPDATE) && !readOnly;
-  const canUpdateOrder = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly;
+  const canUpdateOrder = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly && !orderReadOnly;
   const canMergeCustomers = hasPermission(PERMISSIONS.CUSTOMERS_MERGE);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [mergeConflict, setMergeConflict] = useState<PhoneConflictDetails | null>(

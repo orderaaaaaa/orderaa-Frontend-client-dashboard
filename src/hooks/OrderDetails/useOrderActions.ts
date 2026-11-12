@@ -3,7 +3,7 @@ import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUti
 import { toast } from 'react-toastify';
 import { getApiErrorMessage, getOutOfStockBlock, refusalToastOptions } from '@/utils/apiError';
 import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
-import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
+import { DerivedOrderKind, FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { sameAreaText, ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { SHIPPING_COMPANY_REQUIRED_MESSAGE } from '@/types/shippingCompanies';
@@ -488,6 +488,7 @@ export function useOrderActions({
       const companyChanged =
         (data.shippingCompanyId ?? null) !== (order.shippingCompanyId ?? null);
       const sendPick = (pickChanged || companyChanged) && !!data.governorateOption;
+      const isCustomerReturn = order.derivedKind === DerivedOrderKind.CUSTOMER_RETURN;
 
       try {
         // Send flat object (not nested in customers)
@@ -506,7 +507,7 @@ export function useOrderActions({
             address: data.address,
             ...(data.area !== undefined &&
               !sameAreaText(data.area, order.area) && { area: data.area.trim() }),
-            returnShippingCost: data.returnShippingCost,
+            ...(!isCustomerReturn && { returnShippingCost: data.returnShippingCost }),
             ...(data.availableFrom && { availableFrom: data.availableFrom }),
             ...(data.availableTo && { availableTo: data.availableTo }),
           },
@@ -529,6 +530,7 @@ export function useOrderActions({
       order.governorateOption,
       order.cityOption,
       order.area,
+      order.derivedKind,
       updateOrderMutation,
     ]
   );
