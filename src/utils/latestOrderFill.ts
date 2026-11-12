@@ -113,6 +113,9 @@ export const validateLocationPreset = async (
     }
     if (companyId === undefined) dropped.push('company');
   }
+  if ((shippingCompanyId === undefined || shippingCompanyId === null) && (governorate || city)) {
+    dropped.push('company');
+  }
 
   let governorateOption: LocationOption | null = null;
   if (governorate && companyId !== undefined) {

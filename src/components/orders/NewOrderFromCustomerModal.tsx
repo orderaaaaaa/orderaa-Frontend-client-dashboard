@@ -120,6 +120,8 @@ export default function NewOrderFromCustomerModal({
         ? resolveFromOrder(queryClient, source.order)
         : resolveFromCustomer(queryClient, source.customer),
     gcTime: 0,
+    staleTime: Infinity,
+    refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   });
 
