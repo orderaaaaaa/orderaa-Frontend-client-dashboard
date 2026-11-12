@@ -6,6 +6,7 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { LiaPlusSolid } from 'react-icons/lia';
+import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import {
   type VirtualWarehousePreset,
   type VirtualWarehouseTermInvalidReason,
 } from '@/lib/api/virtualWarehouses';
+import type { VariantCard } from '@/lib/api/products';
 import { useStockProducts } from '@/services/stock';
 import {
   useCreateVirtualWarehouseMutation,
@@ -413,16 +415,17 @@ function VirtualWarehousePreviewPanel({
     [products]
   );
 
-  const variantOptions = useMemo(() => {
+  const variantCards = useMemo<VariantCard[]>(() => {
     const product = products.find((item) => item.id === productId);
     if (!product) return [];
     return product.variants.map((variant) => ({
-      key: String(variant.id),
-      value: variantPlainLabel({
+      id: variant.id,
+      label: variantPlainLabel({
         productName: product.name,
         sku: null,
         options: variant.options,
       }),
+      options: [],
     }));
   }, [products, productId]);
 
@@ -479,15 +482,21 @@ function VirtualWarehousePreviewPanel({
             placeholder={productsLoading ? 'جاري التحميل...' : 'اختر المنتج'}
           />
         </div>
-        <div className="min-w-[200px] flex-1">
-          <SearchableSelect
-            options={variantOptions}
-            value={variantId === null ? '' : String(variantId)}
-            onValueChange={(next) => setVariantId(next ? Number(next) : null)}
-            placeholder={productId === null ? 'اختر المنتج أولًا' : 'اختر المتغير'}
-            disabled={productId === null}
+      </div>
+
+      <div className="mt-3">
+        {productId === null ? (
+          <p className="text-xs text-gray-400">اختر المنتج أولًا</p>
+        ) : (
+          <VariantCards
+            cards={variantCards}
+            rows={[]}
+            selection={{}}
+            selectedCardIds={new Set(variantId === null ? [] : [variantId])}
+            onSelect={(card) => setVariantId(card.id)}
+            scrollClassName={CARD_SCROLL_CLASS}
           />
-        </div>
+        )}
       </div>
 
       <div className="mt-3 text-sm">
