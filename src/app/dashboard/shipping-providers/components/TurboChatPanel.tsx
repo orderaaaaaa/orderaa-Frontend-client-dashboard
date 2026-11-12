@@ -148,16 +148,16 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
   const empty = thread.messages.length === 0 && pending.length === 0;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       <RealtimeStatus state={chat.socketState} lastSyncedAt={chat.lastSyncedAt} onRefresh={chat.refetch} />
-      <div className="relative">
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <div
           ref={listRef}
           onScroll={onScroll}
           role="log"
           aria-live="polite"
           aria-label={CHAT_LOG_LABEL}
-          className="relative h-[min(60vh,30rem)] overflow-y-auto pe-1 max-sm:h-[calc(100dvh-18rem)]"
+          className="relative min-h-0 flex-1 overflow-y-auto pe-1"
         >
           {empty ? <EmptyState icon={<MessagesSquare className="size-5" />} title={CHAT_EMPTY_LABEL} description={CHAT_EMPTY_HINT} /> : rows}
         </div>

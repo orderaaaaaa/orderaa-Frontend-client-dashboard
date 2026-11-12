@@ -166,6 +166,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
           />
         }
         footer={chatFooter ?? notesFooter}
+        bodyClassName={showChat && panel === FOLLOWUP_PANELS.CHAT ? 'flex flex-col overflow-hidden' : undefined}
         showFooter={false}
         maxWidth="md:max-w-3xl"
         height="h-[min(85vh,780px)]"
@@ -188,7 +189,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
           </TabsContent>
         )}
         {showChat && visited.has(FOLLOWUP_PANELS.CHAT) && (
-          <TabsContent value={FOLLOWUP_PANELS.CHAT} forceMount hidden={panel !== FOLLOWUP_PANELS.CHAT}>
+          <TabsContent value={FOLLOWUP_PANELS.CHAT} forceMount hidden={panel !== FOLLOWUP_PANELS.CHAT} className="flex min-h-0 flex-1 flex-col">
             <TurboChatPanel chat={chat} canReadIntegrations={hasPermission(PERMISSIONS.INTEGRATION_CONFIG_READ)} />
           </TabsContent>
         )}
