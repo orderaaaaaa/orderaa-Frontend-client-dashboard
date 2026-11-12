@@ -28,6 +28,7 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { SummaryStatCard, SummaryStatCardSkeleton } from '@/components/ui/summary-stat-card';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 import { useHasOverflowEnd } from '@/hooks/useHasOverflowEnd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { BulkCloseResultItem } from '@/lib/api/followup';
@@ -993,27 +994,29 @@ function InProcessList({
               </div>
             </ResultsFrame>
             {selection && selectedIds.size > 0 && (
-              <div className="sticky bottom-0 z-(--z-inpage-sticky) flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-lg">
-                <span className="text-sm font-medium text-foreground">
-                  {t('inProcess.bulk.selected', { count: selectedIds.size })}
-                </span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => updateSelection(() => new Set<number>())}
-                  >
-                    {t('inProcess.bulk.clear')}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={bulkClose.isPending}
-                    onClick={() => setIsBulkConfirmOpen(true)}
-                  >
-                    {t('inProcess.bulk.close', { count: selectedIds.size })}
-                  </Button>
+              <div className={`${FIXED_BOTTOM_BAR_CLASS} bg-card border-t border-gray-200 shadow-lg py-4 px-6`}>
+                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-foreground">
+                    {t('inProcess.bulk.selected', { count: selectedIds.size })}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateSelection(() => new Set<number>())}
+                    >
+                      {t('inProcess.bulk.clear')}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={bulkClose.isPending}
+                      onClick={() => setIsBulkConfirmOpen(true)}
+                    >
+                      {t('inProcess.bulk.close', { count: selectedIds.size })}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1025,6 +1028,9 @@ function InProcessList({
               onPageChange={onPageChange}
               onPageSizeChange={onPageSizeChange}
             />
+            {selection && selectedIds.size > 0 && (
+              <div aria-hidden="true" className="h-[calc(7rem_+_env(safe-area-inset-bottom))]" />
+            )}
           </>
         )}
       </ViewTabs>
