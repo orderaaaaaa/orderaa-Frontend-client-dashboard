@@ -995,7 +995,7 @@ function InProcessList({
             </ResultsFrame>
             {selection && selectedIds.size > 0 && (
               <div className={`${FIXED_BOTTOM_BAR_CLASS} bg-card border-t border-gray-200 shadow-lg py-4 px-6`}>
-                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+                <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-2">
                   <span className="text-sm font-medium text-foreground">
                     {t('inProcess.bulk.selected', { count: selectedIds.size })}
                   </span>
