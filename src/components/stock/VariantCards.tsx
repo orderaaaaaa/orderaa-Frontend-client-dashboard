@@ -124,7 +124,7 @@ export function VariantCards({
   return (
     <div className="flex flex-col gap-2">
       {cards.length > FILTER_THRESHOLD && (
-        <div className="bg-card max-sm:sticky max-sm:top-0 max-sm:z-(--z-inpage-sticky)">
+        <div className="bg-card max-sm:sticky max-sm:top-0 max-sm:z-(--z-inpage-sticky) max-sm:pt-1">
           <Input
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
