@@ -13,6 +13,7 @@ import {
   Info,
   MapPin,
   MessageSquareText,
+  MessagesSquare,
   PackageCheck,
   PackageSearch,
   Phone,
@@ -58,7 +59,7 @@ import type { OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
-import { FOLLOWUP_PANELS, type FollowupPanel } from './followupPanels';
+import { FOLLOWUP_PANELS, type FollowupPanel, useFollowupChatAvailable } from './followupPanels';
 import CreateReturnFromOrderModal from './CreateReturnFromOrderModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
@@ -91,6 +92,7 @@ interface RowAction {
   reasonTone?: 'warning';
   pending?: boolean;
   count?: number;
+  countLabelKey?: TranslationKey;
   onSelect: () => void;
 }
 
@@ -110,7 +112,7 @@ export const CLOSURE_KIND_LABEL_KEYS: Record<FollowupClosureKind, TranslationKey
 export const closureReasonOf = (closure: FollowupClosure): string | null =>
   closure.reasonName ?? closure.reasonText;
 
-const FROZEN_ROW_ACTION_IDS = ['notes', 'log', 'close', 'refuse', 'cancel', 'reopen'];
+const FROZEN_ROW_ACTION_IDS = ['notes', 'log', 'chat', 'close', 'refuse', 'cancel', 'reopen'];
 
 const ACTION_GROUPS: { id: ActionGroupId; titleKey: TranslationKey }[] = [
   { id: 'follow', titleKey: 'inProcess.sheet.group.follow' },
@@ -146,6 +148,8 @@ export interface ShipmentRowActionsProps {
   carrierSupportsUpdate?: boolean;
   frozenReturnChild?: boolean;
   unreadNoteCount?: number;
+  unreadChatCount?: number;
+  shippingCode?: string | null;
   returnChildStatus?: OrderStatus | null;
   hideFinalActions?: boolean;
 }
@@ -171,12 +175,15 @@ export function ShipmentRowActions({
   carrierSupportsUpdate,
   frozenReturnChild = false,
   unreadNoteCount,
+  unreadChatCount,
+  shippingCode = null,
   returnChildStatus = null,
   hideFinalActions = false,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
   const idPrefix = useId();
+  const chatAvailable = useFollowupChatAvailable();
   const [sheetOpen, setSheetOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const pendingActionRef = useRef<(() => void) | null>(null);
@@ -254,6 +261,24 @@ export function ShipmentRowActions({
             disabled: false,
             count: unreadNoteCount,
             onSelect: () => onOpenFollowup?.(FOLLOWUP_PANELS.NOTES, triggerRef.current),
+          },
+        ]
+      : []),
+    ...(onOpenFollowup && chatAvailable && shippingCode !== null
+      ? [
+          {
+            id: 'chat',
+            labelKey: 'inProcess.action.chat' as const,
+            descriptionKey: 'inProcess.sheet.desc.chat' as const,
+            icon: MessagesSquare,
+            group: 'follow' as const,
+            opensModal: true,
+            survivesPending: true,
+            codes: [PERMISSIONS.FOLLOWUP_READ],
+            disabled: false,
+            count: unreadChatCount,
+            countLabelKey: 'inProcess.table.unreadChatMessages' as const,
+            onSelect: () => onOpenFollowup?.(FOLLOWUP_PANELS.CHAT, triggerRef.current),
           },
         ]
       : []),
@@ -614,7 +639,7 @@ export function ShipmentRowActions({
           )}
           {unreadCount > 0 && (
             <span className="sr-only">
-              {t('inProcess.table.unreadCarrierMessages', { n: formatNumber(unreadCount) })}
+              {t(action.countLabelKey ?? 'inProcess.table.unreadCarrierMessages', { n: formatNumber(unreadCount) })}
             </span>
           )}
         </span>

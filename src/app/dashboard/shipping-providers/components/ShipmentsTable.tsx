@@ -33,8 +33,15 @@ import {
 } from '@/types/shippingProviders';
 import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
-import { FollowupNotesUnreadBadge } from './FollowupNotesUnreadBadge';
-import { FOLLOWUP_PANELS, followupTargetOf, type FollowupOpenHandler, type FollowupPanel } from './followupPanels';
+import { MessagesSquare } from 'lucide-react';
+import { FollowupNotesUnreadBadge, UnreadCountButton } from './FollowupNotesUnreadBadge';
+import {
+  FOLLOWUP_PANELS,
+  followupTargetOf,
+  useFollowupChatAvailable,
+  type FollowupOpenHandler,
+  type FollowupPanel,
+} from './followupPanels';
 import { formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
 import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
@@ -121,14 +128,17 @@ export function CodeCell({
   code,
   shippingCode,
   unreadNoteCount,
+  unreadChatCount,
   onOpenFollowup,
 }: {
   code: string;
   shippingCode: string | null;
   unreadNoteCount: number | undefined;
+  unreadChatCount: number | undefined;
   onOpenFollowup: (panel: FollowupPanel, opener: HTMLElement | null) => void;
 }) {
   const { t } = useI18n();
+  const chatAvailable = useFollowupChatAvailable() && shippingCode !== null;
   return (
     <div className="flex flex-col items-start gap-1">
       <div className="flex items-center gap-1.5">
@@ -139,6 +149,14 @@ export function CodeCell({
           count={unreadNoteCount}
           onOpen={(opener) => onOpenFollowup(FOLLOWUP_PANELS.NOTES, opener)}
         />
+        {chatAvailable && (
+          <UnreadCountButton
+            count={unreadChatCount}
+            icon={MessagesSquare}
+            label={t('inProcess.table.unreadChatMessages', { n: formatNumber(unreadChatCount ?? 0) })}
+            onOpen={(opener) => onOpenFollowup(FOLLOWUP_PANELS.CHAT, opener)}
+          />
+        )}
       </div>
       <CopyableCode value={shippingCode} label={t('inProcess.table.copyShippingCode')}>
         <span className={cn('font-mono', SECONDARY_TEXT_CLASS)}>{shippingCode ?? '—'}</span>
@@ -373,6 +391,8 @@ export function InProcessRowActions({
       carrierSupportsUpdate={carrierSupportsUpdate}
       frozenReturnChild={row.frozenReturnChild}
       unreadNoteCount={row.unreadNoteCount}
+      unreadChatCount={row.unreadChatCount}
+      shippingCode={row.shippingCode}
       returnChildStatus={row.returnChildStatus}
       onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
     />
@@ -400,6 +420,8 @@ export function ReturnedRowActions({
         carrierResendSupported={carrierResendSupported}
         frozenReturnChild={row.frozenReturnChild}
         unreadNoteCount={row.unreadNoteCount}
+        unreadChatCount={row.unreadChatCount}
+        shippingCode={row.shippingCode}
         onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />
     </div>
@@ -423,6 +445,8 @@ export function DeliveredRowActions({
         closure={row.closure}
         frozenReturnChild={row.frozenReturnChild}
         unreadNoteCount={row.unreadNoteCount}
+        unreadChatCount={row.unreadChatCount}
+        shippingCode={row.shippingCode}
         hideFinalActions
         onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />
@@ -534,6 +558,7 @@ export function InProcessShipmentsTable({
                     code={row.code}
                     shippingCode={row.shippingCode}
                     unreadNoteCount={row.unreadNoteCount}
+                    unreadChatCount={row.unreadChatCount}
                     onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
                   />
                 </div>
@@ -656,6 +681,7 @@ export function ReturnedShipmentsTable({
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
+                unreadChatCount={row.unreadChatCount}
                 onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </td>
@@ -746,6 +772,7 @@ export function DeliveredShipmentsTable({ shipments, onOpenFollowup }: Delivered
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
+                unreadChatCount={row.unreadChatCount}
                 onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </td>

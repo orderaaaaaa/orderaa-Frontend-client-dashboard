@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent } from 'react';
-import { MessageSquareText } from 'lucide-react';
+import { MessageSquareText, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -24,16 +24,18 @@ export function UnreadNotesCountPill({ count, className }: { count: number; clas
   );
 }
 
-export function FollowupNotesUnreadBadge({
+export function UnreadCountButton({
   count,
+  icon: Icon,
+  label,
   onOpen,
 }: {
   count: number | undefined;
+  icon: LucideIcon;
+  label: string;
   onOpen: (opener: HTMLElement) => void;
 }) {
-  const { t } = useI18n();
   if (!count || count <= 0) return null;
-  const label = t('inProcess.table.unreadCarrierMessages', { n: formatNumber(count) });
   return (
     <Button
       type="button"
@@ -46,8 +48,26 @@ export function FollowupNotesUnreadBadge({
         onOpen(event.currentTarget);
       }}
     >
-      <MessageSquareText aria-hidden="true" className="size-4 text-muted-foreground" />
+      <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
       <UnreadNotesCountPill count={count} />
     </Button>
+  );
+}
+
+export function FollowupNotesUnreadBadge({
+  count,
+  onOpen,
+}: {
+  count: number | undefined;
+  onOpen: (opener: HTMLElement) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <UnreadCountButton
+      count={count}
+      icon={MessageSquareText}
+      label={t('inProcess.table.unreadCarrierMessages', { n: formatNumber(count ?? 0) })}
+      onOpen={onOpen}
+    />
   );
 }

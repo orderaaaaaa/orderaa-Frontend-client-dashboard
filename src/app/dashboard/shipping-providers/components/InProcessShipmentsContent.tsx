@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { BulkCloseResultItem } from '@/lib/api/followup';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { useCarrierChatPageSocket } from '@/hooks/realtime/useCarrierChatSocket';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -74,7 +75,7 @@ import type { ExportFilterEntry } from '@/lib/excel/export-rows';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { useDebounce } from '@/utils/debounce';
 import { OrderFollowupDialog } from './OrderFollowupDialog';
-import type { FollowupOpenHandler, FollowupTarget } from './followupPanels';
+import { FollowupChatAvailableContext, type FollowupOpenHandler, type FollowupTarget } from './followupPanels';
 import { deliveredExportColumns, exportShipmentsToExcel, inProcessExportColumns, returnedExportColumns } from './exportShipments';
 import { formatNumber } from './formatNumber';
 import { DeliveredShipmentCards, InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
@@ -1444,6 +1445,9 @@ export function InProcessShipmentsContent({
   const { shippingCompanies } = useShippingCompanies();
   const carrierName = shippingCompanies.find((company) => company.id === shippingCompanyId)?.name ?? '';
   const carrier = useInProcessCarrier(shippingCompanyId);
+  const carrierIsTurbo = carrier.implementation === 'TURBO';
+  const chatAvailable = carrierIsTurbo && hasPermission(PERMISSIONS.FOLLOWUP_READ);
+  useCarrierChatPageSocket(carrierIsTurbo);
   const [followup, setFollowup] = useState<FollowupState | null>(null);
   const openFollowup: FollowupOpenHandler = (target, opener) => setFollowup({ target, opener });
 
@@ -1619,6 +1623,7 @@ export function InProcessShipmentsContent({
   );
 
   return (
+    <FollowupChatAvailableContext.Provider value={chatAvailable}>
     <div className="w-full max-w-full overflow-x-clip">
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
         {isInProcess && (
@@ -1672,11 +1677,12 @@ export function InProcessShipmentsContent({
           key={followup.target.orderId}
           target={followup.target}
           carrierName={carrierName}
-          carrierIsTurbo={carrier.implementation === 'TURBO'}
+          carrierIsTurbo={carrierIsTurbo}
           opener={followup.opener}
           onClose={() => setFollowup(null)}
         />
       )}
     </div>
+    </FollowupChatAvailableContext.Provider>
   );
 }

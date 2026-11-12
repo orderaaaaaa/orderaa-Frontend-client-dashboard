@@ -76,6 +76,7 @@ export function InProcessShipmentCards({
                 code={row.code}
                 shippingCode={row.shippingCode}
                 unreadNoteCount={row.unreadNoteCount}
+                unreadChatCount={row.unreadChatCount}
                 onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
               />
             </div>
@@ -147,6 +148,7 @@ export function ReturnedShipmentCards({
               code={row.code}
               shippingCode={row.shippingCode}
               unreadNoteCount={row.unreadNoteCount}
+              unreadChatCount={row.unreadChatCount}
               onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
             />
             <ReturnedRowActions
@@ -187,6 +189,7 @@ export function DeliveredShipmentCards({ shipments, onOpenFollowup }: DeliveredS
               code={row.code}
               shippingCode={row.shippingCode}
               unreadNoteCount={row.unreadNoteCount}
+              unreadChatCount={row.unreadChatCount}
               onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
             />
             <DeliveredRowActions row={row} onOpenFollowup={onOpenFollowup} />

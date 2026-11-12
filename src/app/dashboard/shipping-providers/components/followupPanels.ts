@@ -1,4 +1,9 @@
+import { createContext, useContext } from 'react';
 import type { InProcessShipment, ShipmentRowBase } from '@/types/shippingProviders';
+
+export const FollowupChatAvailableContext = createContext(false);
+
+export const useFollowupChatAvailable = (): boolean => useContext(FollowupChatAvailableContext);
 
 export const FOLLOWUP_PANELS = { NOTES: 'notes', EVENTS: 'events', CHAT: 'chat' } as const;
 
