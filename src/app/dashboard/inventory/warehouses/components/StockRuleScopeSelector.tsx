@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useStockProducts } from '@/services/stock';
+import type { VariantCard } from '@/lib/api/products';
 import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { RULE_SCOPE_LABEL_KEYS } from '../constants';
 
@@ -79,16 +81,17 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
   const activeProductId =
     value.scope === 'VARIANT' ? (variantProductId ?? selectedProductId) : selectedProductId;
 
-  const variantOptions = useMemo(() => {
+  const variantCards = useMemo<VariantCard[]>(() => {
     const product = products.find((item) => item.id === activeProductId);
     if (!product) return [];
     return product.variants.map((variant) => ({
-      key: String(variant.id),
-      value: variantPlainLabel({
+      id: variant.id,
+      label: variantPlainLabel({
         productName: product.name,
         sku: null,
         options: variant.options,
       }),
+      options: [],
     }));
   }, [products, activeProductId]);
 
@@ -139,27 +142,27 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
           </div>
         )}
 
-        {value.scope === 'VARIANT' && (
-          <div className="min-w-[220px]">
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              {t('stockRules.scope.variantLabel')}
-            </label>
-            <SearchableSelect
-              options={variantOptions}
-              value={value.variantId ? String(value.variantId) : ''}
-              onValueChange={(next) =>
-                onChange({ scope: 'VARIANT', variantId: Number(next) })
-              }
-              placeholder={
-                activeProductId
-                  ? t('stockRules.scope.variantPlaceholder')
-                  : t('stockRules.scope.variantNeedsProduct')
-              }
-              disabled={!activeProductId}
-            />
-          </div>
-        )}
       </div>
+
+      {value.scope === 'VARIANT' && (
+        <div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-gray-600">
+            {t('stockRules.scope.variantLabel')}
+          </label>
+          {activeProductId ? (
+            <VariantCards
+              cards={variantCards}
+              rows={[]}
+              selection={{}}
+              selectedCardIds={new Set(value.variantId ? [value.variantId] : [])}
+              onSelect={(card) => onChange({ scope: 'VARIANT', variantId: card.id })}
+              scrollClassName="max-h-72"
+            />
+          ) : (
+            <p className="text-xs text-gray-500">{t('stockRules.scope.variantNeedsProduct')}</p>
+          )}
+        </div>
+      )}
 
       <p className="mt-2 text-[11px] leading-4 text-gray-500">
         {value.scope === 'GLOBAL'

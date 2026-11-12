@@ -44,6 +44,8 @@ interface VariantCardsProps {
   disabledCardIds?: ReadonlySet<number>;
   onSelect?: (card: VariantCard) => void;
   scrollClassName?: string;
+  noteOf?: (card: VariantCard) => string | null;
+  gridClassName?: string;
 }
 
 export function VariantCards({
@@ -54,6 +56,8 @@ export function VariantCards({
   disabledCardIds,
   onSelect,
   scrollClassName,
+  noteOf,
+  gridClassName,
 }: VariantCardsProps) {
   const { t } = useI18n();
   const [filter, setFilter] = useState('');
@@ -88,10 +92,11 @@ export function VariantCards({
         {t('orderDetails.variants.noMatches')}
       </p>
     ) : (
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className={cn('grid gap-2', gridClassName ?? 'grid-cols-2 sm:grid-cols-3')}>
         {visible.map((card) => {
           const row = rowByVariantId.get(card.id);
           const numbers = row ? cardNumbersOf(row) : null;
+          const note = row ? null : (noteOf?.(card) ?? null);
           const selected = selectedCardIds
             ? selectedCardIds.has(card.id)
             : isCardSelected(card, selection);
@@ -119,6 +124,7 @@ export function VariantCards({
                   {numbersTextOf(numbers)}
                 </span>
               )}
+              {note && <span className="text-xs text-muted-foreground">{note}</span>}
             </Button>
           );
         })}
