@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { formatDateToLocalDate, calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import { isValidTimePeriod } from '@/utils/urlFilters';
@@ -262,12 +262,26 @@ export function useSalesStatisticsUrlFilters(): UseSalesStatisticsFiltersResult 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const state = useMemo(() => parseSalesUrlState(searchParams), [searchParams]);
+  const urlKey = searchParams.toString();
+  const urlState = useMemo(() => parseSalesUrlState(searchParams), [searchParams]);
+  const [optimistic, setOptimistic] = useState<SalesStatisticsFiltersState | null>(null);
+  const pendingKeys = useRef<string[]>([]);
+
+  useEffect(() => {
+    const landed = pendingKeys.current.indexOf(urlKey);
+    pendingKeys.current = landed === -1 ? [] : pendingKeys.current.slice(landed + 1);
+    if (pendingKeys.current.length === 0) setOptimistic(null);
+  }, [urlKey]);
+
   const commit = useCallback(
     (update: SalesFilterUpdate) => {
-      router.push(`${pathname}?${serializeSalesUrlState(update(state))}`, { scroll: false });
+      const next = update(optimistic ?? urlState);
+      const key = serializeSalesUrlState(next);
+      pendingKeys.current = [...pendingKeys.current, key];
+      setOptimistic(next);
+      router.push(`${pathname}?${key}`, { scroll: false });
     },
-    [pathname, router, state],
+    [optimistic, pathname, router, urlState],
   );
-  return useSalesFilterResult(state, commit);
+  return useSalesFilterResult(optimistic ?? urlState, commit);
 }
