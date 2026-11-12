@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import React, { useState } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import CopyableCode from '@/components/ui/copyable-code';
 import { AlertTriangle, Check, ChevronDown, Link2 } from 'lucide-react';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import type { VariantCard } from '@/lib/api/products';
 import { cn } from '@/lib/utils';
 import type {
   MergeVariantPlanEntry,
@@ -36,7 +38,7 @@ interface MergeVariantChipProps {
 }
 
 const itemClass =
-  'flex min-h-10 cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[highlighted]:bg-gray-100';
+  'flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-start text-sm outline-none hover:bg-gray-100 focus-visible:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50';
 
 const dropReason = (variant: ProductDetailVariant) =>
   variant.notDeletableReason
@@ -98,6 +100,16 @@ export function MergeVariantChip({
     setDropRef(node);
   };
   const hasProblem = errors.length > 0 || colliding;
+  const [open, setOpen] = useState(false);
+  const choose = (choice: MergeChipChoice) => {
+    onChoose(choice);
+    setOpen(false);
+  };
+  const mergeCards: VariantCard[] = mergeTargets.map((target) => ({
+    id: target.variant.id,
+    label: variantFullLabel(target),
+    options: [],
+  }));
 
   return (
     <div
@@ -155,8 +167,8 @@ export function MergeVariantChip({
             {actionText(variantRef, entry, intoRef)}
           </p>
         </div>
-        <DropdownMenuPrimitive.Root dir="rtl">
-          <DropdownMenuPrimitive.Trigger asChild>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
             <Button
               type="button"
               variant="outline"
@@ -168,79 +180,61 @@ export function MergeVariantChip({
               نقل إلى…
               <ChevronDown className="size-4" aria-hidden />
             </Button>
-          </DropdownMenuPrimitive.Trigger>
-          <DropdownMenuPrimitive.Portal>
-            <DropdownMenuPrimitive.Content
-              align="end"
-              sideOffset={4}
-              collisionPadding={8}
-              className="z-(--z-popover) max-h-[min(360px,var(--radix-dropdown-menu-content-available-height))] w-72 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-card p-1 shadow-lg"
-            >
-              <DropdownMenuPrimitive.Item
-                className={itemClass}
-                onSelect={() => onChoose({ action: 'KEEP' })}
-              >
-                {entry.action === 'KEEP' ? (
-                  <Check className="size-4 text-primary-text" aria-hidden />
-                ) : (
-                  <span className="size-4" aria-hidden />
-                )}
-                إبقاء في المنتج الرئيسي
-              </DropdownMenuPrimitive.Item>
-              <DropdownMenuPrimitive.Separator className="my-1 h-px bg-gray-100" />
-              <DropdownMenuPrimitive.Label className="px-3 py-1.5 text-xs font-semibold text-gray-500">
-                دمج مع متغير…
-              </DropdownMenuPrimitive.Label>
-              {mergeTargets.length === 0 ? (
-                <DropdownMenuPrimitive.Item className={itemClass} disabled>
-                  <span className="size-4" aria-hidden />
-                  لا يوجد متغير باقٍ للدمج معه
-                </DropdownMenuPrimitive.Item>
+          </PopoverTrigger>
+          <PopoverContent
+            align="end"
+            sideOffset={4}
+            collisionPadding={8}
+            className="z-(--z-popover) w-80 max-w-[calc(100vw-16px)] rounded-lg border bg-card p-1 shadow-lg"
+          >
+            <button type="button" className={itemClass} onClick={() => choose({ action: 'KEEP' })}>
+              {entry.action === 'KEEP' ? (
+                <Check className="size-4 text-primary-text" aria-hidden />
               ) : (
-                mergeTargets.map((target) => (
-                  <DropdownMenuPrimitive.Item
-                    key={target.variant.id}
-                    className={itemClass}
-                    onSelect={() =>
-                      onChoose({
-                        action: 'MERGE_INTO',
-                        intoVariantId: target.variant.id,
-                      })
-                    }
-                  >
-                    {entry.action === 'MERGE_INTO' &&
-                    entry.intoVariantId === target.variant.id ? (
-                      <Check className="size-4 shrink-0 text-primary-text" aria-hidden />
-                    ) : (
-                      <span className="size-4 shrink-0" aria-hidden />
-                    )}
-                    <span className="min-w-0 break-words">
-                      {variantFullLabel(target)}
-                    </span>
-                  </DropdownMenuPrimitive.Item>
-                ))
+                <span className="size-4" aria-hidden />
               )}
-              <DropdownMenuPrimitive.Separator className="my-1 h-px bg-gray-100" />
-              <DropdownMenuPrimitive.Item
-                className={cn(itemClass, 'text-red-600')}
-                disabled={!variant.deletable}
-                onSelect={() => onChoose({ action: 'DROP' })}
-              >
-                {entry.action === 'DROP' ? (
-                  <Check className="size-4 shrink-0" aria-hidden />
-                ) : (
-                  <span className="size-4 shrink-0" aria-hidden />
-                )}
-                <span className="flex min-w-0 flex-col">
-                  حذف
-                  {blockedReason && (
-                    <span className="text-xs text-gray-500">{blockedReason}</span>
-                  )}
-                </span>
-              </DropdownMenuPrimitive.Item>
-            </DropdownMenuPrimitive.Content>
-          </DropdownMenuPrimitive.Portal>
-        </DropdownMenuPrimitive.Root>
+              إبقاء في المنتج الرئيسي
+            </button>
+            <div className="my-1 h-px bg-gray-100" />
+            <p className="px-3 py-1.5 text-xs font-semibold text-gray-500">دمج مع متغير…</p>
+            {mergeTargets.length === 0 ? (
+              <p className="px-3 py-2 text-sm text-gray-500">لا يوجد متغير باقٍ للدمج معه</p>
+            ) : (
+              <VariantCards
+                cards={mergeCards}
+                rows={[]}
+                selection={{}}
+                selectedCardIds={
+                  new Set(
+                    entry.action === 'MERGE_INTO' && entry.intoVariantId !== undefined
+                      ? [entry.intoVariantId]
+                      : [],
+                  )
+                }
+                onSelect={(card) => choose({ action: 'MERGE_INTO', intoVariantId: card.id })}
+                gridClassName="grid-cols-1"
+                scrollClassName="max-h-60"
+              />
+            )}
+            <div className="my-1 h-px bg-gray-100" />
+            <button
+              type="button"
+              className={cn(itemClass, 'text-red-600')}
+              disabled={!variant.deletable}
+              onClick={() => choose({ action: 'DROP' })}
+            >
+              {entry.action === 'DROP' ? (
+                <Check className="size-4 shrink-0" aria-hidden />
+              ) : (
+                <span className="size-4 shrink-0" aria-hidden />
+              )}
+              <span className="flex min-w-0 flex-col">
+                حذف
+                {blockedReason && <span className="text-xs text-gray-500">{blockedReason}</span>}
+              </span>
+            </button>
+          </PopoverContent>
+        </Popover>
       </div>
       {(errors.length > 0 || colliding) && (
         <ul role="alert" className="mt-2 space-y-1 text-xs text-red-700">
