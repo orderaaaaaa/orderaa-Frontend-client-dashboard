@@ -12,7 +12,7 @@ import {
 import Link from 'next/link';
 import { BrandLogo } from '@/components/ui/brand-logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ChevronRight, CircleDollarSign, ClipboardList, Info, PackageSearch, Search, X } from 'lucide-react';
+import { ChevronRight, CircleDollarSign, ClipboardList, Download, Info, PackageSearch, Search, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Can } from '@/components/Can';
 import { Alert } from '@/components/ui/alert';
@@ -42,6 +42,9 @@ import { integrationLogoOf } from '@/lib/shippingCompanies';
 import { cn } from '@/lib/utils';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import {
+  fetchDeliveredPage,
+  fetchInProcessPage,
+  fetchReturnedPage,
   useBulkCloseClosure,
   useDeliveredShipmentsQuery,
   useInProcessCountsQuery,
@@ -66,8 +69,11 @@ import {
   type LatenessFilter,
   type ReturnedFilters,
 } from '@/types/shippingProviders';
+import type { ExportFilterEntry } from '@/lib/excel/export-rows';
+import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
+import { deliveredExportColumns, exportShipmentsToExcel, inProcessExportColumns, returnedExportColumns } from './exportShipments';
 import { formatNumber } from './formatNumber';
 import { OrderActionLogModal } from './OrderActionLogModal';
 import { DeliveredShipmentCards, InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
@@ -250,7 +256,7 @@ interface InProcessListProps extends ListProps {
   filters: InProcessFilters;
   hasActiveFilters: boolean;
   onClearAll: () => void;
-  controls: ReactNode;
+  controls: (exportTotal: number | undefined) => ReactNode;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
@@ -519,6 +525,9 @@ interface ShipmentControlsProps {
   searchInputRef: RefObject<HTMLInputElement>;
   searchActive: boolean;
   workStateCounts: WorkStateCounts;
+  exportTotal: number | undefined;
+  exporting: boolean;
+  onExport: () => Promise<void>;
 }
 
 function ShipmentControls({
@@ -543,6 +552,9 @@ function ShipmentControls({
   searchInputRef,
   searchActive,
   workStateCounts,
+  exportTotal,
+  exporting,
+  onExport,
 }: ShipmentControlsProps) {
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
@@ -570,12 +582,25 @@ function ShipmentControls({
               </Badge>
             )}
           </div>
-          {hasActiveFilters && (
-            <Button type="button" variant="ghost" size="sm" className="h-10 sm:h-10" onClick={onClearAll}>
-              <X aria-hidden="true" />
-              {t('inProcess.filters.clear')}
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <Button type="button" variant="ghost" size="sm" className="h-10 sm:h-10" onClick={onClearAll}>
+                <X aria-hidden="true" />
+                {t('inProcess.filters.clear')}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-10 sm:h-10"
+              onClick={onExport}
+              disabled={exporting || !exportTotal}
+            >
+              <Download aria-hidden="true" />
+              {exporting ? t('inProcess.export.busy') : t('inProcess.export.button')}
             </Button>
-          )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -922,7 +947,7 @@ function InProcessList({
       </div>
 
       <ViewTabs {...viewSwitch}>
-        {controls}
+        {controls(data?.total)}
         <p role="status" aria-live="polite" className="sr-only">
           {isLoading ? t('common.loading') : isFetching ? t('inProcess.refreshing') : ''}
         </p>
@@ -1032,7 +1057,7 @@ interface ReturnedListProps extends ListProps {
   filters: ReturnedFilters;
   hasActiveFilters: boolean;
   onClearAll: () => void;
-  controls: ReactNode;
+  controls: (exportTotal: number | undefined) => ReactNode;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
@@ -1099,7 +1124,7 @@ function ReturnedList({
       </div>
 
       <ViewTabs {...viewSwitch}>
-        {controls}
+        {controls(data?.total)}
         <p role="status" aria-live="polite" className="sr-only">
           {isLoading ? t('common.loading') : isFetching ? t('inProcess.refreshing') : ''}
         </p>
@@ -1163,7 +1188,7 @@ interface DeliveredListProps extends ListProps {
   filters: DeliveredFilters;
   hasActiveFilters: boolean;
   onClearAll: () => void;
-  controls: ReactNode;
+  controls: (exportTotal: number | undefined) => ReactNode;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
@@ -1230,7 +1255,7 @@ function DeliveredList({
       </div>
 
       <ViewTabs {...viewSwitch}>
-        {controls}
+        {controls(data?.total)}
         <p role="status" aria-live="polite" className="sr-only">
           {isLoading ? t('common.loading') : isFetching ? t('inProcess.refreshing') : ''}
         </p>
@@ -1303,6 +1328,9 @@ export function InProcessShipmentsContent({
   const canInProcess = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_IN_TRANSIT_VIEW);
   const canReturned = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_RETURNED_VIEW);
   const canDelivered = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_DELIVERED_VIEW);
+  const hasNet = hasPermission(PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ);
+  const { t } = useI18n();
+  const [exporting, setExporting] = useState(false);
 
   const view = resolveView(searchParams.get('view'), canInProcess, canReturned, canDelivered);
   const from = searchParams.get('from') ?? '';
@@ -1497,7 +1525,68 @@ export function InProcessShipmentsContent({
     },
   };
 
-  const controls = (
+  const buildExportFilterSummary = (carrierName: string, rowCount: number): ExportFilterEntry[] => {
+    const workStateOption = WORK_STATE_OPTIONS.find((option) => option.value === workState);
+    return [
+      { label: t('inProcess.export.sheetFilter.tab'), value: t(VIEW_TITLE_KEYS[view]) },
+      { label: t('inProcess.export.sheetFilter.carrier'), value: carrierName },
+      {
+        label: t('inProcess.export.sheetFilter.workState'),
+        value: workStateOption ? t(workStateOption.labelKey) : workState,
+      },
+      ...(status ? [{ label: t('inProcess.filters.status'), value: getStatusLabel(status) }] : []),
+      ...(isInProcess && latenessFilter
+        ? [
+            {
+              label: t('inProcess.filters.lateness'),
+              value: latenessFilter.map((item) => t(LATENESS_LABEL_KEYS[item])).join('، '),
+            },
+          ]
+        : []),
+      ...(governorate ? [{ label: t('inProcess.filters.governorate'), value: governorate }] : []),
+      ...(city ? [{ label: t('inProcess.filters.city'), value: city }] : []),
+      ...(from ? [{ label: t(DATE_LABEL_KEYS[view].from), value: from }] : []),
+      ...(to ? [{ label: t(DATE_LABEL_KEYS[view].to), value: to }] : []),
+      ...(appliedSearch ? [{ label: t('inProcess.filters.search'), value: appliedSearch }] : []),
+      { label: t('inProcess.export.sheetFilter.rowCount'), value: String(rowCount) },
+    ];
+  };
+
+  const exportCurrentView = async () => {
+    setExporting(true);
+    const fileName = `${shippingCompanyId}-${view}-${formatDateToLocalDate(new Date()) ?? ''}`;
+    try {
+      if (view === 'in-process') {
+        await exportShipmentsToExcel({
+          t,
+          fileName,
+          buildFilterSummary: buildExportFilterSummary,
+          columns: inProcessExportColumns(t, getStatusLabel, hasNet),
+          fetchPage: (page, limit) => fetchInProcessPage(shippingCompanyId, { ...filters, page, limit }),
+        });
+      } else if (view === 'returned') {
+        await exportShipmentsToExcel({
+          t,
+          fileName,
+          buildFilterSummary: buildExportFilterSummary,
+          columns: returnedExportColumns(t, getStatusLabel),
+          fetchPage: (page, limit) => fetchReturnedPage(shippingCompanyId, { ...returnedFilters, page, limit }),
+        });
+      } else {
+        await exportShipmentsToExcel({
+          t,
+          fileName,
+          buildFilterSummary: buildExportFilterSummary,
+          columns: deliveredExportColumns(t, getStatusLabel),
+          fetchPage: (page, limit) => fetchDeliveredPage(shippingCompanyId, { ...deliveredFilters, page, limit }),
+        });
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const renderControls = (exportTotal: number | undefined) => (
     <ShipmentControls
       view={view}
       status={status}
@@ -1520,6 +1609,9 @@ export function InProcessShipmentsContent({
       searchInputRef={searchInputRef}
       searchActive={searchActive}
       workStateCounts={tabCounts.workState}
+      exportTotal={exportTotal}
+      exporting={exporting}
+      onExport={exportCurrentView}
     />
   );
 
@@ -1537,7 +1629,7 @@ export function InProcessShipmentsContent({
             viewSwitch={viewSwitch}
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
-            controls={controls}
+            controls={renderControls}
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
@@ -1553,7 +1645,7 @@ export function InProcessShipmentsContent({
             viewSwitch={viewSwitch}
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
-            controls={controls}
+            controls={renderControls}
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
@@ -1569,7 +1661,7 @@ export function InProcessShipmentsContent({
             viewSwitch={viewSwitch}
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
-            controls={controls}
+            controls={renderControls}
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
