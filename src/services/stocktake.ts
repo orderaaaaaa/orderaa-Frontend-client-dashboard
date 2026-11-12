@@ -12,6 +12,7 @@ import {
   getStocktake,
   getStocktakeLines,
   getStocktakes,
+  getStocktakeTypes,
   postStocktake,
   startStocktake,
   updateStocktakeLines,
@@ -36,6 +37,14 @@ export const useStocktakesQuery = (
     queryFn: () => getStocktakes(params),
     enabled,
     placeholderData: (previous) => previous,
+    staleTime: STALE_TIME,
+  });
+
+export const useStocktakeTypesQuery = (enabled: boolean) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.STOCKTAKE_TYPES] as QueryKey,
+    queryFn: () => getStocktakeTypes(),
+    enabled,
     staleTime: STALE_TIME,
   });
 
@@ -81,10 +90,14 @@ const useInvalidateStocktakeViews = () => {
 };
 
 export const useStartStocktakeMutation = () => {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateStocktakeViews();
   return useMutation({
     mutationFn: (body: CreateStocktakeDto) => startStocktake(body),
-    onSuccess: () => invalidate(),
+    onSuccess: () => {
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_TYPES] });
+    },
   });
 };
 

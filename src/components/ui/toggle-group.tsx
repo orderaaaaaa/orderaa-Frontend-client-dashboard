@@ -9,6 +9,7 @@ interface ToggleOption<T extends string> {
   value: T;
   label: string;
   icon?: ReactNode;
+  disabled?: boolean;
 }
 
 interface ToggleGroupProps<T extends string> {
@@ -36,14 +37,14 @@ function ToggleGroupInner<T extends string>({
           type="button"
           variant={value === option.value ? 'default' : 'ghost'}
           size="sm"
-          disabled={disabled}
+          disabled={disabled || option.disabled}
           onClick={() => onChange(option.value)}
           className={clsx(
             'h-10 rounded-full px-4 py-2 text-sm font-medium transition-colors sm:h-8',
             value === option.value
               ? 'shadow-sm'
               : 'text-foreground-muted hover:text-foreground-emphasis hover:bg-transparent',
-            disabled && 'pointer-events-none',
+            (disabled || option.disabled) && 'pointer-events-none',
           )}
         >
           {option.icon}

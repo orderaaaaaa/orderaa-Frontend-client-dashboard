@@ -1,10 +1,20 @@
 export type StocktakeStatusWire = 'OPEN' | 'POSTED' | 'CANCELLED';
 
+export const STOCKTAKE_TYPES = ['MAIN', 'RETURNS'] as const;
+
+export type StocktakeType = (typeof STOCKTAKE_TYPES)[number];
+
 export type StocktakeLineFilter = 'ALL' | 'UNCOUNTED' | 'CHANGED';
 
 export type StocktakeWarehouseDto = {
   id: number;
   name: string;
+};
+
+export type StocktakeTypeOptionDto = {
+  type: StocktakeType;
+  warehouse: StocktakeWarehouseDto | null;
+  available: boolean;
 };
 
 export type StocktakePersonDto = {
@@ -15,6 +25,7 @@ export type StocktakePersonDto = {
 export type StocktakeSummaryDto = {
   id: number;
   status: StocktakeStatusWire;
+  type: StocktakeType | null;
   warehouse: StocktakeWarehouseDto;
   note: string | null;
   createdAt: string;
@@ -62,7 +73,8 @@ export type PostStocktakeResultDto = {
 };
 
 export type CreateStocktakeDto = {
-  warehouseId: number;
+  type?: StocktakeType;
+  warehouseId?: number;
   note?: string | null;
 };
 
@@ -80,6 +92,7 @@ export type PostStocktakeDto = {
 };
 
 export type ListStocktakesQueryDto = {
+  type?: StocktakeType;
   warehouseId?: number;
   status?: StocktakeStatusWire;
   page?: number;

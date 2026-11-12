@@ -2,11 +2,15 @@ import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
 import type { StocktakeShortageLineDto } from '../types/stocktake';
 
 export const STOCKTAKE_ERROR_MESSAGES: Record<string, string> = {
-  STOCKTAKE_ALREADY_OPEN: 'توجد جلسة جرد مفتوحة لهذا المخزن بالفعل',
+  STOCKTAKE_ALREADY_OPEN: 'توجد جلسة جرد مفتوحة لهذا النوع بالفعل',
   STOCKTAKE_NOT_OPEN: 'هذه الجلسة لم تعد مفتوحة للتعديل',
   STOCKTAKE_NOT_FOUND: 'جلسة الجرد غير موجودة',
   STOCKTAKE_LINE_UNKNOWN_VARIANT: 'أحد المتغيرات لا ينتمي إلى هذه الجلسة',
   STOCKTAKE_NOTHING_COUNTED: 'لم يتم إدخال أي عدد قبل الترحيل',
+  STOCKTAKE_TYPE_REQUIRED: 'يجب تحديد نوع الجرد: المخزن الرئيسي أو المرتجعات',
+  STOCKTAKE_WAREHOUSE_NOT_COUNTABLE:
+    'لا يمكن جرد هذا المخزن؛ الجرد متاح للمخزن الرئيسي والمرتجعات فقط',
+  STOCKTAKE_TYPE_WAREHOUSE_MISSING: 'لا يوجد مخزن لهذا النوع',
   WAREHOUSE_NOT_FOUND: 'المخزن غير موجود',
   WAREHOUSE_INACTIVE: 'المخزن غير مفعّل، لا يمكن بدء جرد فيه',
   DUPLICATE_VARIANTS_IN_BATCH: 'تكرر المتغير نفسه في الحفظ، أعد المحاولة',

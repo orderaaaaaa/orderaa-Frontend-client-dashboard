@@ -9,6 +9,7 @@ import type {
   StocktakeLinesQueryDto,
   StocktakeListDto,
   StocktakeSummaryDto,
+  StocktakeTypeOptionDto,
   UpdateStocktakeLinesDto,
 } from '@/app/dashboard/inventory/stock-management/types/stocktake';
 
@@ -20,6 +21,11 @@ export async function getStocktakes(
 ): Promise<StocktakeListDto> {
   const response = await api.get(STOCKTAKES_PATH, { params });
   return response.data as StocktakeListDto;
+}
+
+export async function getStocktakeTypes(): Promise<StocktakeTypeOptionDto[]> {
+  const response = await api.get(`${STOCKTAKES_PATH}/types`);
+  return response.data as StocktakeTypeOptionDto[];
 }
 
 export async function startStocktake(
