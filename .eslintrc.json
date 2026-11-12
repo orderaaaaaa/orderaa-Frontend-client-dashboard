@@ -16,6 +16,17 @@
         "selector": "NewExpression[callee.object.name='Intl'][callee.property.name=/Format$/] > Literal[value=/^ar(?!-EG-u-nu-latn$)/]",
         "message": "Display locale must be APP_LOCALE ('ar-EG-u-nu-latn') from @/utils/format."
       }
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "socket.io-client",
+            "message": "Import the realtime client only through @/lib/realtime/carrierChatSocket and its hooks in @/hooks/realtime."
+          }
+        ]
+      }
     ]
   },
   "overrides": [
@@ -23,6 +34,12 @@
       "files": ["src/utils/format.ts"],
       "rules": {
         "no-restricted-syntax": "off"
+      }
+    },
+    {
+      "files": ["src/lib/realtime/carrierChatSocket.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     }
   ]
