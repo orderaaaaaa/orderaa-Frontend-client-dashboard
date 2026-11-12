@@ -33,17 +33,11 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 import { lookupPhoneOf, normalizePhoneNumber } from '@/utils/phone';
 import {
+  droppedSuffixOf,
   resolveLatestOrderFill,
-  type LocationPresetDropped,
 } from '@/utils/latestOrderFill';
 
 const DIRTY = { shouldDirty: true } as const;
-
-const FILL_DROPPED_LABELS: Record<LocationPresetDropped, string> = {
-  company: 'شركة الشحن',
-  governorate: 'المحافظة',
-  city: 'المدينة',
-};
 
 export type ManualOrderPreset = {
   name?: string;
@@ -193,9 +187,7 @@ export function NewOrderForm({
 
       const successMessage = `تم ملء البيانات من الطلب ${fill.row.code}`;
       if (fill.dropped.length > 0) {
-        toast.warning(
-          `${successMessage} — اختر ${fill.dropped.map((field) => FILL_DROPPED_LABELS[field]).join('/')}`
-        );
+        toast.warning(`${successMessage}${droppedSuffixOf(fill.dropped)}`);
       } else {
         toast.success(successMessage);
       }
@@ -260,7 +252,9 @@ export function NewOrderForm({
       const created = await createManualOrder(payload);
       await invalidateAndWait(queryClient, orderStatusKeys());
 
-      toast.success('تم إنشاء الطلب بنجاح!');
+      toast.success(
+        created.code ? `تم إنشاء الطلب ${created.code} بنجاح!` : 'تم إنشاء الطلب بنجاح!'
+      );
       if (carrierSendNeedsAttention(created.carrierSend)) {
         toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
       }

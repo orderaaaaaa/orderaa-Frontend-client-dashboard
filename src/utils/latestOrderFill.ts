@@ -15,6 +15,17 @@ import { normalizePhoneNumber } from '@/utils/phone';
 
 export type LocationPresetDropped = 'company' | 'governorate' | 'city';
 
+export const DROPPED_LABELS: Record<LocationPresetDropped, string> = {
+  company: 'شركة الشحن',
+  governorate: 'المحافظة',
+  city: 'المدينة',
+};
+
+export const droppedSuffixOf = (dropped: LocationPresetDropped[]): string =>
+  dropped.length === 0
+    ? ''
+    : ` — اختر ${dropped.map((field) => DROPPED_LABELS[field]).join('/')}`;
+
 export interface LocationRef {
   token?: string;
   rowId?: number | null;
@@ -60,7 +71,7 @@ const matchLocationRef = (
   return byRowId ?? matchLocationOption(options, ref.label);
 };
 
-const locationRefOf = (
+export const locationRefOf = (
   token: string | null | undefined,
   rowId: number | null | undefined,
   label: string | null | undefined,

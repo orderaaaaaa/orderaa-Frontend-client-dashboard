@@ -16,11 +16,12 @@ import { ORDER_LOOKUP_SURFACE } from '@/constants/orderReadScope';
 import type { CreateOrderResponse } from '@/types/manual-order';
 import type { Order } from '@/types/orders';
 import {
+  droppedSuffixOf,
+  locationRefOf,
   resolveLatestOrderFill,
   validateLocationPreset,
   type LocationPresetDropped,
   type LocationPresetResult,
-  type LocationRef,
 } from '@/utils/latestOrderFill';
 
 type NewOrderSource =
@@ -33,21 +34,6 @@ interface NewOrderFromCustomerModalProps {
   source: NewOrderSource;
   onCreated?: (created: CreateOrderResponse) => void;
 }
-
-const DROPPED_LABELS: Record<LocationPresetDropped, string> = {
-  company: 'شركة الشحن',
-  governorate: 'المحافظة',
-  city: 'المدينة',
-};
-
-const locationRefOf = (
-  token: string | null | undefined,
-  rowId: number | null | undefined,
-  label: string | null | undefined,
-): LocationRef | undefined => {
-  if (!token && (rowId === undefined || rowId === null) && !label) return undefined;
-  return { token: token ?? undefined, rowId, label };
-};
 
 const presetOf = (
   name: string,
@@ -66,9 +52,7 @@ const presetOf = (
 
 const warnDropped = (code: string, dropped: LocationPresetDropped[]) => {
   if (dropped.length === 0) return;
-  toast.warning(
-    `تم ملء البيانات من الطلب ${code} — اختر ${dropped.map((field) => DROPPED_LABELS[field]).join('/')}`
-  );
+  toast.warning(`تم ملء البيانات من الطلب ${code}${droppedSuffixOf(dropped)}`);
 };
 
 const resolveFromOrder = async (
