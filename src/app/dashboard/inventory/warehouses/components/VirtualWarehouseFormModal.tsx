@@ -6,7 +6,7 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { LiaPlusSolid } from 'react-icons/lia';
-import { CARD_SCROLL_CLASS, VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
+import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import {
   type VirtualWarehouseTermInvalidReason,
 } from '@/lib/api/virtualWarehouses';
 import type { VariantCard } from '@/lib/api/products';
+import { variantCardLabelOf } from '@/lib/variantOptionLabel';
 import { useStockProducts } from '@/services/stock';
 import {
   useCreateVirtualWarehouseMutation,

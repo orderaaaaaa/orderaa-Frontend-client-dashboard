@@ -1,11 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useStockProducts } from '@/services/stock';
 import type { VariantCard } from '@/lib/api/products';
+import { variantCardLabelOf } from '@/lib/variantOptionLabel';
 import { RULE_SCOPE_LABEL_KEYS } from '../constants';
 
 /** Derived from the label map so a new scope cannot be added to only one side. */

@@ -25,3 +25,13 @@ export const variantPlainLabel = ({
   options,
 }: VariantPlainLabelSource): string =>
   variantDisplayLabel(options) || sku || productName;
+
+export const variantCardLabelOf = ({
+  productName,
+  sku,
+  options,
+}: {
+  productName: string;
+  sku?: string | null;
+  options: VariantOptionLabelItem[];
+}): string => variantOptionLabel(options) || sku || productName;
