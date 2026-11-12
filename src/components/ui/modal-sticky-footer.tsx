@@ -12,7 +12,7 @@ export function ModalStickyFooter({ children, className }: ModalStickyFooterProp
   return (
     <div
       className={cn(
-        'sticky bottom-0 z-(--z-inpage-sticky) -mx-5 -mb-5 mt-2 border-t border-border bg-card px-5 py-3 sm:-mx-6 sm:px-6',
+        'sticky -bottom-5 z-(--z-inpage-sticky) -mx-5 -mb-5 mt-2 border-t border-border bg-card px-5 py-3 sm:-mx-6 sm:px-6',
         className,
       )}
     >
