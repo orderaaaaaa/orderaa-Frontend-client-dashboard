@@ -42,8 +42,8 @@ import {
 } from '@/utils/partialDelivery/returnShipmentContent';
 import type { Customer } from '@/app/dashboard/customers/types/customer';
 import type { CarrierSupportState } from '@/app/dashboard/upload-products/manual/types';
-import ConfirmationSection from '../ConfirmationSection';
-import ShippingSection from '../ShippingSection';
+import ConfirmationSection from '../manual/ConfirmationSection';
+import ShippingSection from '../manual/ShippingSection';
 import ReturnSourceOrders from './ReturnSourceOrders';
 import ReturnSummaryPanel from './ReturnSummaryPanel';
 

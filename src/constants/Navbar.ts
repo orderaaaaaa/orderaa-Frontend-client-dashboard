@@ -47,6 +47,7 @@ import {
   Tags,
   Map,
   MapPin,
+  Undo2,
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -182,6 +183,12 @@ export const navigation: NavigationItem[] = [
         name: 'إضافة طلب Excel',
         href: '/dashboard/upload-products/excel',
         icon: ExcelIcon,
+      },
+      {
+        name: 'إضافة مرتجع',
+        href: '/dashboard/upload-products/return',
+        icon: Undo2,
+        permission: PERMISSION_CODES.ORDERS_RETURNS_CREATE,
       },
     ],
   },

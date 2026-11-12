@@ -27,13 +27,8 @@ import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useSto
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
-import ToggleGroup from '@/components/ui/toggle-group';
-import { useI18n } from '@/i18n/I18nProvider';
-import CustomerReturnForm from './return/CustomerReturnForm';
 
 const DIRTY = { shouldDirty: true } as const;
-
-type ManualOrderMode = 'new' | 'return';
 
 function NewOrderForm() {
   const queryClient = useQueryClient();
@@ -359,30 +354,7 @@ function NewOrderForm() {
 }
 
 function ManualOrderPage() {
-  const { t } = useI18n();
-  const [mode, setMode] = useState<ManualOrderMode>('new');
-
-  return (
-    <div className="flex flex-col gap-[26px]">
-      <div className="flex justify-center max-sm:px-4">
-        <div role="group" aria-label={t('customerReturn.mode.label')}>
-          <ToggleGroup
-            className="[&_button]:h-11 sm:[&_button]:h-8"
-            options={[
-              { value: 'new', label: t('customerReturn.mode.new') },
-              { value: 'return', label: t('customerReturn.mode.return') },
-            ]}
-            value={mode}
-            onChange={setMode}
-          />
-        </div>
-      </div>
-      <div hidden={mode !== 'new'}>
-        <NewOrderForm />
-      </div>
-      {mode === 'return' && <CustomerReturnForm />}
-    </div>
-  );
+  return <NewOrderForm />;
 }
 
 export default ManualOrderPage;
