@@ -51,9 +51,11 @@ import { FOLLOWUP_WORK_STATES, type FollowupWorkState } from '@/types/logistics'
 import type { ShippingImplementation } from '@/types/shippingCompanies';
 import type { FollowupClosure } from '@/types/logistics';
 import {
+  DELIVERED_STATUSES,
   IN_PROCESS_STATUSES,
   LATENESS_FILTERS,
   type CarrierHeader,
+  type DeliveredStatus,
   type InProcessCountFilters,
   type InProcessFilters,
   type InProcessStatus,
@@ -97,26 +99,54 @@ const WORK_STATE_OPTIONS: { value: FollowupWorkState; labelKey: TranslationKey }
 const EMPTY_SELECTION: Set<number> = new Set<number>();
 const EMPTY_STATE_ICON = <PackageSearch className="size-10 text-muted-foreground" aria-hidden="true" />;
 
-type ShipmentView = 'in-process' | 'returned';
+type ShipmentView = 'in-process' | 'returned' | 'delivered';
 type SelectOptions = ComponentProps<typeof SearchableSelect>['options'];
+
+const SHIPMENT_VIEWS: readonly ShipmentView[] = ['in-process', 'returned', 'delivered'];
+const VIEW_TITLE_KEYS: Record<ShipmentView, TranslationKey> = {
+  'in-process': 'inProcess.title.inProcess',
+  returned: 'inProcess.title.returned',
+  delivered: 'inProcess.title.delivered',
+};
+const VIEW_SUBTITLE_KEYS: Record<ShipmentView, TranslationKey> = {
+  'in-process': 'inProcess.subtitle.inProcess',
+  returned: 'inProcess.subtitle.returned',
+  delivered: 'inProcess.subtitle.delivered',
+};
+const STATUSES_BY_VIEW: Record<ShipmentView, readonly (InProcessStatus | DeliveredStatus)[]> = {
+  'in-process': IN_PROCESS_STATUSES,
+  returned: [],
+  delivered: DELIVERED_STATUSES,
+};
+
+const readRequestedView = (value: string | null): ShipmentView =>
+  value === 'returned' || value === 'delivered' ? value : 'in-process';
 
 const resolveView = (
   requested: string | null,
   canInProcess: boolean,
   canReturned: boolean,
+  canDelivered: boolean,
 ): ShipmentView => {
-  const wanted: ShipmentView = requested === 'returned' ? 'returned' : 'in-process';
-  if (wanted === 'returned' ? canReturned : canInProcess) return wanted;
-  if (canInProcess) return 'in-process';
-  if (canReturned) return 'returned';
-  return wanted;
+  const wanted = readRequestedView(requested);
+  const allowed: Record<ShipmentView, boolean> = {
+    'in-process': canInProcess,
+    returned: canReturned,
+    delivered: canDelivered,
+  };
+  if (allowed[wanted]) return wanted;
+  return SHIPMENT_VIEWS.find((candidate) => allowed[candidate]) ?? wanted;
 };
 
 const readWorkState = (value: string | null): FollowupWorkState =>
   FOLLOWUP_WORK_STATES.find((state) => state === value) ?? 'open';
 
-const readStatus = (value: string | null): InProcessStatus | undefined =>
-  IN_PROCESS_STATUSES.find((status) => status === value);
+const readStatus = (value: string | null, view: ShipmentView): InProcessStatus | DeliveredStatus | undefined =>
+  STATUSES_BY_VIEW[view].find((status) => status === value);
+
+const isInProcessStatus = (
+  status: InProcessStatus | DeliveredStatus | undefined,
+): status is InProcessStatus => IN_PROCESS_STATUSES.some((known) => known === status);
 
 const readLateness = (value: string | null): LatenessFilter[] => {
   const picked = new Set((value ?? '').split(','));
@@ -143,6 +173,7 @@ type WorkStateCounts = Partial<Record<FollowupWorkState, number>>;
 interface ShipmentTabCounts {
   inProcess: number | undefined;
   returned: number | undefined;
+  delivered: number | undefined;
   workState: WorkStateCounts;
 }
 
@@ -174,6 +205,7 @@ interface ViewSwitchProps {
   view: ShipmentView;
   canInProcess: boolean;
   canReturned: boolean;
+  canDelivered: boolean;
   onViewChange: (view: ShipmentView) => void;
   restoreFocusRef: { current: boolean };
   counts: ShipmentTabCounts;
@@ -212,7 +244,6 @@ interface ListHeaderProps {
 function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProps) {
   const { t } = useI18n();
   const logo = integrationLogoOf(implementation);
-  const isReturned = view === 'returned';
 
   return (
     <div className="flex flex-col gap-2">
@@ -233,7 +264,7 @@ function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProp
             <Skeleton className="h-8 w-48" />
           ) : (
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-              {t(isReturned ? 'inProcess.title.returned' : 'inProcess.title.inProcess')}
+              {t(VIEW_TITLE_KEYS[view])}
             </h1>
           )}
           {isLoading ? (
@@ -259,9 +290,7 @@ function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProp
             )
           )}
           <p className="text-sm text-muted-foreground">
-            {isReturned
-              ? 'طلبات أعادتها جهة الشحن إلينا، ولا تتغير حالتها من هذه الصفحة'
-              : 'طلبات لدى جهة الشحن لم تُسلَّم ولم تُرتجع بعد'}
+            {t(VIEW_SUBTITLE_KEYS[view])}
           </p>
         </div>
       </div>
@@ -282,6 +311,7 @@ function ViewTabs({
   view,
   canInProcess,
   canReturned,
+  canDelivered,
   onViewChange,
   restoreFocusRef,
   counts,
@@ -289,7 +319,7 @@ function ViewTabs({
 }: ViewSwitchProps & { children: ReactNode }) {
   const { t } = useI18n();
   const rootRef = useRef<HTMLDivElement>(null);
-  const inactiveView: ShipmentView = view === 'in-process' ? 'returned' : 'in-process';
+  const inactiveViews = SHIPMENT_VIEWS.filter((candidate) => candidate !== view);
 
   useEffect(() => {
     if (!restoreFocusRef.current) return;
@@ -299,10 +329,7 @@ function ViewTabs({
 
   return (
     <div ref={rootRef}>
-      <Tabs
-        value={view}
-        onValueChange={(next) => onViewChange(next === 'returned' ? 'returned' : 'in-process')}
-      >
+      <Tabs value={view} onValueChange={(next) => onViewChange(readRequestedView(next))}>
         <TabsList>
           {canInProcess && (
             <TabsTrigger value="in-process">
@@ -316,11 +343,19 @@ function ViewTabs({
               <TabCount value={counts.returned} />
             </TabsTrigger>
           )}
+          {canDelivered && (
+            <TabsTrigger value="delivered">
+              {t('inProcess.title.delivered')}
+              <TabCount value={counts.delivered} />
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value={view} className="flex flex-col gap-5">
           {children}
         </TabsContent>
-        <TabsContent value={inactiveView} forceMount hidden />
+        {inactiveViews.map((inactive) => (
+          <TabsContent key={inactive} value={inactive} forceMount hidden />
+        ))}
       </Tabs>
     </div>
   );
@@ -1068,6 +1103,28 @@ function ReturnedList({
   );
 }
 
+interface DeliveredPlaceholderProps {
+  shippingCompanyId: number;
+  viewSwitch: ViewSwitchProps;
+}
+
+function DeliveredPlaceholder({ shippingCompanyId, viewSwitch }: DeliveredPlaceholderProps) {
+  const { t } = useI18n();
+  const { shippingCompanies } = useShippingCompanies();
+  const implementation = shippingCompanies.find(
+    (company) => company.id === shippingCompanyId,
+  )?.implementation;
+
+  return (
+    <>
+      <ListHeader view="delivered" carrier={undefined} implementation={implementation} isLoading={false} />
+      <ViewTabs {...viewSwitch}>
+        <EmptyState icon={EMPTY_STATE_ICON} title={t('inProcess.empty.delivered')} />
+      </ViewTabs>
+    </>
+  );
+}
+
 interface InProcessShipmentsContentProps {
   shippingCompanyId: number;
 }
@@ -1082,11 +1139,13 @@ export function InProcessShipmentsContent({
   const { hasPermission } = usePermissionCheck();
   const canInProcess = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_IN_TRANSIT_VIEW);
   const canReturned = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_RETURNED_VIEW);
+  const canDelivered = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_DELIVERED_VIEW);
 
-  const view = resolveView(searchParams.get('view'), canInProcess, canReturned);
+  const view = resolveView(searchParams.get('view'), canInProcess, canReturned, canDelivered);
   const from = searchParams.get('from') ?? '';
   const to = searchParams.get('to') ?? '';
-  const status = readStatus(searchParams.get('status'));
+  const status = readStatus(searchParams.get('status'), view);
+  const inProcessStatus = isInProcessStatus(status) ? status : undefined;
   const lateness = readLateness(searchParams.get('lateness'));
   const latenessFilter = lateness.length > 0 ? lateness : undefined;
   const governorate = searchParams.get('governorate') ?? '';
@@ -1144,7 +1203,7 @@ export function InProcessShipmentsContent({
   const filters: InProcessFilters = {
     from: from || undefined,
     to: to || undefined,
-    status,
+    status: inProcessStatus,
     lateness: latenessFilter,
     governorate: governorate || undefined,
     city: city || undefined,
@@ -1170,7 +1229,7 @@ export function InProcessShipmentsContent({
   const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
   const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
 
-  const activeCount = [status, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length;
+  const activeCount = [inProcessStatus, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length;
   const searchActive = appliedSearch !== '';
 
   const countFilters: InProcessCountFilters = searchActive
@@ -1178,7 +1237,7 @@ export function InProcessShipmentsContent({
     : {
         from: from || undefined,
         to: to || undefined,
-        status,
+        status: inProcessStatus,
         lateness: latenessFilter,
         governorate: governorate || undefined,
         city: city || undefined,
@@ -1187,6 +1246,7 @@ export function InProcessShipmentsContent({
   const tabCounts: ShipmentTabCounts = {
     inProcess: countsData?.inProcess.all,
     returned: countsData?.returned ?? undefined,
+    delivered: countsData?.delivered ?? undefined,
     workState: {
       open: countsData?.inProcess.open,
       closed: countsData?.inProcess.closed,
@@ -1213,18 +1273,26 @@ export function InProcessShipmentsContent({
     view,
     canInProcess,
     canReturned,
+    canDelivered,
     restoreFocusRef: viewFocusRef,
     counts: tabCounts,
     onViewChange: (next) => {
       viewFocusRef.current = true;
-      updateParams({ view: next === 'returned' ? 'returned' : '', page: '' });
+      updateParams({
+        view: next === 'in-process' ? '' : next,
+        status: '',
+        lateness: '',
+        from: '',
+        to: '',
+        page: '',
+      });
     },
   };
 
   return (
     <div className="w-full max-w-full overflow-x-clip">
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
-        {isInProcess ? (
+        {isInProcess && (
           <InProcessList
             shippingCompanyId={shippingCompanyId}
             filters={filters}
@@ -1237,7 +1305,7 @@ export function InProcessShipmentsContent({
             onClearAll={clearAllFilters}
             controls={
               <InProcessControls
-                status={status}
+                status={inProcessStatus}
                 statusOptions={statusOptions}
                 lateness={lateness}
                 governorate={governorate}
@@ -1262,7 +1330,8 @@ export function InProcessShipmentsContent({
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
-        ) : (
+        )}
+        {view === 'returned' && (
           <ReturnedList
             shippingCompanyId={shippingCompanyId}
             page={page}
@@ -1273,6 +1342,9 @@ export function InProcessShipmentsContent({
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
+        )}
+        {view === 'delivered' && (
+          <DeliveredPlaceholder shippingCompanyId={shippingCompanyId} viewSwitch={viewSwitch} />
         )}
       </div>
       {notesOrderId !== null && (
