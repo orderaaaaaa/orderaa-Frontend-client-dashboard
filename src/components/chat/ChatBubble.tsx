@@ -67,7 +67,8 @@ export function ChatBubble({
   children,
 }: ChatBubbleProps) {
   const isEnd = side === 'end';
-  const failed = sendState === 'FAILED';
+  const failed = sendState === 'FAILED' && !retried;
+  const resent = sendState === 'FAILED' && retried;
   const sending = sendState === 'PENDING' || sendState === 'SENDING';
 
   return (
@@ -138,8 +139,7 @@ export function ChatBubble({
               <AlertTriangle className="size-3.5 text-destructive" aria-hidden="true" />
               <span>{CHAT_NOT_SENT_LABEL}</span>
               {error && <span className="text-muted-foreground">— {CHAT_SEND_ERROR_LABELS[error]}</span>}
-              {retried && <span className="text-muted-foreground">{CHAT_RESENT_LABEL}</span>}
-              {!retried && onRetry && (
+              {onRetry && (
                 <button
                   type="button"
                   onClick={onRetry}
@@ -151,6 +151,7 @@ export function ChatBubble({
               )}
             </div>
           )}
+          {resent && <div className="mt-2 text-xs text-muted-foreground">{CHAT_RESENT_LABEL}</div>}
         </div>
       </div>
       {isEnd && avatar}
