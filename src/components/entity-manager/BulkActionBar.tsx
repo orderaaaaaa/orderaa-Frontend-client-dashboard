@@ -2,6 +2,7 @@
 
 import type { ComponentProps, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 import { useI18n } from '@/i18n/I18nProvider';
 import { PartialSuccessNotice } from './StateViews';
 
@@ -66,7 +67,7 @@ function BulkBar({
   const { t } = useI18n();
 
   return (
-    <div className="sticky bottom-0 z-(--z-inpage-sticky) flex flex-col gap-2 rounded-xl border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-sm sm:top-0 sm:bottom-auto sm:p-4">
+    <div className={`${FIXED_BOTTOM_BAR_CLASS} flex flex-col gap-2 border-t border-gray-200 bg-card px-3 pt-3 shadow-lg sm:px-4 sm:pt-4`}>
       <div className="flex flex-wrap items-center gap-2">
         <p
           aria-hidden="true"
