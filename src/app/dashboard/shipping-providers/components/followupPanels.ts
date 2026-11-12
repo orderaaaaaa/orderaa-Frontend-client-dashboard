@@ -13,6 +13,7 @@ export interface FollowupTarget {
   lateness: InProcessShipment['lateness'];
   governorate: string | null;
   unreadNoteCount: number;
+  unreadChatCount: number;
   panel: FollowupPanel;
 }
 
@@ -29,6 +30,7 @@ export function followupTargetOf(
     lateness: row.lateness ?? null,
     governorate: row.governorate,
     unreadNoteCount: row.unreadNoteCount ?? 0,
+    unreadChatCount: row.unreadChatCount,
     panel,
   };
 }

@@ -105,6 +105,24 @@ export const CHAT_SEND_ERROR_LABELS: Record<CarrierChatSendError, string> = {
   UNREACHABLE: 'تعذر الاتصال بتيربو',
   UNCONFIRMED: 'لم تؤكد تيربو وصول الرسالة',
 };
+export const CHAT_MESSAGE_MAX_LENGTH = 2000;
+export const CHAT_POLL_INTERVAL_MS = 15_000;
+export const CHAT_SEEN_DEBOUNCE_MS = 15_000;
+export const CHAT_PIN_THRESHOLD_PX = 80;
+export const FOLLOWUP_CHAT_TAB_LABEL = 'المحادثة';
+export const CHAT_COMPOSER_PLACEHOLDER = 'اكتب رسالة إلى تيربو…';
+export const CHAT_UNAVAILABLE_LABEL = 'المحادثة غير متاحة لهذه الشحنة';
+export const CHAT_LOAD_ERROR_LABEL = 'تعذر تحميل المحادثة من تيربو';
+export const CHAT_AUTH_ERROR_LABEL = 'تعذر الدخول إلى حساب تيربو';
+export const CHAT_AUTH_HINT_LABEL = 'راجع ربط الحساب في إعدادات شركات الشحن';
+export const CHAT_AUTH_LINK_LABEL = 'إعدادات شركات الشحن';
+export const CHAT_EMPTY_LABEL = 'لا توجد رسائل بعد';
+export const CHAT_EMPTY_HINT = 'ابدأ المحادثة مع تيربو بخصوص هذه الشحنة';
+export const CHAT_NEW_MESSAGES_DIVIDER = 'رسائل جديدة';
+export const CHAT_LOG_LABEL = 'المحادثة مع تيربو';
+export const chatUnreadTabLabel = (count: number): string =>
+  `${FOLLOWUP_CHAT_TAB_LABEL}، ${count} غير مقروءة`;
+export const chatNewBelowLabel = (count: number): string => `↓ ${count} رسائل جديدة`;
 
 export const ACTION_LOG_EMPTY = 'لا توجد إجراءات مسجلة لهذا الطلب';
 export const ACTION_LOG_HISTORY_FORBIDDEN_NOTICE =

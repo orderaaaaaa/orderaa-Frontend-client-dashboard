@@ -1,13 +1,15 @@
 'use client';
 
-import { History, MessageSquareText } from 'lucide-react';
+import { History, MessageSquareText, MessagesSquare } from 'lucide-react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { UnreadNotesCountPill } from './FollowupNotesUnreadBadge';
 import {
+  FOLLOWUP_CHAT_TAB_LABEL,
   FOLLOWUP_EVENTS_TAB_LABEL,
   FOLLOWUP_NOTES_TAB_LABEL,
   FOLLOWUP_TABS_LABEL,
+  chatUnreadTabLabel,
 } from './followupNotesConstants';
 import { FOLLOWUP_PANELS } from './followupPanels';
 
@@ -18,7 +20,13 @@ const ACTIVE_PILL_CLASS = cn(
   'dark:group-data-[state=active]:bg-primary-foreground dark:group-data-[state=active]:text-primary'
 );
 
-export function FollowupPanelTabs({ unreadNotes }: { unreadNotes: number }) {
+interface FollowupPanelTabsProps {
+  unreadNotes: number;
+  showChat: boolean;
+  unreadChat: number;
+}
+
+export function FollowupPanelTabs({ unreadNotes, showChat, unreadChat }: FollowupPanelTabsProps) {
   return (
     <TabsList aria-label={FOLLOWUP_TABS_LABEL} className="w-full bg-muted">
       <TabsTrigger
@@ -36,6 +44,17 @@ export function FollowupPanelTabs({ unreadNotes }: { unreadNotes: number }) {
         <History className="size-4" aria-hidden="true" />
         <span>{FOLLOWUP_EVENTS_TAB_LABEL}</span>
       </TabsTrigger>
+      {showChat && (
+        <TabsTrigger
+          value={FOLLOWUP_PANELS.CHAT}
+          className={TRIGGER_CLASS}
+          aria-label={unreadChat > 0 ? chatUnreadTabLabel(unreadChat) : FOLLOWUP_CHAT_TAB_LABEL}
+        >
+          <MessagesSquare className="size-4" aria-hidden="true" />
+          <span>{FOLLOWUP_CHAT_TAB_LABEL}</span>
+          <UnreadNotesCountPill count={unreadChat} className={ACTIVE_PILL_CLASS} />
+        </TabsTrigger>
+      )}
     </TabsList>
   );
 }

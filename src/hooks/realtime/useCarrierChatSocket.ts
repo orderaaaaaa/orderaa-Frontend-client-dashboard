@@ -46,10 +46,9 @@ export function useOrderChatSocket(orderId: number, enabled: boolean): OrderChat
     };
     const onThread = (event: CarrierChatThreadEvent) => {
       if (event.orderId !== orderId) return;
-      queryClient.setQueryData<CarrierChatThread>(queryKey, (previous) => ({
-        ...event.thread,
-        firstUnreadKey: previous?.firstUnreadKey ?? null,
-      }));
+      queryClient.setQueryData<CarrierChatThread>(queryKey, (previous) =>
+        previous === undefined ? undefined : { ...event.thread, firstUnreadKey: previous.firstUnreadKey }
+      );
       setLastSyncedAt(event.thread.syncedAt);
     };
     const onStatus = (event: CarrierChatStatusEvent) => {

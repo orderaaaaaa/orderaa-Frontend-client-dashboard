@@ -78,7 +78,7 @@ import type { FollowupOpenHandler, FollowupTarget } from './followupPanels';
 import { deliveredExportColumns, exportShipmentsToExcel, inProcessExportColumns, returnedExportColumns } from './exportShipments';
 import { formatNumber } from './formatNumber';
 import { DeliveredShipmentCards, InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
-import { DeliveredShipmentsTable, InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
+import { DeliveredShipmentsTable, InProcessShipmentsTable, ReturnedShipmentsTable, useInProcessCarrier } from './ShipmentsTable';
 import { toDeliveredParams, toReturnedParams } from './shipmentParams';
 import { UnknownShippingCostCount } from './UnknownShippingCostCount';
 
@@ -1443,6 +1443,7 @@ export function InProcessShipmentsContent({
   const isInProcess = view === 'in-process';
   const { shippingCompanies } = useShippingCompanies();
   const carrierName = shippingCompanies.find((company) => company.id === shippingCompanyId)?.name ?? '';
+  const carrier = useInProcessCarrier(shippingCompanyId);
   const [followup, setFollowup] = useState<FollowupState | null>(null);
   const openFollowup: FollowupOpenHandler = (target, opener) => setFollowup({ target, opener });
 
@@ -1671,6 +1672,7 @@ export function InProcessShipmentsContent({
           key={followup.target.orderId}
           target={followup.target}
           carrierName={carrierName}
+          carrierIsTurbo={carrier.implementation === 'TURBO'}
           opener={followup.opener}
           onClose={() => setFollowup(null)}
         />
