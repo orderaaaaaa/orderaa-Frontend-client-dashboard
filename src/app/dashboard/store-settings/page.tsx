@@ -19,6 +19,7 @@ import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CustomerBadgeSettingsSection from './components/CustomerBadgeSettingsSection';
+import WhatsAppTemplatesSection from './components/WhatsAppTemplatesSection';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
@@ -180,6 +181,7 @@ export default function OrderSettingsPage() {
         </Card>
       </form>
       <CustomerBadgeSettingsSection onDirtyChange={reportSectionDirty} />
+      <WhatsAppTemplatesSection onDirtyChange={reportSectionDirty} />
 
       <StickyFormFooter
         isDirty={isDirty}
