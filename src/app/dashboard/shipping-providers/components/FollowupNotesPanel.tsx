@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,14 +16,20 @@ import {
 } from '@/services/followup';
 import { FollowupNoteDayCard } from './FollowupNoteDayCard';
 import {
+  FOLLOWUP_COLLAPSE_ALL_LABEL,
+  FOLLOWUP_EXPAND_ALL_LABEL,
+  FOLLOWUP_EXPAND_ALL_THRESHOLD,
   FOLLOWUP_NOTE_ADD_LABEL,
   FOLLOWUP_NOTE_ADD_PLACEHOLDER,
   FOLLOWUP_NOTE_COUNTER_FROM,
   FOLLOWUP_NOTE_MAX_LENGTH,
+  FOLLOWUP_NOTE_MAX_ROWS,
+  FOLLOWUP_NOTE_MIN_ROWS,
   FOLLOWUP_NOTE_PARTY_GROUP_LABEL,
   FOLLOWUP_NOTE_PARTY_LABELS,
   FOLLOWUP_NOTE_PARTY_ORDER,
   FOLLOWUP_NOTE_PARTY_TONES,
+  FOLLOWUP_NOTE_SHORTCUT_HINT,
   FOLLOWUP_NOTES_LOAD_ERROR,
   FOLLOWUP_NOTES_LOADING,
   FOLLOWUP_NOTES_RETRY_LABEL,
@@ -37,6 +44,7 @@ interface AddFollowupNoteFormProps {
   party: FollowupNotePartyValue;
   onBodyChange: (body: string) => void;
   onPartyChange: (party: FollowupNotePartyValue) => void;
+  compactOnMobile?: boolean;
   onAdded?: () => void;
 }
 
@@ -46,10 +54,38 @@ export function AddFollowupNoteForm({
   party,
   onBodyChange,
   onPartyChange,
+  compactOnMobile = false,
   onAdded,
 }: AddFollowupNoteFormProps) {
   const addMutation = useAddFollowupNoteMutation();
+  const [expanded, setExpanded] = useState(false);
+  const textareaWrapRef = useRef<HTMLDivElement>(null);
   const trimmedBody = body.trim();
+  const collapsed = compactOnMobile && !expanded;
+
+  useLayoutEffect(() => {
+    const textarea = textareaWrapRef.current?.querySelector('textarea');
+    if (!textarea) return;
+    if (collapsed) {
+      textarea.style.height = '';
+      textarea.style.overflowY = '';
+      return;
+    }
+    textarea.style.height = 'auto';
+    const style = window.getComputedStyle(textarea);
+    const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+    const chrome = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + borders;
+    const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5;
+    const maxHeight = lineHeight * FOLLOWUP_NOTE_MAX_ROWS + chrome;
+    const contentHeight = textarea.scrollHeight + borders;
+    textarea.style.height = `${Math.min(contentHeight, maxHeight)}px`;
+    textarea.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
+  }, [body, collapsed]);
+
+  const openComposer = () => {
+    setExpanded(true);
+    textareaWrapRef.current?.querySelector('textarea')?.focus();
+  };
 
   const submit = () => {
     if (trimmedBody.length === 0 || addMutation.isPending) return;
@@ -58,6 +94,7 @@ export function AddFollowupNoteForm({
       {
         onSuccess: () => {
           onBodyChange('');
+          setExpanded(false);
           onAdded?.();
         },
       }
@@ -73,7 +110,12 @@ export function AddFollowupNoteForm({
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-3">
-      <div role="radiogroup" aria-label={FOLLOWUP_NOTE_PARTY_GROUP_LABEL} className="flex flex-wrap gap-1.5">
+      <div
+        role="radiogroup"
+        aria-label={FOLLOWUP_NOTE_PARTY_GROUP_LABEL}
+        className={cn('flex flex-wrap items-center gap-1.5', collapsed && 'max-sm:hidden')}
+      >
+        <span className="me-1 text-xs text-muted-foreground">{FOLLOWUP_NOTE_PARTY_GROUP_LABEL}</span>
         {FOLLOWUP_NOTE_PARTY_ORDER.map((value) => {
           const selected = party === value;
           return (
@@ -95,30 +137,50 @@ export function AddFollowupNoteForm({
           );
         })}
       </div>
-      <Textarea
-        name={`followup-note-add-${orderId}`}
-        value={body}
-        placeholder={FOLLOWUP_NOTE_ADD_PLACEHOLDER}
-        maxLength={FOLLOWUP_NOTE_MAX_LENGTH}
-        rows={2}
-        onChange={(e) => onBodyChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-      <div className="flex items-center justify-end gap-3">
-        {body.length >= FOLLOWUP_NOTE_COUNTER_FROM && (
-          <span className="text-xs text-muted-foreground">
-            {body.length}/{FOLLOWUP_NOTE_MAX_LENGTH}
-          </span>
+      <div className="flex items-end gap-2">
+        <div ref={textareaWrapRef} className="min-w-0 flex-1">
+          <Textarea
+            name={`followup-note-add-${orderId}`}
+            value={body}
+            placeholder={FOLLOWUP_NOTE_ADD_PLACEHOLDER}
+            maxLength={FOLLOWUP_NOTE_MAX_LENGTH}
+            rows={FOLLOWUP_NOTE_MIN_ROWS}
+            className={cn('resize-none', collapsed && 'max-sm:h-10 max-sm:min-h-10 max-sm:overflow-hidden')}
+            onChange={(e) => onBodyChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setExpanded(true)}
+          />
+        </div>
+        {collapsed && (
+          <Button
+            type="button"
+            size="touch"
+            aria-label={FOLLOWUP_NOTE_ADD_LABEL}
+            className="shrink-0 sm:hidden"
+            onClick={openComposer}
+          >
+            <Plus className="size-5" />
+          </Button>
         )}
-        <Button
-          type="button"
-          size="sm"
-          loading={addMutation.isPending}
-          disabled={trimmedBody.length === 0 || addMutation.isPending}
-          onClick={submit}
-        >
-          {FOLLOWUP_NOTE_ADD_LABEL}
-        </Button>
+      </div>
+      <div className={cn('flex items-center justify-between gap-3', collapsed && 'max-sm:hidden')}>
+        <span className="hidden text-xs text-muted-foreground sm:inline">{FOLLOWUP_NOTE_SHORTCUT_HINT}</span>
+        <div className="ms-auto flex items-center gap-3">
+          {body.length >= FOLLOWUP_NOTE_COUNTER_FROM && (
+            <span className="text-xs text-muted-foreground">
+              {body.length}/{FOLLOWUP_NOTE_MAX_LENGTH}
+            </span>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            loading={addMutation.isPending}
+            disabled={trimmedBody.length === 0 || addMutation.isPending}
+            onClick={submit}
+          >
+            {FOLLOWUP_NOTE_ADD_LABEL}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -143,6 +205,7 @@ export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProp
   const { data: notesData, isFetchedAfterMount, isFetching, isError } = notesQuery;
   const { mutate: markRead } = useMarkFollowupNotesReadMutation();
   const [newCarrierLineKeys, setNewCarrierLineKeys] = useState<ReadonlySet<string> | null>(null);
+  const [bulk, setBulk] = useState<{ open: boolean; id: number } | null>(null);
   const snapshotTakenRef = useRef(false);
   const scrollPendingRef = useRef(false);
 
@@ -184,9 +247,22 @@ export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProp
     );
   }
 
+  const days = notesQuery.data?.days ?? [];
+
+  const toggleAll = () => {
+    setBulk((current) => ({ open: !(current?.open ?? false), id: (current?.id ?? 0) + 1 }));
+  };
+
   return (
     <div className="flex flex-col gap-3" dir="rtl">
-      {notesQuery.data?.days.map((day) => (
+      {days.length > FOLLOWUP_EXPAND_ALL_THRESHOLD && (
+        <div className="flex justify-start">
+          <Button type="button" variant="link" size="sm" className="h-7 px-0 text-xs" onClick={toggleAll}>
+            {bulk?.open ? FOLLOWUP_COLLAPSE_ALL_LABEL : FOLLOWUP_EXPAND_ALL_LABEL}
+          </Button>
+        </div>
+      )}
+      {days.map((day) => (
         <FollowupNoteDayCard
           key={day.day}
           orderId={orderId}
@@ -194,6 +270,7 @@ export function FollowupNotesPanel({ orderId, isActive }: FollowupNotesPanelProp
           canManage={canManage}
           newCarrierLineKeys={newCarrierLineKeys ?? NO_NEW_CARRIER_LINES}
           scrollPendingRef={scrollPendingRef}
+          bulkState={bulk}
         />
       ))}
     </div>

@@ -32,6 +32,7 @@ export function FollowupNotesModal({ orderId, onClose }: FollowupNotesModalProps
         >
           <AddFollowupNoteForm
             orderId={orderId}
+            compactOnMobile
             body={body}
             party={party}
             onBodyChange={setBody}

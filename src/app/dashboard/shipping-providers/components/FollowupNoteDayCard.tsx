@@ -22,6 +22,7 @@ import {
   FOLLOWUP_CARRIER_CONTACTS_LABEL,
   FOLLOWUP_CARRIER_REASON_SEPARATOR,
   FOLLOWUP_CARRIER_TEXTS_LABEL,
+  FOLLOWUP_EMPTY_PARTY_MARK,
   FOLLOWUP_LEGACY_NAME_LABELS,
   FOLLOWUP_LEGACY_TAG,
   FOLLOWUP_NEW_LINE_TAG,
@@ -149,9 +150,10 @@ function PartySection({
 }) {
   const showTexts = party !== 'CUSTOMER' && carrierTexts.length > 0;
   const showContacts = party === 'COURIER' && carrierContacts.length > 0;
+  const isEmpty = notes.length === 0 && !showTexts && !showContacts;
 
   return (
-    <section className="flex flex-col gap-2 min-w-0">
+    <section className={clsx('flex flex-col gap-2 min-w-0', isEmpty && 'max-sm:hidden')}>
       <h4
         className={clsx(
           'w-fit rounded-md px-2 py-0.5 text-sm font-semibold',
@@ -160,6 +162,7 @@ function PartySection({
       >
         {FOLLOWUP_NOTE_PARTY_LABELS[party]}
       </h4>
+      {isEmpty && <span className="text-sm text-muted-foreground">{FOLLOWUP_EMPTY_PARTY_MARK}</span>}
       {notes.length > 0 && (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (
@@ -221,6 +224,7 @@ interface FollowupNoteDayCardProps {
   canManage: boolean;
   newCarrierLineKeys: ReadonlySet<string>;
   scrollPendingRef: MutableRefObject<boolean>;
+  bulkState: { open: boolean; id: number } | null;
 }
 
 export function FollowupNoteDayCard({
@@ -229,6 +233,7 @@ export function FollowupNoteDayCard({
   canManage,
   newCarrierLineKeys,
   scrollPendingRef,
+  bulkState,
 }: FollowupNoteDayCardProps) {
   const [isOpen, setIsOpen] = useState(day.isToday);
   const openedForNewRef = useRef(false);
@@ -245,6 +250,10 @@ export function FollowupNoteDayCard({
     openedForNewRef.current = true;
     setIsOpen(true);
   }, [newCarrierLineKeys, day]);
+
+  useEffect(() => {
+    if (bulkState) setIsOpen(bulkState.open);
+  }, [bulkState]);
 
   return (
     <div className="flex flex-col rounded-xl border border-border bg-card">
