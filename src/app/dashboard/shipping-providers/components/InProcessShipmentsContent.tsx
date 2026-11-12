@@ -1353,6 +1353,7 @@ export function InProcessShipmentsContent({
   const appliedSearchRef = useRef(search);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const viewFocusRef = useRef(false);
+  const pendingQueryRef = useRef<string | null>(null);
 
   useEffect(() => {
     const nextSearch = debouncedSearch.trim();
@@ -1378,11 +1379,17 @@ export function InProcessShipmentsContent({
     startTransition(() => setAppliedSearch(search));
   }, [search]);
 
-  const updateParams = (patch: Record<string, string>) =>
-    router.replace(
-      buildSearchUrl(pathname, searchParams, { search: appliedSearchRef.current, ...patch }),
-      { scroll: false },
-    );
+  useEffect(() => {
+    if (pendingQueryRef.current === searchParams.toString()) pendingQueryRef.current = null;
+  }, [searchParams]);
+
+  const updateParams = (patch: Record<string, string>) => {
+    const base = new URLSearchParams(pendingQueryRef.current ?? searchParams.toString());
+    const url = buildSearchUrl(pathname, base, { search: appliedSearchRef.current, ...patch });
+    const [, query = ''] = url.split('?');
+    pendingQueryRef.current = query === searchParams.toString() ? null : query;
+    router.replace(url, { scroll: false });
+  };
 
   const { data: governorates = [] } = useGovernoratesQuery();
   const { data: cities = [], isLoading: citiesLoading } = useCitiesQuery(governorate || undefined);
