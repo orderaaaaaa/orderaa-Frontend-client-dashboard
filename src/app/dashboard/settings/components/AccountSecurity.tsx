@@ -10,6 +10,7 @@ import {
 import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 import { Button } from '@/components/ui/button';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { LiaLockSolid, LiaShieldAltSolid } from 'react-icons/lia';
 import useChangePassword from '../hooks/useChangePassword';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -56,6 +57,26 @@ export default function AccountSecurity() {
 
   const inputClassName =
     'text-base text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary transition-colors';
+
+  const submitButton = (
+    <Button
+      type="submit"
+      size="lg"
+      className="min-h-10"
+      disabled={!hasAllValues || isLoading}
+      loading={isLoading}
+      loadingText="جاري التحديث..."
+      aria-describedby={hasAllValues ? undefined : 'security-submit-hint'}
+    >
+      تحديث كلمة المرور
+    </Button>
+  );
+
+  const submitHint = (
+    <span id="security-submit-hint" className="text-sm text-gray-500">
+      أدخل كلمة المرور الحالية والجديدة وتأكيدها لتفعيل الزر
+    </span>
+  );
 
   return (
     <div className="bg-card rounded-xl p-6 shadow-sm" dir="rtl">
@@ -127,24 +148,20 @@ export default function AccountSecurity() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-start gap-3">
-          <Button
-            type="submit"
-            size="lg"
-            className="min-h-10"
-            disabled={!hasAllValues || isLoading}
-            loading={isLoading}
-            loadingText="جاري التحديث..."
-            aria-describedby={hasAllValues ? undefined : 'security-submit-hint'}
+        {isDirty ? (
+          <StickyFormFooter
+            isDirty={isDirty}
+            isSaving={isLoading}
+            status={hasAllValues ? undefined : submitHint}
           >
-            تحديث كلمة المرور
-          </Button>
-          {!hasAllValues && (
-            <span id="security-submit-hint" className="text-sm text-gray-500">
-              أدخل كلمة المرور الحالية والجديدة وتأكيدها لتفعيل الزر
-            </span>
-          )}
-        </div>
+            {submitButton}
+          </StickyFormFooter>
+        ) : (
+          <div className="mt-8 flex flex-wrap items-center justify-start gap-3">
+            {submitButton}
+            {!hasAllValues && submitHint}
+          </div>
+        )}
       </form>
       <UnsavedChangesDialog
         isOpen={guard.pendingHref !== null}
