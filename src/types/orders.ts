@@ -507,6 +507,8 @@ export interface Order {
   whatsappTemplates?: WhatsappTemplate[];
   returnOfOrderId?: number | null;
   returnOf?: OrderReturnOfRef | null;
+  returnShippingId?: string | null;
+  returnShippingIdActive?: boolean;
   derivedKind?: DerivedOrderKind | null;
   partialReturns?: OrderPartialReturnRef[];
   frozenReturnChild?: boolean;

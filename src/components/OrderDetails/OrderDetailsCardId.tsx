@@ -42,6 +42,8 @@ const OrderDetailsCardId = ({
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const { shippingCompanies } = useShippingCompanies();
   const orderCompanyName = shippingCompanyNameOf(order.shippingCompanyRef);
+  const returnShippingId = order.returnShippingId;
+  const returnShippingActive = order.returnShippingIdActive === true;
   const deleted = isDeletedOrder(order);
 
   const handleCopy = async (text: string) => {
@@ -211,6 +213,58 @@ const OrderDetailsCardId = ({
                           </span>
                         )}
                       </div>
+                    </div>
+                  )}
+                  {returnShippingId && (
+                    <div
+                      className={
+                        returnShippingActive
+                          ? 'flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 shadow-sm'
+                          : 'flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5'
+                      }
+                    >
+                      <Copy
+                        onClick={() => handleCopy(returnShippingId)}
+                        className={
+                          returnShippingActive
+                            ? 'w-3.5 h-3.5 text-emerald-700 cursor-pointer shrink-0'
+                            : 'w-3.5 h-3.5 text-gray-500 cursor-pointer shrink-0'
+                        }
+                        role="button"
+                      />
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-sm">كود المرتجع</span>
+                        <span
+                          className={
+                            returnShippingActive
+                              ? 'text-sm font-bold text-emerald-800'
+                              : 'text-sm font-semibold text-gray-700'
+                          }
+                        >
+                          {returnShippingId}
+                        </span>
+                        {orderCompanyName && (
+                          <span className="text-[11px] font-normal text-gray-500">
+                            {orderCompanyName}
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={
+                          returnShippingActive
+                            ? 'inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5'
+                            : 'inline-flex items-center gap-1 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium px-2 py-0.5'
+                        }
+                      >
+                        <span
+                          className={
+                            returnShippingActive
+                              ? 'w-1.5 h-1.5 rounded-full bg-white'
+                              : 'w-1.5 h-1.5 rounded-full bg-gray-400'
+                          }
+                        />
+                        {returnShippingActive ? 'نشط' : 'غير نشط'}
+                      </span>
                     </div>
                   )}
                 </div>
