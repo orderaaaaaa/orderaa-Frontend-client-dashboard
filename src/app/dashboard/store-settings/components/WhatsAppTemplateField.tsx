@@ -129,11 +129,11 @@ export default function WhatsAppTemplateField({
         </div>
         <div
           dir="rtl"
-          className="max-w-md rounded-2xl rounded-tr-sm bg-[#dcf8c6] px-4 py-3 text-sm leading-relaxed text-gray-900 whitespace-pre-wrap break-words"
+          className="max-w-md rounded-2xl rounded-tr-sm bg-[#dcf8c6] px-4 py-3 text-sm leading-relaxed text-[#111b21] whitespace-pre-wrap break-words dark:bg-[#005c4b] dark:text-[#e9edef]"
         >
           {splitPlaceholderTokens(previewText).map((part, index) =>
             index % 2 === 1 ? (
-              <span key={index} dir="ltr" className="font-semibold text-red-600">
+              <span key={index} dir="ltr" className="font-semibold text-red-700 dark:text-red-200">
                 {part}
               </span>
             ) : (
