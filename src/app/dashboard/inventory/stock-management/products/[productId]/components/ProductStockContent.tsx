@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Boxes, PackageX, SlidersHorizontal, Warehouse } from 'lucide-react';
 import { AdjustStockForm, type AdjustStockGroup } from '@/components/stock/AdjustStockForm';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
+import { VariantCards } from '@/components/stock/VariantCards';
 import { StockTimeline } from '@/components/stock/StockTimeline';
 import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import { MOVEMENT_SOURCE_LABELS } from '@/components/stock/stockLabels';
@@ -17,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/ui/state-panels';
 import { ALL_WAREHOUSES_OPTION } from '@/constants/warehouses';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import type { VariantCard } from '@/lib/api/products';
 import type { ProductStockDto } from '@/lib/api/productStock';
 import type { StockMovementSource, StockTimelineQueryParams } from '@/lib/api/warehouses';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -193,11 +195,12 @@ function ProductStockBody({
     setToDate(range?.to ?? null);
   };
 
-  const variantOptions = [
-    { key: '', value: 'كل المتغيرات' },
+  const variantCards: VariantCard[] = [
+    { id: 0, label: 'كل المتغيرات', options: [] },
     ...stock.variants.map((variant) => ({
-      key: String(variant.variantId),
-      value: variant.variantLabel || stock.product.name,
+      id: variant.variantId,
+      label: variant.variantLabel || stock.product.name,
+      options: [],
     })),
   ];
 
@@ -255,13 +258,15 @@ function ProductStockBody({
           <h3 className="text-sm font-semibold text-foreground">سجل الحركات</h3>
           {canHistory ? (
             <>
+              <VariantCards
+                cards={variantCards}
+                rows={[]}
+                selection={{}}
+                selectedCardIds={new Set([variantId ?? 0])}
+                onSelect={(card) => onVariantChange(card.id === 0 ? null : card.id)}
+                scrollClassName="max-h-72"
+              />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                <SearchableSelect
-                  options={variantOptions}
-                  value={variantId === null ? '' : String(variantId)}
-                  onValueChange={(value) => onVariantChange(value ? Number(value) : null)}
-                  placeholder="كل المتغيرات"
-                />
                 <SearchableSelect
                   options={SOURCE_OPTIONS}
                   value={source}
