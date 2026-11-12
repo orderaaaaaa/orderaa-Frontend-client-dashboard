@@ -42,7 +42,11 @@ export default function CreateReturnFromOrderModal({
 }: CreateReturnFromOrderModalProps) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
-  const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isOpen });
+  const orderQuery = useQuery({
+    ...orderDetailsQueryOptions(orderId),
+    enabled: isOpen,
+    refetchOnWindowFocus: false,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const preset = useMemo(
     () => (orderQuery.data ? presetOf(orderQuery.data) : null),
@@ -60,16 +64,16 @@ export default function CreateReturnFromOrderModal({
   };
 
   const renderBody = () => {
-    if (orderQuery.isError) {
-      return (
-        <ErrorState
-          error={orderQuery.error}
-          fallback={t('inProcess.sheet.createReturnLoadError')}
-          onRetry={() => void orderQuery.refetch()}
-        />
-      );
-    }
     if (preset === null) {
+      if (orderQuery.isError) {
+        return (
+          <ErrorState
+            error={orderQuery.error}
+            fallback={t('inProcess.sheet.createReturnLoadError')}
+            onRetry={() => void orderQuery.refetch()}
+          />
+        );
+      }
       return (
         <div className="flex flex-col gap-4">
           <Skeleton className="h-12 bg-muted border border-border/60" />

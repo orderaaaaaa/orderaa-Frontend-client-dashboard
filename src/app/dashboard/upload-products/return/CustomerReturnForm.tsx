@@ -170,6 +170,7 @@ function CustomerReturnForm({
 }: CustomerReturnFormProps) {
   const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
+  const initialLoadSettledRef = useRef(false);
   const isPreset = preset !== undefined;
   const [customerId, setCustomerId] = useState<number | null>(
     preset?.customerId ?? initialCustomerId ?? null,
@@ -200,9 +201,11 @@ function CustomerReturnForm({
   const orders = candidates?.orders ?? [];
   const lastAddress = candidates?.customer.lastAddress ?? null;
   const storedGovernorateName = isPreset
-    ? preset.governorateName
+    ? (preset.governorateOption ?? preset.governorateName)
     : lastAddress?.governorate;
-  const storedCityName = isPreset ? preset.cityName : lastAddress?.city;
+  const storedCityName = isPreset
+    ? (preset.cityOption ?? preset.cityName)
+    : lastAddress?.city;
   const pickerCustomer = useMemo<CustomerPick | null>(() => {
     if (customerId === null) return null;
     if (pickedCustomer?.id === customerId) return pickedCustomer;
@@ -274,17 +277,30 @@ function CustomerReturnForm({
   }, [isPreset, lastAddress]);
 
   useEffect(() => {
-    if (
-      initialCustomerId === undefined ||
-      customerId !== initialCustomerId ||
-      !candidatesFailed
-    )
+    if (initialCustomerId === undefined || initialLoadSettledRef.current)
       return;
+    if (customerId !== initialCustomerId) {
+      initialLoadSettledRef.current = true;
+      return;
+    }
+    if (!candidatesFailed) {
+      if (candidates?.customer.id === initialCustomerId)
+        initialLoadSettledRef.current = true;
+      return;
+    }
+    initialLoadSettledRef.current = true;
     setCustomerId(null);
     toast.error(
       getApiErrorMessage(candidatesError, t('customerReturn.orders.loadError')),
     );
-  }, [initialCustomerId, customerId, candidatesFailed, candidatesError, t]);
+  }, [
+    initialCustomerId,
+    customerId,
+    candidates,
+    candidatesFailed,
+    candidatesError,
+    t,
+  ]);
 
   useEffect(() => {
     onPendingChange?.(createReturn.isPending);
@@ -561,18 +577,26 @@ function CustomerReturnForm({
       : null;
 
   const governorateLabel =
-    governoratesQuery.data?.options.find(
-      (option) => option.value === draft.governorateOption,
-    )?.label ?? draft.governorateOption;
+    draft.governorateOption === ''
+      ? null
+      : (governoratesQuery.data?.options.find(
+          (option) => option.value === draft.governorateOption,
+        )?.label ??
+        preset?.governorateName ??
+        null);
   const cityLabel =
-    citiesQuery.data?.options.find(
-      (option) => option.value === draft.cityOption,
-    )?.label ?? draft.cityOption;
+    draft.cityOption === ''
+      ? null
+      : (citiesQuery.data?.options.find(
+          (option) => option.value === draft.cityOption,
+        )?.label ??
+        preset?.cityName ??
+        null);
   const presetRows = [
     {
       label: t('customerReturn.field.company'),
       value: selectedCompanyName,
-      missing: draft.shippingCompanyId === '',
+      missing: draft.shippingCompanyId === '' || selectedCompanyName === null,
       pending: false,
     },
     {
@@ -678,10 +702,10 @@ function CustomerReturnForm({
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3">
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate font-semibold text-foreground">
-                      {candidates?.customer.name ?? ''}
+                      {candidates?.customer.name ?? '—'}
                     </span>
                     <span dir="ltr" className="text-start text-sm text-muted-foreground">
-                      {candidates?.customer.phoneNumbers[0] ?? ''}
+                      {candidates?.customer.phoneNumbers[0] ?? '—'}
                     </span>
                   </div>
                 </div>
