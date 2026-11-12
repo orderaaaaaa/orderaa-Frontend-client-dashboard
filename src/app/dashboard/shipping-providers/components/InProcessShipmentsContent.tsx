@@ -1623,66 +1623,66 @@ export function InProcessShipmentsContent({
   );
 
   return (
-    <FollowupChatAvailableContext.Provider value={chatAvailable}>
-    <div className="w-full max-w-full overflow-x-clip">
-      <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
-        {isInProcess && (
-          <InProcessList
-            shippingCompanyId={shippingCompanyId}
-            filters={filters}
-            page={page}
-            limit={limit}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            viewSwitch={viewSwitch}
-            hasActiveFilters={activeCount > 0}
-            onClearAll={clearAllFilters}
-            controls={renderControls}
-            onOpenFollowup={openFollowup}
-          />
-        )}
-        {view === 'returned' && (
-          <ReturnedList
-            shippingCompanyId={shippingCompanyId}
-            filters={returnedFilters}
-            page={page}
-            limit={limit}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            viewSwitch={viewSwitch}
-            hasActiveFilters={activeCount > 0}
-            onClearAll={clearAllFilters}
-            controls={renderControls}
-            onOpenFollowup={openFollowup}
-          />
-        )}
-        {view === 'delivered' && (
-          <DeliveredList
-            shippingCompanyId={shippingCompanyId}
-            filters={deliveredFilters}
-            page={page}
-            limit={limit}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            viewSwitch={viewSwitch}
-            hasActiveFilters={activeCount > 0}
-            onClearAll={clearAllFilters}
-            controls={renderControls}
-            onOpenFollowup={openFollowup}
-          />
-        )}
-      </div>
-      {followup !== null && (
-        <OrderFollowupDialog
-          key={followup.target.orderId}
-          target={followup.target}
-          carrierName={carrierName}
-          carrierIsTurbo={carrierIsTurbo}
-          opener={followup.opener}
-          onClose={() => setFollowup(null)}
-        />
-      )}
-    </div>
-    </FollowupChatAvailableContext.Provider>
+      <FollowupChatAvailableContext.Provider value={chatAvailable}>
+        <div className="w-full max-w-full overflow-x-clip">
+          <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
+            {isInProcess && (
+              <InProcessList
+                shippingCompanyId={shippingCompanyId}
+                filters={filters}
+                page={page}
+                limit={limit}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                viewSwitch={viewSwitch}
+                hasActiveFilters={activeCount > 0}
+                onClearAll={clearAllFilters}
+                controls={renderControls}
+                onOpenFollowup={openFollowup}
+              />
+            )}
+            {view === 'returned' && (
+              <ReturnedList
+                shippingCompanyId={shippingCompanyId}
+                filters={returnedFilters}
+                page={page}
+                limit={limit}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                viewSwitch={viewSwitch}
+                hasActiveFilters={activeCount > 0}
+                onClearAll={clearAllFilters}
+                controls={renderControls}
+                onOpenFollowup={openFollowup}
+              />
+            )}
+            {view === 'delivered' && (
+              <DeliveredList
+                shippingCompanyId={shippingCompanyId}
+                filters={deliveredFilters}
+                page={page}
+                limit={limit}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                viewSwitch={viewSwitch}
+                hasActiveFilters={activeCount > 0}
+                onClearAll={clearAllFilters}
+                controls={renderControls}
+                onOpenFollowup={openFollowup}
+              />
+            )}
+          </div>
+          {followup !== null && (
+            <OrderFollowupDialog
+              key={followup.target.orderId}
+              target={followup.target}
+              carrierName={carrierName}
+              carrierIsTurbo={carrierIsTurbo}
+              opener={followup.opener}
+              onClose={() => setFollowup(null)}
+            />
+          )}
+        </div>
+      </FollowupChatAvailableContext.Provider>
   );
 }
