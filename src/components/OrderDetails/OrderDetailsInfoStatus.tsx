@@ -20,13 +20,14 @@ import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMapp
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { ORDER_STATUSES } from '@/lib/generated/permission-codes';
 import { LiaTruckSolid, LiaHeadsetSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
-import clsx from 'clsx';
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
+import { ChatAgentAvatar, ChatBubble, ChatCarrierAvatar } from '@/components/chat/ChatBubble';
+import { ChatDaySeparator } from '@/components/chat/ChatDaySeparator';
 
 
 interface OrderDetailsInfoStatusProps {
@@ -205,42 +206,6 @@ function buildFullTimeline(events: MappedEvent[], status: string): DayGroup[] {
   return result;
 }
 
-function ChatBubble({
-  event,
-  isAgent,
-}: {
-  event: MappedEvent;
-  isAgent: boolean;
-}) {
-  return (
-    <div className={clsx('flex items-end gap-2 mb-3', isAgent ? 'justify-end' : 'justify-start')}>
-      {!isAgent && (
-        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-          <LiaTruckSolid className="w-4 h-4 text-red-600" />
-        </div>
-      )}
-      <div
-        className={clsx(
-          'max-w-[75%] rounded-2xl px-4 py-2.5 text-sm',
-          isAgent
-            ? 'bg-primary text-white rounded-bl-sm'
-            : 'bg-gray-200 text-gray-900 rounded-br-sm'
-        )}
-      >
-        <p className="font-medium">{event.note || event.status}</p>
-        <p className={clsx('text-xs mt-1', isAgent ? 'text-white/70' : 'text-gray-500')}>
-          <DateWithRelative value={event.createdAt} variant="inline" />
-        </p>
-      </div>
-      {isAgent && (
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <LiaHeadsetSolid className="w-4 h-4 text-primary-text" />
-        </div>
-      )}
-    </div>
-  );
-}
-
 function LogisticsChat({ events, status, scrollToEnd }: { events: MappedEvent[]; status: string; scrollToEnd?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const timeline = buildFullTimeline(events, status);
@@ -266,20 +231,22 @@ function LogisticsChat({ events, status, scrollToEnd }: { events: MappedEvent[];
     <div ref={containerRef} className="bg-card rounded-xl border border-gray-200 p-4 max-h-[500px] overflow-y-auto">
       {timeline.map((group) => (
         <div key={group.dateKey}>
-          <div className="flex items-center justify-center my-4">
-            <span className="bg-gray-100 text-gray-500 text-xs font-medium px-4 py-1.5 rounded-full">
-              {group.dateLabel}
-            </span>
-          </div>
+          <ChatDaySeparator label={group.dateLabel} />
 
           {group.events.length > 0 ? (
-            group.events.map((event) => (
-              <ChatBubble
-                key={event.id}
-                event={event}
-                isAgent={!isLogisticsEvent(event)}
-              />
-            ))
+            group.events.map((event) => {
+              const isAgent = !isLogisticsEvent(event);
+              return (
+                <ChatBubble
+                  key={event.id}
+                  side={isAgent ? 'end' : 'start'}
+                  avatar={isAgent ? <ChatAgentAvatar /> : <ChatCarrierAvatar />}
+                  time={<DateWithRelative value={event.createdAt} variant="inline" />}
+                >
+                  <p className="font-medium">{event.note || event.status}</p>
+                </ChatBubble>
+              );
+            })
           ) : group.isToday ? (
             <div className="border border-dashed border-gray-300 rounded-xl p-4 flex items-center justify-center gap-2 mb-3">
               <LiaTruckSolid className="w-5 h-5 text-gray-400" />

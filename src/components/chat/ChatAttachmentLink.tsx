@@ -2,7 +2,7 @@ import { ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/format';
 
 interface ChatAttachmentLinkProps {
-  url: string;
+  url: string | null;
   name: string;
   size: number | null;
   isImage: boolean;
@@ -15,7 +15,7 @@ const formatSize = (bytes: number): string => `${formatNumber(Math.max(1, Math.r
 export function ChatAttachmentLink({ url, name, size, isImage }: ChatAttachmentLinkProps) {
   const Icon = isImage ? ImageIcon : FileText;
 
-  if (!SAFE_LINK_PATTERN.test(url)) {
+  if (url === null || !SAFE_LINK_PATTERN.test(url)) {
     return (
       <span className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground">
         <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />

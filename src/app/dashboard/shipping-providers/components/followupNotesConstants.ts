@@ -1,4 +1,5 @@
 import type { FollowupActionEventSource, FollowupCarrierText, FollowupNotePartyValue } from '@/lib/api/followup';
+import type { CarrierChatSendError } from '@/types/carrierChat';
 
 export const FOLLOWUP_NOTE_MAX_LENGTH = 2000;
 
@@ -87,6 +88,23 @@ export const CHAT_LAST_SYNC_PREFIX = 'آخر تحديث من تيربو';
 export const CHAT_REFRESH_LABEL = 'تحديث';
 export const CHAT_SEND_LABEL = 'إرسال الرسالة';
 export const CHAT_ENTER_HINT = 'Enter للإرسال · Shift+Enter لسطر جديد';
+export const CHAT_SENT_BY_PREFIX = 'أرسلها:';
+export const CHAT_STORE_ACCOUNT_LABEL = 'من حساب المتجر';
+export const CHAT_SENDING_LABEL = 'جارٍ الإرسال';
+export const CHAT_SENT_STATE_LABEL = 'أُرسلت';
+export const CHAT_NOT_SENT_LABEL = 'لم تُرسل';
+export const CHAT_RETRY_LABEL = 'إعادة المحاولة';
+export const CHAT_RETRY_ARIA_LABEL = 'إعادة إرسال الرسالة';
+export const CHAT_RESENT_LABEL = 'أُعيد إرسالها';
+export const CHAT_LOCATION_LABEL = 'عرض الموقع';
+export const CHAT_SEND_ERROR_LABELS: Record<CarrierChatSendError, string> = {
+  CARRIER_REFUSED: 'تيربو رفضت الإرسال على هذه الشحنة',
+  NOT_FOUND: 'الشحنة غير موجودة لدى تيربو',
+  AUTH: 'تعذر الدخول إلى حساب تيربو',
+  REJECTED: 'رفضت تيربو الرسالة',
+  UNREACHABLE: 'تعذر الاتصال بتيربو',
+  UNCONFIRMED: 'لم تؤكد تيربو وصول الرسالة',
+};
 
 export const ACTION_LOG_EMPTY = 'لا توجد إجراءات مسجلة لهذا الطلب';
 export const ACTION_LOG_HISTORY_FORBIDDEN_NOTICE =
