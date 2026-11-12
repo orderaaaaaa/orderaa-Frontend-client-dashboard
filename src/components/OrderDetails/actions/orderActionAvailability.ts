@@ -1,5 +1,5 @@
 import { OrderStatus } from '@/types/orders';
-import { POST_SHIPPING_STATUSES } from '@/types/logistics';
+import { DELIVERED_STATUSES } from '@/types/shippingProviders';
 import { STOP_OPERATION_STATUSES } from './constants';
 
 export interface OrderActionAvailabilityInput {
@@ -96,6 +96,8 @@ const CUSTOMER_RETURN_CANCEL_STATUSES = new Set<string>([
 
 const SAME_TARGET_ALLOWED = new Set<string>([OrderStatus.ATTEMPTED, OrderStatus.EDIT_REJECTED]);
 
+const RETURN_REFUND_STATUSES = new Set<string>(DELIVERED_STATUSES);
+
 const NO_ACTIONS: OrderActionAvailability = {
   confirm: false,
   followUp: false,
@@ -172,8 +174,8 @@ export function orderActionAvailabilityOf({
   lastEventStatus,
 }: OrderActionAvailabilityInput): OrderActionAvailability {
   if (!KNOWN_STATUSES.has(status) || !actionable) return NO_ACTIONS;
-  if (frozen) return { ...NO_ACTIONS, returnRefund: true };
-  const returnRefund = POST_SHIPPING_STATUSES.has(status);
+  const returnRefund = RETURN_REFUND_STATUSES.has(status);
+  if (frozen) return { ...NO_ACTIONS, returnRefund };
   if (isCustomerReturn) return customerReturnAvailability(status, returnRefund);
   return normalOrderAvailability(status, lastEventStatus, returnRefund);
 }
