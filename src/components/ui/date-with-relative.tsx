@@ -97,13 +97,17 @@ export function DateWithRelative({
   if (variant === 'inline') {
     return (
       <time {...attributes} className={className}>
-        {absolute}
-        {relative && (
+        {relative ? (
           <>
-            {' '}
-            <span aria-hidden className="mx-0.5 text-muted-foreground/60">·</span>{' '}
+            <span className="whitespace-nowrap">
+              {absolute}
+              {' '}
+              <span aria-hidden className="mx-0.5 text-muted-foreground/60">·</span>
+            </span>{' '}
             <span className="whitespace-nowrap text-muted-foreground">{relative}</span>
           </>
+        ) : (
+          absolute
         )}
       </time>
     );

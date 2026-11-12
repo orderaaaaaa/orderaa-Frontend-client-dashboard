@@ -28,7 +28,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { IconType } from 'react-icons';
-import { NoticeBadge } from '@/components/notices/NoticeBadge';
+import { NoticeBadge, useNoticeBadgeVisible } from '@/components/notices/NoticeBadge';
 import { NoticesDialog } from '@/components/notices/NoticesDialog';
 import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
@@ -90,7 +90,9 @@ export default function OrderCard({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isNoticesOpen, setIsNoticesOpen] = useState(false);
   const canAcknowledgeNotices = useHasPermissionStrict(PERMISSION_CODES.ORDERS_NOTICES_ACKNOWLEDGE);
+  const noticeVisible = useNoticeBadgeVisible(unreadNoticeCount);
   const selectable = select && !isDeleted;
+  const showsBadges = !hideCustomerInfo && Boolean(name) && name !== 'غير محدد' && (repeatCount > 1 || (!isDeleted && noticeVisible) || Boolean(isBlocked));
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelectionChange?.(e.target.checked);
   };
@@ -168,43 +170,43 @@ export default function OrderCard({
 
       {/* Content */}
       <div className="flex flex-col items-start px-6 gap-3 flex-grow min-w-0 w-full">
-        <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-          <DateWithRelative value={createdAt} variant="inline" className="text-sm text-muted-foreground leading-6 min-w-0" />
-          <CalendarClock
-            className="w-[18px] h-[18px] flex-shrink-0 mt-[3px]"
-            style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
-          />
-        </div>
-
-        {/* Code */}
-        {code && code !== 'غير محدد' && (
-          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-            <CopyableCode value={code} label="نسخ كود الطلب" className="min-w-0 max-w-full">
-              <span className="text-base font-medium text-foreground break-words min-w-0">{code}</span>
-            </CopyableCode>
-            <span className="text-base font-normal text-foreground flex-shrink-0">الكود :</span>
-            <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
-            {isDeleted && <DeletedOrderChip />}
-          </div>
-        )}
-
-        {/* Name + Alert + Time */}
-        {!hideCustomerInfo && name && name !== 'غير محدد' && (
-          <div className="flex flex-row items-center justify-between w-full">
-            <div className="flex flex-row-reverse items-start gap-2 min-w-0">
-              <span className="text-base font-medium text-foreground break-words min-w-0">{name}</span>
-
-              <User
-                className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+        <div className="flex w-full items-start gap-2">
+          <div className="flex flex-col items-start gap-3 flex-1 min-w-0">
+            <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+              <DateWithRelative value={createdAt} variant="inline" className="text-sm text-muted-foreground leading-6 min-w-0" />
+              <CalendarClock
+                className="w-[18px] h-[18px] flex-shrink-0 mt-[3px]"
                 style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
               />
             </div>
 
-            <div
-              className={`flex absolute left-5 z-[2] flex-col-reverse items-center gap-3
-                ${selectable ? 'top-10' : 'top-5'}
-                `}
-            >
+            {/* Code */}
+            {code && code !== 'غير محدد' && (
+              <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+                <CopyableCode value={code} label="نسخ كود الطلب" className="min-w-0 max-w-full">
+                  <span className="text-base font-medium text-foreground break-words min-w-0">{code}</span>
+                </CopyableCode>
+                <span className="text-base font-normal text-foreground flex-shrink-0">الكود :</span>
+                <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
+                {isDeleted && <DeletedOrderChip />}
+              </div>
+            )}
+
+            {/* Name + Alert + Time */}
+            {!hideCustomerInfo && name && name !== 'غير محدد' && (
+              <div className="flex flex-row-reverse items-start gap-2 min-w-0">
+                <span className="text-base font-medium text-foreground break-words min-w-0">{name}</span>
+
+                <User
+                  className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+                  style={{ strokeWidth: 1.5, color: 'var(--muted-foreground)' }}
+                />
+              </div>
+            )}
+          </div>
+
+          {showsBadges && (
+            <div className="relative z-[2] flex flex-col-reverse items-center gap-3 flex-shrink-0">
               {repeatCount > 1 && (
                 <Button
                   variant="ghost"
@@ -240,8 +242,8 @@ export default function OrderCard({
                 </Then>
               </If>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Phones */}
         {!hideCustomerInfo &&
