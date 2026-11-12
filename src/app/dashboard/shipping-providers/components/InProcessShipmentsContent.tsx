@@ -45,6 +45,7 @@ import {
   useBulkCloseClosure,
   useInProcessCountsQuery,
   useInProcessShipmentsQuery,
+  useOutcomeCountsQuery,
   useReturnedShipmentsQuery,
 } from '@/services/shippingProviders';
 import { FOLLOWUP_WORK_STATES, type FollowupWorkState } from '@/types/logistics';
@@ -55,11 +56,13 @@ import {
   IN_PROCESS_STATUSES,
   LATENESS_FILTERS,
   type CarrierHeader,
+  type DeliveredCountFilters,
   type DeliveredStatus,
   type InProcessCountFilters,
   type InProcessFilters,
   type InProcessStatus,
   type LatenessFilter,
+  type ReturnedFilters,
 } from '@/types/shippingProviders';
 import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
@@ -67,6 +70,7 @@ import { formatNumber } from './formatNumber';
 import { OrderActionLogModal } from './OrderActionLogModal';
 import { InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
 import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
+import { toReturnedParams } from './shipmentParams';
 import { UnknownShippingCostCount } from './UnknownShippingCostCount';
 
 const MAX_PAGE_SIZE = 100;
@@ -113,6 +117,16 @@ const VIEW_SUBTITLE_KEYS: Record<ShipmentView, TranslationKey> = {
   returned: 'inProcess.subtitle.returned',
   delivered: 'inProcess.subtitle.delivered',
 };
+const DATE_LABEL_KEYS: Record<ShipmentView, { from: TranslationKey; to: TranslationKey }> = {
+  'in-process': { from: 'inProcess.filters.from', to: 'inProcess.filters.to' },
+  returned: { from: 'inProcess.filters.returnedFrom', to: 'inProcess.filters.returnedTo' },
+  delivered: { from: 'inProcess.filters.deliveredFrom', to: 'inProcess.filters.deliveredTo' },
+};
+const SEARCH_NOTICE_KEYS: Record<ShipmentView, TranslationKey> = {
+  'in-process': 'inProcess.filters.searchNotice',
+  returned: 'inProcess.filters.searchNoticeTab',
+  delivered: 'inProcess.filters.searchNoticeTab',
+};
 const STATUSES_BY_VIEW: Record<ShipmentView, readonly (InProcessStatus | DeliveredStatus)[]> = {
   'in-process': IN_PROCESS_STATUSES,
   returned: [],
@@ -147,6 +161,10 @@ const readStatus = (value: string | null, view: ShipmentView): InProcessStatus |
 const isInProcessStatus = (
   status: InProcessStatus | DeliveredStatus | undefined,
 ): status is InProcessStatus => IN_PROCESS_STATUSES.some((known) => known === status);
+
+const isDeliveredStatus = (
+  status: InProcessStatus | DeliveredStatus | undefined,
+): status is DeliveredStatus => DELIVERED_STATUSES.some((known) => known === status);
 
 const readLateness = (value: string | null): LatenessFilter[] => {
   const picked = new Set((value ?? '').split(','));
@@ -453,8 +471,32 @@ function ListPagination({
   );
 }
 
-interface InProcessControlsProps {
-  status: InProcessStatus | undefined;
+interface ShipmentsEmptyStateProps {
+  title: TranslationKey;
+  hasActiveFilters: boolean;
+  onClearAll: () => void;
+}
+
+function ShipmentsEmptyState({ title, hasActiveFilters, onClearAll }: ShipmentsEmptyStateProps) {
+  const { t } = useI18n();
+  return (
+    <EmptyState
+      icon={EMPTY_STATE_ICON}
+      title={t(hasActiveFilters ? 'inProcess.empty.filtered' : title)}
+      action={
+        hasActiveFilters ? (
+          <Button type="button" variant="outline" size="sm" onClick={onClearAll}>
+            {t('inProcess.filters.clear')}
+          </Button>
+        ) : undefined
+      }
+    />
+  );
+}
+
+interface ShipmentControlsProps {
+  view: ShipmentView;
+  status: InProcessStatus | DeliveredStatus | undefined;
   statusOptions: SelectOptions;
   lateness: LatenessFilter[];
   governorate: string;
@@ -476,7 +518,8 @@ interface InProcessControlsProps {
   workStateCounts: WorkStateCounts;
 }
 
-function InProcessControls({
+function ShipmentControls({
+  view,
   status,
   statusOptions,
   lateness,
@@ -497,10 +540,13 @@ function InProcessControls({
   searchInputRef,
   searchActive,
   workStateCounts,
-}: InProcessControlsProps) {
+}: ShipmentControlsProps) {
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
   const dimWhenSearching = searchActive ? 'opacity-60' : undefined;
+  const showStatus = view !== 'returned';
+  const isInProcessView = view === 'in-process';
+  const dateLabelKeys = DATE_LABEL_KEYS[view];
   const latenessOptions = LATENESS_FILTERS.map((key) => ({
     key,
     label: t(LATENESS_LABEL_KEYS[key]),
@@ -556,47 +602,51 @@ function InProcessControls({
             className="border-amber-200 bg-amber-50 text-amber-800"
           >
             <Info aria-hidden="true" />
-            <p>{t('inProcess.filters.searchNotice')}</p>
+            <p>{t(SEARCH_NOTICE_KEYS[view])}</p>
           </Alert>
         )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
-            <label htmlFor="in-process-status" className="text-xs text-muted-foreground">
-              {t('inProcess.filters.status')}
-            </label>
-            <SearchableSelect
-              id="in-process-status"
-              aria-label={t('inProcess.filters.status')}
-              value={status ?? ''}
-              onChange={(value) => onPatch({ status: value, page: '' })}
-              options={statusOptions}
-              placeholder={t('inProcess.filters.allStatuses')}
-              clearable
-              disabled={searchActive}
-              widthClass="w-full"
-              triggerClassName="h-10 py-0"
-            />
-          </div>
-          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
-            <label htmlFor="in-process-lateness" className="text-xs text-muted-foreground">
-              {t('inProcess.filters.lateness')}
-            </label>
-            <MultiSelectDropdown
-              id="in-process-lateness"
-              value={lateness}
-              onChange={(next) => {
-                const values = LATENESS_FILTERS.filter((filter) => next.includes(filter));
-                onPatch({ lateness: values.join(','), page: '' });
-              }}
-              options={latenessOptions}
-              placeholder={t('inProcess.filters.allLateness')}
-              disabled={searchActive}
-              widthClass="w-full"
-              summarizeSelection
-              triggerClassName="h-10 py-0"
-            />
-          </div>
+          {showStatus && (
+            <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
+              <label htmlFor="in-process-status" className="text-xs text-muted-foreground">
+                {t('inProcess.filters.status')}
+              </label>
+              <SearchableSelect
+                id="in-process-status"
+                aria-label={t('inProcess.filters.status')}
+                value={status ?? ''}
+                onChange={(value) => onPatch({ status: value, page: '' })}
+                options={statusOptions}
+                placeholder={t('inProcess.filters.allStatuses')}
+                clearable
+                disabled={searchActive}
+                widthClass="w-full"
+                triggerClassName="h-10 py-0"
+              />
+            </div>
+          )}
+          {isInProcessView && (
+            <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
+              <label htmlFor="in-process-lateness" className="text-xs text-muted-foreground">
+                {t('inProcess.filters.lateness')}
+              </label>
+              <MultiSelectDropdown
+                id="in-process-lateness"
+                value={lateness}
+                onChange={(next) => {
+                  const values = LATENESS_FILTERS.filter((filter) => next.includes(filter));
+                  onPatch({ lateness: values.join(','), page: '' });
+                }}
+                options={latenessOptions}
+                placeholder={t('inProcess.filters.allLateness')}
+                disabled={searchActive}
+                widthClass="w-full"
+                summarizeSelection
+                triggerClassName="h-10 py-0"
+              />
+            </div>
+          )}
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-governorate" className="text-xs text-muted-foreground">
               {t('inProcess.filters.governorate')}
@@ -637,7 +687,7 @@ function InProcessControls({
           </div>
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-from" className="text-xs text-muted-foreground">
-              {t('inProcess.filters.from')}
+              {t(dateLabelKeys.from)}
             </label>
             <Input
               id="in-process-from"
@@ -650,7 +700,7 @@ function InProcessControls({
           </div>
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-to" className="text-xs text-muted-foreground">
-              {t('inProcess.filters.to')}
+              {t(dateLabelKeys.to)}
             </label>
             <Input
               id="in-process-to"
@@ -885,20 +935,10 @@ function InProcessList({
         ) : isError ? (
           <ErrorState error={error} fallback={t('inProcess.error.load')} onRetry={() => refetch()} />
         ) : total === 0 ? (
-          <EmptyState
-            icon={EMPTY_STATE_ICON}
-            title={
-              hasActiveFilters
-                ? t('inProcess.empty.filtered')
-                : t('inProcess.empty.inProcess')
-            }
-            action={
-              hasActiveFilters ? (
-                <Button type="button" variant="outline" size="sm" onClick={onClearAll}>
-                  {t('inProcess.filters.clear')}
-                </Button>
-              ) : undefined
-            }
+          <ShipmentsEmptyState
+            title="inProcess.empty.inProcess"
+            hasActiveFilters={hasActiveFilters}
+            onClearAll={onClearAll}
           />
         ) : (
           <>
@@ -986,17 +1026,25 @@ function InProcessList({
 }
 
 interface ReturnedListProps extends ListProps {
+  filters: ReturnedFilters;
+  hasActiveFilters: boolean;
+  onClearAll: () => void;
+  controls: ReactNode;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
 
 function ReturnedList({
   shippingCompanyId,
+  filters,
   page,
   limit,
   onPageChange,
   onPageSizeChange,
   viewSwitch,
+  hasActiveFilters,
+  onClearAll,
+  controls,
   onOpenNotes,
   onOpenActionLog,
 }: ReturnedListProps) {
@@ -1010,7 +1058,7 @@ function ReturnedList({
     isSuccess,
     error,
     refetch,
-  } = useReturnedShipmentsQuery(shippingCompanyId, { page, limit, workState: 'all' });
+  } = useReturnedShipmentsQuery(shippingCompanyId, filters);
 
   const shipments = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -1048,6 +1096,7 @@ function ReturnedList({
       </div>
 
       <ViewTabs {...viewSwitch}>
+        {controls}
         <p role="status" aria-live="polite" className="sr-only">
           {isLoading ? t('common.loading') : isFetching ? t('inProcess.refreshing') : ''}
         </p>
@@ -1063,7 +1112,11 @@ function ReturnedList({
         ) : isError ? (
           <ErrorState error={error} fallback={t('inProcess.error.load')} onRetry={() => refetch()} />
         ) : total === 0 ? (
-          <EmptyState icon={EMPTY_STATE_ICON} title={t('inProcess.empty.returned')} />
+          <ShipmentsEmptyState
+            title="inProcess.empty.returned"
+            hasActiveFilters={hasActiveFilters}
+            onClearAll={onClearAll}
+          />
         ) : (
           <>
             <ResultsFrame busy={isFetching}>
@@ -1106,9 +1159,10 @@ function ReturnedList({
 interface DeliveredPlaceholderProps {
   shippingCompanyId: number;
   viewSwitch: ViewSwitchProps;
+  controls: ReactNode;
 }
 
-function DeliveredPlaceholder({ shippingCompanyId, viewSwitch }: DeliveredPlaceholderProps) {
+function DeliveredPlaceholder({ shippingCompanyId, viewSwitch, controls }: DeliveredPlaceholderProps) {
   const { t } = useI18n();
   const { shippingCompanies } = useShippingCompanies();
   const implementation = shippingCompanies.find(
@@ -1119,6 +1173,7 @@ function DeliveredPlaceholder({ shippingCompanyId, viewSwitch }: DeliveredPlaceh
     <>
       <ListHeader view="delivered" carrier={undefined} implementation={implementation} isLoading={false} />
       <ViewTabs {...viewSwitch}>
+        {controls}
         <EmptyState icon={EMPTY_STATE_ICON} title={t('inProcess.empty.delivered')} />
       </ViewTabs>
     </>
@@ -1146,6 +1201,7 @@ export function InProcessShipmentsContent({
   const to = searchParams.get('to') ?? '';
   const status = readStatus(searchParams.get('status'), view);
   const inProcessStatus = isInProcessStatus(status) ? status : undefined;
+  const outcomeStatus = isDeliveredStatus(status) ? status : undefined;
   const lateness = readLateness(searchParams.get('lateness'));
   const latenessFilter = lateness.length > 0 ? lateness : undefined;
   const governorate = searchParams.get('governorate') ?? '';
@@ -1195,7 +1251,7 @@ export function InProcessShipmentsContent({
   const { data: governorates = [] } = useGovernoratesQuery();
   const { data: cities = [], isLoading: citiesLoading } = useCitiesQuery(governorate || undefined);
 
-  const statusOptions = IN_PROCESS_STATUSES.map((value) => ({
+  const statusOptions = STATUSES_BY_VIEW[view].map((value) => ({
     key: value,
     label: getStatusLabel(value),
   }));
@@ -1213,6 +1269,17 @@ export function InProcessShipmentsContent({
     limit,
   };
 
+  const returnedFilters = toReturnedParams({
+    from: from || undefined,
+    to: to || undefined,
+    governorate: governorate || undefined,
+    city: city || undefined,
+    search: appliedSearch || undefined,
+    workState,
+    page,
+    limit,
+  });
+
   const handlePageChange = (nextPage: number) =>
     updateParams({ page: nextPage > 1 ? String(nextPage) : '' });
 
@@ -1229,28 +1296,49 @@ export function InProcessShipmentsContent({
   const [actionLog, setActionLog] = useState<ActionLogTarget | null>(null);
   const openActionLog = (orderId: number, orderCode: string) => setActionLog({ orderId, orderCode });
 
-  const activeCount = [inProcessStatus, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length;
+  const activeCount = isInProcess
+    ? [inProcessStatus, latenessFilter, governorate, city, from, to, appliedSearch].filter(Boolean).length
+    : [outcomeStatus, governorate, city, from, to, appliedSearch].filter(Boolean).length;
   const searchActive = appliedSearch !== '';
 
-  const countFilters: InProcessCountFilters = searchActive
-    ? { search: appliedSearch }
-    : {
-        from: from || undefined,
-        to: to || undefined,
-        status: inProcessStatus,
-        lateness: latenessFilter,
-        governorate: governorate || undefined,
-        city: city || undefined,
-      };
+  const countFilters: InProcessCountFilters = !isInProcess
+    ? {}
+    : searchActive
+      ? { search: appliedSearch }
+      : {
+          from: from || undefined,
+          to: to || undefined,
+          status: inProcessStatus,
+          lateness: latenessFilter,
+          governorate: governorate || undefined,
+          city: city || undefined,
+        };
   const { data: countsData } = useInProcessCountsQuery(shippingCompanyId, countFilters);
+
+  const outcomeCountFilters: DeliveredCountFilters = {
+    from: from || undefined,
+    to: to || undefined,
+    governorate: governorate || undefined,
+    city: city || undefined,
+    search: appliedSearch || undefined,
+    status: outcomeStatus,
+  };
+  const { data: outcomeCounts } = useOutcomeCountsQuery(
+    shippingCompanyId,
+    view === 'delivered' ? 'delivered' : 'returned',
+    outcomeCountFilters,
+    !isInProcess,
+  );
+
+  const activeWorkStateCounts = isInProcess ? countsData?.inProcess : outcomeCounts;
   const tabCounts: ShipmentTabCounts = {
     inProcess: countsData?.inProcess.all,
-    returned: countsData?.returned ?? undefined,
-    delivered: countsData?.delivered ?? undefined,
+    returned: view === 'returned' ? outcomeCounts?.all : (countsData?.returned ?? undefined),
+    delivered: view === 'delivered' ? outcomeCounts?.all : (countsData?.delivered ?? undefined),
     workState: {
-      open: countsData?.inProcess.open,
-      closed: countsData?.inProcess.closed,
-      all: countsData?.inProcess.all,
+      open: activeWorkStateCounts?.open,
+      closed: activeWorkStateCounts?.closed,
+      all: activeWorkStateCounts?.all,
     },
   };
 
@@ -1289,6 +1377,32 @@ export function InProcessShipmentsContent({
     },
   };
 
+  const controls = (
+    <ShipmentControls
+      view={view}
+      status={status}
+      statusOptions={statusOptions}
+      lateness={lateness}
+      governorate={governorate}
+      governorates={governorates}
+      city={city}
+      cities={cities}
+      citiesLoading={citiesLoading}
+      from={from}
+      to={to}
+      searchInput={searchInput}
+      appliedSearch={appliedSearch}
+      activeCount={activeCount}
+      workState={workState}
+      onPatch={updateParams}
+      onClearAll={clearAllFilters}
+      onSearchChange={setSearchInput}
+      searchInputRef={searchInputRef}
+      searchActive={searchActive}
+      workStateCounts={tabCounts.workState}
+    />
+  );
+
   return (
     <div className="w-full max-w-full overflow-x-clip">
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
@@ -1303,30 +1417,7 @@ export function InProcessShipmentsContent({
             viewSwitch={viewSwitch}
             hasActiveFilters={activeCount > 0}
             onClearAll={clearAllFilters}
-            controls={
-              <InProcessControls
-                status={inProcessStatus}
-                statusOptions={statusOptions}
-                lateness={lateness}
-                governorate={governorate}
-                governorates={governorates}
-                city={city}
-                cities={cities}
-                citiesLoading={citiesLoading}
-                from={from}
-                to={to}
-                searchInput={searchInput}
-                appliedSearch={appliedSearch}
-                activeCount={activeCount}
-                workState={workState}
-                onPatch={updateParams}
-                onClearAll={clearAllFilters}
-                onSearchChange={setSearchInput}
-                searchInputRef={searchInputRef}
-                searchActive={searchActive}
-                workStateCounts={tabCounts.workState}
-              />
-            }
+            controls={controls}
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
@@ -1334,17 +1425,25 @@ export function InProcessShipmentsContent({
         {view === 'returned' && (
           <ReturnedList
             shippingCompanyId={shippingCompanyId}
+            filters={returnedFilters}
             page={page}
             limit={limit}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             viewSwitch={viewSwitch}
+            hasActiveFilters={activeCount > 0}
+            onClearAll={clearAllFilters}
+            controls={controls}
             onOpenNotes={setNotesOrderId}
             onOpenActionLog={openActionLog}
           />
         )}
         {view === 'delivered' && (
-          <DeliveredPlaceholder shippingCompanyId={shippingCompanyId} viewSwitch={viewSwitch} />
+          <DeliveredPlaceholder
+            shippingCompanyId={shippingCompanyId}
+            viewSwitch={viewSwitch}
+            controls={controls}
+          />
         )}
       </div>
       {notesOrderId !== null && (
