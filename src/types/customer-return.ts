@@ -59,6 +59,17 @@ export type CustomerReturnCandidates = {
   carrierSupport: CustomerReturnCarrierSupport[];
 };
 
+export type CustomerReturnPreset = {
+  customerId: number;
+  shippingCompanyId: number | null;
+  governorateOption: string | null;
+  cityOption: string | null;
+  governorateName: string;
+  cityName: string;
+  address: string;
+  area: string;
+};
+
 export type CreateCustomerReturnPayload = {
   customerId: number;
   orderProductIds: number[];

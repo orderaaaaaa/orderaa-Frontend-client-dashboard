@@ -12,8 +12,8 @@ import { useDebounce } from '@/utils/debounce';
 
 type CustomerPickerProps = {
   id?: string;
-  value: Customer | null;
-  onChange: (customer: Customer | null) => void;
+  value: Pick<Customer, 'id' | 'name' | 'phoneNumbers'> | null;
+  onChange: (customer: Pick<Customer, 'id' | 'name' | 'phoneNumbers'> | null) => void;
   error?: string;
 };
 

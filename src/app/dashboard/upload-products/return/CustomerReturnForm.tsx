@@ -24,8 +24,13 @@ import {
   useLocationOptionGovernorates,
 } from '@/services/lookups';
 import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
+import { cn } from '@/lib/utils';
 import { normalizeArabic } from '@/utils/arabicNormalize';
 import type { LocationOption } from '@/types/locationOptions';
+import type {
+  CreateCustomerReturnResponse,
+  CustomerReturnPreset,
+} from '@/types/customer-return';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   CARRIER_SEND_NOT_SENT_WARNING,
@@ -71,6 +76,26 @@ type ReturnErrorKey =
 type ReturnErrors = Partial<Record<ReturnErrorKey, string>>;
 
 type CarrierSupportEntry = CarrierSupportState & { name: string };
+
+type CustomerPick = Pick<Customer, 'id' | 'name' | 'phoneNumbers'>;
+
+type CustomerReturnFormProps = {
+  preset?: CustomerReturnPreset;
+  initialCustomerId?: number;
+  onCreated?: (response: CreateCustomerReturnResponse) => void;
+  onPendingChange?: (pending: boolean) => void;
+};
+
+const draftFromPreset = (preset: CustomerReturnPreset): ReturnDraft => ({
+  shippingCompanyId:
+    preset.shippingCompanyId === null ? '' : String(preset.shippingCompanyId),
+  governorateOption: preset.governorateOption ?? '',
+  cityOption: preset.cityOption ?? '',
+  area: preset.area,
+  address: preset.address,
+  notes: '',
+  needsConfirmation: false,
+});
 
 const EMPTY_DRAFT: ReturnDraft = {
   shippingCompanyId: '',
@@ -137,13 +162,26 @@ const matchLocationOption = (
   );
 };
 
-function CustomerReturnForm() {
+function CustomerReturnForm({
+  preset,
+  initialCustomerId,
+  onCreated,
+  onPendingChange,
+}: CustomerReturnFormProps) {
   const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const isPreset = preset !== undefined;
+  const [customerId, setCustomerId] = useState<number | null>(
+    preset?.customerId ?? initialCustomerId ?? null,
+  );
+  const [pickedCustomer, setPickedCustomer] = useState<CustomerPick | null>(
+    null,
+  );
   const [selectedIds, setSelectedIds] =
     useState<ReadonlySet<number>>(EMPTY_SELECTED_IDS);
-  const [draft, setDraft] = useState<ReturnDraft>(EMPTY_DRAFT);
+  const [draft, setDraft] = useState<ReturnDraft>(() =>
+    preset ? draftFromPreset(preset) : EMPTY_DRAFT,
+  );
   const [errors, setErrors] = useState<ReturnErrors>({});
   const [contentOverride, setContentOverride] = useState<string | null>(null);
   const [priceOverride, setPriceOverride] = useState<string | null>(null);
@@ -151,11 +189,30 @@ function CustomerReturnForm() {
     orderId: number;
     code: string;
   } | null>(null);
-  const candidatesQuery = useCustomerReturnCandidates(customer?.id ?? null);
+  const candidatesQuery = useCustomerReturnCandidates(customerId);
+  const {
+    data: candidates,
+    isError: candidatesFailed,
+    error: candidatesError,
+  } = candidatesQuery;
   const createReturn = useCreateCustomerReturn();
   const { shippingCompanies } = useShippingCompanies(true);
-  const orders = candidatesQuery.data?.orders ?? [];
-  const lastAddress = candidatesQuery.data?.customer.lastAddress ?? null;
+  const orders = candidates?.orders ?? [];
+  const lastAddress = candidates?.customer.lastAddress ?? null;
+  const storedGovernorateName = isPreset
+    ? preset.governorateName
+    : lastAddress?.governorate;
+  const storedCityName = isPreset ? preset.cityName : lastAddress?.city;
+  const pickerCustomer = useMemo<CustomerPick | null>(() => {
+    if (customerId === null) return null;
+    if (pickedCustomer?.id === customerId) return pickedCustomer;
+    if (candidates?.customer.id !== customerId) return null;
+    return {
+      id: candidates.customer.id,
+      name: candidates.customer.name,
+      phoneNumbers: candidates.customer.phoneNumbers,
+    };
+  }, [customerId, pickedCustomer, candidates]);
 
   const companyId = shippingCompanyIdOf(draft.shippingCompanyId);
   const governoratesQuery = useLocationOptionGovernorates(companyId);
@@ -167,13 +224,13 @@ function CustomerReturnForm() {
     () =>
       matchLocationOption(
         governoratesQuery.data?.options,
-        lastAddress?.governorate,
+        storedGovernorateName,
       ),
-    [governoratesQuery.data, lastAddress],
+    [governoratesQuery.data, storedGovernorateName],
   );
   const matchedCity = useMemo(
-    () => matchLocationOption(citiesQuery.data?.options, lastAddress?.city),
-    [citiesQuery.data, lastAddress],
+    () => matchLocationOption(citiesQuery.data?.options, storedCityName),
+    [citiesQuery.data, storedCityName],
   );
 
   const carrierSupportById = useMemo(() => {
@@ -208,13 +265,30 @@ function CustomerReturnForm() {
     null;
 
   useEffect(() => {
-    if (!lastAddress) return;
+    if (isPreset || !lastAddress) return;
     setDraft((current) => ({
       ...current,
       address: lastAddress.address ?? '',
       area: lastAddress.area ?? '',
     }));
-  }, [lastAddress]);
+  }, [isPreset, lastAddress]);
+
+  useEffect(() => {
+    if (
+      initialCustomerId === undefined ||
+      customerId !== initialCustomerId ||
+      !candidatesFailed
+    )
+      return;
+    setCustomerId(null);
+    toast.error(
+      getApiErrorMessage(candidatesError, t('customerReturn.orders.loadError')),
+    );
+  }, [initialCustomerId, customerId, candidatesFailed, candidatesError, t]);
+
+  useEffect(() => {
+    onPendingChange?.(createReturn.isPending);
+  }, [createReturn.isPending, onPendingChange]);
 
   useEffect(() => {
     if (!matchedGovernorate || draft.governorateOption) return;
@@ -268,8 +342,9 @@ function CustomerReturnForm() {
     setErrors((current) => ({ ...current, ...cleared }));
   };
 
-  const handleCustomerChange = (next: Customer | null) => {
-    setCustomer(next);
+  const handleCustomerChange = (next: CustomerPick | null) => {
+    setCustomerId(next?.id ?? null);
+    setPickedCustomer(next);
     setAttention(null);
     setSelectedIds(EMPTY_SELECTED_IDS);
     setContentOverride(null);
@@ -331,7 +406,8 @@ function CustomerReturnForm() {
 
   const validate = (): ReturnErrors => {
     const next: ReturnErrors = {};
-    if (!customer) next.customer = t('customerReturn.customer.required');
+    if (customerId === null)
+      next.customer = t('customerReturn.customer.required');
     if (selectedUnits.length === 0)
       next.units = t('customerReturn.errors.units');
     if (!draft.shippingCompanyId) {
@@ -376,14 +452,14 @@ function CustomerReturnForm() {
         ?.focus({ preventScroll: true });
       return;
     }
-    if (!customer || returnPrice === null) return;
+    if (customerId === null || returnPrice === null) return;
 
     setAttention(null);
     const notes = draft.notes.trim();
     const area = draft.area.trim();
     createReturn.mutate(
       {
-        customerId: customer.id,
+        customerId,
         orderProductIds: selectedUnits.map((unit) => unit.orderProductId),
         confirm: !draft.needsConfirmation,
         shippingCompanyId: companyId,
@@ -411,6 +487,7 @@ function CustomerReturnForm() {
           setPriceOverride(null);
           setDraft((current) => ({ ...current, notes: '' }));
           setErrors({});
+          onCreated?.(created);
         },
         onError: (err: unknown) => {
           toast.error(
@@ -422,7 +499,7 @@ function CustomerReturnForm() {
   };
 
   const renderOrders = () => {
-    if (!customer) {
+    if (customerId === null) {
       return (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {t('customerReturn.orders.selectCustomer')}
@@ -468,7 +545,7 @@ function CustomerReturnForm() {
   };
 
   const isDirty =
-    customer !== null || selectedIds.size > 0 || draft.address !== '';
+    customerId !== null || selectedIds.size > 0 || draft.address !== '';
   const isPending = createReturn.isPending;
   const missingFields = (Object.keys(ERROR_FIELD_IDS) as ReturnErrorKey[]).filter(
     (key) => errors[key],
@@ -482,6 +559,76 @@ function CustomerReturnForm() {
             .join('، '),
         })
       : null;
+
+  const governorateLabel =
+    governoratesQuery.data?.options.find(
+      (option) => option.value === draft.governorateOption,
+    )?.label ?? draft.governorateOption;
+  const cityLabel =
+    citiesQuery.data?.options.find(
+      (option) => option.value === draft.cityOption,
+    )?.label ?? draft.cityOption;
+  const presetRows = [
+    {
+      label: t('customerReturn.field.company'),
+      value: selectedCompanyName,
+      missing: draft.shippingCompanyId === '',
+      pending: false,
+    },
+    {
+      label: t('customerReturn.field.governorate'),
+      value: governorateLabel || null,
+      missing: draft.governorateOption === '',
+      pending: governoratesQuery.isLoading,
+    },
+    {
+      label: t('customerReturn.field.city'),
+      value: cityLabel || null,
+      missing: draft.cityOption === '',
+      pending: citiesQuery.isLoading,
+    },
+    {
+      label: t('customerReturn.area.label'),
+      value: draft.area.trim() || null,
+      missing: false,
+      pending: false,
+    },
+    {
+      label: t('customerReturn.address.label'),
+      value: draft.address.trim() || null,
+      missing: draft.address.trim() === '',
+      pending: false,
+    },
+  ];
+  const presetBlocked =
+    isPreset && presetRows.some((row) => row.missing || row.pending);
+
+  const footerStatus = isPending ? (
+    t('customerReturn.submit.statusSaving')
+  ) : missingStatus ? (
+    <span className="font-medium text-destructive">{missingStatus}</span>
+  ) : isDirty ? (
+    t('customerReturn.submit.statusDirty')
+  ) : (
+    t('customerReturn.submit.status')
+  );
+
+  const submitButton = (
+    <Button
+      type="submit"
+      disabled={isPending || presetBlocked}
+      loading={isPending}
+      loadingText={t('customerReturn.submit.loading')}
+      className="min-h-10 min-w-40 rounded-full font-bold"
+    >
+      <LiaPlusSolid className="w-5 h-5 text-primary-foreground" />
+      {t('customerReturn.submit.button')}
+    </Button>
+  );
+
+  const pickerLabel = (
+    <p className="font-bold text-[19px]">{t('customerReturn.customer.label')}</p>
+  );
 
   return (
     <form
@@ -514,19 +661,45 @@ function CustomerReturnForm() {
         </div>
       )}
 
-      <div className="flex flex-col gap-[26px] lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
+      <div
+        className={cn(
+          'flex flex-col gap-[26px]',
+          !isPreset &&
+            'lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6',
+        )}
+      >
         <div className="flex min-w-0 flex-col gap-[26px]">
-          <div className={CARD_CLASS}>
-            <h1 className="font-bold text-[22px]">
-              {t('customerReturn.customer.label')}
-            </h1>
-            <CustomerPicker
-              id="return-customer"
-              value={customer}
-              onChange={handleCustomerChange}
-              error={errors.customer}
-            />
-          </div>
+          {isPreset ? (
+            <div className={CARD_CLASS}>
+              {pickerLabel}
+              {candidatesQuery.isLoading ? (
+                <Skeleton className="h-16 bg-muted border border-border/60" />
+              ) : (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3">
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate font-semibold text-foreground">
+                      {candidates?.customer.name ?? ''}
+                    </span>
+                    <span dir="ltr" className="text-start text-sm text-muted-foreground">
+                      {candidates?.customer.phoneNumbers[0] ?? ''}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={CARD_CLASS}>
+              <h1 className="font-bold text-[22px]">
+                {t('customerReturn.customer.label')}
+              </h1>
+              <CustomerPicker
+                id="return-customer"
+                value={pickerCustomer}
+                onChange={handleCustomerChange}
+                error={errors.customer}
+              />
+            </div>
+          )}
 
           <div className={CARD_CLASS}>
             <h2 className="font-bold text-[19px]">
@@ -539,46 +712,50 @@ function CustomerReturnForm() {
           </div>
 
           <div className={CARD_CLASS}>
-            <div
-              data-field-error="return-address"
-              className="flex flex-col gap-2"
-            >
-              <label
-                htmlFor="return-address-input"
-                className="font-medium text-[16px]"
+            {!isPreset && (
+              <>
+              <div
+                data-field-error="return-address"
+                className="flex flex-col gap-2"
               >
-                {t('customerReturn.address.label')}{' '}
-                <span className="text-destructive">*</span>
-              </label>
-              <Textarea
-                id="return-address-input"
-                name="address"
-                value={draft.address}
-                onChange={(e) => updateDraft({ address: e.target.value })}
-                placeholder={t('customerReturn.address.placeholder')}
-                className="bg-background"
-              />
-              {errors.address && (
-                <p className="text-sm text-destructive">{errors.address}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="return-area-input"
-                className="font-medium text-[16px]"
-              >
-                {t('customerReturn.area.label')}
-              </label>
-              <Input
-                id="return-area-input"
-                name="area"
-                value={draft.area}
-                onChange={(e) => updateDraft({ area: e.target.value })}
-                placeholder={t('customerReturn.area.placeholder')}
-                className="w-full"
-                inputClassName="bg-background"
-              />
-            </div>
+                <label
+                  htmlFor="return-address-input"
+                  className="font-medium text-[16px]"
+                >
+                  {t('customerReturn.address.label')}{' '}
+                  <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  id="return-address-input"
+                  name="address"
+                  value={draft.address}
+                  onChange={(e) => updateDraft({ address: e.target.value })}
+                  placeholder={t('customerReturn.address.placeholder')}
+                  className="bg-background"
+                />
+                {errors.address && (
+                  <p className="text-sm text-destructive">{errors.address}</p>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="return-area-input"
+                  className="font-medium text-[16px]"
+                >
+                  {t('customerReturn.area.label')}
+                </label>
+                <Input
+                  id="return-area-input"
+                  name="area"
+                  value={draft.area}
+                  onChange={(e) => updateDraft({ area: e.target.value })}
+                  placeholder={t('customerReturn.area.placeholder')}
+                  className="w-full"
+                  inputClassName="bg-background"
+                />
+              </div>
+              </>
+            )}
             <div
               data-field-error="return-content"
               className="flex flex-col gap-2"
@@ -643,32 +820,83 @@ function CustomerReturnForm() {
           </div>
         </div>
 
-        <aside className="flex min-w-0 flex-col gap-[26px] lg:sticky lg:top-4">
-          <ShippingSection
-            mode="return"
-            idPrefix="return"
-            carrierSupport={carrierSupportById}
-            locationHint={locationHint}
-            shippingCompanyId={draft.shippingCompanyId}
-            governorateOption={draft.governorateOption}
-            cityOption={draft.cityOption}
-            shippingCost=""
-            returnShippingCost=""
-            shippingType=""
-            returnShipmentContent=""
-            onShippingCompanyChange={(v) => updateDraft({ shippingCompanyId: v })}
-            onGovernorateOptionChange={(v) => updateDraft({ governorateOption: v })}
-            onCityOptionChange={(v) => updateDraft({ cityOption: v })}
-            onShippingCostChange={() => undefined}
-            onReturnShippingCostChange={() => undefined}
-            onShippingTypeChange={() => undefined}
-            onReturnShipmentContentChange={() => undefined}
-            errors={{
-              shippingCompanyId: errors.shippingCompanyId,
-              governorateOption: errors.governorateOption,
-              cityOption: errors.cityOption,
-            }}
-          />
+        <aside
+          className={cn(
+            'flex min-w-0 flex-col gap-[26px]',
+            !isPreset && 'lg:sticky lg:top-4',
+          )}
+        >
+          {isPreset ? (
+            <div className={SIDE_CARD_CLASS}>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-bold text-[19px]">
+                  {t('customerReturn.preset.shippingTitle')}
+                </h2>
+                <Link
+                  href={`/dashboard/upload-products/return?customerId=${customerId}`}
+                  className="rounded-sm text-sm font-semibold text-primary-text underline underline-offset-4 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                >
+                  {t('customerReturn.preset.edit')}
+                </Link>
+              </div>
+              <dl className="flex flex-col gap-3">
+                {presetRows.map((row) => (
+                  <div key={row.label} className="flex flex-col gap-1">
+                    <dt className="text-sm text-muted-foreground">{row.label}</dt>
+                    <dd
+                      className={cn(
+                        'min-w-0 break-words font-medium',
+                        row.missing && 'text-destructive',
+                      )}
+                    >
+                      {row.pending ? (
+                        <Skeleton className="h-4 w-32 bg-muted" />
+                      ) : (
+                        row.value ??
+                        (row.missing ? t('customerReturn.preset.notSet') : '—')
+                      )}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {presetRows.some((row) => row.missing) && (
+                <p className="text-sm text-destructive">
+                  {t('customerReturn.preset.missing')}
+                </p>
+              )}
+              {errors.shippingCompanyId && (
+                <p className="text-sm text-destructive">
+                  {errors.shippingCompanyId}
+                </p>
+              )}
+            </div>
+          ) : (
+            <ShippingSection
+              mode="return"
+              idPrefix="return"
+              carrierSupport={carrierSupportById}
+              locationHint={locationHint}
+              shippingCompanyId={draft.shippingCompanyId}
+              governorateOption={draft.governorateOption}
+              cityOption={draft.cityOption}
+              shippingCost=""
+              returnShippingCost=""
+              shippingType=""
+              returnShipmentContent=""
+              onShippingCompanyChange={(v) => updateDraft({ shippingCompanyId: v })}
+              onGovernorateOptionChange={(v) => updateDraft({ governorateOption: v })}
+              onCityOptionChange={(v) => updateDraft({ cityOption: v })}
+              onShippingCostChange={() => undefined}
+              onReturnShippingCostChange={() => undefined}
+              onShippingTypeChange={() => undefined}
+              onReturnShipmentContentChange={() => undefined}
+              errors={{
+                shippingCompanyId: errors.shippingCompanyId,
+                governorateOption: errors.governorateOption,
+                cityOption: errors.cityOption,
+              }}
+            />
+          )}
 
           <ConfirmationSection
             description={t('customerReturn.confirm.description')}
@@ -698,33 +926,25 @@ function CustomerReturnForm() {
         </aside>
       </div>
 
-      <StickyFormFooter
-        isDirty={isDirty}
-        isSaving={isPending}
-        className="border-border shadow-[0_-4px_12px_rgb(0_0_0/0.06)] dark:shadow-none"
-        status={
-          isPending ? (
-            t('customerReturn.submit.statusSaving')
-          ) : missingStatus ? (
-            <span className="font-medium text-destructive">{missingStatus}</span>
-          ) : isDirty ? (
-            t('customerReturn.submit.statusDirty')
-          ) : (
-            t('customerReturn.submit.status')
-          )
-        }
-      >
-        <Button
-          type="submit"
-          disabled={isPending}
-          loading={isPending}
-          loadingText={t('customerReturn.submit.loading')}
-          className="min-h-10 min-w-40 rounded-full font-bold"
+      {isPreset ? (
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-4">
+          <div className="min-w-0 text-sm text-gray-500" aria-live="polite">
+            {footerStatus}
+          </div>
+          <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
+            {submitButton}
+          </div>
+        </div>
+      ) : (
+        <StickyFormFooter
+          isDirty={isDirty}
+          isSaving={isPending}
+          className="border-border shadow-[0_-4px_12px_rgb(0_0_0/0.06)] dark:shadow-none"
+          status={footerStatus}
         >
-          <LiaPlusSolid className="w-5 h-5 text-primary-foreground" />
-          {t('customerReturn.submit.button')}
-        </Button>
-      </StickyFormFooter>
+          {submitButton}
+        </StickyFormFooter>
+      )}
     </form>
   );
 }
