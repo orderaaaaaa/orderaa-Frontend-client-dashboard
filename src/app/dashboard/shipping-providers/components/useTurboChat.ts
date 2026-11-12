@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useOrderChatSocket } from '@/hooks/realtime/useCarrierChatSocket';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import type { CarrierChatConnectionState } from '@/lib/realtime/carrierChatSocket';
 import {
   useCarrierChatThreadQuery,
@@ -62,6 +64,7 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
   });
   const sendMutation = useSendCarrierChatMessageMutation();
   const seenMutation = useMarkCarrierChatSeenMutation();
+  const queryClient = useQueryClient();
   const [pending, setPending] = useState<PendingChatSend[]>([]);
   const [unreadKey, setUnreadKey] = useState<string | null | undefined>(undefined);
   const localIdRef = useRef(0);
@@ -69,6 +72,15 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
   const thread = query.data;
   const syncedAt = thread?.syncedAt;
   const markSeen = seenMutation.mutate;
+
+  useEffect(
+    () => () => {
+      const queryKey = [QUERY_KEYS.CARRIER_CHAT_THREAD, orderId];
+      void queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.removeQueries({ queryKey, exact: true });
+    },
+    [orderId, queryClient]
+  );
 
   useEffect(() => {
     if (thread !== undefined && unreadKey === undefined) setUnreadKey(thread.firstUnreadKey);
