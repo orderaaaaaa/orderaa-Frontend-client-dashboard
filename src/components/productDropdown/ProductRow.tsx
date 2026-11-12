@@ -25,7 +25,7 @@ interface ProductRowProps {
   onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
-  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
+  availabilityTarget: 'NEW_ORDER' | 'CONFIRMED';
   draft: DraftSummary;
 }
 
@@ -99,10 +99,6 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
   const priceLabel = product.price != null ? `${product.price} ج.م` : null;
 
-  const getSelectedValue = (attributeId: number): number | undefined => {
-    return selectedVariants.find((v) => v.attributeId === attributeId)?.optionId;
-  };
-
   const getRowClassName = () => {
     if (isAlreadyInOrder) {
       return 'border-b mb-2 border-primary/30 rounded-sm transition-colors bg-primary/5 ring-1 ring-primary/20';
@@ -162,43 +158,13 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           className="py-4 px-6 border-t border-gray-200 bg-card"
           onClick={(e) => e.stopPropagation()}
         >
-          {availabilityTarget ? (
-            <RowAvailabilityPanel
-              product={product}
-              targetStatus={availabilityTarget}
-              draft={draft}
-              selectedVariants={selectedVariants}
-              onVariantSelect={onVariantSelect}
-            />
-          ) : (
-            <div className="space-y-4">
-              {(product.attributes ?? []).map((attribute) => (
-                <div key={attribute.id}>
-                  <div className="text-sm font-medium text-gray-700 mb-2">
-                    {attribute.name}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {attribute.options.map((opt) => {
-                      const isValueSelected = getSelectedValue(attribute.id) === opt.id;
-                      return (
-                        <Button
-                          key={opt.id}
-                          type="button"
-                          variant={isValueSelected ? 'default' : 'outline'}
-                          size="sm"
-                          className="min-h-10"
-                          aria-pressed={isValueSelected}
-                          onClick={() => onVariantSelect(product.id, attribute.id, opt.id)}
-                        >
-                          {opt.name}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <RowAvailabilityPanel
+            product={product}
+            targetStatus={availabilityTarget}
+            draft={draft}
+            selectedVariants={selectedVariants}
+            onVariantSelect={onVariantSelect}
+          />
         </div>
       )}
 

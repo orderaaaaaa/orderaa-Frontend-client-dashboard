@@ -17,7 +17,7 @@ interface ProductDropdownProps {
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
   icon?: React.ComponentType<{ size?: number }>;
-  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
+  availabilityTarget: 'NEW_ORDER' | 'CONFIRMED';
 }
 
 export default function ProductDropdown({

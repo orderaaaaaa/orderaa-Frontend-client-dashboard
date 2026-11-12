@@ -38,7 +38,7 @@ interface DropdownContentProps {
   onRetry: () => void;
   hasNextPage: boolean;
   onLoadMore: () => void;
-  availabilityTarget?: 'NEW_ORDER' | 'CONFIRMED';
+  availabilityTarget: 'NEW_ORDER' | 'CONFIRMED';
 }
 
 export const DropdownContent: React.FC<DropdownContentProps> = ({
