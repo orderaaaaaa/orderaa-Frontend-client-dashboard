@@ -7,6 +7,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 
@@ -38,7 +39,17 @@ export function WizardFooter({
 
   return (
     <>
-      <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 bg-card border rounded-lg border-gray-200 pt-3 px-4 sm:px-6 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] flex flex-col items-center justify-center gap-1 mt-auto">
+      <StickyFormFooter
+        status={
+          !isStep1Valid && !isSubmitting ? (
+            <span className="text-xs text-gray-500">
+              أكمل استلام الطلبات من الشحن وارفع صورة الإيصال أولاً
+            </span>
+          ) : (
+            ''
+          )
+        }
+      >
         <Button
           type="button"
           size="lg"
@@ -53,12 +64,7 @@ export function WizardFooter({
           )}
           {isSubmitting ? 'جاري الإرسال...' : 'تأكيد استلام المرتجعات'}
         </Button>
-        {!isStep1Valid && !isSubmitting && (
-          <p className="text-xs text-gray-500 text-center">
-            أكمل استلام الطلبات من الشحن وارفع صورة الإيصال أولاً
-          </p>
-        )}
-      </div>
+      </StickyFormFooter>
 
       <BaseModal
         isOpen={isConfirmOpen}
