@@ -29,6 +29,8 @@ const KNOWN_PLACEHOLDERS = new Set<string>(WHATSAPP_PLACEHOLDERS);
 
 export const countCodePoints = (text: string) => Array.from(text).length;
 
+export const splitPlaceholderTokens = (text: string) => text.split(/(\{[A-Za-z0-9_]+\})/);
+
 export const fillPlaceholders = (
   text: string,
   values: Record<WhatsAppTemplatePlaceholder, string>
