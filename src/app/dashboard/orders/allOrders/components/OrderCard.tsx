@@ -143,6 +143,8 @@ export default function OrderCard({
       (event): event is { id: number; text: string } => Boolean(event.text)
     );
 
+  const showMoney = Boolean(price) || typeof money?.returnPrice === 'string';
+
   return (
     <div
       onClick={disableNavigation ? handleToggleClick : undefined}
@@ -369,18 +371,22 @@ export default function OrderCard({
           )}
 
         {/* Price */}
-        {price && (
+        {showMoney && (
           <div className="flex items-start gap-2 max-w-full">
-            <Image
-              src="/Icons/price.svg"
-              alt="price"
-              width={18}
-              height={18}
-              className="opacity-50"
-            />
-            <span className="text-base font-medium text-foreground">
-              {price} جنيه
-            </span>
+            {Boolean(price) && (
+              <>
+                <Image
+                  src="/Icons/price.svg"
+                  alt="price"
+                  width={18}
+                  height={18}
+                  className="opacity-50"
+                />
+                <span className="text-base font-medium text-foreground">
+                  {price} جنيه
+                </span>
+              </>
+            )}
             <PrepaidBadge prepaid={money?.prepaid} />
             {typeof money?.settlementAmount === 'string' && (
               <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
