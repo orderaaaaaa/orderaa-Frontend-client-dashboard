@@ -43,6 +43,7 @@ import { cn } from '@/lib/utils';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import {
   useBulkCloseClosure,
+  useDeliveredShipmentsQuery,
   useInProcessCountsQuery,
   useInProcessShipmentsQuery,
   useOutcomeCountsQuery,
@@ -57,6 +58,7 @@ import {
   LATENESS_FILTERS,
   type CarrierHeader,
   type DeliveredCountFilters,
+  type DeliveredFilters,
   type DeliveredStatus,
   type InProcessCountFilters,
   type InProcessFilters,
@@ -68,9 +70,9 @@ import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
 import { formatNumber } from './formatNumber';
 import { OrderActionLogModal } from './OrderActionLogModal';
-import { InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
-import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
-import { toReturnedParams } from './shipmentParams';
+import { DeliveredShipmentCards, InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
+import { DeliveredShipmentsTable, InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
+import { toDeliveredParams, toReturnedParams } from './shipmentParams';
 import { UnknownShippingCostCount } from './UnknownShippingCostCount';
 
 const MAX_PAGE_SIZE = 100;
@@ -94,7 +96,8 @@ const IN_PROCESS_SKELETON_WIDTHS = [
   'w-16',
   'w-6',
 ];
-const RETURNED_SKELETON_WIDTHS = ['w-16', 'w-32', 'w-20', 'w-24', 'w-32', 'w-16', 'w-6'];
+const RETURNED_SKELETON_WIDTHS = ['w-16', 'w-32', 'w-20', 'w-24', 'w-24', 'w-32', 'w-16', 'w-6'];
+const DELIVERED_SKELETON_WIDTHS = ['w-16', 'w-32', 'w-20', 'w-24', 'w-24', 'w-32', 'w-16', 'w-24', 'w-16', 'w-6'];
 const WORK_STATE_OPTIONS: { value: FollowupWorkState; labelKey: TranslationKey }[] = [
   { value: 'open', labelKey: 'inProcess.workState.open' },
   { value: 'closed', labelKey: 'inProcess.workState.closed' },
@@ -1156,25 +1159,130 @@ function ReturnedList({
   );
 }
 
-interface DeliveredPlaceholderProps {
-  shippingCompanyId: number;
-  viewSwitch: ViewSwitchProps;
+interface DeliveredListProps extends ListProps {
+  filters: DeliveredFilters;
+  hasActiveFilters: boolean;
+  onClearAll: () => void;
   controls: ReactNode;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
 
-function DeliveredPlaceholder({ shippingCompanyId, viewSwitch, controls }: DeliveredPlaceholderProps) {
+function DeliveredList({
+  shippingCompanyId,
+  filters,
+  page,
+  limit,
+  onPageChange,
+  onPageSizeChange,
+  viewSwitch,
+  hasActiveFilters,
+  onClearAll,
+  controls,
+  onOpenNotes,
+  onOpenActionLog,
+}: DeliveredListProps) {
   const { t } = useI18n();
   const { shippingCompanies } = useShippingCompanies();
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    isSuccess,
+    error,
+    refetch,
+  } = useDeliveredShipmentsQuery(shippingCompanyId, filters);
+
+  const shipments = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const implementation = shippingCompanies.find(
     (company) => company.id === shippingCompanyId,
   )?.implementation;
 
+  useEffect(() => {
+    if (isSuccess && shipments.length === 0 && page > 1) {
+      onPageChange(1);
+    }
+  }, [isSuccess, shipments.length, page, onPageChange]);
+
   return (
     <>
-      <ListHeader view="delivered" carrier={undefined} implementation={implementation} isLoading={false} />
+      <ListHeader
+        view="delivered"
+        carrier={data?.carrier}
+        implementation={implementation}
+        isLoading={isLoading}
+      />
+
+      <div className="grid grid-cols-2 gap-3 sm:max-w-2xl">
+        {isLoading ? (
+          <SummaryStatCardSkeleton />
+        ) : (
+          <SummaryStatCard
+            icon={<ClipboardList aria-hidden="true" />}
+            iconBgClassName="bg-primary/10 text-primary-text"
+            label={t('inProcess.kpi.deliveredCount')}
+            value={isError ? '—' : formatNumber(total)}
+          />
+        )}
+      </div>
+
       <ViewTabs {...viewSwitch}>
         {controls}
-        <EmptyState icon={EMPTY_STATE_ICON} title={t('inProcess.empty.delivered')} />
+        <p role="status" aria-live="polite" className="sr-only">
+          {isLoading ? t('common.loading') : isFetching ? t('inProcess.refreshing') : ''}
+        </p>
+        {isLoading ? (
+          <ResultsFrame busy={false}>
+            <div className="hidden md:block">
+              <ListSkeleton widths={DELIVERED_SKELETON_WIDTHS} />
+            </div>
+            <div className="md:hidden">
+              <CardsSkeleton />
+            </div>
+          </ResultsFrame>
+        ) : isError ? (
+          <ErrorState error={error} fallback={t('inProcess.error.load')} onRetry={() => refetch()} />
+        ) : total === 0 ? (
+          <ShipmentsEmptyState
+            title="inProcess.empty.delivered"
+            hasActiveFilters={hasActiveFilters}
+            onClearAll={onClearAll}
+          />
+        ) : (
+          <>
+            <ResultsFrame busy={isFetching}>
+              <div className="hidden md:block">
+                {data && (
+                  <DeliveredShipmentsTable
+                    shipments={shipments}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                  />
+                )}
+              </div>
+              <div className="md:hidden">
+                {data && (
+                  <DeliveredShipmentCards
+                    shipments={shipments}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                  />
+                )}
+              </div>
+            </ResultsFrame>
+            <ListPagination
+              page={page}
+              limit={limit}
+              total={total}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+            />
+          </>
+        )}
       </ViewTabs>
     </>
   );
@@ -1275,6 +1383,18 @@ export function InProcessShipmentsContent({
     governorate: governorate || undefined,
     city: city || undefined,
     search: appliedSearch || undefined,
+    workState,
+    page,
+    limit,
+  });
+
+  const deliveredFilters = toDeliveredParams({
+    from: from || undefined,
+    to: to || undefined,
+    governorate: governorate || undefined,
+    city: city || undefined,
+    search: appliedSearch || undefined,
+    status: outcomeStatus,
     workState,
     page,
     limit,
@@ -1439,10 +1559,19 @@ export function InProcessShipmentsContent({
           />
         )}
         {view === 'delivered' && (
-          <DeliveredPlaceholder
+          <DeliveredList
             shippingCompanyId={shippingCompanyId}
+            filters={deliveredFilters}
+            page={page}
+            limit={limit}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
             viewSwitch={viewSwitch}
+            hasActiveFilters={activeCount > 0}
+            onClearAll={clearAllFilters}
             controls={controls}
+            onOpenNotes={setNotesOrderId}
+            onOpenActionLog={openActionLog}
           />
         )}
       </div>

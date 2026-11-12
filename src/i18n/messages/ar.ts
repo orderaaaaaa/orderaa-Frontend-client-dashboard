@@ -412,6 +412,7 @@ const ar = {
   'inProcess.kpi.results': 'نتائج العرض',
   'inProcess.kpi.netInProcess': 'صافي الشحنات الحالية',
   'inProcess.kpi.returnedCount': 'عدد الطلبات',
+  'inProcess.kpi.deliveredCount': 'عدد الطلبات',
   'inProcess.workState.label': 'حالة المتابعة',
   'inProcess.workState.open': 'مفتوح',
   'inProcess.workState.closed': 'مغلق',

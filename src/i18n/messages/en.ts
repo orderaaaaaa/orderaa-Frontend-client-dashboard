@@ -398,6 +398,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.kpi.results': 'Results',
   'inProcess.kpi.netInProcess': 'Net of current shipments',
   'inProcess.kpi.returnedCount': 'Orders',
+  'inProcess.kpi.deliveredCount': 'Orders',
   'inProcess.workState.label': 'Follow-up status',
   'inProcess.workState.open': 'Open',
   'inProcess.workState.closed': 'Closed',

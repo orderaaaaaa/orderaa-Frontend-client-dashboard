@@ -23,6 +23,7 @@ import { OrderStatus } from '@/types/orders';
 import type { ShippingImplementation } from '@/types/shippingCompanies';
 import {
   IN_PROCESS_STATUSES,
+  type DeliveredShipment,
   type InProcessShipment,
   type LatenessOverride,
   type ReturnedShipment,
@@ -407,6 +408,33 @@ export function ReturnedRowActions({
   );
 }
 
+export function DeliveredRowActions({
+  row,
+  onOpenNotes,
+  onOpenActionLog,
+}: {
+  row: DeliveredShipment;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <ShipmentRowActions
+        orderId={row.id}
+        orderCode={row.code}
+        customerName={row.customer.name}
+        status={row.status}
+        closure={row.closure}
+        frozenReturnChild={row.frozenReturnChild}
+        unreadNoteCount={row.unreadNoteCount}
+        hideFinalActions
+        onOpenNotes={() => onOpenNotes(row.id)}
+        onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
+      />
+    </div>
+  );
+}
+
 export interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
   shippingCompanyId: number;
@@ -614,6 +642,9 @@ export function ReturnedShipmentsTable({
             {t('inProcess.table.columns.status')}
           </th>
           <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.returnedAt')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
             {t('inProcess.table.columns.takenAt')}
           </th>
           <th scope="col" className={cn(HEAD_CLASS, 'max-w-40')}>
@@ -647,6 +678,7 @@ export function ReturnedShipmentsTable({
             <td className={CELL_CLASS}>
               <StatusCell status={row.status} closure={row.closure} />
             </td>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.returnedAt} /></td>
             <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.takenAt} /></td>
             <td className={cn(CELL_CLASS, 'max-w-40')}>
               <div className="flex flex-col items-start gap-0.5">
@@ -664,6 +696,96 @@ export function ReturnedShipmentsTable({
                 onOpenNotes={onOpenNotes}
                 onOpenActionLog={onOpenActionLog}
               />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export interface DeliveredShipmentsTableProps {
+  shipments: DeliveredShipment[];
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number, orderCode: string) => void;
+}
+
+export function DeliveredShipmentsTable({ shipments, onOpenNotes, onOpenActionLog }: DeliveredShipmentsTableProps) {
+  const { t } = useI18n();
+
+  return (
+    <table dir="rtl" className="w-full caption-bottom text-sm">
+      <caption className="sr-only">{t('inProcess.table.captionDelivered')}</caption>
+      <thead className="sticky top-0 z-(--z-inpage-sticky) bg-muted">
+        <tr className="border-b">
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-(--z-inpage-sticky-corner)')}>
+            {t('inProcess.table.columns.code')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.customer')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-center')}>
+            {t('inProcess.table.columns.products')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.status')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.deliveredAt')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.takenAt')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'max-w-40')}>
+            {t('inProcess.table.columns.address')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.courier')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
+            {t('inProcess.table.columns.total')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-(--z-inpage-sticky)', PINNED_END_CUE_CLASS)}>
+            <span className="sr-only">{t('inProcess.table.actions')}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {shipments.map((row) => (
+          <tr key={row.id} className={ROW_CLASS}>
+            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 whitespace-nowrap')}>
+              <CodeCell
+                code={row.code}
+                shippingCode={row.shippingCode}
+                unreadNoteCount={row.unreadNoteCount}
+                onOpenNotes={() => onOpenNotes(row.id)}
+              />
+            </td>
+            <td className={CELL_CLASS}>
+              <CustomerCell name={row.customer.name} phones={row.customer.phones} />
+            </td>
+            <td className={cn(CELL_CLASS, 'text-center')}>
+              <LineCountCell count={row.lineCount} />
+            </td>
+            <td className={CELL_CLASS}>
+              <StatusCell status={row.status} closure={row.closure} />
+            </td>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.deliveredAt} /></td>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}><DateWithRelative value={row.takenAt} /></td>
+            <td className={cn(CELL_CLASS, 'max-w-40')}>
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="font-medium">{row.governorate ?? '—'}</span>
+                <span className={SECONDARY_TEXT_CLASS}>{row.city ?? '—'}</span>
+              </div>
+            </td>
+            <td className={CELL_CLASS}>
+              <CourierCell name={row.courierName} phone={row.courierPhone} />
+            </td>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
+              <span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span>
+            </td>
+            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
+              <DeliveredRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
             </td>
           </tr>
         ))}

@@ -5,13 +5,14 @@ import { Can } from '@/components/Can';
 import { useI18n } from '@/i18n/I18nProvider';
 import { PrepaidBadge } from '@/components/orders/PrepaidBadge';
 import { PERMISSIONS } from '@/lib/permissions';
-import type { InProcessShipment, ReturnedShipment } from '@/types/shippingProviders';
+import type { DeliveredShipment, InProcessShipment, ReturnedShipment } from '@/types/shippingProviders';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { latenessChipOf } from './LatenessChip';
 import {
   CodeCell,
   CourierCell,
   CustomerCell,
+  DeliveredRowActions,
   DueCell,
   InProcessRowActions,
   LineCountCell,
@@ -24,6 +25,7 @@ import {
   moneyTextOf,
   useInProcessCarrier,
   useIsBulkClosable,
+  type DeliveredShipmentsTableProps,
   type InProcessShipmentsTableProps,
   type ReturnedShipmentsTableProps,
 } from './ShipmentsTable';
@@ -31,6 +33,8 @@ import {
 export type InProcessShipmentCardsProps = InProcessShipmentsTableProps;
 
 export type ReturnedShipmentCardsProps = ReturnedShipmentsTableProps;
+
+export type DeliveredShipmentCardsProps = DeliveredShipmentsTableProps;
 
 const CARD_CLASS = 'flex flex-col gap-3 rounded-xl border bg-card p-4';
 
@@ -157,6 +161,43 @@ export function ReturnedShipmentCards({
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />
           <dl className="grid grid-cols-2 gap-3 text-sm">
+            <CardField label={t('inProcess.table.columns.returnedAt')}><DateWithRelative value={row.returnedAt} /></CardField>
+            <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
+            <CardField label={t('inProcess.table.columns.products')}>
+              <LineCountCell count={row.lineCount} />
+            </CardField>
+            <CardField label={t('inProcess.table.columns.address')}>
+              {row.governorate ?? '—'}
+              {row.city ? ` - ${row.city}` : ''}
+            </CardField>
+            <CardField label={t('inProcess.table.columns.total')}><span className="inline-flex items-center gap-2">{moneyTextOf(row.totalCost)}<PrepaidBadge prepaid={row.prepaid} /></span></CardField>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function DeliveredShipmentCards({ shipments, onOpenNotes, onOpenActionLog }: DeliveredShipmentCardsProps) {
+  const { t } = useI18n();
+
+  return (
+    <ul role="list" className="flex flex-col gap-3">
+      {shipments.map((row: DeliveredShipment) => (
+        <li key={row.id} className={CARD_CLASS}>
+          <div className="flex items-start justify-between gap-3">
+            <CodeCell
+              code={row.code}
+              shippingCode={row.shippingCode}
+              unreadNoteCount={row.unreadNoteCount}
+              onOpenNotes={() => onOpenNotes(row.id)}
+            />
+            <DeliveredRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
+          </div>
+          <StatusCell status={row.status} closure={row.closure} />
+          <CustomerCell name={row.customer.name} phones={row.customer.phones} />
+          <dl className="grid grid-cols-2 gap-3 text-sm">
+            <CardField label={t('inProcess.table.columns.deliveredAt')}><DateWithRelative value={row.deliveredAt} /></CardField>
             <CardField label={t('inProcess.table.columns.takenAt')}><DateWithRelative value={row.takenAt} /></CardField>
             <CardField label={t('inProcess.table.columns.products')}>
               <LineCountCell count={row.lineCount} />

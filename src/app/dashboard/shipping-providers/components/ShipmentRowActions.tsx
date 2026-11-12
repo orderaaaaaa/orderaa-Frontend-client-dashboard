@@ -147,6 +147,7 @@ export interface ShipmentRowActionsProps {
   frozenReturnChild?: boolean;
   unreadNoteCount?: number;
   returnChildCode?: string | null;
+  hideFinalActions?: boolean;
 }
 
 export function ShipmentRowActions({
@@ -172,6 +173,7 @@ export function ShipmentRowActions({
   frozenReturnChild = false,
   unreadNoteCount,
   returnChildCode,
+  hideFinalActions = false,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -522,7 +524,11 @@ export function ShipmentRowActions({
     hasAllPermissions(action.codes) && (!action.anyOfCodes || hasAnyPermission(action.anyOfCodes));
   const isAllowedOnFrozenChild = (action: RowAction): boolean =>
     !frozenReturnChild || FROZEN_ROW_ACTION_IDS.includes(action.id);
-  const visibleActions = actions.filter(isAllowedOnFrozenChild).filter(isActionVisible);
+  const isShownFinalAction = (action: RowAction): boolean => !hideFinalActions || action.group !== 'final';
+  const visibleActions = actions
+    .filter(isAllowedOnFrozenChild)
+    .filter(isActionVisible)
+    .filter(isShownFinalAction);
   const hasNonFinalActions = visibleActions.some((action) => action.group !== 'final');
 
   const chooseAction = (action: RowAction) => {
