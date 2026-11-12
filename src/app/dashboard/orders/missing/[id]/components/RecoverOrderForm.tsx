@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import Order from '@/app/dashboard/upload-products/manual/Order';
 import ClientInformation from '@/app/dashboard/upload-products/manual/ClientInformation';
 import OrderDetails from '@/app/dashboard/upload-products/manual/OrderDetails';
@@ -386,44 +387,6 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           }}
         />
 
-        {variantCheck.lines.length > 0 && (
-          <p
-            role="alert"
-            data-testid="incomplete-variants-message"
-            className="text-red-600 text-sm font-semibold"
-          >
-            {incompleteLinesMessage(variantCheck.lines)}
-          </p>
-        )}
-
-        <div className="flex justify-end gap-3 ml-6">
-          <Can code={PERMISSION_CODES.ORDERS_MISSING_MANAGE}>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="rounded-full font-bold"
-              onClick={() => setIsDismissOpen(true)}
-            >
-              استبعاد
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || variantsBlocked}
-              size="lg"
-              className="w-40 rounded-full font-bold"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin">⟳</span>
-                  جاري الإرسال...
-                </>
-              ) : (
-                'قبول'
-              )}
-            </Button>
-          </Can>
-        </div>
       </div>
 
       <StoreLinkMoveConfirmModal
@@ -439,6 +402,50 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         onOpenChange={setIsDismissOpen}
         onDismissed={() => router.back()}
       />
+
+      <Can code={PERMISSION_CODES.ORDERS_MISSING_MANAGE}>
+        <StickyFormFooter
+          isSaving={isSubmitting || isRecovering}
+          status={
+            variantCheck.lines.length > 0 ? (
+              <span
+                role="alert"
+                data-testid="incomplete-variants-message"
+                className="text-red-600 text-sm font-semibold"
+              >
+                {incompleteLinesMessage(variantCheck.lines)}
+              </span>
+            ) : (
+              <></>
+            )
+          }
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="rounded-full font-bold"
+            onClick={() => setIsDismissOpen(true)}
+          >
+            استبعاد
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting || variantsBlocked}
+            size="lg"
+            className="w-40 rounded-full font-bold"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="animate-spin">⟳</span>
+                جاري الإرسال...
+              </>
+            ) : (
+              'قبول'
+            )}
+          </Button>
+        </StickyFormFooter>
+      </Can>
     </form>
   );
 }

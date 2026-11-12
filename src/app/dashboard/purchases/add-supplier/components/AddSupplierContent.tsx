@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { LiaTimesSolid, LiaSaveSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import BaseModal from '@/components/ui/base-modal';
 import { EmptyState } from '@/components/ui/state-panels';
@@ -35,7 +36,7 @@ function AddSupplierForm() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<AddSupplierFormData>({
     resolver: zodResolver(addSupplierSchema),
     defaultValues: {
@@ -188,7 +189,7 @@ function AddSupplierForm() {
           <p className="sm:px-8 text-red-500 text-sm -mt-4">{submitError}</p>
         )}
 
-        <div className="flex items-center gap-3 sm:px-8 justify-end">
+        <StickyFormFooter isDirty={isDirty} isSaving={createSupplierMutation.isPending}>
           <Button
             type="submit"
             variant="default"
@@ -209,7 +210,7 @@ function AddSupplierForm() {
             إلغاء
             <LiaTimesSolid className="w-4 h-4" />
           </Button>
-        </div>
+        </StickyFormFooter>
       </form>
 
       <BaseModal

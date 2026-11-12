@@ -12,6 +12,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
 import { parseSettlementFile, type SettlementSheetError } from '@/lib/excel/parse-settlement-file';
 import CopyableCode from '@/components/ui/copyable-code';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
@@ -286,6 +287,11 @@ export default function SettlementUploadPage() {
     }
   }, []);
 
+  const showCloseBatchButton = batch?.status === 'OPEN';
+  const showForceButton = results !== null && results.failed.length > 0 && results.failed.some((item) => item.bypassable);
+  const closeBatchHelp = 'تم تسوية الصفوف بالفعل عند رفعها؛ التأكيد يغلق التحصيل ويثبّت إجماليه فقط';
+  const forceRowsStatus = selectedForceRows.size > 0 ? `${selectedForceRows.size} صف محدد` : <></>;
+
   return (
     <div className="flex flex-col p-4 sm:p-6 max-w-5xl mx-auto w-full min-h-full">
       <Breadcrumb
@@ -421,18 +427,7 @@ export default function SettlementUploadPage() {
               </div>
             </div>
 
-            {batch.status === 'OPEN' ? (
-              <div className="flex flex-col items-stretch sm:items-end gap-1 w-full sm:w-auto">
-                <Button onClick={() => setCloseBatchOpen(true)} disabled={isConfirming}>
-                  {isConfirming ? 'جاري الإغلاق...' : 'تأكيد وإغلاق التحصيل'}
-                </Button>
-                {/* Rows settle on upload, not on confirmation. Saying so stops
-                    anyone believing this button is what commits the money. */}
-                <span className="text-[11px] text-muted-foreground sm:max-w-xs text-start sm:text-end">
-                  تم تسوية الصفوف بالفعل عند رفعها؛ التأكيد يغلق التحصيل ويثبّت إجماليه فقط
-                </span>
-              </div>
-            ) : (
+            {batch.status !== 'OPEN' && (
               <span className="text-sm font-semibold text-green-700">
                 تم التأكيد — لا يمكن إضافة صفوف أخرى
               </span>
@@ -692,17 +687,6 @@ export default function SettlementUploadPage() {
                     <XCircle className="w-4 h-4" />
                     فشل ({results.failed.length})
                   </h3>
-                  {results.failed.some((item) => item.bypassable) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="max-sm:h-10"
-                      disabled={selectedForceRows.size === 0 || isForcingSelected}
-                      onClick={() => setForceSelectedOpen(true)}
-                    >
-                      {isForcingSelected ? 'جاري الإضافة...' : 'إضافة المحدد رغم الأخطاء'}
-                    </Button>
-                  )}
                 </div>
                 {results.failed.some((item) => item.bypassable) && (
                   <label className="sm:hidden flex min-h-10 items-center gap-2 text-sm">
@@ -915,6 +899,41 @@ export default function SettlementUploadPage() {
             : null
         }
       />
+
+      {(showCloseBatchButton || showForceButton) && (
+        <StickyFormFooter
+          status={
+            showForceButton ? forceRowsStatus : (
+              <span className="text-[11px] text-muted-foreground sm:max-w-xs text-start sm:text-end">
+                {closeBatchHelp}
+              </span>
+            )
+          }
+        >
+          {/* Rows settle on upload, not on confirmation. Saying so stops
+              anyone believing this button is what commits the money. */}
+          {showCloseBatchButton && (
+            <Button
+              onClick={() => setCloseBatchOpen(true)}
+              disabled={isConfirming}
+              title={showForceButton ? closeBatchHelp : undefined}
+            >
+              {isConfirming ? 'جاري الإغلاق...' : 'تأكيد وإغلاق التحصيل'}
+            </Button>
+          )}
+          {showForceButton && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="max-sm:h-10"
+              disabled={selectedForceRows.size === 0 || isForcingSelected}
+              onClick={() => setForceSelectedOpen(true)}
+            >
+              {isForcingSelected ? 'جاري الإضافة...' : 'إضافة المحدد رغم الأخطاء'}
+            </Button>
+          )}
+        </StickyFormFooter>
+      )}
     </div>
   );
 }
