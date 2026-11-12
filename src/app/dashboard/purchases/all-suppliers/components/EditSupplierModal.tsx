@@ -8,6 +8,7 @@ import { LiaSaveSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   addSupplierSchema,
@@ -191,26 +192,28 @@ export default function EditSupplierModal({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 justify-end">
-          <Button
-            type="submit"
-            variant="default"
-            disabled={updateSupplierMutation.isPending}
-            className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
-          >
-            حفظ
-            <LiaSaveSolid className="w-4 h-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
-            onClick={onClose}
-          >
-            إلغاء
-            <LiaTimesSolid className="w-4 h-4" />
-          </Button>
-        </div>
+        <ModalStickyFooter>
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              type="submit"
+              variant="default"
+              disabled={updateSupplierMutation.isPending}
+              className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
+            >
+              حفظ
+              <LiaSaveSolid className="w-4 h-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
+              onClick={onClose}
+            >
+              إلغاء
+              <LiaTimesSolid className="w-4 h-4" />
+            </Button>
+          </div>
+        </ModalStickyFooter>
       </form>
     </BaseModal>
   );

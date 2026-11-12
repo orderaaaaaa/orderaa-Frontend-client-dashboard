@@ -7,6 +7,7 @@ import { z } from 'zod';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { INVOICE_LIFECYCLE, type SupplierInvoiceApiItem } from '@/lib/api/suppliers';
 import { useCreateSupplierInvoiceMutation, useSupplierInvoicesQuery } from '@/services/suppliers';
@@ -311,13 +312,15 @@ export default function PaymentModal({
               <p className="text-red-500 text-sm">{submitError}</p>
             )}
 
-            <Button
-              type="submit"
-              disabled={createInvoiceMutation.isPending || linkedOverLimit}
-              className="w-full sm:w-[60%] mx-auto rounded-xl font-bold text-base py-3"
-            >
-              دفع
-            </Button>
+            <ModalStickyFooter className="flex flex-col">
+              <Button
+                type="submit"
+                disabled={createInvoiceMutation.isPending || linkedOverLimit}
+                className="w-full sm:w-[60%] mx-auto rounded-xl font-bold text-base py-3"
+              >
+                دفع
+              </Button>
+            </ModalStickyFooter>
           </form>
         </>
       )}

@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import CopyField from './CopyField';
 import { SavedSecretStatus } from '@/components/SavedSecretStatus';
 import BaseModal from '@/components/ui/base-modal';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import { Switch } from '@/components/ui/switch';
 import { useIntegrations } from '../hooks/useIntegrations';
 import {
@@ -623,24 +624,26 @@ const EditIntegrationModal = ({
           </div>
         )}
 
-        <div className="flex gap-3 pt-2">
-          <Button
-            type="submit"
-            disabled={isLoading || !hasChanges}
-            className="flex-1 bg-primary text-white h-10"
-          >
-            {isLoading ? 'جاري الحفظ...' : 'حفظ التعديلات'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={isLoading}
-            className="h-10 px-6"
-          >
-            إلغاء
-          </Button>
-        </div>
+        <ModalStickyFooter>
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="submit"
+              disabled={isLoading || !hasChanges}
+              className="flex-1 bg-primary text-white h-10"
+            >
+              {isLoading ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isLoading}
+              className="h-10 px-6"
+            >
+              إلغاء
+            </Button>
+          </div>
+        </ModalStickyFooter>
       </form>
     </BaseModal>
   );

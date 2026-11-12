@@ -12,6 +12,7 @@ import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/base-modal';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import {
   Accordion,
   AccordionItem,
@@ -315,37 +316,38 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 />
               </>
             )}
-
-            {!isSaving && !form.formState.isValid && (
-              <p id="submit-disabled-reason" className="text-xs text-gray-500">
-                أكمل الحقول المطلوبة لتفعيل الزر
-              </p>
-            )}
-
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1 h-12 text-lg"
-              >
-                إلغاء
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSaving || !form.formState.isValid}
-                aria-describedby={
-                  !isSaving && !form.formState.isValid
-                    ? 'submit-disabled-reason'
-                    : undefined
-                }
-                className="flex-1 bg-primary hover:bg-brand-hover h-12 text-lg"
-              >
-                {isSaving ? 'جاري الحفظ...' : isEditing ? 'تحديث الربط' : 'تفعيل الربط'}
-              </Button>
-            </div>
           </div>
         </div>
+        {!isSaving && !form.formState.isValid && (
+          <p id="submit-disabled-reason" className="text-xs text-gray-500">
+            أكمل الحقول المطلوبة لتفعيل الزر
+          </p>
+        )}
+
+        <ModalStickyFooter>
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1 h-12 text-lg"
+            >
+              إلغاء
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving || !form.formState.isValid}
+              aria-describedby={
+                !isSaving && !form.formState.isValid
+                  ? 'submit-disabled-reason'
+                  : undefined
+              }
+              className="flex-1 bg-primary hover:bg-brand-hover h-12 text-lg"
+            >
+              {isSaving ? 'جاري الحفظ...' : isEditing ? 'تحديث الربط' : 'تفعيل الربط'}
+            </Button>
+          </div>
+        </ModalStickyFooter>
       </form>
     </BaseModal>
   );

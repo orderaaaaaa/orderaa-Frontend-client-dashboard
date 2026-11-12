@@ -15,6 +15,7 @@ import Input from '@/components/ui/Input';
 import CopyField from './CopyField';
 import { SavedSecretStatus } from '@/components/SavedSecretStatus';
 import BaseModal from '@/components/ui/base-modal';
+import { ModalStickyFooter } from '@/components/ui/modal-sticky-footer';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import {
   Accordion,
@@ -420,24 +421,26 @@ const IntegrationModal = ({
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="flex-1 bg-primary text-white h-10"
-                    >
-                      {isLoading ? 'جاري الإنشاء...' : 'التالي'}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowStepper(false)}
-                      disabled={isLoading}
-                      className="h-10 px-6"
-                    >
-                      إلغاء
-                    </Button>
-                  </div>
+                  <ModalStickyFooter>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-1 bg-primary text-white h-10"
+                      >
+                        {isLoading ? 'جاري الإنشاء...' : 'التالي'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowStepper(false)}
+                        disabled={isLoading}
+                        className="h-10 px-6"
+                      >
+                        إلغاء
+                      </Button>
+                    </div>
+                  </ModalStickyFooter>
                 </form>
               </StepContent>
 
@@ -481,40 +484,42 @@ const IntegrationModal = ({
                     )}
                   </div>
 
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="flex-1 bg-primary text-white h-10"
-                    >
-                      {isLoading
-                        ? 'جاري الحفظ...'
-                        : isWebhookOnly
-                          ? 'حفظ'
-                          : 'التالي'}
-                    </Button>
-                    {webhookSaved ? (
+                  <ModalStickyFooter>
+                    <div className="flex gap-3 pt-2">
                       <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleSkipApi}
+                        type="submit"
                         disabled={isLoading}
-                        className="h-10 px-6"
+                        className="flex-1 bg-primary text-white h-10"
                       >
-                        إنهاء
+                        {isLoading
+                          ? 'جاري الحفظ...'
+                          : isWebhookOnly
+                            ? 'حفظ'
+                            : 'التالي'}
                       </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setCurrentStep(0)}
-                        disabled={isLoading}
-                        className="h-10 px-6"
-                      >
-                        رجوع
-                      </Button>
-                    )}
-                  </div>
+                      {webhookSaved ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleSkipApi}
+                          disabled={isLoading}
+                          className="h-10 px-6"
+                        >
+                          إنهاء
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setCurrentStep(0)}
+                          disabled={isLoading}
+                          className="h-10 px-6"
+                        >
+                          رجوع
+                        </Button>
+                      )}
+                    </div>
+                  </ModalStickyFooter>
                 </form>
               </StepContent>
 
@@ -558,24 +563,26 @@ const IntegrationModal = ({
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="flex-1 bg-primary text-white h-10"
-                    >
-                      {isLoading ? 'جاري الحفظ...' : 'حفظ'}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(1)}
-                      disabled={isLoading}
-                      className="h-10 px-6"
-                    >
-                      رجوع
-                    </Button>
-                  </div>
+                  <ModalStickyFooter>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-1 bg-primary text-white h-10"
+                      >
+                        {isLoading ? 'جاري الحفظ...' : 'حفظ'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCurrentStep(1)}
+                        disabled={isLoading}
+                        className="h-10 px-6"
+                      >
+                        رجوع
+                      </Button>
+                    </div>
+                  </ModalStickyFooter>
                 </form>
               </StepContent>
               )}
