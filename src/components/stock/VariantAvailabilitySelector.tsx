@@ -1,14 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/state-panels';
-import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
-import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useProductCards } from '@/services/products';
 import type { VariantCard } from '@/lib/api/products';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { VariantCards } from './VariantCards';
+import { CARD_SCROLL_CLASS, VariantCards } from './VariantCards';
 import {
   availableNumbersTextFor,
   catalogAttributesOf,
@@ -51,7 +49,6 @@ export function VariantAvailabilitySelector({
   currentLabel,
 }: VariantAvailabilitySelectorProps) {
   const { t, dir } = useI18n();
-  const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
   const catalog = useProductCards(productId);
   const attributes = catalogAttributesOf(catalog.attributes ?? []);
   const cards: VariantCard[] = catalog.cards ?? [];
@@ -139,23 +136,13 @@ export function VariantAvailabilitySelector({
       {cards.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('orderDetails.variants.noCards')}</p>
       ) : (
-        <div className="relative">
-          <div
-            ref={scrollerRef}
-            className={cn(
-              'overflow-y-auto overscroll-contain p-0.5',
-              maxHeightClassName ?? 'max-h-72 max-sm:max-h-none max-sm:overflow-y-visible',
-            )}
-          >
-            <VariantCards
-              cards={cards}
-              rows={numberRows}
-              selection={selection}
-              onSelect={onChange ? pickCard : undefined}
-            />
-          </div>
-          <ScrollEndFade visible={hasMoreAtEnd} axis="y" fromClassName="from-card" />
-        </div>
+        <VariantCards
+          cards={cards}
+          rows={numberRows}
+          selection={selection}
+          onSelect={onChange ? pickCard : undefined}
+          scrollClassName={maxHeightClassName ?? CARD_SCROLL_CLASS}
+        />
       )}
 
       {excludedLines > 0 && (

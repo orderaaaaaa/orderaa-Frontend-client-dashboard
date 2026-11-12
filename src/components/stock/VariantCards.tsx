@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
+import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantCard } from '@/lib/api/products';
 import type { VariantAvailability } from '@/lib/api/warehouses';
@@ -31,16 +34,28 @@ const CARD_TEXT: Record<CardNumbers['kind'], string> = {
   enough: 'text-muted-foreground',
 };
 
+export const CARD_SCROLL_CLASS = 'max-h-72 max-sm:max-h-none max-sm:overflow-y-visible';
+
 interface VariantCardsProps {
   cards: VariantCard[];
   rows: VariantAvailability[];
   selection: Selection;
+  selectedCardIds?: ReadonlySet<number>;
   onSelect?: (card: VariantCard) => void;
+  scrollClassName?: string;
 }
 
-export function VariantCards({ cards, rows, selection, onSelect }: VariantCardsProps) {
+export function VariantCards({
+  cards,
+  rows,
+  selection,
+  selectedCardIds,
+  onSelect,
+  scrollClassName,
+}: VariantCardsProps) {
   const { t } = useI18n();
   const [filter, setFilter] = useState('');
+  const { ref: scrollerRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>('y');
   const rowByVariantId = new Map(rows.map((row) => [row.variantId, row]));
   const needle = filter.trim().toLowerCase();
   const visible =
@@ -65,22 +80,19 @@ export function VariantCards({ cards, rows, selection, onSelect }: VariantCardsP
     }
   };
 
-  return (
-    <div className="flex flex-col gap-2">
-      {cards.length > FILTER_THRESHOLD && (
-        <Input
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          aria-label={t('orderDetails.variants.filterLabel')}
-          placeholder={t('orderDetails.variants.filterLabel')}
-          className="h-9"
-        />
-      )}
+  const grid =
+    needle && visible.length === 0 ? (
+      <p className="py-3 text-center text-sm text-muted-foreground">
+        {t('orderDetails.variants.noMatches')}
+      </p>
+    ) : (
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {visible.map((card) => {
           const row = rowByVariantId.get(card.id);
           const numbers = row ? cardNumbersOf(row) : null;
-          const selected = isCardSelected(card, selection);
+          const selected = selectedCardIds
+            ? selectedCardIds.has(card.id)
+            : isCardSelected(card, selection);
           return (
             <Button
               key={card.id}
@@ -107,6 +119,36 @@ export function VariantCards({ cards, rows, selection, onSelect }: VariantCardsP
           );
         })}
       </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-2">
+      {cards.length > FILTER_THRESHOLD && (
+        <div className="bg-card max-sm:sticky max-sm:top-0 max-sm:z-(--z-inpage-sticky)">
+          <Input
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            aria-label={t('orderDetails.variants.filterLabel')}
+            placeholder={t('orderDetails.variants.filterLabel')}
+            icon={Search}
+            clearable
+            onClear={() => setFilter('')}
+          />
+        </div>
+      )}
+      {scrollClassName ? (
+        <div className="relative">
+          <div
+            ref={scrollerRef}
+            className={cn('overflow-y-auto overscroll-contain p-0.5', scrollClassName)}
+          >
+            {grid}
+          </div>
+          <ScrollEndFade visible={hasMoreAtEnd} axis="y" fromClassName="from-card" />
+        </div>
+      ) : (
+        grid
+      )}
     </div>
   );
 }

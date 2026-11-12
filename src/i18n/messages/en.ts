@@ -155,6 +155,7 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.selectedSummary': 'Current choice: {variant}',
   'orderDetails.variants.pickAll': 'Choose every option to see exact availability',
   'orderDetails.variants.noCards': 'No variants available',
+  'orderDetails.variants.noMatches': 'No results',
   'orderDetails.variants.filterLabel': 'Search variants',
   'orderDetails.variants.excludedLines': '{count} line(s) without a full selection are not counted',
   'orderDetails.variants.loadError': 'Could not load available stock',
