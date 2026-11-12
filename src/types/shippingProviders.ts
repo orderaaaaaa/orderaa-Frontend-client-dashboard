@@ -61,6 +61,12 @@ export const IN_PROCESS_STATUSES = [
 
 export type InProcessStatus = (typeof IN_PROCESS_STATUSES)[number];
 
+export const DELIVERED_STATUSES = [OrderStatus.DELIVERED, OrderStatus.COLLECTED] as const;
+
+export type DeliveredStatus = (typeof DELIVERED_STATUSES)[number];
+
+export type OutcomeView = 'returned' | 'delivered';
+
 export const LATENESS_FLAGS = ['RED', 'YELLOW', 'GREEN'] as const;
 
 export type LatenessFlag = (typeof LATENESS_FLAGS)[number];
@@ -159,8 +165,16 @@ export interface ReturnedShipment extends ShipmentRowBase {
   lateness: null;
   courierName: string | null;
   courierPhone: string | null;
+  returnedAt: string | null;
   sendAgainEligible: boolean;
   sendAgainBlockedReason: SendAgainBlockedReason | null;
+}
+
+export interface DeliveredShipment extends ShipmentRowBase {
+  lateness: null;
+  courierName: string | null;
+  courierPhone: string | null;
+  deliveredAt: string | null;
 }
 
 export interface CarrierHeader {
@@ -193,6 +207,15 @@ export interface ReturnedShipmentsPage {
   total: number;
 }
 
+export interface DeliveredShipmentsPage {
+  carrier: CarrierHeader;
+  summary: Record<string, never>;
+  data: DeliveredShipment[];
+  page: number;
+  limit: number;
+  total: number;
+}
+
 export interface InProcessFilters {
   from?: string;
   to?: string;
@@ -206,9 +229,21 @@ export interface InProcessFilters {
   limit: number;
 }
 
-export interface ReturnedFilters {
+export interface OutcomeFilters {
+  from?: string;
+  to?: string;
+  governorate?: string;
+  city?: string;
+  search?: string;
+  workState: FollowupWorkState;
   page: number;
   limit: number;
+}
+
+export type ReturnedFilters = OutcomeFilters;
+
+export interface DeliveredFilters extends OutcomeFilters {
+  status?: DeliveredStatus;
 }
 
 export type InProcessCountFilters = Pick<
@@ -216,9 +251,22 @@ export type InProcessCountFilters = Pick<
   'from' | 'to' | 'status' | 'lateness' | 'governorate' | 'city' | 'search'
 >;
 
+export type OutcomeCountFilters = Omit<OutcomeFilters, 'workState' | 'page' | 'limit'>;
+
+export interface DeliveredCountFilters extends OutcomeCountFilters {
+  status?: DeliveredStatus;
+}
+
+export interface WorkStateCounts {
+  open: number;
+  closed: number;
+  all: number;
+}
+
 export interface ShipmentCounts {
-  inProcess: { open: number; closed: number; all: number };
+  inProcess: WorkStateCounts;
   returned: number | null;
+  delivered: number | null;
 }
 
 export interface LateMarkBody {

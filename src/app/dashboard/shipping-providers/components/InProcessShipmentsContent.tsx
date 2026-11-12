@@ -975,7 +975,7 @@ function ReturnedList({
     isSuccess,
     error,
     refetch,
-  } = useReturnedShipmentsQuery(shippingCompanyId, { page, limit });
+  } = useReturnedShipmentsQuery(shippingCompanyId, { page, limit, workState: 'all' });
 
   const shipments = data?.data ?? [];
   const total = data?.total ?? 0;

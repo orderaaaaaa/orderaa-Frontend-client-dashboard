@@ -20,8 +20,18 @@ import {
 } from '@/lib/api/followup';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import type { Order } from '@/types/orders';
+import {
+  toDeliveredParams,
+  toInProcessCountParams,
+  toInProcessParams,
+  toOutcomeCountParams,
+  toReturnedParams,
+} from '@/app/dashboard/shipping-providers/components/shipmentParams';
 import type {
   CarrierStats,
+  DeliveredFilters,
+  DeliveredCountFilters,
+  DeliveredShipmentsPage,
   DeliveryWindowBody,
   DeliveryWindowResponse,
   InProcessCountFilters,
@@ -30,6 +40,7 @@ import type {
   LateMarkBody,
   LateMarkResponse,
   LocationStats,
+  OutcomeView,
   ReturnedFilters,
   ReturnedShipmentsPage,
   ShippingProvider,
@@ -43,10 +54,22 @@ import type {
   ShipmentReturnCostBody,
   ShippingProviderType,
   StatsRange,
+  WorkStateCounts,
 } from '@/types/shippingProviders';
 
 const BASE = '/shipping/providers';
 export const KEY = 'shipping-providers';
+
+export const SHIPMENT_LIST_KEY = {
+  IN_PROCESS: 'in-process',
+  RETURNED: 'returned',
+  DELIVERED: 'delivered',
+} as const;
+
+export type ShipmentListKey = (typeof SHIPMENT_LIST_KEY)[keyof typeof SHIPMENT_LIST_KEY];
+
+export const isShipmentListKey = (value: unknown): value is ShipmentListKey =>
+  Object.values(SHIPMENT_LIST_KEY).some((key) => key === value);
 
 export const useShippingProvidersQuery = (filters?: {
   type?: ShippingProviderType;
@@ -91,19 +114,46 @@ export const useCarrierLocationStatsQuery = (
     enabled: !!shippingCompanyId,
   });
 
+export const fetchInProcessPage = async (
+  shippingCompanyId: number | undefined,
+  filters: InProcessFilters,
+): Promise<InProcessShipmentsPage> => {
+  const { data } = await http.get<InProcessShipmentsPage>(
+    `${BASE}/${shippingCompanyId}/shipments`,
+    { params: toInProcessParams(filters) },
+  );
+  return data;
+};
+
+export const fetchReturnedPage = async (
+  shippingCompanyId: number | undefined,
+  filters: ReturnedFilters,
+): Promise<ReturnedShipmentsPage> => {
+  const { data } = await http.get<ReturnedShipmentsPage>(
+    `${BASE}/${shippingCompanyId}/returned-shipments`,
+    { params: toReturnedParams(filters) },
+  );
+  return data;
+};
+
+export const fetchDeliveredPage = async (
+  shippingCompanyId: number | undefined,
+  filters: DeliveredFilters,
+): Promise<DeliveredShipmentsPage> => {
+  const { data } = await http.get<DeliveredShipmentsPage>(
+    `${BASE}/${shippingCompanyId}/delivered-shipments`,
+    { params: toDeliveredParams(filters) },
+  );
+  return data;
+};
+
 export const useInProcessShipmentsQuery = (
   shippingCompanyId: number | undefined,
   filters: InProcessFilters,
 ) =>
   useQuery({
-    queryKey: [KEY, shippingCompanyId, 'in-process', filters],
-    queryFn: async () => {
-      const { data } = await http.get<InProcessShipmentsPage>(
-        `${BASE}/${shippingCompanyId}/shipments`,
-        { params: filters },
-      );
-      return data;
-    },
+    queryKey: [KEY, shippingCompanyId, SHIPMENT_LIST_KEY.IN_PROCESS, filters],
+    queryFn: () => fetchInProcessPage(shippingCompanyId, filters),
     enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: true,
@@ -118,7 +168,7 @@ export const useInProcessCountsQuery = (
     queryFn: async () => {
       const { data } = await http.get<ShipmentCounts>(
         `${BASE}/${shippingCompanyId}/shipments/counts`,
-        { params: filters },
+        { params: toInProcessCountParams(filters) },
       );
       return data;
     },
@@ -131,17 +181,47 @@ export const useReturnedShipmentsQuery = (
   filters: ReturnedFilters,
 ) =>
   useQuery({
-    queryKey: [KEY, shippingCompanyId, 'returned', filters],
-    queryFn: async () => {
-      const { data } = await http.get<ReturnedShipmentsPage>(
-        `${BASE}/${shippingCompanyId}/returned-shipments`,
-        { params: filters },
-      );
-      return data;
-    },
+    queryKey: [KEY, shippingCompanyId, SHIPMENT_LIST_KEY.RETURNED, filters],
+    queryFn: () => fetchReturnedPage(shippingCompanyId, filters),
     enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: true,
+  });
+
+export const useDeliveredShipmentsQuery = (
+  shippingCompanyId: number | undefined,
+  filters: DeliveredFilters,
+) =>
+  useQuery({
+    queryKey: [KEY, shippingCompanyId, SHIPMENT_LIST_KEY.DELIVERED, filters],
+    queryFn: () => fetchDeliveredPage(shippingCompanyId, filters),
+    enabled: !!shippingCompanyId,
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
+  });
+
+export const useOutcomeCountsQuery = (
+  shippingCompanyId: number | undefined,
+  view: OutcomeView,
+  filters: DeliveredCountFilters,
+  enabled: boolean = true,
+) =>
+  useQuery({
+    queryKey: [KEY, shippingCompanyId, `${view}-counts`, filters],
+    queryFn: async () => {
+      const { data } = await http.get<WorkStateCounts>(
+        `${BASE}/${shippingCompanyId}/${view}-shipments/counts`,
+        {
+          params:
+            view === 'delivered'
+              ? toOutcomeCountParams('delivered', filters)
+              : toOutcomeCountParams('returned', filters),
+        },
+      );
+      return data;
+    },
+    enabled: !!shippingCompanyId && enabled,
+    placeholderData: keepPreviousData,
   });
 
 export interface ActionSuccessToast {

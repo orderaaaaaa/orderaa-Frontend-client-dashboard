@@ -21,7 +21,7 @@ import {
   type FollowupReasonBody,
 } from '@/lib/api/followup';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
+import { KEY as SHIPPING_PROVIDERS_KEY, isShipmentListKey } from '@/services/shippingProviders';
 
 function useFollowupListsInvalidation() {
   const queryClient = useQueryClient();
@@ -112,8 +112,7 @@ export const useMarkFollowupNotesReadMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
-          query.queryKey[0] === SHIPPING_PROVIDERS_KEY &&
-          (query.queryKey[2] === 'in-process' || query.queryKey[2] === 'returned'),
+          query.queryKey[0] === SHIPPING_PROVIDERS_KEY && isShipmentListKey(query.queryKey[2]),
       });
     },
   });
