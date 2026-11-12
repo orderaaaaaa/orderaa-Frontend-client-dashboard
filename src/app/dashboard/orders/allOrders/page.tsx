@@ -531,6 +531,7 @@ function AllOrdersContent() {
                 }
                 shippingId={activeShippingIdOf(order)}
                 shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
+                shippingStatusLabel={order.shippingStatusLabel}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 money={order}

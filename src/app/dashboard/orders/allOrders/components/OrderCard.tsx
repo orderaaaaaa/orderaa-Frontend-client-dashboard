@@ -13,7 +13,7 @@ import {
   CalendarClock,
 } from 'lucide-react';
 import { CiBarcode } from 'react-icons/ci';
-import { DateWithRelative } from '@/components/ui/date-with-relative';
+import { DateText, DateWithRelative } from '@/components/ui/date-with-relative';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
@@ -55,6 +55,7 @@ export default function OrderCard({
   price,
   shippingId,
   shippingCompanyName,
+  shippingStatusLabel,
   isBlocked,
   customerNotes,
   trys,
@@ -140,9 +141,10 @@ export default function OrderCard({
     .map((event) => ({
       id: event.id,
       text: renderOrderEventNote(event.name, event.note),
+      createdAt: event.createdAt,
     }))
     .filter(
-      (event): event is { id: number; text: string } => Boolean(event.text)
+      (event): event is { id: number; text: string; createdAt: string } => Boolean(event.text)
     );
 
   const showMoney = Boolean(price) || typeof money?.returnPrice === 'string';
@@ -422,18 +424,28 @@ export default function OrderCard({
         )}
 
         {/* Shipping */}
-        {shippingId && (
+        {(shippingId || shippingStatusLabel) && (
           <div className="flex flex-row items-center gap-2 max-w-full flex-wrap">
-            <Truck className="opacity-30 flex-shrink-0" height={18} />
-            <CopyableCode value={shippingId} label="نسخ كود الشحن" className="min-w-0 max-w-full">
-              <span className="text-base font-medium text-foreground break-words min-w-0">
-                {shippingId}
-              </span>
-            </CopyableCode>
-            {shippingCompanyName && (
-              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary-text text-xs font-semibold px-2 py-0.5 rounded-full break-words">
-                {shippingCompanyName}
-              </span>
+            {shippingId && (
+              <>
+                <Truck className="opacity-30 flex-shrink-0" height={18} />
+                <CopyableCode value={shippingId} label="نسخ كود الشحن" className="min-w-0 max-w-full">
+                  <span className="text-base font-medium text-foreground break-words min-w-0">
+                    {shippingId}
+                  </span>
+                </CopyableCode>
+                {shippingCompanyName && (
+                  <span className="inline-flex items-center gap-1 bg-primary/10 text-primary-text text-xs font-semibold px-2 py-0.5 rounded-full break-words">
+                    {shippingCompanyName}
+                  </span>
+                )}
+              </>
+            )}
+            {shippingStatusLabel && (
+              <p className="w-full text-sm break-words min-w-0">
+                <span className="text-muted-foreground">حالة الشحن: </span>
+                <span className="font-medium text-foreground">{shippingStatusLabel}</span>
+              </p>
             )}
           </div>
         )}
@@ -456,7 +468,7 @@ export default function OrderCard({
                   style={{ strokeWidth: 1.5, color: 'var(--danger-text, rgba(220,38,38,0.7))' }}
                 />
                 <span className="text-base font-medium text-red-600 break-words min-w-0">
-                  {event.text}
+                  {event.text}<span className="text-xs font-normal text-muted-foreground whitespace-nowrap"> · <DateText value={event.createdAt} /></span>
                 </span>
               </div>
             ))}

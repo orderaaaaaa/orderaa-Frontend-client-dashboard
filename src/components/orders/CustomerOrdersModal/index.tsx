@@ -259,6 +259,7 @@ export default function CustomerOrdersModal({
                   order.externalGovernorate ||
                   'غير محدد'
                 }
+                shippingStatusLabel={order.shippingStatusLabel}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 money={order}
