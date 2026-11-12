@@ -80,6 +80,14 @@ export const FOLLOWUP_ACTION_LOG_BUTTON_LABEL = 'سجل الإجراءات';
 export const FOLLOWUP_COURIER_COLUMN_LABEL = 'المندوب';
 export const FOLLOWUP_ACTIONS_COLUMN_LABEL = 'المتابعة';
 
+export const CHAT_LIVE_LABEL = 'مباشر';
+export const CHAT_RECONNECTING_LABEL = 'جارٍ إعادة الاتصال…';
+export const CHAT_OFFLINE_LABEL = 'غير متصل';
+export const CHAT_LAST_SYNC_PREFIX = 'آخر تحديث من تيربو';
+export const CHAT_REFRESH_LABEL = 'تحديث';
+export const CHAT_SEND_LABEL = 'إرسال الرسالة';
+export const CHAT_ENTER_HINT = 'Enter للإرسال · Shift+Enter لسطر جديد';
+
 export const ACTION_LOG_EMPTY = 'لا توجد إجراءات مسجلة لهذا الطلب';
 export const ACTION_LOG_HISTORY_FORBIDDEN_NOTICE =
   'سجل تعديلات الطلب غير متاح لصلاحياتك، ويظهر سجل الإجراءات فقط';
