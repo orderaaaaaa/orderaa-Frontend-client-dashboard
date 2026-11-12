@@ -6,7 +6,7 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { LiaPlusSolid } from 'react-icons/lia';
-import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
+import { CARD_SCROLL_CLASS, VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,6 @@ import {
 import { OrderStatus } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { useDebounce } from '@/utils/debounce';
-import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import {
   MAX_VIRTUAL_WAREHOUSE_TERMS,
   emptyVirtualWarehouseForm,
@@ -420,9 +419,9 @@ function VirtualWarehousePreviewPanel({
     if (!product) return [];
     return product.variants.map((variant) => ({
       id: variant.id,
-      label: variantPlainLabel({
+      label: variantCardLabelOf({
         productName: product.name,
-        sku: null,
+        sku: variant.sku,
         options: variant.options,
       }),
       options: [],

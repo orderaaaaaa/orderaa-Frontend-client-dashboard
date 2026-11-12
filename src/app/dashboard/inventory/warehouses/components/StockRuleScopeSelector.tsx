@@ -1,12 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { VariantCards } from '@/components/stock/VariantCards';
+import { VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useStockProducts } from '@/services/stock';
 import type { VariantCard } from '@/lib/api/products';
-import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { RULE_SCOPE_LABEL_KEYS } from '../constants';
 
 /** Derived from the label map so a new scope cannot be added to only one side. */
@@ -86,9 +85,9 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
     if (!product) return [];
     return product.variants.map((variant) => ({
       id: variant.id,
-      label: variantPlainLabel({
+      label: variantCardLabelOf({
         productName: product.name,
-        sku: null,
+        sku: variant.sku,
         options: variant.options,
       }),
       options: [],

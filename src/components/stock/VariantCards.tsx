@@ -7,6 +7,7 @@ import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantCard } from '@/lib/api/products';
 import type { VariantAvailability } from '@/lib/api/warehouses';
+import { variantOptionLabel, type VariantOptionLabelItem } from '@/lib/variantOptionLabel';
 import { cn } from '@/lib/utils';
 import { toStockNumber } from '@/utils/format';
 import {
@@ -35,6 +36,16 @@ const CARD_TEXT: Record<CardNumbers['kind'], string> = {
 };
 
 export const CARD_SCROLL_CLASS = 'max-h-72 max-sm:max-h-none max-sm:overflow-y-visible';
+
+export const variantCardLabelOf = ({
+  productName,
+  sku,
+  options,
+}: {
+  productName: string;
+  sku?: string | null;
+  options: VariantOptionLabelItem[];
+}): string => variantOptionLabel(options) || sku || productName;
 
 interface VariantCardsProps {
   cards: VariantCard[];

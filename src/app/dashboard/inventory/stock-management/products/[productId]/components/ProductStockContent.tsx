@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Boxes, PackageX, SlidersHorizontal, Warehouse } from 'lucide-react';
 import { AdjustStockForm, type AdjustStockGroup } from '@/components/stock/AdjustStockForm';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
-import { VariantCards } from '@/components/stock/VariantCards';
+import { VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
 import { StockTimeline } from '@/components/stock/StockTimeline';
 import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import { MOVEMENT_SOURCE_LABELS } from '@/components/stock/stockLabels';
@@ -199,7 +199,11 @@ function ProductStockBody({
     { id: 0, label: 'كل المتغيرات', options: [] },
     ...stock.variants.map((variant) => ({
       id: variant.variantId,
-      label: variant.variantLabel || stock.product.name,
+      label: variantCardLabelOf({
+        productName: stock.product.name,
+        sku: variant.sku,
+        options: variant.options,
+      }),
       options: [],
     })),
   ];

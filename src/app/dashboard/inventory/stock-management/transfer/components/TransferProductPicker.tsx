@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import type { MoveStockLine } from '@/components/stock/MoveStockForm';
 import { STOCK_FIELD_CLASS } from '@/components/stock/formStyles';
-import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
+import { CARD_SCROLL_CLASS, VariantCards, variantCardLabelOf } from '@/components/stock/VariantCards';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantCard } from '@/lib/api/products';
-import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { cn } from '@/lib/utils';
 import { useStockProducts } from '@/services/stock';
 import { toStockNumber } from '@/utils/format';
@@ -59,7 +58,7 @@ export function TransferProductPicker({
         cards: groupLines.map(
           (line): VariantCard => ({
             id: line.variantId,
-            label: variantPlainLabel(line),
+            label: variantCardLabelOf(line),
             options: [],
           })
         ),
