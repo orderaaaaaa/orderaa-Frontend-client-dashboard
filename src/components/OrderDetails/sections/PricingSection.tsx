@@ -5,7 +5,7 @@ import { EditableTextField } from '../fields/EditableTextField';
 import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
-import { Order, paymentStatusShown } from '@/types/orders';
+import { Order, OrderStatus, paymentStatusShown } from '@/types/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE } from '@/types/shippingCompanies';
@@ -26,6 +26,11 @@ const prepaidSchema = z.string().refine(
   { message: 'أدخل مبلغاً صحيحاً بحد أقصى رقمين عشريين' }
 );
 
+const returnPriceSchema = z.string().refine(
+  (val) => /^\d+(\.\d{1,2})?$/.test(val),
+  { message: 'أدخل مبلغاً صحيحاً بحد أقصى رقمين عشريين' }
+);
+
 /**
  * Props for PricingSection component
  */
@@ -35,6 +40,7 @@ export interface PricingSectionProps {
   onShippingTypeSelect?: (value: string) => void;
   pendingShippingType?: string | null;
   onSaveReturnContent?: (content: string) => Promise<void>;
+  isCustomerReturn?: boolean;
   className?: string;
   readOnly?: boolean;
 }
@@ -52,6 +58,7 @@ export function PricingSection({
   onShippingTypeSelect,
   pendingShippingType,
   onSaveReturnContent,
+  isCustomerReturn = false,
   className = '',
   readOnly = false,
 }: PricingSectionProps) {
@@ -59,6 +66,10 @@ export function PricingSection({
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && !readOnly;
   const priceLocked = order.shippingCompanyRef?.carrierSupportsUpdate === false;
+  const returnPriceEditable =
+    canEdit &&
+    order.status !== OrderStatus.RETURNED_FINAL &&
+    order.status !== OrderStatus.CANCELLED;
   const { t } = useI18n();
 
   // T8. Every amount is a decimal string from the API and is rendered as-is —
@@ -106,6 +117,19 @@ export function PricingSection({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {isCustomerReturn && (
+          <EditableTextField
+            label={ORDER_FIELD_LABELS.returnPrice}
+            value={order.returnPrice ?? undefined}
+            icon={LiaFileInvoiceDollarSolid}
+            inputType="number"
+            validationSchema={returnPriceSchema}
+            onSave={async (value) => {
+              await onUpdate('returnPrice', Number(value));
+            }}
+            canEdit={returnPriceEditable}
+          />
+        )}
         <EditableTextField
           label="السعر"
           value={String(order.totalCost)}
@@ -115,7 +139,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
           }}
-          canEdit={canEdit && !priceLocked}
+          canEdit={canEdit && !priceLocked && !isCustomerReturn}
           readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
         />
         <EditableTextField
@@ -127,7 +151,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('prepaidAmount', value === '' ? null : Number(value));
           }}
-          canEdit={canEdit && !priceLocked}
+          canEdit={canEdit && !priceLocked && !isCustomerReturn}
           readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
         />
         <EditableTextField
@@ -139,7 +163,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('shippingCost', Number(value));
           }}
-          canEdit={canEdit}
+          canEdit={canEdit && !isCustomerReturn}
         />
         <ShippingTypeSelect
           value={pendingShippingType || order.shippingType}

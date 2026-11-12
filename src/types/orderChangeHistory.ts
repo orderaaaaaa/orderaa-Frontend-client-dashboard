@@ -32,6 +32,7 @@ export type OrderTrackedField =
   | 'couponDiscount'
   | 'returnShippingCost'
   | 'prepaidAmount'
+  | 'returnPrice'
   | 'coupon'
   | 'paymentMethod'
   | 'paymentStatus'

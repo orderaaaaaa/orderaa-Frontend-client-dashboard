@@ -7,6 +7,7 @@ import CopyableCode from '@/components/ui/copyable-code';
 import PageLoading from '@/components/ui/page-loading';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import type { SettlementBatchOrder } from '@/lib/api/settlement';
+import { ORDER_FIELD_LABELS } from '@/constants/orderFieldLabels';
 import {
   SettlementShippingColumnCells,
   SettlementShippingColumnHeaders,
@@ -72,7 +73,19 @@ export default function SettlementBatchOrdersPanel({
                     </span>
                   ),
                 },
-                { label: 'المبلغ في هذا التحصيل', value: <span className="font-semibold">{row.amount}</span> },
+                {
+                  label: 'المبلغ في هذا التحصيل',
+                  value: (
+                    <span className="flex flex-col">
+                      <span className="font-semibold">{row.amount}</span>
+                      {typeof row.returnPrice === 'string' && (
+                        <span className="text-xs text-muted-foreground">
+                          {ORDER_FIELD_LABELS.returnPrice} {row.returnPrice}
+                        </span>
+                      )}
+                    </span>
+                  ),
+                },
                 {
                   label: 'كود الشحن',
                   value: (
@@ -172,7 +185,14 @@ export default function SettlementBatchOrdersPanel({
                   <SettlementShippingColumnCells
                     shipping={row.shipping}
                     betweenTotalAndCost={
-                      <td className="px-4 py-2 font-semibold">{row.amount}</td>
+                      <td className="px-4 py-2 font-semibold">
+                        {row.amount}
+                        {typeof row.returnPrice === 'string' && (
+                          <div className="text-xs font-normal text-muted-foreground">
+                            {ORDER_FIELD_LABELS.returnPrice} {row.returnPrice}
+                          </div>
+                        )}
+                      </td>
                     }
                   />
                   <td className="px-4 py-2">

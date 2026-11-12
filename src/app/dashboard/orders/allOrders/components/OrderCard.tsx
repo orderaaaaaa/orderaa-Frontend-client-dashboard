@@ -22,6 +22,7 @@ import { getRemainingTime } from '@/utils/getRemainingTime';
 import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid, LiaPauseCircleSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 import { ShippingType } from '@/types/orders';
+import { ORDER_FIELD_LABELS } from '@/constants/orderFieldLabels';
 import { MdBlock } from 'react-icons/md';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -384,6 +385,11 @@ export default function OrderCard({
             {typeof money?.settlementAmount === 'string' && (
               <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                 محصل {money.settlementAmount} جنيه
+              </span>
+            )}
+            {typeof money?.returnPrice === 'string' && (
+              <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                {ORDER_FIELD_LABELS.returnPrice} {money.returnPrice} جنيه
               </span>
             )}
             {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {

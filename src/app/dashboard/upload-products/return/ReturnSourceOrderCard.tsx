@@ -61,6 +61,7 @@ function UnitThumbnail({ unit }: { unit: CustomerReturnUnit }) {
       width={48}
       height={48}
       className="size-12 shrink-0 rounded-md border object-cover"
+      unoptimized
     />
   );
 }

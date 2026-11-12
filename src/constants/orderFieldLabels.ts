@@ -22,6 +22,7 @@ export const ORDER_FIELD_LABELS: Record<OrderChangeField, string> = {
   couponDiscount: 'خصم الكوبون',
   returnShippingCost: 'مصاريف شحن المرتجع',
   prepaidAmount: 'المبلغ المدفوع مسبقاً',
+  returnPrice: 'سعر المرتجع',
   coupon: 'الكوبون',
   paymentMethod: 'طريقة الدفع',
   paymentStatus: 'حالة الدفع',

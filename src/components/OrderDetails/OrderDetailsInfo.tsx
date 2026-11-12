@@ -430,6 +430,7 @@ function OrderDetailsInfoComponent({
           onShippingTypeSelect={handleShippingTypeSelect}
           pendingShippingType={pendingShippingType}
           onSaveReturnContent={handleSaveReturnContent}
+          isCustomerReturn={isCustomerReturn}
           readOnly={readOnly}
         />
 

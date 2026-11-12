@@ -5,7 +5,7 @@ import {
   ShippingType,
 } from '@/types/orders';
 
-export type OrderCardMoney = Pick<Order, 'settlementAmount' | 'prepaid'>;
+export type OrderCardMoney = Pick<Order, 'settlementAmount' | 'prepaid' | 'returnPrice'>;
 
 export interface OrderCardProps {
   id: number;

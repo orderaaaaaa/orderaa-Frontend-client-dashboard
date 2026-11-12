@@ -416,6 +416,7 @@ export interface Order {
   settlementRecordedAt?: string | null;
   settlementResolved?: boolean;
   prepaidAmount?: string | null;
+  returnPrice?: string | null;
   prepaid?: OrderPrepaid | null;
   paidWithoutAmount?: boolean;
   collectedAmount?: string | null;

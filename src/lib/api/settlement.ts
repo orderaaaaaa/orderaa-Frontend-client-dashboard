@@ -189,6 +189,7 @@ export interface SettlementBatchOrder {
   shippingCode: string | null;
   /** What THIS collection settled — not the order's current amount. */
   amount: string;
+  returnPrice?: string | null;
   targetStatus: string;
   currentStatus: string;
   fromStatus: string | null;
