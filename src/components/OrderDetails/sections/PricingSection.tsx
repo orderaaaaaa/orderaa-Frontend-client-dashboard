@@ -200,7 +200,7 @@ export function PricingSection({
           onChange={async (value) => {
             await onUpdate('paymentMethod', value);
           }}
-          canEdit={canEdit}
+          canEdit={canEdit && !isCustomerReturn}
         />
         <PaymentStatusSelect
           value={paymentStatusShown(order.prepaid, order.paymentStatus)}

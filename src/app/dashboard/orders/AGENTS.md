@@ -57,7 +57,7 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **Loading state**: skeleton cards (`OrderCard.tsx`) matching the order card shape, shown during initial `isLoading`.
 - **Empty state**: `OrderCard` or list view shows "لا توجد طلبات" message per status tab when data length is zero.
 - **Error state**: error display with retry button mapped from React Query `isError` state in the page component.
-- **Card money** (T56) — `OrderCard` takes `money?: OrderCardMoney` (`Pick<Order, 'settlementAmount' | 'prepaid'>`, `allOrders/types/OrderProps.ts`); every list caller passes `money={order}`. `PrepaidBadge` (`components/orders/PrepaidBadge.tsx`) shows «مدفوع مسبقاً {amount} جنيه» (green, FULL) or «مدفوع جزئياً {amount} جنيه» (amber, PARTIAL). «محصل» comes only from `settlementAmount`, never from prepaid.
+- **Card money** (T56) — `OrderCard` takes `money?: OrderCardMoney` (`Pick<Order, 'settlementAmount' | 'prepaid' | 'returnPrice'>`, `allOrders/types/OrderProps.ts`); every list caller passes `money={order}`. `PrepaidBadge` (`components/orders/PrepaidBadge.tsx`) shows «مدفوع مسبقاً {amount} جنيه» (green, FULL) or «مدفوع جزئياً {amount} جنيه» (amber, PARTIAL). «محصل» comes only from `settlementAmount`, never from prepaid. «سعر المرتجع {x} جنيه» is shown beside «محصل» when `returnPrice` is a string (customer returns only).
 
 ## Bulk Actions UX
 
