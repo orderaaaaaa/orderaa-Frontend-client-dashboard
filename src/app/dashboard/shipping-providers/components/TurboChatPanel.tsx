@@ -165,7 +165,7 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
           <button
             type="button"
             onClick={jumpToEnd}
-            className="absolute bottom-3 start-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow-sm"
+            className="absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow-sm"
           >
             {chatNewBelowLabel(newBelow)}
           </button>
