@@ -3,6 +3,12 @@ import { getShippingCompanies } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 
+export const shippingCompaniesQueryOptions = {
+  queryKey: [QUERY_KEYS.SHIPPING_COMPANIES],
+  queryFn: getShippingCompanies,
+  staleTime: 5 * 60 * 1000,
+};
+
 export default function useShippingCompanies(enabled: boolean = true) {
   const {
     data,
@@ -10,9 +16,7 @@ export default function useShippingCompanies(enabled: boolean = true) {
     isLoading,
     isFetching,
   } = useQuery<ShippingCompanyRef[]>({
-    queryKey: [QUERY_KEYS.SHIPPING_COMPANIES],
-    queryFn: getShippingCompanies,
-    staleTime: 5 * 60 * 1000,
+    ...shippingCompaniesQueryOptions,
     retry: 1,
     enabled,
   });

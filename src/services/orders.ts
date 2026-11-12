@@ -252,12 +252,12 @@ export const usePrefetchOrderDetails = () => {
 };
 
 // Fetch customer orders by phone number
-export const useCustomerOrders = (
+export const customerOrdersQueryOptions = (
   phone: string,
-  options: { surface: OrderLookupSurface; enabled?: boolean }
+  surface: OrderLookupSurface
 ) => {
-  const scopeParams = readScopeParamsOf(options.surface);
-  return useQuery({
+  const scopeParams = readScopeParamsOf(surface);
+  return {
     queryKey: [
       QUERY_KEYS.CUSTOMER_ORDERS,
       phone,
@@ -277,9 +277,17 @@ export const useCustomerOrders = (
       );
       return response.data;
     },
+  };
+};
+
+export const useCustomerOrders = (
+  phone: string,
+  options: { surface: OrderLookupSurface; enabled?: boolean }
+) =>
+  useQuery({
+    ...customerOrdersQueryOptions(phone, options.surface),
     enabled: options?.enabled !== false && !!phone,
   });
-};
 
 const warnIfCarrierSendNeedsAttention = (response: CarrierSendBearingResponse | null | undefined) => {
   if (carrierSendNeedsAttention(response?.carrierSend)) {

@@ -25,8 +25,7 @@ import {
 } from '@/services/lookups';
 import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
 import { cn } from '@/lib/utils';
-import { normalizeArabic } from '@/utils/arabicNormalize';
-import type { LocationOption } from '@/types/locationOptions';
+import { matchLocationOption } from '@/utils/locationOptionMatch';
 import type {
   CreateCustomerReturnResponse,
   CustomerReturnPreset,
@@ -141,25 +140,6 @@ const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   address: 'return-address',
   returnContent: 'return-content',
   returnPrice: 'return-price',
-};
-
-const matchLocationOption = (
-  options: LocationOption[] | undefined,
-  stored: string | null | undefined,
-): LocationOption | null => {
-  const wanted = stored?.trim();
-  if (!options || !wanted) return null;
-  const normalizedWanted = normalizeArabic(wanted);
-  return (
-    options.find((option) => option.value === wanted) ??
-    options.find((option) => option.label.trim() === wanted) ??
-    options.find(
-      (option) =>
-        normalizeArabic(option.label) === normalizedWanted ||
-        normalizeArabic(option.value) === normalizedWanted,
-    ) ??
-    null
-  );
 };
 
 function CustomerReturnForm({

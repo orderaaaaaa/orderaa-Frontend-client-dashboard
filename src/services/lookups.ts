@@ -138,17 +138,43 @@ const LOCATION_SYNC_POLL_MS = 5000;
 const locationOptionPollInterval = (data: LocationOptionsResponse | undefined) =>
   isLocationSyncInFlight(data?.sync) ? LOCATION_SYNC_POLL_MS : false;
 
+export const locationOptionGovernoratesQueryOptions = (
+  shippingCompanyId: number | null | undefined,
+  orderId?: number
+) => ({
+  queryKey: [
+    QUERY_KEYS.LOCATION_OPTION_GOVERNORATES,
+    shippingCompanyId,
+    orderId ?? null,
+  ] as QueryKey,
+  queryFn: () => getLocationOptionGovernorates(shippingCompanyId as number, orderId),
+});
+
+export const locationOptionCitiesQueryOptions = (
+  shippingCompanyId: number | null | undefined,
+  governorateOption: string | undefined,
+  orderId?: number
+) => ({
+  queryKey: [
+    QUERY_KEYS.LOCATION_OPTION_CITIES,
+    shippingCompanyId,
+    governorateOption,
+    orderId ?? null,
+  ] as QueryKey,
+  queryFn: () =>
+    getLocationOptionCities(
+      shippingCompanyId as number,
+      governorateOption as string,
+      orderId
+    ),
+});
+
 export const useLocationOptionGovernorates = (
   shippingCompanyId: number | null | undefined,
   orderId?: number
 ) =>
   useQuery({
-    queryKey: [
-      QUERY_KEYS.LOCATION_OPTION_GOVERNORATES,
-      shippingCompanyId,
-      orderId ?? null,
-    ] as QueryKey,
-    queryFn: () => getLocationOptionGovernorates(shippingCompanyId as number, orderId),
+    ...locationOptionGovernoratesQueryOptions(shippingCompanyId, orderId),
     enabled: !!shippingCompanyId,
     retry: retryUnlessClientError,
     refetchInterval: (query) => locationOptionPollInterval(query.state.data),
@@ -160,18 +186,7 @@ export const useLocationOptionCities = (
   orderId?: number
 ) =>
   useQuery({
-    queryKey: [
-      QUERY_KEYS.LOCATION_OPTION_CITIES,
-      shippingCompanyId,
-      governorateOption,
-      orderId ?? null,
-    ] as QueryKey,
-    queryFn: () =>
-      getLocationOptionCities(
-        shippingCompanyId as number,
-        governorateOption as string,
-        orderId
-      ),
+    ...locationOptionCitiesQueryOptions(shippingCompanyId, governorateOption, orderId),
     enabled: !!shippingCompanyId && !!governorateOption,
     retry: retryUnlessClientError,
     refetchInterval: (query) => locationOptionPollInterval(query.state.data),
