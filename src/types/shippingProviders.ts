@@ -129,6 +129,7 @@ export interface ShipmentRowBase {
   frozenReturnChild: boolean;
   prepaid: OrderPrepaid | null;
   unreadNoteCount?: number;
+  unreadChatCount: number;
 }
 
 export interface InProcessShipment extends ShipmentRowBase {
