@@ -177,7 +177,7 @@ export function OrderActionsFooterLargeScreens({
               menuItems={menuItems}
               partialAction={partialAction}
               undoAction={undoAction}
-              className={dir === 'rtl' ? 'right-auto left-0' : undefined}
+              className={dir === 'rtl' ? 'right-auto left-0 min-w-[260px] max-w-[320px]' : 'min-w-[260px] max-w-[320px]'}
               onActionClick={handleActionClick}
             />
           </div>

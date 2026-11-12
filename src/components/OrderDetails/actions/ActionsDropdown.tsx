@@ -107,17 +107,15 @@ export function ActionsDropdown({
             variant="ghost"
             disabled={blockedReason !== null}
             onClick={() => onActionClick(option.label, option.action)}
-            className="w-full px-4 py-3 text-sm font-bold text-foreground hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
+            className="h-auto min-h-11 w-full px-4 py-2.5 sm:h-auto sm:py-2.5 items-start whitespace-normal text-start text-sm font-bold text-foreground hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex gap-3 justify-start"
           >
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex flex-row items-center gap-2">
-                {option.icon}
-                {option.label}
-              </div>
+            <span className="flex shrink-0 mt-0.5">{option.icon}</span>
+            <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
+              <span>{option.label}</span>
               {blockedReason !== null && (
-                <span className="text-xs font-normal whitespace-normal text-gray-500">{blockedReason}</span>
+                <span className="text-xs leading-5 font-normal whitespace-normal break-words text-gray-500">{blockedReason}</span>
               )}
-            </div>
+            </span>
           </Button>
         );
       })}
