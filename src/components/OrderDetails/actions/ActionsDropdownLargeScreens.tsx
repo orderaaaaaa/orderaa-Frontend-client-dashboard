@@ -9,17 +9,16 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
-import { usePermissionCheck } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown, type PartialDeliveryMenuAction } from './ActionsDropdown';
-import { STOP_OPERATION_STATUSES } from './constants';
+import type { OrderActionAvailability } from './orderActionAvailability';
+import type { OrderMenuAction } from './orderMenuItems';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 import { useI18n } from '@/i18n/I18nProvider';
 
 export interface OrderActionsFooterProps {
-  orderStatus: string;
-  lastEventStatus?: string;
+  availability: OrderActionAvailability;
+  menuItems: OrderMenuAction[];
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
   onActionClick: (label: string, action: string) => void;
@@ -30,12 +29,11 @@ export interface OrderActionsFooterProps {
   isBusy?: boolean;
   partialAction: PartialDeliveryMenuAction;
   undoAction: PartialDeliveryMenuAction;
-  frozen?: boolean;
 }
 
 export function OrderActionsFooterLargeScreens({
-  orderStatus,
-  lastEventStatus,
+  availability,
+  menuItems,
   onConfirm,
   onFollowUpClick,
   onActionClick,
@@ -46,17 +44,11 @@ export function OrderActionsFooterLargeScreens({
   isBusy = false,
   partialAction,
   undoAction,
-  frozen = false,
 }: OrderActionsFooterProps) {
-  // Confirm / follow-up / the actions menu all mutate the order: everything but
-  // `cancel` patches it (`orders:update`), cancel posts to /cancel.
   const { dir } = useI18n();
-  const { hasPermission } = usePermissionCheck();
-  const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
-  const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
-  const showActionsMenu = canUpdate || canCancel;
+  const showActionsMenu = menuItems.length > 0;
+  const showActionGroup = availability.confirm || availability.followUp || showActionsMenu;
 
-  const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus) && canUpdate;
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
 
@@ -119,7 +111,7 @@ export function OrderActionsFooterLargeScreens({
           </Button>
         </div>
 
-        {!frozen && showStopOperation ? (
+        {availability.stopBar ? (
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -129,10 +121,10 @@ export function OrderActionsFooterLargeScreens({
             <LiaStopCircleSolid className="w-5 h-5" />
             وقف التشغيل
           </Button>
-        ) : showActionsMenu ? (
+        ) : showActionGroup ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
-              {canUpdate && !frozen && orderStatus !== 'CONFIRMED' && (
+              {availability.confirm && (
                 <Button
                   variant="default"
                   onClick={onConfirm}
@@ -145,7 +137,7 @@ export function OrderActionsFooterLargeScreens({
                 </Button>
               )}
 
-              {canUpdate && !frozen && (
+              {availability.followUp && (
                 <div className="relative" ref={followUpDropdown.ref}>
                   <Button
                     variant="outline"
@@ -164,27 +156,27 @@ export function OrderActionsFooterLargeScreens({
                 </div>
               )}
 
-              <Button
-                variant="ghost"
-                onClick={handleActionsToggle}
-                disabled={isBusy}
-                className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
-              >
-                <LiaAngleDownSolid
-                  className={`w-5 h-5 text-primary-text transition-all ${
-                    actionsDropdown.isOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </Button>
+              {showActionsMenu && (
+                <Button
+                  variant="ghost"
+                  onClick={handleActionsToggle}
+                  disabled={isBusy}
+                  className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
+                >
+                  <LiaAngleDownSolid
+                    className={`w-5 h-5 text-primary-text transition-all ${
+                      actionsDropdown.isOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </Button>
+              )}
             </div>
 
             <ActionsDropdown
               isOpen={actionsDropdown.isOpen}
-              orderStatus={orderStatus}
-              lastEventStatus={lastEventStatus}
+              menuItems={menuItems}
               partialAction={partialAction}
               undoAction={undoAction}
-              frozen={frozen}
               className={dir === 'rtl' ? 'right-auto left-0' : undefined}
               onActionClick={handleActionClick}
             />

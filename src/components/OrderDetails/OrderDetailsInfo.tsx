@@ -22,6 +22,8 @@ import { PricingSection } from './sections/PricingSection';
 import { ShippingSection } from './sections/ShippingSection';
 import { PackagingNotesSection } from './sections/PackagingNotesSection';
 import { OrderActionsFooter } from './actions/OrderActionsFooter';
+import { useOrderActionAvailability } from './actions/useOrderActionAvailability';
+import { orderMenuItemsOf } from './actions/orderMenuItems';
 import { OrderActionModals } from './modals/OrderActionModals';
 import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
@@ -35,6 +37,7 @@ import {
 } from '@/utils/partialDelivery/partialDeliveryGate';
 import { useI18n } from '@/i18n/I18nProvider';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { isDeletedOrder } from '@/utils/deletedOrder';
 
 interface OrderDetailsInfoComponentProps {
@@ -96,7 +99,7 @@ function OrderDetailsInfoComponent({
 
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
   const { t } = useI18n();
-  const { hasAllPermissions } = usePermissionCheck();
+  const { hasAllPermissions, hasPermission } = usePermissionCheck();
   // Permission-scoped on purpose — these become the status actions offered.
   const availableStatuses = statusesData?.statuses ?? [];
 
@@ -233,6 +236,23 @@ function OrderDetailsInfoComponent({
     visible: undoGate.visible,
     blockedReason: undoGate.blockedKey === null ? null : t(undoGate.blockedKey),
   };
+
+  const actionable = !order.isShadowed && !order.parkedAt;
+  const availability = useOrderActionAvailability({
+    status: order.status,
+    isCustomerReturn,
+    frozen,
+    actionable,
+    lastEventStatus,
+    availableStatuses,
+  });
+  const partialDeliveryPermitted =
+    actionable && hasPermission(PERMISSION_CODES.ORDERS_UPDATE) && hasAllPermissions(PARTIAL_DELIVERY_CODES);
+  const menuItems = orderMenuItemsOf({
+    availability,
+    partialVisible: partialAction.visible && partialDeliveryPermitted,
+    undoVisible: undoAction.visible && partialDeliveryPermitted,
+  });
 
   const handleConfirmClick = () =>
     runWhenLockSettles(() =>
@@ -454,9 +474,8 @@ function OrderDetailsInfoComponent({
 
       {!deleted && <div className="md:hidden">
         <OrderActionsFooter
-          frozen={frozen}
-          orderStatus={order.status}
-          lastEventStatus={lastEventStatus}
+          availability={availability}
+          menuItems={menuItems}
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
           onActionClick={handleActionClick}
@@ -472,9 +491,8 @@ function OrderDetailsInfoComponent({
 
       {!deleted && <div className="hidden md:block">
         <OrderActionsFooterLargeScreens
-          frozen={frozen}
-          orderStatus={order.status}
-          lastEventStatus={lastEventStatus}
+          availability={availability}
+          menuItems={menuItems}
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
           onActionClick={handleActionClick}

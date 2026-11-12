@@ -9,17 +9,16 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
-import { usePermissionCheck } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown, type PartialDeliveryMenuAction } from './ActionsDropdown';
-import { STOP_OPERATION_STATUSES } from './constants';
+import type { OrderActionAvailability } from './orderActionAvailability';
+import type { OrderMenuAction } from './orderMenuItems';
 
 const FOOTER_CLEARANCE_PX = 48;
 
 export interface OrderActionsFooterProps {
-  orderStatus: string;
-  lastEventStatus?: string;
+  availability: OrderActionAvailability;
+  menuItems: OrderMenuAction[];
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
   onActionClick: (label: string, action: string) => void;
@@ -30,12 +29,11 @@ export interface OrderActionsFooterProps {
   isBusy?: boolean;
   partialAction: PartialDeliveryMenuAction;
   undoAction: PartialDeliveryMenuAction;
-  frozen?: boolean;
 }
 
 export function OrderActionsFooter({
-  orderStatus,
-  lastEventStatus,
+  availability,
+  menuItems,
   onConfirm,
   onFollowUpClick,
   onActionClick,
@@ -46,16 +44,10 @@ export function OrderActionsFooter({
   isBusy = false,
   partialAction,
   undoAction,
-  frozen = false,
 }: OrderActionsFooterProps) {
-  // Confirm / follow-up / the actions menu all mutate the order: everything but
-  // `cancel` patches it (`orders:update`), cancel posts to /cancel.
-  const { hasPermission } = usePermissionCheck();
-  const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
-  const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
-  const showActionsMenu = canUpdate || canCancel;
+  const showActionsMenu = menuItems.length > 0;
+  const showActionGroup = availability.confirm || availability.followUp || showActionsMenu;
 
-  const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus) && canUpdate;
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
 
@@ -97,7 +89,7 @@ export function OrderActionsFooter({
             <LiaAngleRightSolid className="w-6 h-6" />
           </Button>
 
-          {!frozen && showStopOperation ? (
+          {availability.stopBar ? (
             <Button
               variant="default"
               onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
@@ -107,9 +99,9 @@ export function OrderActionsFooter({
               <LiaStopCircleSolid className="w-5 h-5" />
               وقف التشغيل
             </Button>
-          ) : showActionsMenu ? (
+          ) : showActionGroup ? (
             <div className="bg-primary rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
-              {canUpdate && !frozen && orderStatus !== 'CONFIRMED' && (
+              {availability.confirm && (
                 <Button
                   variant="ghost"
                   onClick={onConfirm}
@@ -123,7 +115,7 @@ export function OrderActionsFooter({
                 </Button>
               )}
 
-              {canUpdate && !frozen && (
+              {availability.followUp && (
                 <div className="relative top-[-6px]" ref={followUpDropdown.ref}>
                   <Button
                     variant="ghost"
@@ -149,36 +141,36 @@ export function OrderActionsFooter({
                 </div>
               )}
 
-              <div className="relative top-[-6px]" ref={actionsDropdown.ref}>
-                <Button
-                  variant="ghost"
-                  onClick={handleActionsToggle}
-                  disabled={isBusy}
-                  aria-label="إجراءات أخرى"
-                  className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 min-w-10 min-h-10 hover:bg-transparent"
-                >
-                  <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
-                    <LiaEllipsisHSolid className="w-5 h-5" />
-                  </div>
-                  <span className="text-sm font-medium">أخرى</span>
-                </Button>
+              {showActionsMenu && (
+                <div className="relative top-[-6px]" ref={actionsDropdown.ref}>
+                  <Button
+                    variant="ghost"
+                    onClick={handleActionsToggle}
+                    disabled={isBusy}
+                    aria-label="إجراءات أخرى"
+                    className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 min-w-10 min-h-10 hover:bg-transparent"
+                  >
+                    <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+                      <LiaEllipsisHSolid className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">أخرى</span>
+                  </Button>
 
-                <div className="fixed inset-x-4 bottom-[6.25rem]">
-                  <ActionsDropdown
-                    isOpen={actionsDropdown.isOpen}
-                    orderStatus={orderStatus}
-                    lastEventStatus={lastEventStatus}
-                    partialAction={partialAction}
-                    undoAction={undoAction}
-                    frozen={frozen}
-                    className="max-h-[60vh] max-w-full"
-                    onActionClick={(label, action) => {
-                      actionsDropdown.close();
-                      onActionClick(label, action);
-                    }}
-                  />
+                  <div className="fixed inset-x-4 bottom-[6.25rem]">
+                    <ActionsDropdown
+                      isOpen={actionsDropdown.isOpen}
+                      menuItems={menuItems}
+                      partialAction={partialAction}
+                      undoAction={undoAction}
+                      className="max-h-[60vh] max-w-full"
+                      onActionClick={(label, action) => {
+                        actionsDropdown.close();
+                        onActionClick(label, action);
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : null}
 

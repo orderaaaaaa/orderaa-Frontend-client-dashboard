@@ -15,12 +15,9 @@ import {
   LiaBoxOpenSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
-import { POST_SHIPPING_STATUSES } from '@/types/logistics';
-import { usePermissionCheck } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
-import { PARTIAL_DELIVERY_CODES } from '@/utils/partialDelivery/partialDeliveryGate';
 import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
+import type { OrderMenuAction } from './orderMenuItems';
 
 interface ActionOption {
   label: string;
@@ -51,79 +48,41 @@ export type PartialDeliveryMenuAction = { visible: boolean; blockedReason: strin
 
 export interface ActionsDropdownProps {
   isOpen: boolean;
-  orderStatus: string;
-  lastEventStatus?: string;
+  menuItems: OrderMenuAction[];
   partialAction: PartialDeliveryMenuAction;
   undoAction: PartialDeliveryMenuAction;
-  frozen: boolean;
   className?: string;
   onActionClick: (label: string, action: string) => void;
 }
 
 export function ActionsDropdown({
   isOpen,
-  orderStatus,
-  lastEventStatus,
+  menuItems,
   partialAction,
   undoAction,
-  frozen,
   className,
   onActionClick,
 }: ActionsDropdownProps) {
-  const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
-  const { visible: partialVisible, blockedReason: partialBlockedReason } = partialAction;
-  const { visible: undoVisible, blockedReason: undoBlockedReason } = undoAction;
+  const { blockedReason: partialBlockedReason } = partialAction;
+  const { blockedReason: undoBlockedReason } = undoAction;
   const { t } = useI18n();
-  // `cancel` posts to /orders/:id/cancel, every other action patches the order.
-  const { hasPermission, hasAllPermissions } = usePermissionCheck();
-  const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
-  const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
-  const arrowOptionsWithUndo = useMemo<ActionOption[]>(() => {
-    const partialIndex = arrowOptions.findIndex((option) => option.action === 'partial_delivery');
+  const optionByAction = useMemo(() => {
     const undoOption: ActionOption = {
       label: t('partialDelivery.undo.title'),
       action: 'undo_partial_delivery',
       icon: <LiaUndoAltSolid className="w-5 h-5" />,
     };
-    return [...arrowOptions.slice(0, partialIndex + 1), undoOption, ...arrowOptions.slice(partialIndex + 1)];
+    const options = [...arrowOptions, ...postShippingOptions, undoOption];
+    return new Map<string, ActionOption>(
+      options.map((option): [string, ActionOption] => [option.action, option])
+    );
   }, [t]);
 
-  const filteredOptions = useMemo(() => {
-    if (frozen) {
-      return canUpdate ? postShippingOptions.filter((option) => option.action === 'return_refund') : [];
-    }
-    const base = arrowOptionsWithUndo.filter((option) => {
-      if (option.action === 'cancel') {
-        return canCancel;
-      }
-      if (!canUpdate) {
-        return false;
-      }
-      if (option.action === 'partial_delivery') {
-        return partialVisible && hasAllPermissions(PARTIAL_DELIVERY_CODES);
-      }
-      if (option.action === 'undo_partial_delivery') {
-        return undoVisible && hasAllPermissions(PARTIAL_DELIVERY_CODES);
-      }
-      if (option.action === 'stop_operation') {
-        return orderStatus === 'CONFIRMED';
-      }
-      if (option.action === 'urgent') {
-        return orderStatus !== 'CONFIRMED';
-      }
-      if (option.action === 'waiting_payment') {
-        return lastEventStatus !== 'WAITING_FOR_PAYMENT';
-      }
-      return true;
-    });
-
-    if (isPostShipping && canUpdate) {
-      return [...base, ...postShippingOptions];
-    }
-
-    return base;
-  }, [frozen, orderStatus, lastEventStatus, partialVisible, undoVisible, arrowOptionsWithUndo, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
+  const filteredOptions = menuItems.flatMap((action) => {
+    const option = optionByAction.get(action);
+    return option ? [option] : [];
+  });
 
   if (!isOpen || filteredOptions.length === 0) return null;
 
