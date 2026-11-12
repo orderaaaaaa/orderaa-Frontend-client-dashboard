@@ -185,7 +185,7 @@ export function MergeVariantChip({
             align="end"
             sideOffset={4}
             collisionPadding={8}
-            className="z-(--z-popover) w-80 max-w-[calc(100vw-16px)] rounded-lg border bg-card p-1 shadow-lg"
+            className="z-(--z-popover) max-h-(--radix-popover-content-available-height) w-80 max-w-[calc(100vw-16px)] overflow-y-auto rounded-lg border bg-card p-1 shadow-lg"
             onMouseDown={(event) => event.stopPropagation()}
           >
             <button type="button" className={itemClass} onClick={() => choose({ action: 'KEEP' })}>

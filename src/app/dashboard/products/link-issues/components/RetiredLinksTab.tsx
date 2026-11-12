@@ -84,14 +84,16 @@ function RetiredLinkRow({
         ) : variantCards.length === 0 ? (
           <p className="text-xs text-gray-500">{t('linkIssues.retired.noTarget')}</p>
         ) : (
-          <VariantCards
-            cards={variantCards}
-            rows={[]}
-            selection={{}}
-            selectedCardIds={new Set(targetId !== null ? [targetId] : [])}
-            onSelect={(card) => setTargetId(card.id)}
-            scrollClassName="max-h-72"
-          />
+          <div role="group" aria-label={t('linkIssues.retired.target')}>
+            <VariantCards
+              cards={variantCards}
+              rows={[]}
+              selection={{}}
+              selectedCardIds={new Set(targetId !== null ? [targetId] : [])}
+              onSelect={(card) => setTargetId(card.id)}
+              scrollClassName="max-h-72"
+            />
+          </div>
         )}
       </div>
       {issue.suggestedTarget && (

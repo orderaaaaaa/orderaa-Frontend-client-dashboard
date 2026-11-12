@@ -140,14 +140,16 @@ function UnlinkedItemRow({
           ) : variantCards.length === 0 ? (
             <p className="text-xs text-gray-500">{t('orderDetails.variants.noCards')}</p>
           ) : (
-            <VariantCards
-              cards={variantCards}
-              rows={[]}
-              selection={{}}
-              selectedCardIds={new Set(pick.variantId !== null ? [pick.variantId] : [])}
-              onSelect={(card) => pick && onPickChange({ productId: pick.productId, variantId: card.id })}
-              scrollClassName="max-h-72"
-            />
+            <div role="group" aria-label={t('linkIssues.unlinked.pickVariant')}>
+              <VariantCards
+                cards={variantCards}
+                rows={[]}
+                selection={{}}
+                selectedCardIds={new Set(pick.variantId !== null ? [pick.variantId] : [])}
+                onSelect={(card) => pick && onPickChange({ productId: pick.productId, variantId: card.id })}
+                scrollClassName="max-h-72"
+              />
+            </div>
           )}
         </div>
       )}

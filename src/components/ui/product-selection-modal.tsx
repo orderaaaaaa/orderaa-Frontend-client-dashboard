@@ -115,6 +115,22 @@ function resolveCombo(
   return combo;
 }
 
+function emitSelectionChanges(
+  productId: number,
+  groups: readonly { attributeId: number }[],
+  previous: Selection,
+  next: Selection,
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void,
+) {
+  for (const group of groups) {
+    const previousId = previous[group.attributeId];
+    const nextId = next[group.attributeId];
+    if (previousId === nextId) continue;
+    const optionId = nextId === undefined ? previousId : nextId;
+    if (optionId !== undefined) onVariantSelect(productId, group.attributeId, optionId);
+  }
+}
+
 function AddAllVariantsButton({
   productId,
   availabilityPath,
@@ -157,13 +173,7 @@ function ProductAvailabilityBlock({
   const groups = catalog.data ?? [];
 
   const handleChange = (next: Selection) => {
-    for (const group of groups) {
-      const previousId = selection[group.attributeId];
-      const nextId = next[group.attributeId];
-      if (previousId === nextId) continue;
-      const optionId = nextId === undefined ? previousId : nextId;
-      if (optionId !== undefined) onVariantSelect(productId, group.attributeId, optionId);
-    }
+    emitSelectionChanges(productId, groups, selection, next, onVariantSelect);
   };
 
   return (
@@ -232,13 +242,7 @@ function ProductCardsBlock({
 
   const pick = (card: VariantCard) => {
     const next: Selection = isCardSelected(card, selection) ? {} : selectionOfCard(card);
-    for (const group of product.variantOptions ?? []) {
-      const previousId = selection[group.attributeId];
-      const nextId = next[group.attributeId];
-      if (previousId === nextId) continue;
-      const optionId = nextId === undefined ? previousId : nextId;
-      if (optionId !== undefined) onVariantSelect(product.id, group.attributeId, optionId);
-    }
+    emitSelectionChanges(product.id, product.variantOptions ?? [], selection, next, onVariantSelect);
   };
 
   return (

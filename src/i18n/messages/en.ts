@@ -26,7 +26,6 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.scope.productLabel': 'Product',
   'stockRules.scope.productPlaceholder': 'Select a product',
   'stockRules.scope.variantLabel': 'Variant',
-  'stockRules.scope.variantPlaceholder': 'Select a variant',
   'stockRules.scope.variantNeedsProduct': 'Select a product first',
   'stockRules.scope.globalHint':
     'Global rules apply to every product that has no rules of its own.',

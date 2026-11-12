@@ -31,7 +31,6 @@ const ar = {
   'stockRules.scope.productLabel': 'المنتج',
   'stockRules.scope.productPlaceholder': 'اختر المنتج',
   'stockRules.scope.variantLabel': 'المتغير',
-  'stockRules.scope.variantPlaceholder': 'اختر المتغير',
   'stockRules.scope.variantNeedsProduct': 'اختر المنتج أولًا',
   'stockRules.scope.globalHint':
     'القواعد العامة تُطبق على كل منتج ليس له قواعد خاصة به.',

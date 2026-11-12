@@ -319,8 +319,6 @@ export default function FilterPanel({
                     value={field.value || ''}
                     onChange={(value) => {
                       field.onChange(value);
-                      // Options belong to the product that was chosen, so a
-                      // different product invalidates them.
                       if (setValue) {
                         setValue('variantIds', []);
                       }
