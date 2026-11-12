@@ -5,8 +5,11 @@ import { Copy, TriangleAlert, History } from 'lucide-react';
 import { Order, OrderLockedBy } from '@/types/orders';
 import { toast } from 'react-toastify';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
+import NewOrderFromCustomerModal from '@/components/orders/NewOrderFromCustomerModal';
 import { DeletedOrderChip } from '@/components/orders/DeletedOrderChip';
 import { Button } from '@/components/ui/button';
+import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import { isDeletedOrder } from '@/utils/deletedOrder';
 import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
@@ -107,11 +110,14 @@ const OrderDetailsCardId = ({
   const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] =
     useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const { shippingCompanies } = useShippingCompanies();
+  const { hasPermission } = usePermissionCheck();
   const orderCompanyName = shippingCompanyNameOf(order.shippingCompanyRef);
   const returnShippingId = order.returnShippingId;
   const returnShippingActive = order.returnShippingIdActive === true;
   const deleted = isDeletedOrder(order);
+  const canCreateOrder = !deleted && hasPermission(PERMISSION_CODES.ORDERS_CREATE);
 
   const handleCopy = async (text: string) => {
     try {
@@ -275,6 +281,15 @@ const OrderDetailsCardId = ({
                   </h3>
                 </button>
               )}
+              {canCreateOrder && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsNewOrderModalOpen(true)}
+                >
+                  طلب جديد
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -308,6 +323,14 @@ const OrderDetailsCardId = ({
         onClose={() => setIsHistoryModalOpen(false)}
         order={order}
       />
+
+      {isNewOrderModalOpen && (
+        <NewOrderFromCustomerModal
+          open
+          onClose={() => setIsNewOrderModalOpen(false)}
+          source={{ kind: 'order', order }}
+        />
+      )}
     </div>
   );
 };

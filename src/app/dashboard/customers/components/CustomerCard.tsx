@@ -20,10 +20,13 @@ import {
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useQueryClient } from '@tanstack/react-query';
+import NewOrderFromCustomerModal from '@/components/orders/NewOrderFromCustomerModal';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { CustomerBadgeChip } from './CustomerBadgeChip';
 import { CustomerActionsMenu } from './CustomerActionsMenu';
 import { Customer } from '../types/customer';
+import { CUSTOMERS_QUERY_KEY } from '../hooks/useGetCustomers';
 
 interface CustomerCardProps {
   customer: Customer;
@@ -50,6 +53,8 @@ export function CustomerCard({
   onToggleSelect,
 }: CustomerCardProps) {
   const [showBanModal, setShowBanModal] = useState(false);
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+  const queryClient = useQueryClient();
   const blockReason = blockReasonOf(customer);
   const { getStatusLabel } = useStatusLabel();
 
@@ -194,6 +199,7 @@ export function CustomerCard({
             isBlocked={customer.isBlocked}
             isPending={isPending}
             onToggleBlockRequest={() => setShowBanModal(true)}
+            onNewOrder={() => setShowNewOrderModal(true)}
           />
         </div>
       </div>
@@ -205,6 +211,14 @@ export function CustomerCard({
         onConfirm={handleConfirmBan}
         customer={customer}
       />
+      {showNewOrderModal && (
+        <NewOrderFromCustomerModal
+          open
+          onClose={() => setShowNewOrderModal(false)}
+          source={{ kind: 'customer', customer }}
+          onCreated={() => void queryClient.invalidateQueries({ queryKey: [CUSTOMERS_QUERY_KEY] })}
+        />
+      )}
     </>
   );
 }
