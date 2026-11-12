@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getCarrierChatThread, markCarrierChatSeen, sendCarrierChatMessage } from '@/lib/api/carrierChat';
 import type { SendCarrierChatMessageBody } from '@/types/carrierChat';
+import type { ShipmentRowBase } from '@/types/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { KEY as SHIPPING_PROVIDERS_KEY, isShipmentListKey } from '@/services/shippingProviders';
 
@@ -39,15 +40,26 @@ export const useSendCarrierChatMessageMutation = () => {
   });
 };
 
+const clearChatUnread = <T extends { data: ShipmentRowBase[] }>(page: T, orderId: number): T => {
+  if (!Array.isArray(page.data)) return page;
+  return {
+    ...page,
+    data: page.data.map((row) => (row.id === orderId ? { ...row, unreadChatCount: 0 } : row)),
+  };
+};
+
 export const useMarkCarrierChatSeenMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ orderId }: { orderId: number }) => markCarrierChatSeen(orderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === SHIPPING_PROVIDERS_KEY && isShipmentListKey(query.queryKey[2]),
-      });
+    onSuccess: (_result, { orderId }) => {
+      queryClient.setQueriesData<{ data: ShipmentRowBase[] }>(
+        {
+          predicate: (query) =>
+            query.queryKey[0] === SHIPPING_PROVIDERS_KEY && isShipmentListKey(query.queryKey[2]),
+        },
+        (previous) => (previous === undefined ? undefined : clearChatUnread(previous, orderId))
+      );
     },
   });
 };

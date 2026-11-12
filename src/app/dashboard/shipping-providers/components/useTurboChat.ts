@@ -45,7 +45,16 @@ export const carrierChatErrorCodeOf = (error: unknown): string | null => {
   return typeof code === 'string' ? code : null;
 };
 
-const subscribeCoarsePointer = (listener: () => void): (() => void) => {
+const newestCarrierKeyOf = (thread: CarrierChatThread | undefined): string | null => {
+  if (thread === undefined) return null;
+  for (let index = thread.messages.length - 1; index >= 0; index -= 1) {
+    const message = thread.messages[index];
+    if (message.origin === 'CARRIER') return message.key;
+  }
+  return null;
+};
+
+const subscribeCoarsePointer =(listener: () => void): (() => void) => {
   const query = window.matchMedia('(pointer: coarse)');
   query.addEventListener('change', listener);
   return () => query.removeEventListener('change', listener);
@@ -69,6 +78,7 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
   const [unreadKey, setUnreadKey] = useState<string | null | undefined>(undefined);
   const localIdRef = useRef(0);
   const seenAtRef = useRef(0);
+  const markedKeyRef = useRef<string | null | undefined>(undefined);
   const thread = query.data;
   const syncedAt = thread?.syncedAt;
   const markSeen = seenMutation.mutate;
@@ -86,10 +96,21 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
     if (thread !== undefined && unreadKey === undefined) setUnreadKey(thread.firstUnreadKey);
   }, [thread, unreadKey]);
 
+  const newestCarrierKey = newestCarrierKeyOf(thread);
+
   useEffect(() => {
-    if (!isActive || syncedAt === undefined || document.visibilityState !== 'visible') return;
+    if (!isActive || thread === undefined || document.visibilityState !== 'visible') return;
+    if (markedKeyRef.current === undefined) {
+      if (thread.firstUnreadKey === null) {
+        markedKeyRef.current = newestCarrierKey;
+        return;
+      }
+    } else if (newestCarrierKey === null || newestCarrierKey === markedKeyRef.current) {
+      return;
+    }
     const send = () => {
       seenAtRef.current = Date.now();
+      markedKeyRef.current = newestCarrierKey;
       markSeen({ orderId });
     };
     const wait = seenAtRef.current + CHAT_SEEN_DEBOUNCE_MS - Date.now();
@@ -99,7 +120,7 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
     }
     const timer = window.setTimeout(send, wait);
     return () => window.clearTimeout(timer);
-  }, [isActive, syncedAt, orderId, markSeen]);
+  }, [isActive, thread, newestCarrierKey, orderId, markSeen]);
 
   const sendText = async (text: string, retryOfLogId?: number): Promise<boolean> => {
     localIdRef.current += 1;
