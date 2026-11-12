@@ -159,6 +159,7 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.filterLabel': 'Search variants',
   'orderDetails.variants.excludedLines': '{count} line(s) without a full selection are not counted',
   'orderDetails.variants.loadError': 'Could not load available stock',
+  'orderDetails.variants.cardsLoadError': 'Could not load variants',
   'orderDetails.productDetails.noSpecs': 'No specifications recorded for this product',
   'orderDetails.productDetails.orderData': 'Order data',
 

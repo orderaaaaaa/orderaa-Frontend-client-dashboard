@@ -41,6 +41,7 @@ interface VariantCardsProps {
   rows: VariantAvailability[];
   selection: Selection;
   selectedCardIds?: ReadonlySet<number>;
+  disabledCardIds?: ReadonlySet<number>;
   onSelect?: (card: VariantCard) => void;
   scrollClassName?: string;
 }
@@ -50,6 +51,7 @@ export function VariantCards({
   rows,
   selection,
   selectedCardIds,
+  disabledCardIds,
   onSelect,
   scrollClassName,
 }: VariantCardsProps) {
@@ -93,14 +95,16 @@ export function VariantCards({
           const selected = selectedCardIds
             ? selectedCardIds.has(card.id)
             : isCardSelected(card, selection);
+          const disabled = disabledCardIds?.has(card.id) ?? false;
           return (
             <Button
               key={card.id}
               type="button"
               variant="ghost"
               size="sm"
+              disabled={disabled}
               aria-pressed={selected}
-              onClick={onSelect ? () => onSelect(card) : undefined}
+              onClick={onSelect && !disabled ? () => onSelect(card) : undefined}
               className={cn(
                 'flex h-auto min-h-14 min-w-0 flex-col items-start justify-center gap-1 whitespace-normal rounded-xl border px-3 py-2 text-start text-sm',
                 numbers ? CARD_BORDER[numbers.kind] : 'border-border bg-card',

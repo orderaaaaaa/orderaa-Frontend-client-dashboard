@@ -9,16 +9,26 @@ import BaseModal from './base-modal';
 import Input from './Input';
 import { Button } from './button';
 import { Checkbox } from './checkbox';
+import { ErrorState } from './state-panels';
 import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useProductVariantsOptions } from '@/services/orders';
-import { productAttributeOptionsQueryOptions, useProductCardsFailed } from '@/services/products';
+import {
+  productAttributeOptionsQueryOptions,
+  useProductCards,
+  useProductCardsFailed,
+} from '@/services/products';
 import { OrderlessVariantAvailabilityPanel } from '@/components/stock/OrderlessVariantAvailabilityPanel';
+import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
 import {
   comboKeyOf,
+  isCardSelected,
+  selectionOfCard,
   type Selection,
   type DraftSummary,
 } from '@/components/stock/variantAvailabilityModel';
+import type { VariantCard } from '@/lib/api/products';
 
 export interface ProductSelectionAvailability {
   targetStatus: 'NEW_ORDER' | 'CONFIRMED';
@@ -180,24 +190,67 @@ const comboKeyOfSelected = (combo: SelectedVariant[]) =>
 const sameCombo = (a: SelectedVariant[], b: SelectedVariant[]) =>
   comboKeyOfSelected(a) === comboKeyOfSelected(b);
 
-function isValueDisabled(
-  attributeId: number,
-  optionId: number,
-  currentSelection: Selection,
-  addedCombos: SelectedVariant[][],
-  allAttributeIds: number[],
-): boolean {
-  if (addedCombos.length === 0) return false;
+function ProductCardsBlock({
+  product,
+  selection,
+  stagedCombos,
+  onVariantSelect,
+}: {
+  product: SelectableProduct;
+  selection: Selection;
+  stagedCombos: SelectedVariant[][];
+  onVariantSelect: (productId: number, attributeId: number, optionId: number) => void;
+}) {
+  const { t } = useI18n();
+  const catalog = useProductCards(product.id);
+  const cards: VariantCard[] = catalog.cards ?? [];
 
-  const hypothetical: Selection = { ...currentSelection, [attributeId]: optionId };
+  if (catalog.isLoading) {
+    return <p className="text-sm text-muted-foreground">جاري التحميل...</p>;
+  }
 
-  const chosenIds = allAttributeIds.flatMap((id) =>
-    hypothetical[id] === undefined ? [] : [hypothetical[id]],
+  if (catalog.isError) {
+    return (
+      <ErrorState
+        error={catalog.error}
+        fallback={t('orderDetails.variants.cardsLoadError')}
+        onRetry={() => void catalog.refetch()}
+      />
+    );
+  }
+
+  if (cards.length === 0) {
+    return <p className="text-sm text-muted-foreground">{t('orderDetails.variants.noCards')}</p>;
+  }
+
+  const stagedKeys = new Set(stagedCombos.map(comboKeyOfSelected));
+  const disabledCardIds = new Set(
+    cards
+      .filter((card) => stagedKeys.has(comboKeyOf(card.options.map((option) => option.optionId))))
+      .map((card) => card.id),
   );
-  if (chosenIds.length < allAttributeIds.length) return false;
 
-  const key = comboKeyOf(chosenIds);
-  return addedCombos.some((combo) => comboKeyOfSelected(combo) === key);
+  const pick = (card: VariantCard) => {
+    const next: Selection = isCardSelected(card, selection) ? {} : selectionOfCard(card);
+    for (const group of product.variantOptions ?? []) {
+      const previousId = selection[group.attributeId];
+      const nextId = next[group.attributeId];
+      if (previousId === nextId) continue;
+      const optionId = nextId === undefined ? previousId : nextId;
+      if (optionId !== undefined) onVariantSelect(product.id, group.attributeId, optionId);
+    }
+  };
+
+  return (
+    <VariantCards
+      cards={cards}
+      rows={[]}
+      selection={selection}
+      onSelect={pick}
+      disabledCardIds={disabledCardIds}
+      scrollClassName={CARD_SCROLL_CLASS}
+    />
+  );
 }
 
 async function stagedCombosOf(
@@ -585,41 +638,14 @@ export default function ProductSelectionModal({
                             selection={selection}
                             onVariantSelect={handleVariantSelect}
                           />
-                        ) : product.variantOptions!.map((option) => (
-                          <div key={option.attributeId} className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-muted-foreground min-w-16">
-                              {option.attribute}:
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {option.optionDetails.map((value) => {
-                                const isSelected = selection[option.attributeId] === value.id;
-                                const disabled = isValueDisabled(
-                                  option.attributeId,
-                                  value.id,
-                                  selection,
-                                  productCombos,
-                                  allAttributeIds,
-                                );
-                                return (
-                                  <Button
-                                    key={value.id}
-                                    type="button"
-                                    variant={isSelected ? 'default' : 'outline'}
-                                    size="sm"
-                                    disabled={disabled}
-                                    className={clsx(
-                                      'rounded-full text-xs h-7 px-3 max-sm:h-10',
-                                      !isSelected && !disabled && 'border-input text-foreground hover:border-primary hover:text-primary-text',
-                                    )}
-                                    onClick={() => handleVariantSelect(product.id, option.attributeId, value.id)}
-                                  >
-                                    {value.name}
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
+                        ) : (
+                          <ProductCardsBlock
+                            product={product}
+                            selection={selection}
+                            stagedCombos={productCombos}
+                            onVariantSelect={handleVariantSelect}
+                          />
+                        )}
 
                         <div className="flex items-center gap-2 w-fit self-end">
                           <AddAllVariantsButton

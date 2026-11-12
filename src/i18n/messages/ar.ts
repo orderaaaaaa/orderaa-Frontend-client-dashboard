@@ -173,6 +173,7 @@ const ar = {
   'orderDetails.variants.filterLabel': 'ابحث في المتغيرات',
   'orderDetails.variants.excludedLines': '{count} سطر بدون اختيار كامل غير محتسب في المخزون',
   'orderDetails.variants.loadError': 'تعذر تحميل المخزون المتاح',
+  'orderDetails.variants.cardsLoadError': 'تعذر تحميل المتغيرات',
   'orderDetails.productDetails.noSpecs': 'لا توجد مواصفات مسجلة لهذا المنتج',
   'orderDetails.productDetails.orderData': 'بيانات الطلب',
 
