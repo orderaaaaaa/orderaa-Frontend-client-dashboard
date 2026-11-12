@@ -146,7 +146,7 @@ export interface ShipmentRowActionsProps {
   carrierSupportsUpdate?: boolean;
   frozenReturnChild?: boolean;
   unreadNoteCount?: number;
-  returnChildCode?: string | null;
+  returnChildStatus?: OrderStatus | null;
   hideFinalActions?: boolean;
 }
 
@@ -171,7 +171,7 @@ export function ShipmentRowActions({
   carrierSupportsUpdate,
   frozenReturnChild = false,
   unreadNoteCount,
-  returnChildCode,
+  returnChildStatus = null,
   hideFinalActions = false,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
@@ -234,8 +234,8 @@ export function ShipmentRowActions({
   const undoGate = undoPartialDeliveryActionOf({
     locked: rowLocked,
     status,
-    hasReturnChild: typeof returnChildCode === 'string',
-    childStatus: null,
+    hasReturnChild: returnChildStatus !== null,
+    childStatus: returnChildStatus,
   });
 
   const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);

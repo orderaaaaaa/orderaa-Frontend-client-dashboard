@@ -373,7 +373,7 @@ export function InProcessRowActions({
       carrierSupportsUpdate={carrierSupportsUpdate}
       frozenReturnChild={row.frozenReturnChild}
       unreadNoteCount={row.unreadNoteCount}
-      returnChildCode={row.returnChildCode}
+      returnChildStatus={row.returnChildStatus}
       onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
     />
   );

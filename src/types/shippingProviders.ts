@@ -125,6 +125,7 @@ export interface ShipmentRowBase {
   returnShippingCost: number | null;
   lineCount: number;
   returnChildCode: string | null;
+  returnChildStatus: OrderStatus | null;
   frozenReturnChild: boolean;
   prepaid: OrderPrepaid | null;
   unreadNoteCount?: number;
