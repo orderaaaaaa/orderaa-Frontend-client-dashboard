@@ -61,7 +61,7 @@ const newestCarrierKeyOf = (thread: CarrierChatThread | undefined): string | nul
   return null;
 };
 
-const subscribeCoarsePointer =(listener: () => void): (() => void) => {
+const subscribeCoarsePointer = (listener: () => void): (() => void) => {
   const query = window.matchMedia('(pointer: coarse)');
   query.addEventListener('change', listener);
   return () => query.removeEventListener('change', listener);
