@@ -19,6 +19,8 @@ import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
 import { CANCELLATION_REASON_KEY_SEPARATOR } from "@/hooks/orders/useUnifiedFilters";
+import { cn } from "@/lib/utils";
+import { VariantCards } from "@/components/stock/VariantCards";
 
 export type FilterKey = keyof OrderFiltersFormData;
 
@@ -36,9 +38,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
   { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
   { key: 'productId', label: 'المنتج', type: 'select' },
-  // Depends on a chosen product: option ids belong to one, so the control
-  // stays disabled until المنتج is set, and clears when it changes.
-  { key: 'variantOptionIds', label: 'المتغيرات', type: 'select' },
+  { key: 'variantIds', label: 'المتغيرات', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   // المنطقة is populated from the cities lookup, so it submits `city`. It used
   // to submit `area`, a different column that is empty on every order.
@@ -90,14 +90,16 @@ interface FilterChipProps {
   label: string;
   children: React.ReactNode;
   onRemove: (filterKey: FilterKey) => void;
+  className?: string;
+  fill?: boolean;
 }
 
-const FilterChip = React.memo(function FilterChip({ filterKey, label, children, onRemove }: FilterChipProps) {
+const FilterChip = React.memo(function FilterChip({ filterKey, label, children, onRemove, className, fill }: FilterChipProps) {
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className={cn("flex flex-col gap-1 w-full", className)}>
       {/* <span className="text-sm font-medium text-gray-600">{label}</span> */}
       <div className="flex items-center gap-2 rounded-lg px-3 py-2">
-        <div className="flex-1 min-w-0 h-10">
+        <div className={cn("flex-1 min-w-0", fill ? "min-h-10" : "h-10")}>
           {children}
         </div>
         <Button
@@ -133,7 +135,7 @@ export default function FilterPanel({
   onRemoveFilter,
 }: Props) {
   const isProductActive = activeFilters.includes('productId');
-  const isVariantActive = activeFilters.includes('variantOptionIds');
+  const isVariantActive = activeFilters.includes('variantIds');
   const isGovernorateActive = activeFilters.includes('governorate');
   const isCityActive = activeFilters.includes('city');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
@@ -186,10 +188,7 @@ export default function FilterPanel({
     useProductAttributeOptionsQuery(
       isVariantActive && selectedProductId ? Number(selectedProductId) : undefined,
     );
-  const variantGroups = React.useMemo(
-    () => (attributeOptions?.options ?? []).filter((g) => (g.options ?? []).length > 0),
-    [attributeOptions],
-  );
+  const cards = attributeOptions?.variants ?? [];
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isCityActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isCityActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
@@ -323,7 +322,7 @@ export default function FilterPanel({
                       // Options belong to the product that was chosen, so a
                       // different product invalidates them.
                       if (setValue) {
-                        setValue('variantOptionIds', []);
+                        setValue('variantIds', []);
                       }
                     }}
                     onBlur={field.onBlur}
@@ -341,11 +340,11 @@ export default function FilterPanel({
             />
           );
         }
-        if (key === 'variantOptionIds') {
+        if (key === 'variantIds') {
           return (
             <Controller
               key={key}
-              name="variantOptionIds"
+              name="variantIds"
               control={control}
               // Typed explicitly: react-hook-form's own types do not resolve in
               // this project, so an inferred `field` would land as `any`.
@@ -355,51 +354,35 @@ export default function FilterPanel({
                 field: { value: number[] | undefined; onChange: (v: number[]) => void };
               }) => {
                 const selected: number[] = Array.isArray(field.value) ? field.value : [];
-                const toggle = (optionId: number) =>
+                const toggle = (variantId: number) =>
                   field.onChange(
-                    selected.includes(optionId)
-                      ? selected.filter((id) => id !== optionId)
-                      : [...selected, optionId],
+                    selected.includes(variantId)
+                      ? selected.filter((id) => id !== variantId)
+                      : [...selected, variantId],
                   );
 
                 return (
-                  <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter} fill className="col-span-full">
                     {!selectedProductId ? (
                       <span className="text-xs text-gray-500 py-2 block">
                         اختر منتجًا أولاً لعرض متغيراته
                       </span>
                     ) : isLoadingVariantOptions ? (
                       <span className="text-xs text-gray-500 py-2 block">جاري التحميل...</span>
-                    ) : variantGroups.length === 0 ? (
+                    ) : cards.length === 0 ? (
                       <span className="text-xs text-gray-500 py-2 block">
                         لا توجد متغيرات لهذا المنتج
                       </span>
                     ) : (
                       <div className="flex flex-col gap-2 py-1">
-                        {variantGroups.map((group) => (
-                          <div key={group.id} className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-xs font-semibold text-gray-500 min-w-14">
-                              {group.name}:
-                            </span>
-                            {group.options.map((option) => {
-                              const isSelected = selected.includes(option.id);
-                              return (
-                                <button
-                                  key={option.id}
-                                  type="button"
-                                  onClick={() => toggle(option.id)}
-                                  className={
-                                    isSelected
-                                      ? 'rounded-full text-xs px-3 py-1 bg-primary text-white font-medium'
-                                      : 'rounded-full text-xs px-3 py-1 border border-gray-300 text-gray-600 hover:border-primary hover:text-primary-text'
-                                  }
-                                >
-                                  {option.name}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ))}
+                        <VariantCards
+                          cards={cards}
+                          rows={[]}
+                          selection={{}}
+                          selectedCardIds={new Set(selected)}
+                          onSelect={(card) => toggle(card.id)}
+                          scrollClassName="max-h-72"
+                        />
                         {selected.length > 0 && (
                           <button
                             type="button"

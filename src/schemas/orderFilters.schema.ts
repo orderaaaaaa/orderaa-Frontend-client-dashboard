@@ -60,9 +60,7 @@ export const orderFiltersSchema = z.object({
 
     productId: z.string().optional().or(z.literal('')),
 
-    // Variant option ids narrowing the chosen product. Cleared whenever the
-    // product changes, since option ids belong to a single product.
-    variantOptionIds: z.array(z.number()).optional(),
+    variantIds: z.array(z.number()).optional(),
 
     cancellationReasons: z.array(z.string()).optional(),
 
@@ -97,7 +95,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     area: '',
     sizeColor: '',
     productId: '',
-    variantOptionIds: [],
+    variantIds: [],
     cancellationReasons: [],
     storeId: '',
     shippingCompanyId: '',

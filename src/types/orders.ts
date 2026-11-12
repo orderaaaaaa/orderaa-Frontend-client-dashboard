@@ -122,7 +122,7 @@ export interface OrderFilters {
   skipFilters?: boolean;
   orderByDirection?: 'asc' | 'desc' | '';
   productId?: string;
-  variantOptionIds?: number[];
+  variantIds?: number[];
   storeId?: string;
   shippingCompanyId?: string;
   employeeName?: string;
@@ -626,7 +626,7 @@ export interface FilterOrdersDto {
   department?: string;
   productId?: string;
   /** Ignored by the API unless productId is also set. */
-  variantOptionIds?: number[];
+  variantIds?: number[];
   cancelReasonId?: string[];
   storeId?: number;
   employeeName?: string;
