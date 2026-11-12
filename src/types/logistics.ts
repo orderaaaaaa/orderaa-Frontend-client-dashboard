@@ -82,7 +82,8 @@ export type RefundMethod = (typeof REFUND_METHODS)[number];
 
 export interface ReturnRefundData {
   orderId: number;
-  returnedOrderProductId: number;
+  returnedOrderProductId?: number;
+  returnedOrderProductIds?: number[];
   amount: number;
   refundMethod: RefundMethod;
   reasonId: number;

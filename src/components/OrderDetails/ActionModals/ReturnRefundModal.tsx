@@ -7,6 +7,7 @@ import { OrderProduct } from '@/types/orders';
 import { useCancellationReasons } from '@/services/orders';
 import { useReturnRefund } from '@/services/logistics';
 import { REFUND_METHODS, type RefundMethod } from '@/types/logistics';
+import { LiaCheckSolid } from 'react-icons/lia';
 import clsx from 'clsx';
 
 const REFUND_METHOD_LABELS: Record<RefundMethod, string> = {
@@ -34,7 +35,7 @@ export default function ReturnRefundModal({
   orderId,
   orderProducts,
 }: ReturnRefundModalProps) {
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [amount, setAmount] = useState('');
   const [refundMethod, setRefundMethod] = useState<RefundMethod | null>(null);
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
@@ -48,12 +49,12 @@ export default function ReturnRefundModal({
   }));
 
   const handleConfirm = () => {
-    if (selectedProductId === null || selectedReasonId === null || refundMethod === null) return;
+    if (selectedProductIds.length === 0 || selectedReasonId === null || refundMethod === null) return;
     if (amountValue === null || amountInvalid) return;
     refundMutation.mutate(
       {
         orderId,
-        returnedOrderProductId: selectedProductId,
+        returnedOrderProductIds: selectedProductIds,
         amount: amountValue,
         refundMethod,
         reasonId: selectedReasonId,
@@ -68,7 +69,7 @@ export default function ReturnRefundModal({
   };
 
   const handleReset = () => {
-    setSelectedProductId(null);
+    setSelectedProductIds([]);
     setAmount('');
     setRefundMethod(null);
     setSelectedReasonId(null);
@@ -82,8 +83,21 @@ export default function ReturnRefundModal({
 
   const amountValue = amount === '' ? null : Number(amount);
   const amountInvalid = amountValue === null || !Number.isFinite(amountValue) || amountValue < 0;
+  const selectedTotal =
+    Math.round(
+      orderProducts
+        .filter((op) => selectedProductIds.includes(op.id))
+        .reduce((sum, op) => sum + op.price, 0) * 100
+    ) / 100;
   const isFormValid =
-    selectedProductId !== null && selectedReasonId !== null && refundMethod !== null && !amountInvalid;
+    selectedProductIds.length > 0 && selectedReasonId !== null && refundMethod !== null && !amountInvalid;
+
+  const isSelected = (productId: number) => selectedProductIds.includes(productId);
+
+  const toggleProduct = (productId: number) =>
+    setSelectedProductIds((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+    );
 
   return (
     <BaseModal
@@ -103,28 +117,35 @@ export default function ReturnRefundModal({
             {orderProducts.map((op) => (
               <label
                 key={op.id}
+                role="checkbox"
+                aria-checked={isSelected(op.id)}
+                tabIndex={0}
                 className={clsx(
                   'flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all',
-                  selectedProductId === op.id
+                  isSelected(op.id)
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-primary/40 hover:bg-primary/5'
                 )}
-                onClick={() => setSelectedProductId(op.id)}
+                onClick={() => toggleProduct(op.id)}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleProduct(op.id);
+                  }
+                }}
               >
                 <div
                   className={clsx(
-                    'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0',
-                    selectedProductId === op.id ? 'border-primary' : 'border-gray-300'
+                    'w-5 h-5 rounded-[4px] border-2 flex items-center justify-center transition-all shrink-0',
+                    isSelected(op.id) ? 'border-primary bg-primary' : 'border-gray-300 bg-card'
                   )}
                 >
-                  {selectedProductId === op.id && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                  )}
+                  {isSelected(op.id) && <LiaCheckSolid className="w-4 h-4 text-white" />}
                 </div>
                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   <span className={clsx(
                     'text-sm',
-                    selectedProductId === op.id ? 'text-primary-text font-semibold' : 'text-foreground'
+                    isSelected(op.id) ? 'text-primary-text font-semibold' : 'text-foreground'
                   )}>
                     {op.products.name}
                   </span>
@@ -165,6 +186,11 @@ export default function ReturnRefundModal({
             placeholder="0"
             className="w-full border border-border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
+          {selectedProductIds.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              إجمالي المنتجات المحددة: {selectedTotal} ج.م
+            </p>
+          )}
           {amountValue !== null && amountInvalid && (
             <p className="text-xs text-red-600">
               المبلغ مطلوب ويجب أن يكون صفرًا أو أكبر
