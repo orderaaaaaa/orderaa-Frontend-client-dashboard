@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, ClipboardCheck, FileCheck2 } from 'lucide-react';
 import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
 import { VarianceChip } from '@/components/stock/VarianceChip';
-import { WarehouseSelect } from '@/components/stock/WarehouseSelect';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
@@ -16,14 +15,15 @@ import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStocktakesQuery } from '@/services/stocktake';
-import { useWarehouseOptions } from '@/services/warehouses';
 import { formatStockNumber } from '@/utils/format';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import type {
   StocktakePersonDto,
   StocktakeStatusWire,
   StocktakeSummaryDto,
+  StocktakeType,
 } from '../../types/stocktake';
+import { STOCKTAKE_TYPE_LABELS, parseStocktakeType } from '../../utils/stocktakeTypes';
 import { StartStocktakeDialog } from './StartStocktakeDialog';
 import { StocktakeAccessDenied } from './StocktakeAccessDenied';
 import { StocktakeStatusChip } from './StocktakeStatusChip';
@@ -31,15 +31,22 @@ import { stocktakeSheetHref } from './stocktakeRoutes';
 
 const PAGE_SIZE = 25;
 const COUNT_PROBE_LIMIT = 1;
-const WAREHOUSE_PARAM = 'warehouseId';
+const TYPE_PARAM = 'type';
 
 type StatusFilter = 'ALL' | StocktakeStatusWire;
+type TypeFilter = 'ALL' | StocktakeType;
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'ALL', label: 'الكل' },
   { value: 'OPEN', label: 'مفتوحة' },
   { value: 'POSTED', label: 'مرحّلة' },
   { value: 'CANCELLED', label: 'ملغاة' },
+];
+
+const TYPE_OPTIONS: { value: TypeFilter; label: string }[] = [
+  { value: 'ALL', label: 'كل الأنواع' },
+  { value: 'MAIN', label: STOCKTAKE_TYPE_LABELS.MAIN },
+  { value: 'RETURNS', label: STOCKTAKE_TYPE_LABELS.RETURNS },
 ];
 
 const actorOf = (ref: StocktakePersonDto | null): ActorChipActor =>
@@ -50,27 +57,21 @@ const actorOf = (ref: StocktakePersonDto | null): ActorChipActor =>
 const countText = (probe: { data?: { total: number }; isError: boolean }): string =>
   probe.data && !probe.isError ? formatStockNumber(probe.data.total) : '—';
 
-const parseWarehouseId = (raw: string | null): number | null => {
-  const id = Number(raw);
-  return raw !== null && Number.isInteger(id) && id > 0 ? id : null;
-};
-
 export function StocktakeListContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const canRead = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ);
   const canManage = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_MANAGE);
-  const warehouseOptions = useWarehouseOptions();
 
-  const warehouseId = parseWarehouseId(searchParams.get(WAREHOUSE_PARAM));
+  const type = parseStocktakeType(searchParams.get(TYPE_PARAM));
   const [status, setStatus] = useState<StatusFilter>('ALL');
   const [page, setPage] = useState(1);
   const [startOpen, setStartOpen] = useState(false);
 
   const listQuery = useStocktakesQuery(
     {
-      warehouseId: warehouseId ?? undefined,
+      type: type ?? undefined,
       status: status === 'ALL' ? undefined : status,
       page,
       limit: PAGE_SIZE,
@@ -78,11 +79,11 @@ export function StocktakeListContent() {
     canRead,
   );
   const openProbe = useStocktakesQuery(
-    { warehouseId: warehouseId ?? undefined, status: 'OPEN', limit: COUNT_PROBE_LIMIT },
+    { type: type ?? undefined, status: 'OPEN', limit: COUNT_PROBE_LIMIT },
     canRead,
   );
   const postedProbe = useStocktakesQuery(
-    { warehouseId: warehouseId ?? undefined, status: 'POSTED', limit: COUNT_PROBE_LIMIT },
+    { type: type ?? undefined, status: 'POSTED', limit: COUNT_PROBE_LIMIT },
     canRead,
   );
 
@@ -90,9 +91,13 @@ export function StocktakeListContent() {
     return <StocktakeAccessDenied />;
   }
 
-  const onWarehouseChange = (id: number) => {
+  const onTypeChange = (next: TypeFilter) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set(WAREHOUSE_PARAM, String(id));
+    if (next === 'ALL') {
+      params.delete(TYPE_PARAM);
+    } else {
+      params.set(TYPE_PARAM, next);
+    }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     setPage(1);
   };
@@ -116,9 +121,14 @@ export function StocktakeListContent() {
       ),
     },
     {
-      key: 'warehouse',
-      header: 'المخزن',
-      render: (_value, row) => row.warehouse.name,
+      key: 'type',
+      header: 'النوع',
+      render: (_value, row) =>
+        row.type === null ? (
+          <span className="text-muted-foreground">{row.warehouse.name}</span>
+        ) : (
+          STOCKTAKE_TYPE_LABELS[row.type]
+        ),
     },
     {
       key: 'status',
@@ -181,7 +191,7 @@ export function StocktakeListContent() {
     <div className="w-full max-w-full space-y-6 overflow-x-hidden">
       <StockPageHeader
         title="جرد المخزون"
-        subtitle="جلسة لكل مخزن: تُسجَّل الأعداد، ثم تُرحَّل الفروقات دفعة واحدة"
+        subtitle="جلسة لكل نوع: تُسجَّل الأعداد، ثم تُرحَّل الفروقات دفعة واحدة"
         breadcrumbs={[
           { label: 'إدارة المخزن', href: '/dashboard/inventory/stock-management' },
           { label: 'جرد المخزون' },
@@ -220,16 +230,12 @@ export function StocktakeListContent() {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="w-full md:w-72">
-          <WarehouseSelect
-            value={warehouseId}
-            onChange={onWarehouseChange}
-            source={warehouseOptions}
-            includeHidden
-            placeholder="كل المخازن"
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-3 md:justify-between">
+        <ToggleGroup
+          options={TYPE_OPTIONS}
+          value={type ?? 'ALL'}
+          onChange={onTypeChange}
+        />
         <ToggleGroup
           options={STATUS_OPTIONS}
           value={status}
@@ -277,7 +283,7 @@ export function StocktakeListContent() {
 
       {startOpen && (
         <StartStocktakeDialog
-          initialWarehouseId={warehouseId}
+          initialType={type}
           onClose={() => setStartOpen(false)}
         />
       )}

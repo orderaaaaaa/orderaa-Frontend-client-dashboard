@@ -51,6 +51,7 @@ import {
   toRefusedLines,
   toStocktakeCountSheetLine,
 } from '../../utils/stocktakeSheet';
+import { stocktakeTargetLabel } from '../../utils/stocktakeTypes';
 import { StocktakeAccessDenied } from './StocktakeAccessDenied';
 import { StocktakeStatusChip } from './StocktakeStatusChip';
 import { STOCKTAKE_LIST_HREF } from './stocktakeRoutes';
@@ -273,7 +274,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
     <div className="w-full max-w-full space-y-6 overflow-x-hidden pb-4">
       <StockPageHeader
         title={title}
-        subtitle={summary.warehouse.name}
+        subtitle={stocktakeTargetLabel(summary)}
         breadcrumbs={breadcrumbs}
         actions={
           <>

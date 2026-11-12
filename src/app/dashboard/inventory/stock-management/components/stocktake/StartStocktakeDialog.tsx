@@ -4,31 +4,47 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
-import { WarehouseSelect } from '@/components/stock/WarehouseSelect';
-import { useStartStocktakeMutation } from '@/services/stocktake';
-import { useWarehouseOptions } from '@/services/warehouses';
+import ToggleGroup from '@/components/ui/toggle-group';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/ui/state-panels';
+import { useStartStocktakeMutation, useStocktakeTypesQuery } from '@/services/stocktake';
+import type { StocktakeType, StocktakeTypeOptionDto } from '../../types/stocktake';
 import { getStocktakeErrorMessage } from '../../utils/stocktakeErrors';
+import { STOCKTAKE_TYPE_LABELS } from '../../utils/stocktakeTypes';
 import { stocktakeSheetHref } from './stocktakeRoutes';
 
+const NO_SELECTION = 'NONE';
+
 interface StartStocktakeDialogProps {
-  initialWarehouseId: number | null;
+  initialType: StocktakeType | null;
   onClose(): void;
 }
 
-export function StartStocktakeDialog({
-  initialWarehouseId,
-  onClose,
-}: StartStocktakeDialogProps) {
+const defaultType = (
+  options: StocktakeTypeOptionDto[] | undefined,
+  initialType: StocktakeType | null,
+): StocktakeType | null => {
+  const available = (options ?? [])
+    .filter((option) => option.available)
+    .map((option) => option.type);
+  if (initialType !== null && available.includes(initialType)) return initialType;
+  return available[0] ?? null;
+};
+
+export function StartStocktakeDialog({ initialType, onClose }: StartStocktakeDialogProps) {
   const router = useRouter();
   const startStocktake = useStartStocktakeMutation();
-  const warehouseOptions = useWarehouseOptions();
-  const [warehouseId, setWarehouseId] = useState<number | null>(initialWarehouseId);
+  const typesQuery = useStocktakeTypesQuery(true);
+  const [picked, setPicked] = useState<StocktakeType | null>(null);
   const [note, setNote] = useState('');
 
+  const options = typesQuery.data ?? [];
+  const selected = picked ?? defaultType(typesQuery.data, initialType);
+
   const onConfirm = () => {
-    if (warehouseId === null) return;
+    if (selected === null) return;
     startStocktake.mutate(
-      { warehouseId, note: note.trim() || null },
+      { type: selected, note: note.trim() || null },
       {
         onSuccess: (stocktake) => {
           toast.success('تم بدء جلسة الجرد');
@@ -41,6 +57,12 @@ export function StartStocktakeDialog({
     );
   };
 
+  const toggleOptions = options.map((option) => ({
+    value: option.type,
+    label: STOCKTAKE_TYPE_LABELS[option.type],
+    disabled: !option.available,
+  }));
+
   return (
     <BaseModal
       isOpen
@@ -49,15 +71,40 @@ export function StartStocktakeDialog({
       onConfirm={onConfirm}
       confirmText="بدء الجرد"
       isLoading={startStocktake.isPending}
-      confirmDisabled={warehouseId === null}
+      confirmDisabled={selected === null}
       maxWidth="md:max-w-[480px]"
     >
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">المخزن</p>
-          <WarehouseSelect value={warehouseId} onChange={setWarehouseId} source={warehouseOptions} />
+          <p className="text-sm font-medium text-foreground">نوع الجرد</p>
+          {typesQuery.isError ? (
+            <ErrorState
+              error={typesQuery.error}
+              fallback="تعذر تحميل أنواع الجرد"
+              onRetry={() => typesQuery.refetch()}
+            />
+          ) : typesQuery.isLoading ? (
+            <Skeleton className="h-10 w-full rounded-full" />
+          ) : (
+            <>
+              <ToggleGroup
+                options={toggleOptions}
+                value={selected ?? NO_SELECTION}
+                onChange={(next) => setPicked(next === NO_SELECTION ? null : next)}
+              />
+              {options
+                .filter((option) => !option.available)
+                .map((option) => (
+                  <p key={option.type} className="text-xs text-muted-foreground">
+                    {`${STOCKTAKE_TYPE_LABELS[option.type]}: ${
+                      option.warehouse === null ? 'لا يوجد مخزن لهذا النوع' : 'المخزن غير مفعّل'
+                    }`}
+                  </p>
+                ))}
+            </>
+          )}
           <p className="text-xs text-muted-foreground">
-            لكل مخزن جلسة جرد مفتوحة واحدة في الوقت نفسه.
+            لكل نوع جلسة جرد مفتوحة واحدة في الوقت نفسه.
           </p>
         </div>
         <div className="space-y-2">
