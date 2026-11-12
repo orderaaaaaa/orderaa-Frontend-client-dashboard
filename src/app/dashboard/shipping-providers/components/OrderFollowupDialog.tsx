@@ -30,6 +30,13 @@ interface OrderFollowupDialogProps {
 const isFollowupPanel = (value: string): value is FollowupPanel =>
   value === FOLLOWUP_PANELS.NOTES || value === FOLLOWUP_PANELS.EVENTS || value === FOLLOWUP_PANELS.CHAT;
 
+const isVisible = (element: HTMLElement) => element.getClientRects().length > 0;
+
+const findVisibleOpener = (orderId: number): HTMLElement | null => {
+  const candidates = document.querySelectorAll<HTMLElement>(`[data-followup-opener="${orderId}"]`);
+  return Array.from(candidates).find(isVisible) ?? null;
+};
+
 export function OrderFollowupDialog({ target, carrierName, opener, onClose }: OrderFollowupDialogProps) {
   const { dir } = useI18n();
   const { hasPermission } = usePermissionCheck();
@@ -70,8 +77,7 @@ export function OrderFollowupDialog({ target, carrierName, opener, onClose }: Or
   };
 
   const handleCloseAutoFocus = (event: Event) => {
-    const fallback = document.querySelector<HTMLElement>(`[data-followup-opener="${target.orderId}"]`);
-    const restore = opener?.isConnected ? opener : fallback;
+    const restore = opener?.isConnected && isVisible(opener) ? opener : findVisibleOpener(target.orderId);
     if (!restore) return;
     event.preventDefault();
     restore.focus();
@@ -86,6 +92,7 @@ export function OrderFollowupDialog({ target, carrierName, opener, onClose }: Or
           party={party}
           onBodyChange={setBody}
           onPartyChange={setParty}
+          compactOnMobile
           onAdded={() => setAddedToken((current) => current + 1)}
         />
       </div>

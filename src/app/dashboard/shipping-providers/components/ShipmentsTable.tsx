@@ -589,7 +589,8 @@ export function InProcessShipmentsTable({
                   shippingCompanyId={shippingCompanyId}
                   carrier={carrier}
                   carrierSupportsUpdate={carrierSupportsUpdate}
-                  onOpenFollowup={onOpenFollowup}                />
+                  onOpenFollowup={onOpenFollowup}
+                />
               </td>
             </tr>
           );
@@ -682,7 +683,8 @@ export function ReturnedShipmentsTable({
               <ReturnedRowActions
                 row={row}
                 carrierResendSupported={carrier.capabilities?.resend.supported}
-                onOpenFollowup={onOpenFollowup}              />
+                onOpenFollowup={onOpenFollowup}
+              />
             </td>
           </tr>
         ))}

@@ -84,7 +84,8 @@ export function InProcessShipmentCards({
               shippingCompanyId={shippingCompanyId}
               carrier={carrier}
               carrierSupportsUpdate={carrierSupportsUpdate}
-              onOpenFollowup={onOpenFollowup}            />
+              onOpenFollowup={onOpenFollowup}
+            />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <DueCell
@@ -151,7 +152,8 @@ export function ReturnedShipmentCards({
             <ReturnedRowActions
               row={row}
               carrierResendSupported={carrier.capabilities?.resend.supported}
-              onOpenFollowup={onOpenFollowup}            />
+              onOpenFollowup={onOpenFollowup}
+            />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />

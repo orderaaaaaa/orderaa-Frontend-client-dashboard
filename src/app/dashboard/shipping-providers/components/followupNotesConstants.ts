@@ -26,7 +26,6 @@ export const FOLLOWUP_NOTE_PARTY_HEADING_TONES: Record<FollowupNotePartyValue, s
   COURIER: 'bg-success/15 text-foreground',
 };
 
-export const FOLLOWUP_NOTES_TITLE = 'ملاحظات المتابعة';
 export const FOLLOWUP_NOTES_LOADING = 'جاري تحميل الملاحظات...';
 export const FOLLOWUP_NOTES_LOAD_ERROR = 'تعذر تحميل الملاحظات';
 export const FOLLOWUP_NOTES_EMPTY_DAY = 'لا توجد ملاحظات في هذا اليوم';
@@ -81,7 +80,6 @@ export const FOLLOWUP_ACTION_LOG_BUTTON_LABEL = 'سجل الإجراءات';
 export const FOLLOWUP_COURIER_COLUMN_LABEL = 'المندوب';
 export const FOLLOWUP_ACTIONS_COLUMN_LABEL = 'المتابعة';
 
-export const ACTION_LOG_TITLE = 'سجل الإجراءات';
 export const ACTION_LOG_EMPTY = 'لا توجد إجراءات مسجلة لهذا الطلب';
 export const ACTION_LOG_HISTORY_FORBIDDEN_NOTICE =
   'سجل تعديلات الطلب غير متاح لصلاحياتك، ويظهر سجل الإجراءات فقط';
