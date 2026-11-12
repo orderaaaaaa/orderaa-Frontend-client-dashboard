@@ -160,6 +160,7 @@ export interface SalesPieceProduct {
   productId: number;
   name: string;
   piecesSold: number;
+  avgUnitCost: string | null;
   soldPiecesCost: string;
   uncostedPieces: number;
   variants: SalesPieceVariant[];

@@ -42,7 +42,8 @@ export function buildSalesPieceExport(
     rows.push({
       [PIECE_TABLE_HEADERS.name]: product.name,
       [PIECE_TABLE_HEADERS.piecesSold]: product.piecesSold,
-      [PIECE_TABLE_HEADERS.avgUnitCost]: null,
+      [PIECE_TABLE_HEADERS.avgUnitCost]:
+        product.avgUnitCost === null ? null : Number(product.avgUnitCost),
       [PIECE_TABLE_HEADERS.soldPiecesCost]: Number(product.soldPiecesCost),
       [PIECE_TABLE_HEADERS.uncostedPieces]: product.uncostedPieces,
     });
@@ -125,7 +126,9 @@ export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) 
                     </TableCell>
                     {withCost && (
                       <>
-                        <TableCell className="tabular-nums text-end">—</TableCell>
+                        <TableCell className="tabular-nums text-end">
+                          {formatMoney(product.avgUnitCost)}
+                        </TableCell>
                         <TableCell className="tabular-nums text-end">
                           {formatMoney(product.soldPiecesCost)}
                         </TableCell>
