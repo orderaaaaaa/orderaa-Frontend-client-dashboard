@@ -28,6 +28,73 @@ interface OrderDetailsCardIdProps {
   isForceUnlocking?: boolean;
 }
 
+interface ShippingCodeChipProps {
+  label: string;
+  code: string;
+  companyName: string;
+  active: boolean;
+  onCopy: () => void;
+}
+
+const ShippingCodeChip = ({
+  label,
+  code,
+  companyName,
+  active,
+  onCopy,
+}: ShippingCodeChipProps) => (
+  <div
+    className={
+      active
+        ? 'flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 shadow-sm'
+        : 'flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5'
+    }
+  >
+    <Copy
+      onClick={onCopy}
+      className={
+        active
+          ? 'w-3.5 h-3.5 text-emerald-700 cursor-pointer shrink-0'
+          : 'w-3.5 h-3.5 text-gray-500 cursor-pointer shrink-0'
+      }
+      role="button"
+    />
+    <div className="flex flex-col leading-tight">
+      <span className="text-sm">{label}</span>
+      <span
+        className={
+          active
+            ? 'text-sm font-bold text-emerald-800'
+            : 'text-sm font-semibold text-gray-700'
+        }
+      >
+        {code}
+      </span>
+      {companyName && (
+        <span className="text-[11px] font-normal text-gray-500">
+          {companyName}
+        </span>
+      )}
+    </div>
+    <span
+      className={
+        active
+          ? 'inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5'
+          : 'inline-flex items-center gap-1 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium px-2 py-0.5'
+      }
+    >
+      <span
+        className={
+          active
+            ? 'w-1.5 h-1.5 rounded-full bg-white'
+            : 'w-1.5 h-1.5 rounded-full bg-gray-400'
+        }
+      />
+      {active ? 'نشط' : 'غير نشط'}
+    </span>
+  </div>
+);
+
 const OrderDetailsCardId = ({
   order,
   isLockedByOther,
@@ -135,65 +202,18 @@ const OrderDetailsCardId = ({
                 <div className="flex flex-wrap gap-2 mb-2">
                   {order.shipping_ids && order.shipping_ids.length > 0 ? (
                     order.shipping_ids.map((entry) => (
-                      <div
+                      <ShippingCodeChip
                         key={entry.id}
-                        className={
-                          entry.isActive
-                            ? 'flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 shadow-sm'
-                            : 'flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5'
-                        }
-                      >
-                        <Copy
-                          onClick={() => handleCopy(entry.shippingId)}
-                          className={
-                            entry.isActive
-                              ? 'w-3.5 h-3.5 text-emerald-700 cursor-pointer shrink-0'
-                              : 'w-3.5 h-3.5 text-gray-500 cursor-pointer shrink-0'
-                          }
-                          role="button"
-                        />
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-sm">كود الشحن</span>
-                          <span
-                            className={
-                              entry.isActive
-                                ? 'text-sm font-bold text-emerald-800'
-                                : 'text-sm font-semibold text-gray-700'
-                            }
-                          >
-                            {entry.shippingId}
-                          </span>
-                          {shippingIdCompanyNameOf(
-                            entry,
-                            order.shippingCompanyRef,
-                            shippingCompanies
-                          ) && (
-                            <span className="text-[11px] font-normal text-gray-500">
-                              {shippingIdCompanyNameOf(
-                                entry,
-                                order.shippingCompanyRef,
-                                shippingCompanies
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        <span
-                          className={
-                            entry.isActive
-                              ? 'inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5'
-                              : 'inline-flex items-center gap-1 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium px-2 py-0.5'
-                          }
-                        >
-                          <span
-                            className={
-                              entry.isActive
-                                ? 'w-1.5 h-1.5 rounded-full bg-white'
-                                : 'w-1.5 h-1.5 rounded-full bg-gray-400'
-                            }
-                          />
-                          {entry.isActive ? 'نشط' : 'غير نشط'}
-                        </span>
-                      </div>
+                        label="كود الشحن"
+                        code={entry.shippingId}
+                        companyName={shippingIdCompanyNameOf(
+                          entry,
+                          order.shippingCompanyRef,
+                          shippingCompanies
+                        )}
+                        active={entry.isActive}
+                        onCopy={() => handleCopy(entry.shippingId)}
+                      />
                     ))
                   ) : (
                     <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-card px-3 py-1.5">
@@ -216,56 +236,13 @@ const OrderDetailsCardId = ({
                     </div>
                   )}
                   {returnShippingId && (
-                    <div
-                      className={
-                        returnShippingActive
-                          ? 'flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 shadow-sm'
-                          : 'flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5'
-                      }
-                    >
-                      <Copy
-                        onClick={() => handleCopy(returnShippingId)}
-                        className={
-                          returnShippingActive
-                            ? 'w-3.5 h-3.5 text-emerald-700 cursor-pointer shrink-0'
-                            : 'w-3.5 h-3.5 text-gray-500 cursor-pointer shrink-0'
-                        }
-                        role="button"
-                      />
-                      <div className="flex flex-col leading-tight">
-                        <span className="text-sm">كود المرتجع</span>
-                        <span
-                          className={
-                            returnShippingActive
-                              ? 'text-sm font-bold text-emerald-800'
-                              : 'text-sm font-semibold text-gray-700'
-                          }
-                        >
-                          {returnShippingId}
-                        </span>
-                        {orderCompanyName && (
-                          <span className="text-[11px] font-normal text-gray-500">
-                            {orderCompanyName}
-                          </span>
-                        )}
-                      </div>
-                      <span
-                        className={
-                          returnShippingActive
-                            ? 'inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5'
-                            : 'inline-flex items-center gap-1 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium px-2 py-0.5'
-                        }
-                      >
-                        <span
-                          className={
-                            returnShippingActive
-                              ? 'w-1.5 h-1.5 rounded-full bg-white'
-                              : 'w-1.5 h-1.5 rounded-full bg-gray-400'
-                          }
-                        />
-                        {returnShippingActive ? 'نشط' : 'غير نشط'}
-                      </span>
-                    </div>
+                    <ShippingCodeChip
+                      label="كود المرتجع"
+                      code={returnShippingId}
+                      companyName={orderCompanyName}
+                      active={returnShippingActive}
+                      onCopy={() => handleCopy(returnShippingId)}
+                    />
                   )}
                 </div>
               </Then>
