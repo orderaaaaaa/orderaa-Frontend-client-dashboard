@@ -14,6 +14,7 @@ import {
   LiaUsersSolid,
   LiaWarehouseSolid,
   LiaClipboardListSolid,
+  LiaClipboardCheckSolid,
   LiaCubesSolid,
   LiaUndoAltSolid,
   LiaRobotSolid,
@@ -53,6 +54,7 @@ import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { PERMISSION_CODES, type PermissionCode } from '@/lib/permissions';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
+import { STOCKTAKE_LIST_HREF } from '@/app/dashboard/inventory/stock-management/components/stocktake/stocktakeRoutes';
 
 export type NavigationItem = {
   name: string;
@@ -346,6 +348,12 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/inventory/stock-management',
         icon: LiaCubesSolid,
         permission: PERMISSION_CODES.WAREHOUSES_STOCK_READ,
+      },
+      {
+        name: 'جرد المخزون',
+        href: STOCKTAKE_LIST_HREF,
+        icon: LiaClipboardCheckSolid,
+        permission: PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ,
       },
       {
         name: 'إدارة الاستلامات',

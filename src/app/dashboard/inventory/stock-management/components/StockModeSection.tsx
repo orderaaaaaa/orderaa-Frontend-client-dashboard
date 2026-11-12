@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { LiaClipboardCheckSolid, LiaClipboardListSolid, LiaSyncSolid } from 'react-icons/lia';
+import { LiaClipboardListSolid, LiaSyncSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
@@ -16,7 +15,6 @@ import {
 } from '@/services/stockMode';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate } from '@/utils/format';
-import { STOCKTAKE_LIST_HREF } from './stocktake/stocktakeRoutes';
 import { StockActionsMenu, type StockActionItem } from './StockActionsMenu';
 import { TransferStockLink } from './TransferStockLink';
 import {
@@ -44,9 +42,6 @@ export function StockModeSection() {
     PERMISSION_CODES.STOCK_WORKFLOWS_MODE_SWITCH,
   );
   const canReadMovements = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
-  const canReadStocktake = useHasPermissionStrict(
-    PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ,
-  );
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const modeQuery = useStockModeQuery(canRead);
@@ -77,15 +72,10 @@ export function StockModeSection() {
       : '';
 
   const goLiveVisible = canSwitchMode && mode.mode === 'TRIAL';
-  const stocktakeVisible = canReadStocktake;
-  const primary = goLiveVisible ? 'goLive' : stocktakeVisible ? 'stocktake' : null;
 
   const menuItems: StockActionItem[] = [
     ...(canReadMovements
       ? [{ key: 'count', label: 'عدّ المخزون الافتتاحي', href: COUNT_PAGE_HREF, icon: LiaClipboardListSolid }]
-      : []),
-    ...(canReadStocktake && primary !== 'stocktake'
-      ? [{ key: 'stocktake', label: 'جرد المخزون', href: STOCKTAKE_LIST_HREF, icon: LiaClipboardCheckSolid }]
       : []),
     ...(canReadMovements
       ? [{ key: 'sync', label: 'مزامنة مخزون الطلبات', href: ORDER_STOCK_SYNC_HREF, icon: LiaSyncSolid }]
@@ -124,18 +114,13 @@ export function StockModeSection() {
           )}
         </div>
         <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
-          {primary === 'goLive' && (
+          {goLiveVisible && (
             <Button
               size="sm"
               className="h-10 w-full sm:h-9 sm:w-auto"
               onClick={() => setDialogOpen(true)}
             >
               بدء التشغيل الفعلي للمخزون
-            </Button>
-          )}
-          {primary === 'stocktake' && (
-            <Button asChild size="sm" className="h-10 w-full sm:h-9 sm:w-auto">
-              <Link href={STOCKTAKE_LIST_HREF}>جرد المخزون</Link>
             </Button>
           )}
           <TransferStockLink />
