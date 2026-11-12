@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Check, Lock } from 'lucide-react';
+import Image from 'next/image';
+import { Check, Lock, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
@@ -9,6 +10,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
 import { formatMoney } from '@/utils/formatMoney';
 import { selectableUnitIdsOf } from '@/utils/customerReturn/selection';
+import { customerReturnUnitVariantLabelOf } from '@/utils/customerReturn/returnContent';
 import type {
   CustomerReturnSourceOrder,
   CustomerReturnUnit,
@@ -41,6 +43,28 @@ function StatusBadge({
   );
 }
 
+function UnitThumbnail({ unit }: { unit: CustomerReturnUnit }) {
+  if (!unit.imageUrl) {
+    return (
+      <span
+        className="flex size-12 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground"
+        aria-hidden="true"
+      >
+        <Package className="size-5" />
+      </span>
+    );
+  }
+  return (
+    <Image
+      src={unit.imageUrl}
+      alt={unit.productName ?? unit.sku ?? ''}
+      width={48}
+      height={48}
+      className="size-12 shrink-0 rounded-md border object-cover"
+    />
+  );
+}
+
 function UnitChip({
   unit,
   index,
@@ -53,7 +77,9 @@ function UnitChip({
   onToggle: () => void;
 }) {
   const { t } = useI18n();
-  const detailLine = [unit.productName ? unit.sku : null, unit.variantLabel]
+  const variantLine =
+    customerReturnUnitVariantLabelOf(unit) || unit.variantLabel;
+  const detailLine = [unit.productName ? unit.sku : null, variantLine]
     .filter(Boolean)
     .join(' · ');
   const fallbackLine =
@@ -101,6 +127,7 @@ function UnitChip({
           )}
           aria-hidden="true"
         />
+        <UnitThumbnail unit={unit} />
         {details}
       </button>
     );
@@ -113,6 +140,7 @@ function UnitChip({
     >
       <div className="flex items-center gap-3">
         <Lock className="size-4 shrink-0" aria-hidden="true" />
+        <UnitThumbnail unit={unit} />
         {details}
       </div>
       {unit.holder && (
@@ -156,6 +184,11 @@ function ReturnSourceOrderCard({
           {order.shippingCompanyName && (
             <span className="text-sm text-muted-foreground">
               {order.shippingCompanyName}
+            </span>
+          )}
+          {typeof order.settlementAmount === 'string' && (
+            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+              محصل {order.settlementAmount} جنيه
             </span>
           )}
         </div>

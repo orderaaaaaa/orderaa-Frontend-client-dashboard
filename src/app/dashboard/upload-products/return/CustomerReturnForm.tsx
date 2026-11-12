@@ -33,6 +33,7 @@ import {
 } from '@/utils/manualOrder/carrierSend';
 import {
   refundValueOf,
+  returnPriceOf,
   selectedUnitsOf,
 } from '@/utils/customerReturn/selection';
 import { customerReturnContentOf } from '@/utils/customerReturn/returnContent';
@@ -64,7 +65,8 @@ type ReturnErrorKey =
   | 'governorateOption'
   | 'cityOption'
   | 'address'
-  | 'returnContent';
+  | 'returnContent'
+  | 'returnPrice';
 
 type ReturnErrors = Partial<Record<ReturnErrorKey, string>>;
 
@@ -102,6 +104,7 @@ const MISSING_FIELD_KEYS: Record<ReturnErrorKey, TranslationKey> = {
   cityOption: 'customerReturn.field.city',
   address: 'customerReturn.address.label',
   returnContent: 'customerReturn.returnContent.label',
+  returnPrice: 'customerReturn.summary.returnPrice',
 };
 
 const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
@@ -112,6 +115,7 @@ const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   cityOption: 'city',
   address: 'return-address',
   returnContent: 'return-content',
+  returnPrice: 'return-price',
 };
 
 const matchLocationOption = (
@@ -142,6 +146,7 @@ function CustomerReturnForm() {
   const [draft, setDraft] = useState<ReturnDraft>(EMPTY_DRAFT);
   const [errors, setErrors] = useState<ReturnErrors>({});
   const [contentOverride, setContentOverride] = useState<string | null>(null);
+  const [priceOverride, setPriceOverride] = useState<string | null>(null);
   const [attention, setAttention] = useState<{
     orderId: number;
     code: string;
@@ -185,6 +190,8 @@ function CustomerReturnForm() {
 
   const selectedUnits = selectedUnitsOf(orders, selectedIds);
   const refundValue = refundValueOf(selectedUnits);
+  const priceText = priceOverride ?? String(refundValue);
+  const returnPrice = returnPriceOf(priceText);
   const prefill = customerReturnContentOf(selectedUnits);
   const contentValue = contentOverride ?? prefill;
   const sentContent =
@@ -266,6 +273,7 @@ function CustomerReturnForm() {
     setAttention(null);
     setSelectedIds(EMPTY_SELECTED_IDS);
     setContentOverride(null);
+    setPriceOverride(null);
     setDraft((current) => ({
       ...current,
       address: '',
@@ -279,6 +287,7 @@ function CustomerReturnForm() {
       customer: undefined,
       units: undefined,
       returnContent: undefined,
+      returnPrice: undefined,
       address: undefined,
       governorateOption: undefined,
       cityOption: undefined,
@@ -286,8 +295,14 @@ function CustomerReturnForm() {
   };
 
   const handleToggleUnit = (orderProductId: number) => {
-    setErrors((current) => ({ ...current, units: undefined, returnContent: undefined }));
+    setErrors((current) => ({
+      ...current,
+      units: undefined,
+      returnContent: undefined,
+      returnPrice: undefined,
+    }));
     setContentOverride(null);
+    setPriceOverride(null);
     setSelectedIds((current) => {
       const next = new Set(current);
       if (next.has(orderProductId)) next.delete(orderProductId);
@@ -297,8 +312,14 @@ function CustomerReturnForm() {
   };
 
   const handleToggleOrder = (orderProductIds: number[], select: boolean) => {
-    setErrors((current) => ({ ...current, units: undefined, returnContent: undefined }));
+    setErrors((current) => ({
+      ...current,
+      units: undefined,
+      returnContent: undefined,
+      returnPrice: undefined,
+    }));
     setContentOverride(null);
+    setPriceOverride(null);
     setSelectedIds((current) => {
       const next = new Set(current);
       orderProductIds.forEach((id) =>
@@ -334,6 +355,7 @@ function CustomerReturnForm() {
         max: RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
       });
     }
+    if (returnPrice === null) next.returnPrice = t('customerReturn.errors.returnPrice');
     return next;
   };
 
@@ -354,7 +376,7 @@ function CustomerReturnForm() {
         ?.focus({ preventScroll: true });
       return;
     }
-    if (!customer) return;
+    if (!customer || returnPrice === null) return;
 
     setAttention(null);
     const notes = draft.notes.trim();
@@ -371,6 +393,7 @@ function CustomerReturnForm() {
         ...(area && { area }),
         ...(notes && { notes }),
         returnShipmentContent: sentContent,
+        returnPrice,
       },
       {
         onSuccess: (created) => {
@@ -385,6 +408,7 @@ function CustomerReturnForm() {
           }
           setSelectedIds(EMPTY_SELECTED_IDS);
           setContentOverride(null);
+          setPriceOverride(null);
           setDraft((current) => ({ ...current, notes: '' }));
           setErrors({});
         },
@@ -660,7 +684,12 @@ function CustomerReturnForm() {
             </h2>
             <ReturnSummaryPanel
               unitsCount={selectedUnits.length}
-              refundValue={refundValue}
+              returnPrice={priceText}
+              onReturnPriceChange={(value) => {
+                setPriceOverride(value);
+                setErrors((current) => ({ ...current, returnPrice: undefined }));
+              }}
+              returnPriceError={errors.returnPrice}
               shippingCompanyName={selectedCompanyName}
               carrier={selectedCarrier}
               pickupAddress={draft.address.trim()}

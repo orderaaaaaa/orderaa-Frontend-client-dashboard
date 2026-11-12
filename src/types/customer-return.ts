@@ -28,6 +28,7 @@ export type CustomerReturnSourceOrder = {
   status: OrderStatus;
   createdAt: string;
   shippingCompanyName: string | null;
+  settlementAmount: string | null;
   units: CustomerReturnUnit[];
 };
 
@@ -69,6 +70,7 @@ export type CreateCustomerReturnPayload = {
   address?: string;
   notes?: string;
   returnShipmentContent: string;
+  returnPrice?: number;
 };
 
 export type CreateCustomerReturnResponse = {
@@ -76,6 +78,7 @@ export type CreateCustomerReturnResponse = {
   code: string;
   status: OrderStatus;
   refundValue: number;
+  returnPrice: string;
   unitsCount: number;
   carrierSend: CarrierSendBlock | null;
 };

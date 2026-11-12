@@ -4,6 +4,18 @@ import {
   variantPartsLabelOf,
 } from '@/utils/partialDelivery/returnShipmentContent';
 
+export const customerReturnUnitVariantLabelOf = (
+  unit: CustomerReturnUnit,
+): string =>
+  variantPartsLabelOf(
+    unit.variants
+      .filter((variant) => variant.label.trim() && variant.value.trim())
+      .map((variant) => ({
+        name: variant.label,
+        value: variant.value,
+      })),
+  );
+
 export const customerReturnContentOf = (units: CustomerReturnUnit[]): string =>
   returnShipmentContentOfPieces(
     units.flatMap((unit) => {
@@ -12,14 +24,7 @@ export const customerReturnContentOf = (units: CustomerReturnUnit[]): string =>
       return [
         {
           name,
-          variantLabel: variantPartsLabelOf(
-            unit.variants
-              .filter((variant) => variant.label.trim() && variant.value.trim())
-              .map((variant) => ({
-                name: variant.label,
-                value: variant.value,
-              })),
-          ),
+          variantLabel: customerReturnUnitVariantLabelOf(unit),
         },
       ];
     }),

@@ -23,3 +23,10 @@ export const selectedUnitsOf = (
 
 export const refundValueOf = (units: CustomerReturnUnit[]): number =>
   Math.round(units.reduce((total, unit) => total + unit.price, 0) * 100) / 100;
+
+const RETURN_PRICE_PATTERN = /^\d+(\.\d{1,2})?$/;
+
+export const returnPriceOf = (text: string): number | null => {
+  const trimmed = text.trim();
+  return RETURN_PRICE_PATTERN.test(trimmed) ? Number(trimmed) : null;
+};

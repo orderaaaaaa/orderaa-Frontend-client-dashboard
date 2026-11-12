@@ -1,7 +1,8 @@
 'use client';
 
 import React, { type ReactNode } from 'react';
-import { Package, Wallet } from 'lucide-react';
+import { Package } from 'lucide-react';
+import Input from '@/components/ui/Input';
 import { SummaryStatCard } from '@/components/ui/summary-stat-card';
 import { useI18n } from '@/i18n/I18nProvider';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
@@ -10,7 +11,9 @@ import type { CarrierSupportState } from '@/app/dashboard/upload-products/manual
 
 type ReturnSummaryPanelProps = {
   unitsCount: number;
-  refundValue: number;
+  returnPrice: string;
+  onReturnPriceChange: (value: string) => void;
+  returnPriceError?: string;
   shippingCompanyName: string | null;
   carrier: CarrierSupportState | null;
   pickupAddress: string;
@@ -29,7 +32,9 @@ function SummaryRow({ label, value }: { label: string; value: ReactNode }) {
 
 function ReturnSummaryPanel({
   unitsCount,
-  refundValue,
+  returnPrice,
+  onReturnPriceChange,
+  returnPriceError,
   shippingCompanyName,
   carrier,
   pickupAddress,
@@ -51,12 +56,22 @@ function ReturnSummaryPanel({
           label={t('customerReturn.summary.units')}
           value={formatCount(unitsCount)}
         />
-        <SummaryStatCard
-          icon={<Wallet className="size-5" aria-hidden="true" />}
-          iconBgClassName="bg-primary/10 text-primary-text"
-          label={t('customerReturn.summary.refundValue')}
-          value={formatMoney(String(refundValue))}
-        />
+        <div
+          data-field-error="return-price"
+          className="min-w-0 rounded-xl border border-border bg-card px-4 py-4 text-card-foreground shadow-soft sm:py-5"
+        >
+          <Input
+            id="return-price-input"
+            name="returnPrice"
+            label={t('customerReturn.summary.returnPrice')}
+            value={returnPrice}
+            onChange={(e) => onReturnPriceChange(e.target.value)}
+            inputMode="decimal"
+            dir="ltr"
+            error={returnPriceError}
+            className="w-full"
+          />
+        </div>
       </div>
       <dl className="rounded-xl border border-border bg-muted/40 px-4">
         <SummaryRow
