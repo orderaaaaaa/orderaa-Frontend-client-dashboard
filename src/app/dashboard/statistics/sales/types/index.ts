@@ -4,7 +4,7 @@ export interface SalesRange {
   timezone: string;
 }
 
-export type SalesBreakdownDimension = 'STORE' | 'CARRIER' | 'PAGE';
+export type SalesBreakdownDimension = 'STORE' | 'CARRIER' | 'PAGE' | 'SOURCE';
 
 export interface SalesMetrics {
   totalOrders: number;

@@ -19,7 +19,7 @@ interface MetricColumn {
   format: (metrics: SalesMetrics) => string;
 }
 
-const DIMENSION_ORDER: SalesBreakdownDimension[] = ['STORE', 'CARRIER', 'PAGE'];
+const DIMENSION_ORDER: SalesBreakdownDimension[] = ['STORE', 'CARRIER', 'PAGE', 'SOURCE'];
 
 const STICKY_FIRST_COLUMN = 'sticky start-0 z-[1] bg-card';
 const COST_FIELD: keyof SalesMetrics = 'soldPiecesCost';

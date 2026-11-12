@@ -18,6 +18,7 @@ import {
 import type { KpiAccent, KpiChipTone } from '@/components/ui/kpi-card';
 import { formatCount, formatPercent } from '@/utils/formatMoney';
 import type {
+  SalesBreakdownDimension,
   SalesDerivedKind,
   SalesExclusionReason,
   SalesMetrics,
@@ -312,10 +313,11 @@ export const SALES_COPY = {
   piecesCountLabel: 'عدد القطع',
 } as const;
 
-export const BREAKDOWN_GROUP_HEADINGS: Record<'STORE' | 'CARRIER' | 'PAGE', string> = {
+export const BREAKDOWN_GROUP_HEADINGS: Record<SalesBreakdownDimension, string> = {
   STORE: 'المتاجر',
   CARRIER: 'شركات الشحن',
   PAGE: 'الصفحات',
+  SOURCE: 'المصادر',
 };
 
 export type SalesOrderColumn =
