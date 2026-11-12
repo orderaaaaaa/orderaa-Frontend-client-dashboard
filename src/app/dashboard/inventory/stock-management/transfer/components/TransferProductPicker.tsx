@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Minus, Plus } from 'lucide-react';
 import type { MoveStockLine } from '@/components/stock/MoveStockForm';
-import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
-import { VariantLabel } from '@/components/stock/VariantLabel';
 import { STOCK_FIELD_CLASS } from '@/components/stock/formStyles';
-import { Button } from '@/components/ui/button';
+import { CARD_SCROLL_CLASS, VariantCards } from '@/components/stock/VariantCards';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { VariantCard } from '@/lib/api/products';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { cn } from '@/lib/utils';
 import { useStockProducts } from '@/services/stock';
+import { toStockNumber } from '@/utils/format';
 import { useDebounce } from '@/utils/debounce';
 
 const PAGE_SIZE = 20;
@@ -30,6 +31,7 @@ export function TransferProductPicker({
   disabled,
   onToggleLine,
 }: TransferProductPickerProps) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 300);
@@ -42,17 +44,38 @@ export function TransferProductPicker({
   });
 
   const products = stockQuery.data?.data ?? [];
-  const rows: MoveStockLine[] = products.flatMap((product) =>
-    product.variants.map((variant) => ({
-      variantId: variant.id,
-      productName: product.name,
-      sku: variant.sku ?? null,
-      options: variant.options,
-      available: variant.availableCount,
-    }))
-  );
+  const groups = products
+    .map((product) => {
+      const groupLines: MoveStockLine[] = product.variants.map((variant) => ({
+        variantId: variant.id,
+        productName: product.name,
+        sku: variant.sku ?? null,
+        options: variant.options,
+        available: variant.availableCount,
+      }));
+      return {
+        id: product.id,
+        name: product.name,
+        cards: groupLines.map(
+          (line): VariantCard => ({
+            id: line.variantId,
+            label: variantPlainLabel(line),
+            options: [],
+          })
+        ),
+        lines: groupLines,
+      };
+    })
+    .filter((group) => group.lines.length > 0);
+  const rows = groups.flatMap((group) => group.lines);
+  const rowById = new Map(rows.map((row) => [row.variantId, row]));
   const totalPages = stockQuery.data?.totalPages ?? 1;
   const selectedIds = new Set(lines.map((line) => line.variantId));
+  const disabledCardIds = new Set(
+    rows
+      .filter((row) => disabled || (!selectedIds.has(row.variantId) && row.available <= 0))
+      .map((row) => row.variantId)
+  );
   const hasSearch = debouncedSearch.trim() !== '';
 
   useEffect(() => {
@@ -99,36 +122,34 @@ export function TransferProductPicker({
           />
         )
       ) : (
-        <ul
+        <div
           key={`${page}:${debouncedSearch}`}
           className="max-h-[60dvh] divide-y divide-border overflow-x-hidden overflow-y-auto rounded-lg border border-border"
         >
-          {rows.map((row) => {
-            const selected = selectedIds.has(row.variantId);
-            return (
-              <li
-                key={row.variantId}
-                className={cn('flex items-center gap-3 px-3 py-2.5', selected && 'bg-primary/5')}
-              >
-                <div className="min-w-0 flex-1">
-                  <VariantLabel productName={row.productName} sku={row.sku} options={row.options} size="sm" />
-                </div>
-                <StockQuantityCell quantity={row.available} />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  disabled={disabled || (!selected && row.available <= 0)}
-                  onClick={() => onToggleLine(row)}
-                >
-                  {selected ? <Minus aria-hidden="true" /> : <Plus aria-hidden="true" />}
-                  {selected ? 'إزالة' : 'إضافة'}
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
+          {groups.map((group) => (
+            <div key={group.id} className="flex flex-col gap-3 p-3">
+              <h3 className="text-sm font-semibold text-foreground">{group.name}</h3>
+              <VariantCards
+                cards={group.cards}
+                rows={[]}
+                selection={{}}
+                selectedCardIds={selectedIds}
+                disabledCardIds={disabledCardIds}
+                onSelect={(card) => {
+                  const row = rowById.get(card.id);
+                  if (row) onToggleLine(row);
+                }}
+                noteOf={(card) => {
+                  const row = rowById.get(card.id);
+                  return row
+                    ? t('orderDetails.stock.available', { count: toStockNumber(row.available) })
+                    : null;
+                }}
+                scrollClassName={CARD_SCROLL_CLASS}
+              />
+            </div>
+          ))}
+        </div>
       )}
 
       {stockQuery.data && totalPages > 1 && (
