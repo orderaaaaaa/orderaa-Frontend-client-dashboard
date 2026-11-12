@@ -28,6 +28,7 @@ interface UseTurboChatOptions {
   enabled: boolean;
   isActive: boolean;
   canManage: boolean;
+  unreadChatCount: number;
 }
 
 export interface TurboChatView {
@@ -72,7 +73,13 @@ const coarsePointerSnapshot = (): boolean => window.matchMedia('(pointer: coarse
 export const useCoarsePointer = (): boolean =>
   useSyncExternalStore(subscribeCoarsePointer, coarsePointerSnapshot, () => false);
 
-export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurboChatOptions): TurboChatView {
+export function useTurboChat({
+  orderId,
+  enabled,
+  isActive,
+  canManage,
+  unreadChatCount,
+}: UseTurboChatOptions): TurboChatView {
   const socket = useOrderChatSocket(orderId, isActive);
   const liveState: CarrierChatConnectionState =
     socket.state === 'connected' && socket.carrierStatus === CARRIER_CHAT_SOCKET_STATE.DEGRADED
@@ -127,7 +134,7 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
   useEffect(() => {
     if (!isActive || thread === undefined || document.visibilityState !== 'visible') return;
     if (markedKeyRef.current === undefined) {
-      if (thread.firstUnreadKey === null) {
+      if (thread.firstUnreadKey === null && unreadChatCount <= 0) {
         markedKeyRef.current = newestCarrierKey;
         return;
       }
@@ -146,7 +153,7 @@ export function useTurboChat({ orderId, enabled, isActive, canManage }: UseTurbo
     }
     const timer = window.setTimeout(send, wait);
     return () => window.clearTimeout(timer);
-  }, [isActive, thread, newestCarrierKey, orderId, markSeen]);
+  }, [isActive, thread, newestCarrierKey, unreadChatCount, orderId, markSeen]);
 
   const sendText = async (text: string, retryOfLogId?: number): Promise<boolean> => {
     localIdRef.current += 1;
