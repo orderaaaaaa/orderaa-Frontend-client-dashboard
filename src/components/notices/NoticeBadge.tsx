@@ -13,11 +13,16 @@ interface NoticeBadgeProps {
   onClick(): void;
 }
 
-export function NoticeBadge({ count, onClick }: NoticeBadgeProps) {
+export function useNoticeBadgeVisible(count: number): boolean {
   const canReadNotices = useHasPermissionStrict(PERMISSION_CODES.ORDERS_NOTICES_READ);
+  return canReadNotices && count > 0;
+}
+
+export function NoticeBadge({ count, onClick }: NoticeBadgeProps) {
+  const visible = useNoticeBadgeVisible(count);
   const { t } = useI18n();
 
-  if (!canReadNotices || count <= 0) return null;
+  if (!visible) return null;
 
   return (
     <Button

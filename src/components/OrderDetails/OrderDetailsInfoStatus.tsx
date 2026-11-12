@@ -11,7 +11,10 @@ import {
   renderOrderEventNote,
 } from '@/lib/orderEventNote';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
-import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
+import {
+  CARRIER_SHIPPING_NOTE_EVENT,
+  orderEventLabelOf,
+} from '@/app/dashboard/orders/constants/orderEventLabels';
 import { RETURNED_IN_COMPANY_TEXT } from '@/app/dashboard/customers/lib/getBadgeColor';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
@@ -113,7 +116,13 @@ function EventCard({
 }
 
 const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);
-const LOGISTICS_EVENT_NAMES = new Set(['SHIPPING', 'WITH_DRIVER', 'DELIVERED', 'RETURNED_DELIVERED']);
+const LOGISTICS_EVENT_NAMES = new Set([
+  'SHIPPING',
+  'WITH_DRIVER',
+  'DELIVERED',
+  'RETURNED_DELIVERED',
+  CARRIER_SHIPPING_NOTE_EVENT,
+]);
 
 interface MappedEvent {
   id: number;

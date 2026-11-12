@@ -1,12 +1,15 @@
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { ACTION_EVENT_NAME_LABELS } from '@/constants/followupEventLabels';
 
+export const CARRIER_SHIPPING_NOTE_EVENT = 'CARRIER_SHIPPING_NOTE';
+
 export const ORDER_EVENT_LABELS = {
   SHIPPING_COMPANY_CHANGED: 'تغيير شركة الشحن',
   EXCHANGE: 'استبدال',
   PARTIAL_RETURN_SPLIT: 'تقسيم تسليم جزئي',
   PARTIAL_RETURN_SPLIT_IN_TRANSIT: 'تقسيم تسليم جزئي أثناء الشحن',
   PARTIAL_RETURN_SPLIT_UNDONE: 'تراجع عن التقسيم',
+  [CARRIER_SHIPPING_NOTE_EVENT]: 'ملاحظة شركة الشحن',
 } as const;
 
 export type OrderEventLabelKey = keyof typeof ORDER_EVENT_LABELS;

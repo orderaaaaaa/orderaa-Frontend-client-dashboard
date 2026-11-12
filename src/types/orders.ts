@@ -400,6 +400,7 @@ export interface Order {
   returnShipmentContent?: string | null;
   shippingCompanyId?: number | null;
   shippingCompanyRef?: ShippingCompanyRef | null;
+  shippingStatusLabel?: string | null;
   carrierSend?: CarrierSendBlock | null;
   shipmentContent?: string | null;
   canOpenShipment?: boolean;
