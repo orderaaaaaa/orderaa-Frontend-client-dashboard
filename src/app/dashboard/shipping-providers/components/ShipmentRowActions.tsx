@@ -58,6 +58,7 @@ import type { OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
+import CreateReturnFromOrderModal from './CreateReturnFromOrderModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
 import { UnreadNotesCountPill } from './FollowupNotesUnreadBadge';
@@ -184,6 +185,7 @@ export function ShipmentRowActions({
   const [partialRequested, setPartialRequested] = useState(false);
   const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
   const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+  const [isCreateReturnOpen, setIsCreateReturnOpen] = useState(false);
   const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
   const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
   const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -448,6 +450,17 @@ export function ShipmentRowActions({
         ]
       : []),
     {
+      id: 'createReturn',
+      labelKey: 'inProcess.sheet.createReturn' as const,
+      descriptionKey: 'inProcess.sheet.createReturnDesc' as const,
+      icon: Undo2,
+      group: 'delivery' as const,
+      opensModal: true,
+      codes: [PERMISSIONS.ORDERS_RETURNS_CREATE, PERMISSIONS.ORDERS_READ],
+      disabled: false,
+      onSelect: () => setIsCreateReturnOpen(true),
+    },
+    {
       id: 'close',
       labelKey: 'closure.close',
       descriptionKey: 'inProcess.sheet.desc.close',
@@ -693,6 +706,14 @@ export function ShipmentRowActions({
       )}
       {isExchangeOpen && (
         <ExchangeCandidatesModal isOpen onClose={() => setIsExchangeOpen(false)} orderId={orderId} />
+      )}
+      {isCreateReturnOpen && (
+        <CreateReturnFromOrderModal
+          isOpen
+          onClose={() => setIsCreateReturnOpen(false)}
+          orderId={orderId}
+          orderCode={orderCode}
+        />
       )}
       {isChangeProductsOpen && (
         <ChangeProductsModal
