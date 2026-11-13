@@ -56,7 +56,8 @@ export interface BulkRefusedOrder {
     | 'CUSTOMER_RETURN_STATUS_NOT_ALLOWED'
     | 'CUSTOMER_RETURN_CONFIRM_ONE_BY_ONE'
     | 'CUSTOMER_RETURN_FIELDS_LOCKED'
-    | 'RETURN_CHILD_FROZEN';
+    | 'RETURN_CHILD_FROZEN'
+    | 'CARRIER_STAGE_REWIND';
   message: string;
 }
 

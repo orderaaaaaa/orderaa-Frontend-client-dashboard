@@ -3,7 +3,7 @@ export interface MerchantSettingsResponse {
   canOpenShipment: boolean;
   employeeCanEditContent: boolean;
   defaultShipmentContent: string;
-  defaultReturnShippingCost: number;
+  defaultReturnShippingCost?: number;
   language: language;
   cancellationReasons: string[];
   utmSources: string[];

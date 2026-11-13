@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/ui/state-panels';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import {
   NewOrderForm,
+  NewOrderFormSkeleton,
   type ManualOrderPreset,
 } from '@/app/dashboard/upload-products/manual/NewOrderForm';
 import type { Customer as CustomerListItem } from '@/app/dashboard/customers/types/customer';
@@ -93,14 +93,6 @@ const resolveFromCustomer = async (
   return presetOf(fill.name, customer.phoneNumbers, fill.address, fill);
 };
 
-const skeleton = (
-  <div className="flex flex-col gap-4">
-    <Skeleton className="h-12 bg-muted border border-border/60" />
-    <Skeleton className="h-32 bg-muted border border-border/60" />
-    <Skeleton className="h-32 bg-muted border border-border/60" />
-  </div>
-);
-
 export default function NewOrderFromCustomerModal({
   open,
   onClose,
@@ -160,7 +152,7 @@ export default function NewOrderFromCustomerModal({
         />
       );
     }
-    return skeleton;
+    return NewOrderFormSkeleton;
   };
 
   return (

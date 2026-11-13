@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import ClientInformation from './ClientInformation';
 import Order from './Order';
 import OrderDetails from './OrderDetails';
@@ -59,13 +60,22 @@ type NewOrderFormProps = {
 const presetPhonesOf = (phones: string[] | undefined): string[] =>
   phones && phones.length > 0 ? phones.slice(0, 2) : [''];
 
-export function NewOrderForm({
+export const NewOrderFormSkeleton = (
+  <div className="flex flex-col gap-4">
+    <Skeleton className="h-12 bg-muted border border-border/60" />
+    <Skeleton className="h-32 bg-muted border border-border/60" />
+    <Skeleton className="h-32 bg-muted border border-border/60" />
+  </div>
+);
+
+function NewOrderFormContent({
   preset,
   variant = 'page',
   onCreated,
   onPendingChange,
   onDirtyChange,
-}: NewOrderFormProps) {
+  defaultReturnShippingCost,
+}: NewOrderFormProps & { defaultReturnShippingCost?: number }) {
   const queryClient = useQueryClient();
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -78,7 +88,6 @@ export function NewOrderForm({
     setValue,
     formState: { errors, isSubmitting, isDirty },
     reset,
-    resetField,
     clearErrors,
   } = useForm<ManualOrderFormData>({
     resolver: zodResolver(manualOrderSchema),
@@ -98,7 +107,8 @@ export function NewOrderForm({
         governorateOption: preset?.governorateOption ?? '',
         cityOption: preset?.cityOption ?? '',
         shippingCost: '',
-        returnShippingCost: '',
+        returnShippingCost:
+          defaultReturnShippingCost != null ? String(defaultReturnShippingCost) : '',
         shippingType: 'DELIVERY',
         returnShipmentContent: '',
       },
@@ -106,20 +116,10 @@ export function NewOrderForm({
         paymentMethod: 'CASH',
       },
       needsConfirmation: false,
-      total: '',
+      total: '0',
       packagingNotes: '',
     },
   });
-
-  const { settings } = useMerchantSettings();
-
-  useEffect(() => {
-    if (settings?.defaultReturnShippingCost != null) {
-      resetField('shipping.returnShippingCost', {
-        defaultValue: String(settings.defaultReturnShippingCost),
-      });
-    }
-  }, [settings?.defaultReturnShippingCost, resetField]);
 
   useEffect(() => {
     const clearStore = () => {
@@ -493,5 +493,16 @@ export function NewOrderForm({
         </ModalStickyFooter>
       )}
     </form>
+  );
+}
+
+export function NewOrderForm(props: NewOrderFormProps) {
+  const { settings, isLoading } = useMerchantSettings();
+  if (isLoading) return NewOrderFormSkeleton;
+  return (
+    <NewOrderFormContent
+      {...props}
+      defaultReturnShippingCost={settings?.defaultReturnShippingCost}
+    />
   );
 }
