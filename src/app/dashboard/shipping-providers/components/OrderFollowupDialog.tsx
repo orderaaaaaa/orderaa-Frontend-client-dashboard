@@ -60,7 +60,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
     orderId: target.orderId,
     enabled: showChat && visited.has(FOLLOWUP_PANELS.CHAT),
     isActive: showChat && panel === FOLLOWUP_PANELS.CHAT,
-    canManage: hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_NOTE_MANAGE),
+    canManage: hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_CHAT_SEND),
     unreadChatCount: target.unreadChatCount,
   });
   const coarsePointer = useCoarsePointer();

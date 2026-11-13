@@ -77,6 +77,7 @@ export const PERMISSION_CODES = {
   FOLLOWUP_READ: 'followup:read',
   FOLLOWUP_MANAGE: 'followup:manage',
   FOLLOWUP_CARRIERS_NOTE_MANAGE: 'followup:carriers:note:manage',
+  FOLLOWUP_CARRIERS_CHAT_SEND: 'followup:carriers:chat:send',
   FOLLOWUP_CARRIERS_CLOSE_MANAGE: 'followup:carriers:close:manage',
   FOLLOWUP_CARRIERS_REFUSE_MANAGE: 'followup:carriers:refuse:manage',
   FOLLOWUP_CARRIERS_CANCEL_MANAGE: 'followup:carriers:cancel:manage',
