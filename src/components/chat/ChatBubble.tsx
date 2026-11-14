@@ -15,7 +15,8 @@ import {
   CHAT_SEND_ERROR_LABELS,
   CHAT_STORE_ACCOUNT_LABEL,
 } from '@/app/dashboard/shipping-providers/components/followupNotesConstants';
-import { ChatAttachmentLink } from './ChatAttachmentLink';
+import { ChatAttachmentImage } from './ChatAttachmentImage';
+import { ChatAttachmentLink, isSafeHttpUrl } from './ChatAttachmentLink';
 
 interface ChatBubbleProps {
   side: 'start' | 'end';
@@ -33,7 +34,33 @@ interface ChatBubbleProps {
   children?: ReactNode;
 }
 
-const isImageType = (type: string | null): boolean => type?.startsWith('image/') ?? false;
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'avif'];
+
+const extensionOf = (value: string): string => {
+  const dot = value.lastIndexOf('.');
+  return dot === -1 ? '' : value.slice(dot + 1).toLowerCase();
+};
+
+const urlPathname = (url: string): string => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return '';
+  }
+};
+
+const isImageAttachment = (file: CarrierChatFile): boolean => {
+  const type = (file.type ?? '').toLowerCase();
+  const nameExtension = extensionOf(file.name);
+  const urlExtension = extensionOf(urlPathname(file.url));
+  if (type.includes('svg') || nameExtension === 'svg' || urlExtension === 'svg') return false;
+  return (
+    type.startsWith('image') ||
+    IMAGE_EXTENSIONS.includes(type.replace(/^\./, '')) ||
+    IMAGE_EXTENSIONS.includes(nameExtension) ||
+    IMAGE_EXTENSIONS.includes(urlExtension)
+  );
+};
 
 export function ChatCarrierAvatar() {
   return (
@@ -89,12 +116,16 @@ export function ChatBubble({
           {children}
           {file ? (
             <div className="mt-2">
-              <ChatAttachmentLink
-                url={file.url}
-                name={file.name}
-                size={file.size}
-                isImage={isImageType(file.type)}
-              />
+              {isSafeHttpUrl(file.url) && isImageAttachment(file) ? (
+                <ChatAttachmentImage url={file.url} name={file.name} size={file.size} />
+              ) : (
+                <ChatAttachmentLink
+                  url={file.url}
+                  name={file.name}
+                  size={file.size}
+                  isImage={isImageAttachment(file)}
+                />
+              )}
             </div>
           ) : attachmentName ? (
             <div className="mt-2">

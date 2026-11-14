@@ -97,6 +97,7 @@ export const CHAT_RETRY_LABEL = 'إعادة المحاولة';
 export const CHAT_RETRY_ARIA_LABEL = 'إعادة إرسال الرسالة';
 export const CHAT_RESENT_LABEL = 'أُعيد إرسالها';
 export const CHAT_LOCATION_LABEL = 'عرض الموقع';
+export const CHAT_IMAGE_ATTACHMENT_LABEL = 'صورة مرفقة';
 export const CHAT_SEND_ERROR_LABELS: Record<CarrierChatSendError, string> = {
   CARRIER_REFUSED: 'تيربو رفضت الإرسال على هذه الشحنة',
   NOT_FOUND: 'الشحنة غير موجودة لدى تيربو',

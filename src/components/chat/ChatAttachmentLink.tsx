@@ -10,12 +10,14 @@ interface ChatAttachmentLinkProps {
 
 const SAFE_LINK_PATTERN = /^https?:\/\//i;
 
-const formatSize = (bytes: number): string => `${formatNumber(Math.max(1, Math.round(bytes / 1024)))} KB`;
+export const isSafeHttpUrl = (url: string): boolean => SAFE_LINK_PATTERN.test(url);
+
+export const formatAttachmentSize = (bytes: number): string => `${formatNumber(Math.max(1, Math.round(bytes / 1024)))} KB`;
 
 export function ChatAttachmentLink({ url, name, size, isImage }: ChatAttachmentLinkProps) {
   const Icon = isImage ? ImageIcon : FileText;
 
-  if (url === null || !SAFE_LINK_PATTERN.test(url)) {
+  if (url === null || !isSafeHttpUrl(url)) {
     return (
       <span className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground">
         <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -34,7 +36,7 @@ export function ChatAttachmentLink({ url, name, size, isImage }: ChatAttachmentL
     >
       <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <span className="min-w-0 truncate">{name}</span>
-      {size !== null && <span className="shrink-0 text-muted-foreground">{formatSize(size)}</span>}
+      {size !== null && <span className="shrink-0 text-muted-foreground">{formatAttachmentSize(size)}</span>}
       <ExternalLink className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
     </a>
   );
