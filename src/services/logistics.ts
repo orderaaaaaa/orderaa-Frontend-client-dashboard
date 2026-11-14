@@ -26,8 +26,8 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import { invalidateStockViews } from '@/services/warehouses';
 import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
 import {
-  CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
+  carrierSendWarningOf,
 } from '@/utils/manualOrder/carrierSend';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
@@ -140,8 +140,9 @@ export const usePartialDelivery = () => {
       queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
       invalidateStockViews(queryClient);
       toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
-      if (carrierSendNeedsAttention(result.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      const carrierSend = result.carrierSend;
+      if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+        toast.warning(carrierSendWarningOf(carrierSend));
       }
     },
     onError: (error: unknown) => {

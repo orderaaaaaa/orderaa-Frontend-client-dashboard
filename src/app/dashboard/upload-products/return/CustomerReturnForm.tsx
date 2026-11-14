@@ -34,6 +34,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import {
   CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
+  carrierSendWarningOf,
 } from '@/utils/manualOrder/carrierSend';
 import {
   refundValueOf,
@@ -472,9 +473,10 @@ function CustomerReturnForm({
           toast.success(
             t('customerReturn.submit.success', { code: created.code }),
           );
-          if (carrierSendNeedsAttention(created.carrierSend)) {
+          const carrierSend = created.carrierSend;
+          if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
             setAttention({ orderId: created.id, code: created.code });
-            toast.warning(CARRIER_SEND_NOT_SENT_WARNING, {
+            toast.warning(carrierSendWarningOf(carrierSend), {
               className: TOAST_WARNING_CLASS,
             });
           }

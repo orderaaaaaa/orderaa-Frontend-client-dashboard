@@ -9,7 +9,7 @@ import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNeedsAttention, carrierSendWarningOf } from '@/utils/manualOrder/carrierSend';
 import {
   markFollowupCancelled,
   markFollowupClosed,
@@ -322,8 +322,9 @@ const useShipmentEditMutation = <TVariables, TResult extends CarrierSendBearingR
         [QUERY_KEYS.CARRIER_SENDS],
         ...extraQueryKeys.map((key) => [key]),
       ]);
-      if (carrierSendNeedsAttention(data.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      const carrierSend = data.carrierSend;
+      if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+        toast.warning(carrierSendWarningOf(carrierSend));
       }
       toast.success(messages.success);
     },

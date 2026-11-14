@@ -237,7 +237,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       const response = await createMutation.mutateAsync({ orderId, ...body });
       const createdText = t('exchange.create.success', { code: response.newOrderCode });
       if (carrierSendNeedsAttention(response.carrierSend)) {
-        toast.warning(carrierSendNotSentWarningAfter(createdText));
+        toast.warning(carrierSendNotSentWarningAfter(createdText, response.carrierSend?.carrierText));
       } else {
         toast.success(createdText);
       }

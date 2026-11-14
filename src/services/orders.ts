@@ -27,8 +27,8 @@ import { getProductAttributeOptions, type GetProductAttributeOptionsResponse } f
 import { productAttributeOptionsQueryOptions } from '@/services/products';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import {
-  CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
+  carrierSendWarningOf,
 } from '@/utils/manualOrder/carrierSend';
 import {
   Order,
@@ -291,8 +291,9 @@ export const useCustomerOrders = (
   });
 
 const warnIfCarrierSendNeedsAttention = (response: CarrierSendBearingResponse | null | undefined) => {
-  if (carrierSendNeedsAttention(response?.carrierSend)) {
-    toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+  const carrierSend = response?.carrierSend;
+  if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+    toast.warning(carrierSendWarningOf(carrierSend));
   }
 };
 

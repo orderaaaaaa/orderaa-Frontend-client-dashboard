@@ -20,7 +20,7 @@ import {
   buildManualOrderPayload,
   orderlessAvailabilityTargetOf,
 } from '@/utils/manualOrder/payload';
-import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNeedsAttention, carrierSendWarningOf } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { getAvailabilityRefusalMessage, isAvailabilityRefusal, refusalToastOptions } from '@/utils/apiError';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -122,8 +122,9 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       const recovered = await recover(payload);
       setPendingStoreLinkMoves(null);
       toast.success('تم إنشاء الطلب بنجاح!');
-      if (carrierSendNeedsAttention(recovered.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      const carrierSend = recovered.carrierSend;
+      if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+        toast.warning(carrierSendWarningOf(carrierSend));
       }
       router.back();
     } catch (err: any) {

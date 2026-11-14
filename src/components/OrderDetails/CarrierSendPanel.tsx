@@ -29,14 +29,14 @@ import {
 } from '@/services/orderSystemFailures';
 import type {
   CarrierSendCloseChoice,
-  CarrierSendState,
+  CarrierSendSettlement,
   CarrierSendView,
 } from '@/types/carrierSends';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
-import { CARRIER_SEND_NOT_SENT_WARNING } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 import { OrderSystemFailureItem } from './SystemFailures/OrderSystemFailureItem';
 import { narrowFailureDetails } from './SystemFailures/details/guards';
 
@@ -77,12 +77,12 @@ const oldShipmentRowsOf = (failures: OrderSystemFailure[]) => {
   return [...rows.values()];
 };
 
-const notifySettlement = (state: CarrierSendState, successText: string) => {
-  if (state === 'SENT') {
+const notifySettlement = (settlement: CarrierSendSettlement, successText: string) => {
+  if (settlement.state === 'SENT') {
     toast.success(successText);
     return;
   }
-  toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+  toast.warning(carrierSendNotSentWarningAfter('تم حفظ الطلب', settlement.carrierText));
 };
 
 function CloseCarrierSendForm({
@@ -182,7 +182,7 @@ function CarrierSendMarkerBlock({
   const handleDispatch = () =>
     dispatchMutation
       .mutateAsync({ orderId, markerId: marker.id })
-      .then(({ settlement }) => notifySettlement(settlement.state, 'تم إرسال الطلب لشركة الشحن'))
+      .then(({ settlement }) => notifySettlement(settlement, 'تم إرسال الطلب لشركة الشحن'))
       .catch((err: unknown) =>
         toast.error(getApiErrorMessage(err, 'تعذر إرسال الطلب لشركة الشحن')),
       );
@@ -190,7 +190,7 @@ function CarrierSendMarkerBlock({
   const handleSendAgain = () =>
     sendAgainMutation
       .mutateAsync({ orderId, markerId: marker.id })
-      .then(({ settlement }) => notifySettlement(settlement.state, 'تمت إعادة الإرسال'))
+      .then(({ settlement }) => notifySettlement(settlement, 'تمت إعادة الإرسال'))
       .catch((err: unknown) =>
         toast.error(getApiErrorMessage(err, 'تعذر إعادة الإرسال لشركة الشحن')),
       );

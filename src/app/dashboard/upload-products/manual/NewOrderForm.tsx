@@ -20,7 +20,7 @@ import {
   orderlessAvailabilityTargetOf,
 } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
-import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNeedsAttention, carrierSendWarningOf } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { getAvailabilityRefusalMessage, isAvailabilityRefusal, refusalToastOptions } from '@/utils/apiError';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
@@ -255,8 +255,9 @@ function NewOrderFormContent({
       toast.success(
         created.code ? `تم إنشاء الطلب ${created.code} بنجاح!` : 'تم إنشاء الطلب بنجاح!'
       );
-      if (carrierSendNeedsAttention(created.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      const carrierSend = created.carrierSend;
+      if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+        toast.warning(carrierSendWarningOf(carrierSend));
       }
       if (variant === 'page') {
         reset();

@@ -37,7 +37,7 @@ import {
   probeQuantityOf,
   type Selection,
 } from '@/components/stock/variantAvailabilityModel';
-import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNeedsAttention, carrierSendWarningOf } from '@/utils/manualOrder/carrierSend';
 
 const MAX_TOTAL_COST = 9_999_999;
 
@@ -413,8 +413,9 @@ export default function ChangeProductsModal({
     try {
       const response = await changeProductsMutation.mutateAsync({ orderId, ...body });
       toast.success('تم تغيير المنتج بنجاح');
-      if (carrierSendNeedsAttention(response.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      const carrierSend = response.carrierSend;
+      if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
+        toast.warning(carrierSendWarningOf(carrierSend));
       }
       resetForm();
       onDone?.(response);
