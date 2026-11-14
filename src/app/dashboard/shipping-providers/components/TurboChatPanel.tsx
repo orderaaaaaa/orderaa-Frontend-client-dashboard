@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { MessagesSquare } from 'lucide-react';
 import { ChatBubble, ChatCarrierAvatar } from '@/components/chat/ChatBubble';
@@ -37,6 +37,8 @@ const LOADING_BUBBLES = [0, 1, 2, 3];
 export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const contentHeightRef = useRef<number | null>(null);
   const pinnedRef = useRef(true);
   const countRef = useRef<number | null>(null);
   const [newBelow, setNewBelow] = useState(0);
@@ -48,9 +50,11 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
     if (!list || thread === undefined) return;
     const previous = countRef.current;
     countRef.current = itemCount;
+    contentHeightRef.current = contentRef.current?.offsetHeight ?? null;
     if (previous === null) {
       const divider = dividerRef.current;
       list.scrollTop = divider ? divider.offsetTop - list.clientHeight / 3 : list.scrollHeight;
+      if (divider) pinnedRef.current = list.scrollHeight - list.scrollTop - list.clientHeight < CHAT_PIN_THRESHOLD_PX;
       return;
     }
     if (itemCount <= previous) return;
@@ -60,6 +64,22 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
       setNewBelow((current) => current + itemCount - previous);
     }
   }, [itemCount, thread]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    const content = contentRef.current;
+    if (!list || !content) return;
+    const observer = new ResizeObserver(() => {
+      const height = content.offsetHeight;
+      const previous = contentHeightRef.current;
+      contentHeightRef.current = height;
+      if (previous !== null && height !== previous && pinnedRef.current) {
+        list.scrollTop = list.scrollHeight;
+      }
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [thread, chat.isLoading, chat.authFailed]);
 
   const onScroll = () => {
     const list = listRef.current;
@@ -157,9 +177,11 @@ export function TurboChatPanel({ chat, canReadIntegrations }: TurboChatPanelProp
           role="log"
           aria-live="polite"
           aria-label={CHAT_LOG_LABEL}
-          className="relative min-h-0 flex-1 overflow-y-auto pe-1"
+          className="relative min-h-0 flex-1 overflow-y-auto pe-1 [overflow-anchor:none]"
         >
-          {empty ? <EmptyState icon={<MessagesSquare className="size-5" />} title={CHAT_EMPTY_LABEL} description={CHAT_EMPTY_HINT} /> : rows}
+          <div ref={contentRef}>
+            {empty ? <EmptyState icon={<MessagesSquare className="size-5" />} title={CHAT_EMPTY_LABEL} description={CHAT_EMPTY_HINT} /> : rows}
+          </div>
         </div>
         {newBelow > 0 && (
           <button
