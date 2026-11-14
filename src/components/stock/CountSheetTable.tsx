@@ -159,6 +159,7 @@ export function CountSheetTable({
           ref={(node) => registerInput(line.variantId, node)}
           type="number"
           inputMode="numeric"
+          enterKeyHint="next"
           dir="ltr"
           value={raw}
           aria-label={`العدد الفعلي ${line.productName}`}

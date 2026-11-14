@@ -4,13 +4,15 @@ import BaseModal from '@/components/ui/base-modal';
 import { formatStockNumber } from '@/utils/format';
 
 interface StocktakeRemoveCountedModalProps {
-  count: number;
+  total: number;
+  counted: number;
   onClose: () => void;
   onConfirm: () => void;
 }
 
 export function StocktakeRemoveCountedModal({
-  count,
+  total,
+  counted,
   onClose,
   onConfirm,
 }: StocktakeRemoveCountedModalProps) {
@@ -25,7 +27,7 @@ export function StocktakeRemoveCountedModal({
       maxWidth="md:max-w-[440px]"
     >
       <p className="text-sm text-muted-foreground">
-        {`سيتم حذف ${formatStockNumber(count)} منتج من الجرد مع أعدادها المسجلة.`}
+        {`سيتم حذف ${formatStockNumber(total)} منتج من الجرد، منها ${formatStockNumber(counted)} معدود مع أعدادها المسجلة.`}
       </p>
     </BaseModal>
   );

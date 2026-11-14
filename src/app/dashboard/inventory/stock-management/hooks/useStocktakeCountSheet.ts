@@ -158,8 +158,12 @@ export function useStocktakeCountSheet(stocktakeId: number) {
   }, [saveDrafts]);
 
   useEffect(() => {
-    const onBeforeUnload = () => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      const hasDrafts = Object.keys(draftsRef.current).length > 0;
       void flushDrafts();
+      if (!hasDrafts) return;
+      event.preventDefault();
+      event.returnValue = '';
     };
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);

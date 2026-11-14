@@ -63,9 +63,18 @@ export function StocktakeSessionContent({ stocktakeId }: StocktakeSessionContent
   );
 
   useEffect(() => {
-    if (!summary || !isEditable || stepParam !== null || defaultAppliedRef.current) return;
+    if (stepParam !== null) {
+      defaultAppliedRef.current = false;
+      return;
+    }
+    if (!summary || !isEditable || defaultAppliedRef.current) return;
     defaultAppliedRef.current = true;
     router.replace(stepHref(defaultStocktakeStep(summary)));
+  }, [summary, isEditable, stepParam, router, stepHref]);
+
+  useEffect(() => {
+    if (!summary || !isEditable || stepParam !== 'count' || summary.lineCount > 0) return;
+    router.replace(stepHref('items'));
   }, [summary, isEditable, stepParam, router, stepHref]);
 
   if (!canRead) {

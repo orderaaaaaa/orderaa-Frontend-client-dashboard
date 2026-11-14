@@ -97,8 +97,9 @@ export function StocktakeItemsStep({ stocktakeId, summary, onNext }: StocktakeIt
     setOverlay((current) => withOverlay(current, ids, selected));
     const request = selected ? add(ids) : remove(ids, discardCounted);
     request
-      .catch((err: unknown) => {
+      .catch(async (err: unknown) => {
         if (!selected && getStocktakeErrorCode(err) === 'STOCKTAKE_REMOVE_COUNTED') {
+          await selectionQuery.refetch();
           setPendingRemoval(ids);
           return;
         }
@@ -233,7 +234,7 @@ export function StocktakeItemsStep({ stocktakeId, summary, onNext }: StocktakeIt
       </div>
 
       <SlideUpFooter
-        visible={lineCount > 0}
+        visible={lineCount > 0 || selectedIds.size > 0}
         status={saving ? 'جارٍ الحفظ...' : `تم اختيار ${formatStockNumber(lineCount)} منتج`}
       >
         <Button onClick={onNext} disabled={saving}>
@@ -243,7 +244,8 @@ export function StocktakeItemsStep({ stocktakeId, summary, onNext }: StocktakeIt
 
       {pendingRemoval && (
         <StocktakeRemoveCountedModal
-          count={pendingRemoval.length}
+          total={pendingRemoval.length}
+          counted={pendingRemoval.filter((id) => countedIds.has(id)).length}
           onClose={() => setPendingRemoval(null)}
           onConfirm={confirmDiscard}
         />
