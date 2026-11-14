@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef, type KeyboardEvent } from 'react';
+import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import CopyableCode from '@/components/ui/copyable-code';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
 import type { VariantDisplayItem } from '@/lib/variantOptionLabel';
 import { isFiniteNumber } from '@/utils/format';
@@ -39,6 +40,22 @@ const deltaOf = (line: CountSheetLine, raw: string): number | null => {
 
 const HEADER_CELL_CLASS = 'px-3 py-2.5 text-start text-xs font-semibold text-muted-foreground';
 const BODY_CELL_CLASS = 'px-3 py-2.5 align-middle';
+const MOBILE_BREAKPOINT = 768;
+
+const quantityNodeOf = (quantity: number | null) =>
+  quantity === null ? (
+    <span className="text-muted-foreground">—</span>
+  ) : (
+    <StockQuantityCell quantity={quantity} tone="muted" />
+  );
+
+const skuNodeOf = (sku: string | null) => (
+  <CopyableCode value={sku} label="نسخ كود المنتج">
+    <span dir="ltr" className="font-mono text-xs text-muted-foreground">
+      {sku ?? '—'}
+    </span>
+  </CopyableCode>
+);
 
 interface CountSheetTableProps {
   lines: CountSheetLine[];
@@ -52,6 +69,7 @@ interface CountSheetTableProps {
   flaggedVariantIds?: number[];
   uncountedLabel?: string;
   varianceUnavailable?: boolean;
+  mobileCards?: boolean;
 }
 
 export function CountSheetTable({
@@ -66,8 +84,11 @@ export function CountSheetTable({
   flaggedVariantIds = [],
   uncountedLabel,
   varianceUnavailable = false,
+  mobileCards = false,
 }: CountSheetTableProps) {
   const inputs = useRef(new Map<number, HTMLInputElement>());
+  const isMobile = useIsMobile(MOBILE_BREAKPOINT);
+  const showCards = mobileCards && isMobile;
   const showExpected = lines.some((line) => line.expected !== null);
 
   const registerInput = (variantId: number, node: HTMLInputElement | null) => {
@@ -110,6 +131,138 @@ export function CountSheetTable({
     }
   };
 
+  const stateOf = (line: CountSheetLine) => {
+    const raw = valueOf(line);
+    const invalid = isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
+    const flagged = flaggedVariantIds.includes(line.variantId);
+    const uncounted = line.uncounted ?? isBlankCount(raw);
+    const showUncountedLabel =
+      Boolean(uncountedLabel) && uncounted && (readOnly || isBlankCount(raw));
+    const varianceDelta = !readOnly
+      ? deltaOf(line, raw)
+      : isFiniteNumber(line.postedDelta) || !uncountedLabel
+        ? (line.postedDelta ?? null)
+        : deltaOf(line, raw);
+    return { raw, invalid, flagged, uncounted, showUncountedLabel, varianceDelta };
+  };
+
+  const countNodeOf = (
+    line: CountSheetLine,
+    index: number,
+    raw: string,
+    invalid: boolean,
+    uncounted: boolean
+  ): ReactNode => {
+    if (!readOnly) {
+      return (
+        <input
+          ref={(node) => registerInput(line.variantId, node)}
+          type="number"
+          inputMode="numeric"
+          dir="ltr"
+          value={raw}
+          aria-label={`العدد الفعلي ${line.productName}`}
+          aria-invalid={invalid || undefined}
+          onChange={(event) => onCountedChange(line.variantId, event.target.value)}
+          onBlur={() => onCountBlur?.(line.variantId)}
+          onKeyDown={(event) => onInputKeyDown(event, index, line)}
+          className={cn(
+            'h-10 w-28 rounded-lg border bg-card px-3 text-center text-base font-semibold tabular-nums text-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+            invalid ? 'border-destructive' : 'border-input'
+          )}
+        />
+      );
+    }
+    return uncounted && uncountedLabel ? (
+      <span className="text-gray-400">{uncountedLabel}</span>
+    ) : (
+      <span
+        dir="ltr"
+        className={cn(
+          'font-semibold tabular-nums',
+          isBlankCount(raw) ? 'text-muted-foreground' : 'text-foreground'
+        )}
+      >
+        {isBlankCount(raw) ? '—' : raw}
+      </span>
+    );
+  };
+
+  const varianceNodeOf = (varianceDelta: number | null, showUncountedLabel: boolean): ReactNode =>
+    varianceUnavailable ? (
+      <span className="text-gray-400">—</span>
+    ) : showUncountedLabel ? (
+      <span className="text-gray-400">{uncountedLabel}</span>
+    ) : (
+      <VarianceChip delta={varianceDelta} />
+    );
+
+  const flaggedNodeOf = (flagged: boolean) =>
+    flagged && (
+      <p className="mt-1 text-xs font-medium text-destructive">
+        تعذر ترحيل هذا السطر: الرصيد لا يكفي
+      </p>
+    );
+
+  if (showCards) {
+    return (
+      <div className="flex flex-col gap-3" onKeyDown={onContainerKeyDown}>
+        {lines.map((line, index) => {
+          const { raw, invalid, flagged, uncounted, showUncountedLabel, varianceDelta } =
+            stateOf(line);
+          return (
+            <div
+              key={line.variantId}
+              className={cn(
+                'flex flex-col gap-3 rounded-xl border border-border bg-card p-4',
+                flagged && 'bg-destructive/5'
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <VariantLabel
+                  productName={line.productName}
+                  sku={line.sku}
+                  options={line.options}
+                  optionsLabel={line.optionsLabel}
+                  size="sm"
+                />
+                <div className="shrink-0 text-sm">
+                  {varianceNodeOf(varianceDelta, showUncountedLabel)}
+                </div>
+              </div>
+              {flaggedNodeOf(flagged)}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-xs text-muted-foreground">SKU</span>
+                {skuNodeOf(line.sku)}
+              </div>
+              <div
+                className={cn(
+                  'grid gap-3 text-sm',
+                  showExpected ? 'grid-cols-2' : 'grid-cols-1'
+                )}
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">الكمية بالنظام</span>
+                  {quantityNodeOf(line.live)}
+                </div>
+                {showExpected && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-muted-foreground">المتوقع عند البدء</span>
+                    {quantityNodeOf(line.expected)}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+                <span className="text-sm font-medium text-foreground">العدد الفعلي</span>
+                {countNodeOf(line, index, raw, invalid, uncounted)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div
       className="overflow-x-auto rounded-xl border border-border bg-card"
@@ -142,18 +295,8 @@ export function CountSheetTable({
         </thead>
         <tbody>
           {lines.map((line, index) => {
-            const raw = valueOf(line);
-            const invalid =
-              isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
-            const flagged = flaggedVariantIds.includes(line.variantId);
-            const uncounted = line.uncounted ?? isBlankCount(raw);
-            const showUncountedLabel =
-              Boolean(uncountedLabel) && uncounted && (readOnly || isBlankCount(raw));
-            const varianceDelta = !readOnly
-              ? deltaOf(line, raw)
-              : isFiniteNumber(line.postedDelta) || !uncountedLabel
-                ? (line.postedDelta ?? null)
-                : deltaOf(line, raw);
+            const { raw, invalid, flagged, uncounted, showUncountedLabel, varianceDelta } =
+              stateOf(line);
             return (
               <tr
                 key={line.variantId}
@@ -170,81 +313,18 @@ export function CountSheetTable({
                     optionsLabel={line.optionsLabel}
                     size="sm"
                   />
-                  {flagged && (
-                    <p className="mt-1 text-xs font-medium text-destructive">
-                      تعذر ترحيل هذا السطر: الرصيد لا يكفي
-                    </p>
-                  )}
+                  {flaggedNodeOf(flagged)}
                 </td>
-                <td className={BODY_CELL_CLASS}>
-                  <CopyableCode value={line.sku} label="نسخ كود المنتج">
-                    <span dir="ltr" className="font-mono text-xs text-muted-foreground">
-                      {line.sku ?? '—'}
-                    </span>
-                  </CopyableCode>
-                </td>
-                <td className={BODY_CELL_CLASS}>
-                  {line.live === null ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <StockQuantityCell quantity={line.live} tone="muted" />
-                  )}
-                </td>
+                <td className={BODY_CELL_CLASS}>{skuNodeOf(line.sku)}</td>
+                <td className={BODY_CELL_CLASS}>{quantityNodeOf(line.live)}</td>
                 {showExpected && (
-                  <td className={BODY_CELL_CLASS}>
-                    {line.expected === null ? (
-                      <span className="text-muted-foreground">—</span>
-                    ) : (
-                      <StockQuantityCell quantity={line.expected} tone="muted" />
-                    )}
-                  </td>
+                  <td className={BODY_CELL_CLASS}>{quantityNodeOf(line.expected)}</td>
                 )}
                 <td className={BODY_CELL_CLASS}>
-                  {readOnly ? (
-                    uncounted && uncountedLabel ? (
-                      <span className="text-gray-400">{uncountedLabel}</span>
-                    ) : (
-                      <span
-                        dir="ltr"
-                        className={cn(
-                          'font-semibold tabular-nums',
-                          isBlankCount(raw)
-                            ? 'text-muted-foreground'
-                            : 'text-foreground'
-                        )}
-                      >
-                        {isBlankCount(raw) ? '—' : raw}
-                      </span>
-                    )
-                  ) : (
-                    <input
-                      ref={(node) => registerInput(line.variantId, node)}
-                      type="number"
-                      inputMode="numeric"
-                      dir="ltr"
-                      value={raw}
-                      aria-label={`العدد الفعلي ${line.productName}`}
-                      aria-invalid={invalid || undefined}
-                      onChange={(event) =>
-                        onCountedChange(line.variantId, event.target.value)
-                      }
-                      onBlur={() => onCountBlur?.(line.variantId)}
-                      onKeyDown={(event) => onInputKeyDown(event, index, line)}
-                      className={cn(
-                        'h-10 w-28 rounded-lg border bg-card px-3 text-center text-base font-semibold tabular-nums text-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-                        invalid ? 'border-destructive' : 'border-input'
-                      )}
-                    />
-                  )}
+                  {countNodeOf(line, index, raw, invalid, uncounted)}
                 </td>
                 <td className={BODY_CELL_CLASS}>
-                  {varianceUnavailable ? (
-                    <span className="text-gray-400">—</span>
-                  ) : showUncountedLabel ? (
-                    <span className="text-gray-400">{uncountedLabel}</span>
-                  ) : (
-                    <VarianceChip delta={varianceDelta} />
-                  )}
+                  {varianceNodeOf(varianceDelta, showUncountedLabel)}
                 </td>
               </tr>
             );
