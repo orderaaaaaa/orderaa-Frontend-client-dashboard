@@ -118,6 +118,7 @@ function OrderDetailsInfoComponent({
     'addColorProduct',
     'rejectModification',
     'waitingPayment',
+    'shippingMove',
     'whatsapp',
     'shipping',
     'packagingNotes',
@@ -301,6 +302,9 @@ function OrderDetailsInfoComponent({
         break;
       case 'waiting_payment':
         modals.waitingPayment.open();
+        break;
+      case 'shipping_move':
+        modals.shippingMove.open();
         break;
       case 'whatsapp':
         modals.whatsapp.open();
@@ -512,6 +516,7 @@ function OrderDetailsInfoComponent({
         modals={modals}
         order={order}
         actions={actions}
+        shippingMoveTargets={availability.shippingMoveTargets}
         confirmationDialog={confirmationDialog}
         onCloseConfirmation={() =>
           setConfirmationDialog({

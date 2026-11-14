@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DerivedOrderKind, Order } from '@/types/orders';
+import { DerivedOrderKind, Order, OrderStatus } from '@/types/orders';
 import { ModalStates } from '@/hooks/OrderDetails/useModalState';
 import { OrderActionsState } from '@/hooks/OrderDetails/useOrderActions';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
@@ -16,6 +16,7 @@ import {
   RejectModificationModal,
   WhatsappModal,
   WaitingPaymentModal,
+  ShippingMoveModal,
   ExchangeModal,
   ReturnRefundModal,
   PostShippingCancelModal,
@@ -27,6 +28,7 @@ export interface OrderActionModalsProps {
   modals: ModalStates;
   order: Order;
   actions: OrderActionsState;
+  shippingMoveTargets: OrderStatus[];
   confirmationDialog: {
     isOpen: boolean;
     title: string;
@@ -42,6 +44,7 @@ export function OrderActionModals({
   modals,
   order,
   actions,
+  shippingMoveTargets,
   confirmationDialog,
   onCloseConfirmation,
   onConfirmAction,
@@ -115,6 +118,13 @@ export function OrderActionModals({
     const success = await actions.handleWaitingPayment(note);
     if (success) {
       modals.waitingPayment.close();
+    }
+  };
+
+  const handleShippingMoveConfirm = async (status: OrderStatus, note?: string) => {
+    const success = await actions.handleShippingMove(status, note);
+    if (success) {
+      modals.shippingMove.close();
     }
   };
 
@@ -231,6 +241,14 @@ export function OrderActionModals({
         isOpen={modals.waitingPayment.isOpen}
         onClose={modals.waitingPayment.close}
         onConfirm={handleWaitingPaymentConfirm}
+      />
+
+      <ShippingMoveModal
+        isOpen={modals.shippingMove.isOpen}
+        onClose={modals.shippingMove.close}
+        targets={shippingMoveTargets}
+        loading={actions.isTransitioning}
+        onConfirm={handleShippingMoveConfirm}
       />
 
       <WhatsappModal

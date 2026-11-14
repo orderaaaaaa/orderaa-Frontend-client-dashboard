@@ -3,7 +3,7 @@ import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUti
 import { toast } from 'react-toastify';
 import { getApiErrorMessage, getOutOfStockBlock, refusalToastOptions } from '@/utils/apiError';
 import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
-import { DerivedOrderKind, FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
+import { DerivedOrderKind, FilterOrdersDto, Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { sameAreaText, ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { SHIPPING_COMPANY_REQUIRED_MESSAGE } from '@/types/shippingCompanies';
@@ -87,6 +87,7 @@ export interface OrderActionsState {
   handleRejectModification: (notes: string) => Promise<boolean>;
   handleWaitingPayment: (note?: string) => Promise<boolean>;
   handleWhatsapp: (note?: string) => Promise<boolean>;
+  handleShippingMove: (status: OrderStatus, note?: string) => Promise<boolean>;
   handleConfirmAction: (action: string) => Promise<boolean>;
   handleFollowUpAction: (label: string) => Promise<boolean>;
   handleUpdateShipping: (data: ShippingData) => Promise<void>;
@@ -441,6 +442,30 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
+  const handleShippingMove = useCallback(
+    async (status: OrderStatus, note?: string): Promise<boolean> =>
+      runTransition(async () => {
+        try {
+          await updateOrderMutation.mutateAsync({
+            orderId: order.id,
+            data: { status, eventNote: note },
+          });
+        } catch (error: unknown) {
+          const outOfStock = getOutOfStockBlock(error);
+          const toastMessage =
+            outOfStock?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE
+              ? outOfStock.message.split('\n')[0].replace(/:$/, '')
+              : (outOfStock?.message ?? getApiErrorMessage(error, UPDATE_FAILED_MESSAGE));
+          toast.error(toastMessage, refusalToastOptions(error));
+          return false;
+        }
+
+        toast.success('تم تحديث حالة الشحن');
+        return true;
+      }),
+    [order.id, updateOrderMutation, runTransition]
+  );
+
   const handleConfirmAction = useCallback(
     async (action: string) => {
       const status = getStatusFromAction(action);
@@ -576,6 +601,7 @@ export function useOrderActions({
     handleRejectModification,
     handleWaitingPayment,
     handleWhatsapp,
+    handleShippingMove,
     handleConfirmAction,
     handleFollowUpAction,
     handleUpdateShipping,

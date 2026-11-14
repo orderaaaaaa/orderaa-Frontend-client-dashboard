@@ -10,6 +10,7 @@ export type OrderMenuAction =
   | 'partial_delivery'
   | 'undo_partial_delivery'
   | 'waiting_payment'
+  | 'shipping_move'
   | 'return_refund';
 
 export interface OrderMenuItemsInput {
@@ -32,6 +33,7 @@ export function orderMenuItemsOf({
   if (partialVisible) items.push('partial_delivery');
   if (undoVisible) items.push('undo_partial_delivery');
   if (availability.waitingPayment) items.push('waiting_payment');
+  if (availability.shippingMove) items.push('shipping_move');
   if (availability.returnRefund) items.push('return_refund');
   return items;
 }

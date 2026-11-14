@@ -12,6 +12,7 @@ export type ModalName =
   | 'addColorProduct'
   | 'rejectModification'
   | 'waitingPayment'
+  | 'shippingMove'
   | 'whatsapp'
   | 'shipping'
   | 'packagingNotes'

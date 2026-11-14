@@ -13,6 +13,7 @@ import {
   LiaRedoAltSolid,
   LiaClockSolid,
   LiaBoxOpenSolid,
+  LiaTruckSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -35,6 +36,7 @@ const arrowOptions: ActionOption[] = [
   { label: 'تسليم جزئي', action: 'partial_delivery', icon: <LiaBoxOpenSolid className="w-5 h-5" /> },
   { label: 'وقف التشغيل', action: 'stop_operation', icon: <LiaStopCircleSolid className="w-5 h-5" /> },
   { label: 'في انتظار الدفع', action: 'waiting_payment', icon: <LiaLockSolid className="w-5 h-5" /> },
+  { label: 'تحديث حالة الشحن', action: 'shipping_move', icon: <LiaTruckSolid className="w-5 h-5" /> },
 ];
 
 const postShippingOptions: ActionOption[] = [
