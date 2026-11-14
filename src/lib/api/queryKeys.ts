@@ -69,6 +69,7 @@ export const QUERY_KEYS = {
   STOCKTAKES: 'stocktakes',
   STOCKTAKE_DETAIL: 'stocktake-detail',
   STOCKTAKE_LINES: 'stocktake-lines',
+  STOCKTAKE_SELECTION: 'stocktake-selection',
   STOCKTAKE_TYPES: 'stocktake-types',
   ORDER_STOCK_AVAILABILITY: 'order-stock-availability',
   ORDER_STOCK_DRIFT: 'order-stock-drift',

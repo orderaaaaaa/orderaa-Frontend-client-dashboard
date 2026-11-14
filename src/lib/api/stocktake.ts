@@ -1,13 +1,16 @@
 import api from './index';
 import type {
+  AddStocktakeLinesDto,
   CreateStocktakeDto,
   ListStocktakesQueryDto,
   PostStocktakeDto,
   PostStocktakeResultDto,
+  RemoveStocktakeLinesDto,
   StocktakeLineDto,
   StocktakeLinesPageDto,
   StocktakeLinesQueryDto,
   StocktakeListDto,
+  StocktakeSelectionDto,
   StocktakeSummaryDto,
   StocktakeTypeOptionDto,
   UpdateStocktakeLinesDto,
@@ -72,6 +75,29 @@ export async function updateStocktakeLines(
   body: UpdateStocktakeLinesDto
 ): Promise<StocktakeSummaryDto> {
   const response = await api.patch(`${STOCKTAKES_PATH}/${id}/lines`, body);
+  return response.data as StocktakeSummaryDto;
+}
+
+export async function getStocktakeSelection(
+  id: number
+): Promise<StocktakeSelectionDto> {
+  const response = await api.get(`${STOCKTAKES_PATH}/${id}/selection`);
+  return response.data as StocktakeSelectionDto;
+}
+
+export async function addStocktakeLines(
+  id: number,
+  body: AddStocktakeLinesDto
+): Promise<StocktakeSummaryDto> {
+  const response = await api.post(`${STOCKTAKES_PATH}/${id}/lines`, body);
+  return response.data as StocktakeSummaryDto;
+}
+
+export async function removeStocktakeLines(
+  id: number,
+  body: RemoveStocktakeLinesDto
+): Promise<StocktakeSummaryDto> {
+  const response = await api.post(`${STOCKTAKES_PATH}/${id}/lines/remove`, body);
   return response.data as StocktakeSummaryDto;
 }
 

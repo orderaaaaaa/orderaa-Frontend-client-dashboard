@@ -91,6 +91,20 @@ export type PostStocktakeDto = {
   note?: string | null;
 };
 
+export type AddStocktakeLinesDto = {
+  variantIds: number[];
+};
+
+export type RemoveStocktakeLinesDto = {
+  variantIds: number[];
+  discardCounted?: boolean;
+};
+
+export type StocktakeSelectionDto = {
+  variantIds: number[];
+  countedVariantIds: number[];
+};
+
 export type ListStocktakesQueryDto = {
   type?: StocktakeType;
   warehouseId?: number;

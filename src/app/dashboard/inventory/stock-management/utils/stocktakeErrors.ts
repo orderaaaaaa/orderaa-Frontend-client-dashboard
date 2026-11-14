@@ -14,6 +14,8 @@ export const STOCKTAKE_ERROR_MESSAGES: Record<string, string> = {
   WAREHOUSE_NOT_FOUND: 'المخزن غير موجود',
   WAREHOUSE_INACTIVE: 'المخزن غير مفعّل، لا يمكن بدء جرد فيه',
   DUPLICATE_VARIANTS_IN_BATCH: 'تكرر المتغير نفسه في الحفظ، أعد المحاولة',
+  STOCKTAKE_VARIANT_NOT_ADDABLE: 'بعض المنتجات المختارة لا يمكن إضافتها إلى هذا الجرد',
+  STOCKTAKE_REMOVE_COUNTED: 'بعض المنتجات المحددة معدودة بالفعل، أكد حذف أعدادها',
   ADJUSTMENT_BELOW_ZERO:
     'تعذر الترحيل لأن الرصيد الحالي لا يكفي لأحد الفروقات السالبة، ولم يتم ترحيل أي سطر',
 };

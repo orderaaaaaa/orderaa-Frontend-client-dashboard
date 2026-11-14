@@ -3,30 +3,43 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type QueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
+  addStocktakeLines,
   cancelStocktake,
   getAllChangedStocktakeLines,
   getStocktake,
   getStocktakeLines,
   getStocktakes,
+  getStocktakeSelection,
   getStocktakeTypes,
   postStocktake,
+  removeStocktakeLines,
   startStocktake,
   updateStocktakeLines,
 } from '@/lib/api/stocktake';
 import { STOCK_VIEW_KEYS } from '@/services/warehouses';
 import type {
+  AddStocktakeLinesDto,
   CreateStocktakeDto,
   ListStocktakesQueryDto,
   PostStocktakeDto,
+  RemoveStocktakeLinesDto,
   StocktakeLinesQueryDto,
   UpdateStocktakeLinesDto,
 } from '@/app/dashboard/inventory/stock-management/types/stocktake';
 
 const STALE_TIME = 30 * 1000;
+
+const invalidateSessionViews = (queryClient: QueryClient, id: number) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_DETAIL, id] }),
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_LINES, id] }),
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_SELECTION, id] }),
+  ]);
 
 export const useStocktakesQuery = (
   params: ListStocktakesQueryDto,
@@ -69,6 +82,14 @@ export const useStocktakeLinesQuery = (
     staleTime: STALE_TIME,
   });
 
+export const useStocktakeSelectionQuery = (id: number | null, enabled = true) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.STOCKTAKE_SELECTION, id] as QueryKey,
+    queryFn: () => getStocktakeSelection(id as number),
+    enabled: enabled && id !== null,
+    staleTime: STALE_TIME,
+  });
+
 const useInvalidateStocktakeViews = () => {
   const queryClient = useQueryClient();
   return useCallback(
@@ -84,9 +105,30 @@ const useInvalidateStocktakeViews = () => {
           ? [QUERY_KEYS.STOCKTAKE_LINES]
           : [QUERY_KEYS.STOCKTAKE_LINES, id],
       });
+      queryClient.invalidateQueries({
+        queryKey: id === undefined
+          ? [QUERY_KEYS.STOCKTAKE_SELECTION]
+          : [QUERY_KEYS.STOCKTAKE_SELECTION, id],
+      });
     },
     [queryClient]
   );
+};
+
+export const useAddStocktakeLinesMutation = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddStocktakeLinesDto) => addStocktakeLines(id, body),
+    onSuccess: () => invalidateSessionViews(queryClient, id),
+  });
+};
+
+export const useRemoveStocktakeLinesMutation = (id: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: RemoveStocktakeLinesDto) => removeStocktakeLines(id, body),
+    onSuccess: () => invalidateSessionViews(queryClient, id),
+  });
 };
 
 export const useStartStocktakeMutation = () => {
