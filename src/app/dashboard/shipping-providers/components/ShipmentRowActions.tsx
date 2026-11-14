@@ -54,7 +54,7 @@ import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { orderDetailsQueryOptions, useUpdateOrder } from '@/services/orders';
 import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
-import { getApiErrorMessage, refusalToastOptions } from '@/utils/apiError';
+import { getApiErrorMessage, refusalToastOptions, statusUpdateErrorToastOf } from '@/utils/apiError';
 import { PARTIAL_DELIVERY_CODES, undoPartialDeliveryActionOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { DerivedOrderKind, type OrderStatus } from '@/types/orders';
@@ -599,7 +599,7 @@ export function ShipmentRowActions({
     try {
       await updateOrderMutation.mutateAsync({ orderId, data: { status, eventNote: note } });
     } catch (error: unknown) {
-      toast.error(getApiErrorMessage(error, 'تعذر تحديث حالة الشحن'), refusalToastOptions(error));
+      toast.error(statusUpdateErrorToastOf(error, 'تعذر تحديث حالة الشحن'), refusalToastOptions(error));
       return false;
     }
     toast.success('تم تحديث حالة الشحن');

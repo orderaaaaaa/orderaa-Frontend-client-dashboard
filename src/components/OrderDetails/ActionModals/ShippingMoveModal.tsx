@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { OrderStatus } from '@/types/orders';
@@ -24,6 +24,7 @@ export default function ShippingMoveModal({
   const { getStatusLabel } = useStatusLabel();
   const [chosen, setChosen] = useState<OrderStatus | null>(null);
   const [note, setNote] = useState('');
+  const noteId = useId();
 
   const selected =
     chosen !== null && targets.includes(chosen)
@@ -57,21 +58,24 @@ export default function ShippingMoveModal({
       isLoading={loading}
     >
       <div className="space-y-4">
-        <div className="flex flex-col gap-2">
-          {targets.map((target) => (
-            <label key={target} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="shippingMoveTarget"
-                value={target}
-                checked={selected === target}
-                onChange={() => setChosen(target)}
-                className="w-5 h-5 accent-primary"
-              />
-              <span className="text-foreground font-medium">{getStatusLabel(target)}</span>
-            </label>
-          ))}
-        </div>
+        <fieldset className="space-y-2 border-0 p-0 m-0 min-w-0">
+          <legend className="font-bold text-foreground">الحالة الجديدة</legend>
+          <div className="flex flex-col gap-2">
+            {targets.map((target) => (
+              <label key={target} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="shippingMoveTarget"
+                  value={target}
+                  checked={selected === target}
+                  onChange={() => setChosen(target)}
+                  className="w-5 h-5 accent-primary"
+                />
+                <span className="text-foreground font-medium">{getStatusLabel(target)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         <div className="flex items-center gap-2 text-muted-foreground">
           <LiaInfoCircleSolid className="w-5 h-5" />
@@ -79,12 +83,13 @@ export default function ShippingMoveModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-foreground flex items-center gap-2">
+          <label htmlFor={noteId} className="font-bold text-foreground flex items-center gap-2">
             <LiaCommentDotsSolid className="w-5 h-5" />
             ملاحظة
             <span className="text-gray-400 text-sm font-normal">(اختياري)</span>
           </label>
           <textarea
+            id={noteId}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={2000}

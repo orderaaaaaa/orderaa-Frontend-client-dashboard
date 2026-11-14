@@ -446,6 +446,14 @@ export function getAvailabilityRefusalMessage(err: unknown, fallback: string): s
   return getApiErrorMessage(err, fallback);
 }
 
+export function statusUpdateErrorToastOf(err: unknown, fallback: string): string {
+  const outOfStock = getOutOfStockBlock(err);
+  if (outOfStock?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE) {
+    return outOfStock.message.split('\n')[0].replace(/:$/, '');
+  }
+  return outOfStock?.message ?? getApiErrorMessage(err, fallback);
+}
+
 function isOrderLineEditConflictBody(
   data: unknown
 ): data is OrderLineEditConflictBody {

@@ -423,6 +423,7 @@ export function ReturnedRowActions({
         unreadNoteCount={row.unreadNoteCount}
         unreadChatCount={row.unreadChatCount}
         shippingCode={row.shippingCode}
+        derivedKind={row.derivedKind}
         onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />
     </div>
@@ -448,6 +449,7 @@ export function DeliveredRowActions({
         unreadNoteCount={row.unreadNoteCount}
         unreadChatCount={row.unreadChatCount}
         shippingCode={row.shippingCode}
+        derivedKind={row.derivedKind}
         hideFinalActions
         onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
       />

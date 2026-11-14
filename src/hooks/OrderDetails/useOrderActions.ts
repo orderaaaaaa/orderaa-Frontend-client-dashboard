@@ -1,8 +1,12 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
-import { getApiErrorMessage, getOutOfStockBlock, refusalToastOptions } from '@/utils/apiError';
-import { AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE } from '@/lib/api/stockShortage';
+import {
+  getApiErrorMessage,
+  getOutOfStockBlock,
+  refusalToastOptions,
+  statusUpdateErrorToastOf,
+} from '@/utils/apiError';
 import { DerivedOrderKind, FilterOrdersDto, Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { sameAreaText, ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
@@ -250,11 +254,10 @@ export function useOrderActions({
           outOfStock?.message ??
           getApiErrorMessage(error, UPDATE_FAILED_MESSAGE);
         if (!options.skipToast) {
-          const toastMessage =
-            outOfStock?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE
-              ? outOfStock.message.split('\n')[0].replace(/:$/, '')
-              : apiErrorMessage;
-          toast.error(toastMessage, refusalToastOptions(error));
+          toast.error(
+            statusUpdateErrorToastOf(error, UPDATE_FAILED_MESSAGE),
+            refusalToastOptions(error)
+          );
         }
         endTransition();
         throw new Error(apiErrorMessage);
@@ -451,12 +454,10 @@ export function useOrderActions({
             data: { status, eventNote: note },
           });
         } catch (error: unknown) {
-          const outOfStock = getOutOfStockBlock(error);
-          const toastMessage =
-            outOfStock?.code === AVAILABLE_STOCK_WOULD_GO_NEGATIVE_CODE
-              ? outOfStock.message.split('\n')[0].replace(/:$/, '')
-              : (outOfStock?.message ?? getApiErrorMessage(error, UPDATE_FAILED_MESSAGE));
-          toast.error(toastMessage, refusalToastOptions(error));
+          toast.error(
+            statusUpdateErrorToastOf(error, UPDATE_FAILED_MESSAGE),
+            refusalToastOptions(error)
+          );
           return false;
         }
 
