@@ -101,7 +101,10 @@ export function ShippingOrdersContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
+  } = usePrintOrdersFilters('orderFilters', {
+    ignoreDateRange: true,
+    forceDefaultStatus: true,
+  });
 
   const apiFilters = useMemo(() => {
     const baseFilters = {
