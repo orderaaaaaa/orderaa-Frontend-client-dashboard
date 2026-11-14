@@ -11,7 +11,7 @@ interface ShippingMoveModalProps {
   onClose: () => void;
   targets: OrderStatus[];
   loading: boolean;
-  onConfirm: (status: OrderStatus, note?: string) => void | Promise<void>;
+  onConfirm: (status: OrderStatus, note?: string) => boolean | Promise<boolean>;
 }
 
 export default function ShippingMoveModal({
@@ -34,7 +34,8 @@ export default function ShippingMoveModal({
 
   const handleConfirm = async () => {
     if (selected === null) return;
-    await onConfirm(selected, note.trim() || undefined);
+    const success = await onConfirm(selected, note.trim() || undefined);
+    if (!success) return;
     setChosen(null);
     setNote('');
   };

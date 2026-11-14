@@ -28,6 +28,8 @@ import {
 import { LiaEllipsisVSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import ChangeProductsModal from '@/components/orders/ChangeProductsModal';
+import { allowedShippingMoveTargets } from '@/components/OrderDetails/actions/orderActionAvailability';
+import { ShippingMoveModal } from '@/components/OrderDetails/ActionModals';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
 import UndoPartialDeliveryDialog from '@/components/OrderDetails/ActionModals/UndoPartialDeliveryDialog';
 import BaseModal from '@/components/ui/base-modal';
@@ -50,12 +52,12 @@ import type { TranslationKey } from '@/i18n/translate';
 import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
 import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
-import { orderDetailsQueryOptions } from '@/services/orders';
+import { orderDetailsQueryOptions, useUpdateOrder } from '@/services/orders';
 import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorMessage, refusalToastOptions } from '@/utils/apiError';
 import { PARTIAL_DELIVERY_CODES, undoPartialDeliveryActionOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
-import type { OrderStatus } from '@/types/orders';
+import { DerivedOrderKind, type OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
@@ -152,6 +154,7 @@ export interface ShipmentRowActionsProps {
   shippingCode?: string | null;
   returnChildStatus?: OrderStatus | null;
   hideFinalActions?: boolean;
+  derivedKind?: DerivedOrderKind | null;
 }
 
 export function ShipmentRowActions({
@@ -179,6 +182,7 @@ export function ShipmentRowActions({
   shippingCode = null,
   returnChildStatus = null,
   hideFinalActions = false,
+  derivedKind = null,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -198,9 +202,11 @@ export function ShipmentRowActions({
   const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
   const [isWindowOpen, setIsWindowOpen] = useState(false);
   const [editKind, setEditKind] = useState<OrderEditKind | null>(null);
+  const [isShippingMoveOpen, setIsShippingMoveOpen] = useState(false);
   const queryClient = useQueryClient();
   const closeMutation = useCloseClosure();
   const undoMutation = useUndoClosure();
+  const updateOrderMutation = useUpdateOrder();
   const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isPartialOpen || partialRequested });
 
   useEffect(() => {
@@ -246,6 +252,12 @@ export function ShipmentRowActions({
   });
 
   const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);
+  const shippingMoveTargets = allowedShippingMoveTargets({
+    status,
+    isCustomerReturn: derivedKind === DerivedOrderKind.CUSTOMER_RETURN,
+    closureKind: closure?.kind ?? null,
+    has: (code) => hasAllPermissions([code]),
+  });
   const actions: RowAction[] = [
     ...(onOpenFollowup
       ? [
@@ -475,6 +487,21 @@ export function ShipmentRowActions({
           },
         ]
       : []),
+    ...(shippingMoveTargets.length > 0
+      ? [
+          {
+            id: 'shippingMove',
+            labelKey: 'inProcess.action.shippingMove' as const,
+            descriptionKey: 'inProcess.sheet.desc.shippingMove' as const,
+            icon: Truck,
+            group: 'delivery' as const,
+            opensModal: true,
+            codes: [],
+            disabled: false,
+            onSelect: () => setIsShippingMoveOpen(true),
+          },
+        ]
+      : []),
     {
       id: 'createReturn',
       labelKey: 'inProcess.sheet.createReturn' as const,
@@ -566,6 +593,19 @@ export function ShipmentRowActions({
       return;
     }
     action.onSelect();
+  };
+
+  const handleShippingMove = async (status: OrderStatus, note?: string): Promise<boolean> => {
+    try {
+      await updateOrderMutation.mutateAsync({ orderId, data: { status, eventNote: note } });
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'تعذر تحديث حالة الشحن'), refusalToastOptions(error));
+      return false;
+    }
+    toast.success('تم تحديث حالة الشحن');
+    void queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
+    setIsShippingMoveOpen(false);
+    return true;
   };
 
   const handleSheetOpenChange = (open: boolean) => {
@@ -805,6 +845,15 @@ export function ShipmentRowActions({
       )}
       {isUndoOpen && (
         <UndoPartialDeliveryDialog isOpen onClose={() => setIsUndoOpen(false)} orderId={orderId} />
+      )}
+      {isShippingMoveOpen && (
+        <ShippingMoveModal
+          isOpen
+          onClose={() => setIsShippingMoveOpen(false)}
+          targets={shippingMoveTargets}
+          loading={updateOrderMutation.isPending}
+          onConfirm={handleShippingMove}
+        />
       )}
       {isPartialOpen && orderQuery.data && (
         <PartialDeliveryModal

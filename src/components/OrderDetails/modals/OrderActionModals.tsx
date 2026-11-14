@@ -126,6 +126,7 @@ export function OrderActionModals({
     if (success) {
       modals.shippingMove.close();
     }
+    return success;
   };
 
   const handleWhatsappConfirm = async (note?: string) => {

@@ -394,6 +394,7 @@ export function InProcessRowActions({
       unreadChatCount={row.unreadChatCount}
       shippingCode={row.shippingCode}
       returnChildStatus={row.returnChildStatus}
+      derivedKind={row.derivedKind}
       onOpenFollowup={(panel, opener) => onOpenFollowup(followupTargetOf(row, panel), opener)}
     />
   );
