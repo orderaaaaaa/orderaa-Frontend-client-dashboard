@@ -514,6 +514,17 @@ export interface Order {
   frozenReturnChild?: boolean;
   derivedFrom?: { id: number; code: string } | null;
   deletedParts?: DeletedOrderPart[];
+  duplicateOfOrderId?: number | null;
+  duplicateOf?: { id: number; code: string } | null;
+  duplicates?: { id: number; code: string }[];
+}
+
+export interface DuplicateCandidate {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  createdAt: string;
+  totalCost: number;
 }
 
 export interface OrderReturnOfRef {

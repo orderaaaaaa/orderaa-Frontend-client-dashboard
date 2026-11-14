@@ -52,6 +52,7 @@ export interface CustomerDetailOrderProduct {
 export interface CustomerDetailOrder extends Order {
   notes: string | null;
   order_products: CustomerDetailOrderProduct[];
+  duplicateOfOrderId: number | null;
 }
 
 export interface CustomerDetail {

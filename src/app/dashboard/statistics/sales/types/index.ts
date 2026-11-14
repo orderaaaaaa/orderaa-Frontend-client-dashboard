@@ -19,6 +19,7 @@ export interface SalesMetrics {
   runningOrders: number;
   deliveredOrders: number;
   cancelledOrders: number;
+  duplicateOrders: number;
   returnedOrders: number;
   returnsExpense: string;
   returnsWithoutSettlement: number;

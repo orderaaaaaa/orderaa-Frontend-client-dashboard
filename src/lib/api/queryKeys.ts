@@ -97,6 +97,7 @@ export const QUERY_KEYS = {
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
+  DUPLICATE_CANDIDATES: 'duplicate-candidates',
 
   // Logistics & Tracking
   GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',

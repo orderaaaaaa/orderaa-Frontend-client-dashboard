@@ -38,6 +38,7 @@ import {
   OrderStatisticsResponse,
   OrderStatusesResponse,
   Product,
+  DuplicateCandidate,
 } from '@/types/orders';
 
 export interface OrderQueryFocusOptions {
@@ -695,6 +696,24 @@ export const useUpdateCancellationReason = () => {
   });
 };
 
+export const useDuplicateCandidates = (
+  customerId: number,
+  excludeOrderId: number,
+  enabled: boolean
+) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DUPLICATE_CANDIDATES, customerId, excludeOrderId] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<DuplicateCandidate[]>(
+        `/orders/customers/${customerId}/duplicate-candidates`,
+        { params: { excludeOrderId } }
+      );
+      return response.data;
+    },
+    enabled,
+  });
+};
+
 // Cancel order mutation
 export const useCancelOrder = () => {
   const queryClient = useQueryClient();
@@ -704,17 +723,30 @@ export const useCancelOrder = () => {
       orderId,
       reasonId,
       notes,
+      duplicateOfOrderId,
+      customerId,
     }: {
       orderId: number;
       reasonId: number;
       notes?: string;
+      duplicateOfOrderId?: number;
+      customerId?: number;
     }) => {
       const response = await http.post<Order>(`/orders/${orderId}/cancel`, {
         cancelReasonId: reasonId,
         cancelNotes: notes,
+        ...(duplicateOfOrderId !== undefined ? { duplicateOfOrderId } : {}),
       });
       const respondedAt = Date.now();
-      await invalidateAndWait(queryClient, orderStatusKeys(orderId));
+      await invalidateAndWait(queryClient, [
+        ...orderStatusKeys(orderId),
+        ...(duplicateOfOrderId !== undefined
+          ? [[QUERY_KEYS.ORDER_DETAILS, duplicateOfOrderId]]
+          : []),
+        ...(customerId !== undefined
+          ? [[QUERY_KEYS.DUPLICATE_CANDIDATES, customerId]]
+          : []),
+      ]);
       return readFreshQueryData(
         queryClient,
         [QUERY_KEYS.ORDER_DETAILS, orderId],
