@@ -36,6 +36,7 @@ const STALE_TIME = 30 * 1000;
 
 const invalidateSessionViews = (queryClient: QueryClient, id: number) =>
   Promise.all([
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKES] }),
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_DETAIL, id] }),
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_LINES, id] }),
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCKTAKE_SELECTION, id] }),
@@ -119,7 +120,7 @@ export const useAddStocktakeLinesMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: AddStocktakeLinesDto) => addStocktakeLines(id, body),
-    onSuccess: () => invalidateSessionViews(queryClient, id),
+    onSettled: () => invalidateSessionViews(queryClient, id),
   });
 };
 
@@ -127,7 +128,7 @@ export const useRemoveStocktakeLinesMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: RemoveStocktakeLinesDto) => removeStocktakeLines(id, body),
-    onSuccess: () => invalidateSessionViews(queryClient, id),
+    onSettled: () => invalidateSessionViews(queryClient, id),
   });
 };
 
