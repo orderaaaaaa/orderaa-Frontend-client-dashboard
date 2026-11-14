@@ -78,7 +78,7 @@ export interface OrderActionsState {
     shippingCost?: number;
     urgentDate: string;
   }) => Promise<boolean>;
-  handleCancel: (data: { reasonId: number; notes: string }) => Promise<boolean>;
+  handleCancel: (data: { reasonId: number; notes: string; duplicateOfOrderId?: number }) => Promise<boolean>;
   handleStopOperation: (notes: string) => Promise<boolean>;
   handlePostponeHours: (data: {
     duration?: '30min' | '1hour' | '2hours';
@@ -304,13 +304,15 @@ export function useOrderActions({
   );
 
   const handleCancel = useCallback(
-    async (data: { reasonId: number; notes: string }) =>
+    async (data: { reasonId: number; notes: string; duplicateOfOrderId?: number }) =>
       runTransition(async () => {
         try {
           await cancelOrderMutation.mutateAsync({
             orderId: order.id,
             reasonId: data.reasonId,
             notes: data.notes || undefined,
+            duplicateOfOrderId: data.duplicateOfOrderId,
+            customerId: order.customerId,
           });
         } catch (error: unknown) {
           console.error('Failed to cancel order:', error);
@@ -321,7 +323,7 @@ export function useOrderActions({
         await completeAndAdvance('تم إلغاء الطلب بنجاح');
         return true;
       }),
-    [order.id, cancelOrderMutation, runTransition, completeAndAdvance]
+    [order.id, order.customerId, cancelOrderMutation, runTransition, completeAndAdvance]
   );
 
   const handleStopOperation = useCallback(

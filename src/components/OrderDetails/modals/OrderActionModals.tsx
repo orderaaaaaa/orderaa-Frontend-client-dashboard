@@ -67,7 +67,7 @@ export function OrderActionModals({
     }
   };
 
-  const handleCancelOrderConfirm = async (data: { reasonId: number; notes: string }) => {
+  const handleCancelOrderConfirm = async (data: { reasonId: number; notes: string; duplicateOfOrderId?: number }) => {
     const success = await actions.handleCancel(data);
     if (success) {
       modals.cancel.close();
@@ -200,6 +200,8 @@ export function OrderActionModals({
       <CancelOrderModal
         isOpen={modals.cancel.isOpen}
         onClose={modals.cancel.close}
+        orderId={order.id}
+        customerId={order.customerId}
         onConfirm={handleCancelOrderConfirm}
       />
 

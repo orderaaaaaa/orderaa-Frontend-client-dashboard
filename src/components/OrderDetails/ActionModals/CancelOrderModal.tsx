@@ -5,38 +5,58 @@ import BaseModal from '@/components/ui/base-modal';
 import Link from 'next/link';
 import { LiaCommentDotsSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { useCancellationReasons, useTopCancellationReasons } from '@/services/orders';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
+import { formatDate } from '@/utils/format';
+import { useCancellationReasons, useDuplicateCandidates, useTopCancellationReasons } from '@/services/orders';
 
 interface CancelOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { reasonId: number; notes: string }) => void | Promise<void>;
+  orderId: number;
+  customerId: number;
+  onConfirm: (data: { reasonId: number; notes: string; duplicateOfOrderId?: number }) => void | Promise<void>;
 }
 
 export default function CancelOrderModal({
   isOpen,
   onClose,
+  orderId,
+  customerId,
   onConfirm,
 }: CancelOrderModalProps) {
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
+  const [isDuplicate, setIsDuplicate] = useState(false);
+  const [originalOrderId, setOriginalOrderId] = useState<number | null>(null);
 
   const { data: allReasons = [], isLoading: loadingAllReasons, isError: isAllReasonsError } = useCancellationReasons(isOpen);
   const { data: topReasons = [], isLoading: loadingTopReasons } = useTopCancellationReasons(isOpen);
+  const { data: duplicateCandidates = [], isLoading: loadingDuplicateCandidates } = useDuplicateCandidates(
+    customerId,
+    orderId,
+    isOpen && isDuplicate
+  );
 
   const selectedReason = allReasons.find(r => r.id === selectedReasonId);
 
   const handleConfirm = async () => {
     if (!selectedReasonId) return;
-    await onConfirm({ reasonId: selectedReasonId, notes });
+    await onConfirm({
+      reasonId: selectedReasonId,
+      notes,
+      ...(isDuplicate && originalOrderId ? { duplicateOfOrderId: originalOrderId } : {}),
+    });
     handleReset();
   };
 
-  const isFormValid = !!selectedReasonId;
+  const isFormValid = !!selectedReasonId && (!isDuplicate || !!originalOrderId);
 
   const handleReset = () => {
     setSelectedReasonId(null);
     setNotes('');
+    setIsDuplicate(false);
+    setOriginalOrderId(null);
   };
 
   const handleClose = () => {
@@ -56,6 +76,16 @@ export default function CancelOrderModal({
   };
 
   const allReasonOptions = allReasons.map(r => ({ key: String(r.id), label: r.reasonName }));
+
+  const duplicateOptions = duplicateCandidates.map(c => ({
+    key: String(c.id),
+    label: `#${c.code}`,
+    description: `${ORDER_STATUS_ARABIC_LABELS[c.status] ?? c.status} · ${formatDate(c.createdAt)} · ${c.totalCost} جنيه`,
+  }));
+
+  const handleSelectOriginal = (orderKey: string) => {
+    setOriginalOrderId(Number(orderKey));
+  };
 
   return (
     <BaseModal
@@ -140,6 +170,35 @@ export default function CancelOrderModal({
                 </div>
               )}
             </>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <Checkbox
+              checked={isDuplicate}
+              onCheckedChange={(checked) => setIsDuplicate(checked === true)}
+            />
+            <span className="font-bold text-foreground">الطلب مكرر</span>
+          </label>
+
+          {isDuplicate && (
+            <div className="flex flex-col gap-2 mt-2">
+              <label className="font-bold text-foreground">
+                الطلب الأصلي <span className="text-red-600">*</span>
+              </label>
+              <SearchableSelect
+                value={originalOrderId ? String(originalOrderId) : undefined}
+                onValueChange={handleSelectOriginal}
+                options={duplicateOptions}
+                loading={loadingDuplicateCandidates}
+                placeholder="اختر الطلب الأصلي..."
+                searchPlaceholder="بحث بكود الطلب..."
+                emptyMessage="لا توجد طلبات أخرى لهذا العميل"
+                noResultsMessage="لا توجد نتائج للبحث"
+                triggerClassName={`border rounded-lg px-4 py-3 text-base ${originalOrderId ? 'border-primary bg-primary/10' : 'border-border'}`}
+              />
+            </div>
           )}
         </div>
 
