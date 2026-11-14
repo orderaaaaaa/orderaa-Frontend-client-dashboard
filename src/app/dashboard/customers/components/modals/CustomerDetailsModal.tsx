@@ -13,6 +13,7 @@ import CustomersDetailsShare from './CustomerModalComponents/CustomersDetailsSha
 import CustomersDetailsTotalStats from './CustomerModalComponents/CustomersDetailsTotalStats';
 import { CustomersDetailsBlockHistory } from './CustomerModalComponents/CustomersDetailsBlockHistory';
 import { ORDER_LOOKUP_SURFACE, showsDeletedOrders } from '@/constants/orderReadScope';
+import { isDuplicateExcludedOrder } from '@/utils/duplicateOrder';
 
 interface CustomerDetailsModalProps {
   customerId?: number;
@@ -36,10 +37,11 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   }, [isOpen, customerId, refetch]);
 
   const orders = data?.orders || [];
-  const totalOrders = orders.length;
-  const delivered = orders.filter((o) => o.status === 'DELIVERED').length;
-  const cancelled = orders.filter((o) => o.status === 'CANCELLED').length;
-  const returned = orders.filter(
+  const rateOrders = orders.filter((o) => !isDuplicateExcludedOrder(o));
+  const totalOrders = rateOrders.length;
+  const delivered = rateOrders.filter((o) => o.status === 'DELIVERED').length;
+  const cancelled = rateOrders.filter((o) => o.status === 'CANCELLED').length;
+  const returned = rateOrders.filter(
     (o) => o.status === 'RETURNED_DELIVERED'
   ).length;
 

@@ -617,22 +617,23 @@ export function resolveCardContextChip(
   totals: SalesMetrics,
   approvedOnly: boolean,
 ): SalesCardChip | undefined {
+  const rateBase = totals.totalOrders - totals.duplicateOrders;
   if (field === 'collectedOrders') {
-    if (totals.totalOrders === 0) return undefined;
-    const percent = Math.round((totals.collectedOrders / totals.totalOrders) * 100);
+    if (rateBase === 0) return undefined;
+    const percent = Math.round((totals.collectedOrders / rateBase) * 100);
     return { tone: 'neutral', text: `${percent}% من الطلبات` };
   }
   if (field === 'runningOrders') {
-    return shareChip(totals.runningNormalOrders, totals.totalOrders);
+    return shareChip(totals.runningNormalOrders, rateBase);
   }
   if (field === 'deliveredOrders') {
-    return shareChip(totals.deliveredOrders, totals.totalOrders);
+    return shareChip(totals.deliveredOrders, rateBase);
   }
   if (field === 'cancelledOrders') {
-    return shareChip(totals.cancelledOrders, totals.totalOrders);
+    return shareChip(totals.cancelledOrders - totals.duplicateOrders, rateBase);
   }
   if (field === 'returnedOrders') {
-    return shareChip(totals.returnedNormalOrders, totals.totalOrders);
+    return shareChip(totals.returnedNormalOrders, rateBase);
   }
   if (field === 'suppliedAmount') {
     if (totals.collectedWithoutSettlement <= 0) return undefined;
