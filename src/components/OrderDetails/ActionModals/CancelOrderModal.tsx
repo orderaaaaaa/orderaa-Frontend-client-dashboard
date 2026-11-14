@@ -7,7 +7,7 @@ import { LiaCommentDotsSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatNumber } from '@/utils/format';
 import { useCancellationReasons, useDuplicateCandidates, useTopCancellationReasons } from '@/services/orders';
 
 interface CancelOrderModalProps {
@@ -32,7 +32,7 @@ export default function CancelOrderModal({
 
   const { data: allReasons = [], isLoading: loadingAllReasons, isError: isAllReasonsError } = useCancellationReasons(isOpen);
   const { data: topReasons = [], isLoading: loadingTopReasons } = useTopCancellationReasons(isOpen);
-  const { data: duplicateCandidates = [], isLoading: loadingDuplicateCandidates } = useDuplicateCandidates(
+  const { data: duplicateCandidates = [], isLoading: loadingDuplicateCandidates, isError: isDuplicateCandidatesError } = useDuplicateCandidates(
     customerId,
     orderId,
     isOpen && isDuplicate
@@ -80,7 +80,7 @@ export default function CancelOrderModal({
   const duplicateOptions = duplicateCandidates.map(c => ({
     key: String(c.id),
     label: `#${c.code}`,
-    description: `${ORDER_STATUS_ARABIC_LABELS[c.status] ?? c.status} · ${formatDate(c.createdAt)} · ${c.totalCost} جنيه`,
+    description: `${ORDER_STATUS_ARABIC_LABELS[c.status] ?? c.status} · ${formatDate(c.createdAt)} · ${formatNumber(c.totalCost, { minFractionDigits: 2, maxFractionDigits: 2 })} جنيه`,
   }));
 
   const handleSelectOriginal = (orderKey: string) => {
@@ -187,17 +187,21 @@ export default function CancelOrderModal({
               <label className="font-bold text-foreground">
                 الطلب الأصلي <span className="text-red-600">*</span>
               </label>
-              <SearchableSelect
-                value={originalOrderId ? String(originalOrderId) : undefined}
-                onValueChange={handleSelectOriginal}
-                options={duplicateOptions}
-                loading={loadingDuplicateCandidates}
-                placeholder="اختر الطلب الأصلي..."
-                searchPlaceholder="بحث بكود الطلب..."
-                emptyMessage="لا توجد طلبات أخرى لهذا العميل"
-                noResultsMessage="لا توجد نتائج للبحث"
-                triggerClassName={`border rounded-lg px-4 py-3 text-base ${originalOrderId ? 'border-primary bg-primary/10' : 'border-border'}`}
-              />
+              {isDuplicateCandidatesError ? (
+                <p className="text-sm text-red-600">تعذر تحميل طلبات العميل</p>
+              ) : (
+                <SearchableSelect
+                  value={originalOrderId ? String(originalOrderId) : undefined}
+                  onValueChange={handleSelectOriginal}
+                  options={duplicateOptions}
+                  loading={loadingDuplicateCandidates}
+                  placeholder="اختر الطلب الأصلي..."
+                  searchPlaceholder="بحث بكود الطلب..."
+                  emptyMessage="لا توجد طلبات أخرى لهذا العميل"
+                  noResultsMessage="لا توجد نتائج للبحث"
+                  triggerClassName={`border rounded-lg px-4 py-3 text-base ${originalOrderId ? 'border-primary bg-primary/10' : 'border-border'}`}
+                />
+              )}
             </div>
           )}
         </div>
