@@ -15,6 +15,7 @@ import {
   ORDER_STATUS_READ_PREFIX,
   ORDER_STATUS_SET_PREFIX,
   type OrderStatusKey,
+  type OrderStatusReadCode,
   type OrderStatusSetCode,
   type PermissionCode,
 } from '@/lib/generated/permission-codes';
@@ -58,6 +59,11 @@ export const orderStatusSetCodeOf = (
   status: string
 ): OrderStatusSetCode | null =>
   isOrderStatusKey(status) ? `${ORDER_STATUS_SET_PREFIX}${status}` : null;
+
+export const orderStatusReadCodeOf = (
+  status: string
+): OrderStatusReadCode | null =>
+  isOrderStatusKey(status) ? `${ORDER_STATUS_READ_PREFIX}${status}` : null;
 
 /**
  * Fail-closed membership check against a known permission list.

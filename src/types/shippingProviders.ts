@@ -3,7 +3,7 @@ import type {
   ShippingImplementation,
 } from '@/types/shippingCompanies';
 import type { FollowupClosure, FollowupWorkState } from '@/types/logistics';
-import { OrderPrepaid, OrderStatus } from '@/types/orders';
+import { DerivedOrderKind, OrderPrepaid, OrderStatus } from '@/types/orders';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import type { CarrierCapabilityReason } from '@/types/shippingCompanies';
 
@@ -127,6 +127,7 @@ export interface ShipmentRowBase {
   returnChildCode: string | null;
   returnChildStatus: OrderStatus | null;
   frozenReturnChild: boolean;
+  derivedKind: DerivedOrderKind | null;
   prepaid: OrderPrepaid | null;
   unreadNoteCount?: number;
   unreadChatCount: number;

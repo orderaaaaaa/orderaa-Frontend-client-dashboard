@@ -1,3 +1,10 @@
+import {
+  PERMISSION_CODES,
+  orderStatusReadCodeOf,
+  orderStatusSetCodeOf,
+  type PermissionCode,
+} from '@/lib/permissions';
+import type { FollowupClosureKind } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
 import { DELIVERED_STATUSES } from '@/types/shippingProviders';
 import { STOP_OPERATION_STATUSES } from './constants';
@@ -20,6 +27,7 @@ export interface OrderActionAvailability {
   waitingPayment: boolean;
   cancel: boolean;
   stopBar: boolean;
+  shippingMove: boolean;
   returnRefund: boolean;
   orderFieldsEditable: boolean;
   shippingEditable: boolean;
@@ -62,11 +70,13 @@ const PRE_STATUSES = new Set<string>([
   OrderStatus.UNCOMPLETED,
 ]);
 
-const TRANSIT_STATUSES = new Set<string>([
+const SHIPPING_WINDOW_STATUSES: OrderStatus[] = [
   OrderStatus.WAITING_FOR_APPROVAL,
   OrderStatus.SHIPPING,
   OrderStatus.WITH_DRIVER,
-]);
+];
+
+const TRANSIT_STATUSES = new Set<string>(SHIPPING_WINDOW_STATUSES);
 
 const DONE_STATUSES = new Set<string>([
   OrderStatus.DELIVERED,
@@ -94,6 +104,48 @@ const CUSTOMER_RETURN_CANCEL_STATUSES = new Set<string>([
   OrderStatus.RETURNED_DELIVERED,
 ]);
 
+const CUSTOMER_RETURN_SHIPPING_MOVE_TARGETS = new Map<string, OrderStatus[]>([
+  [
+    OrderStatus.WAITING_FOR_APPROVAL,
+    [OrderStatus.SHIPPING, OrderStatus.WITH_DRIVER, OrderStatus.RETURNED_DELIVERED],
+  ],
+  [OrderStatus.SHIPPING, [OrderStatus.WITH_DRIVER, OrderStatus.RETURNED_DELIVERED]],
+  [OrderStatus.WITH_DRIVER, [OrderStatus.RETURNED_DELIVERED]],
+]);
+
+const SHIPPING_MOVE_END_STATUSES: OrderStatus[] = [OrderStatus.DELIVERED, OrderStatus.RETURNED_DELIVERED];
+
+export const shippingMoveTargetsOf = (status: string, isCustomerReturn: boolean): OrderStatus[] => {
+  if (isCustomerReturn) return CUSTOMER_RETURN_SHIPPING_MOVE_TARGETS.get(status) ?? [];
+  if (!TRANSIT_STATUSES.has(status)) return [];
+  return [
+    ...SHIPPING_WINDOW_STATUSES.filter((windowStatus) => windowStatus !== status),
+    ...SHIPPING_MOVE_END_STATUSES,
+  ];
+};
+
+export const allowedShippingMoveTargets = ({
+  status,
+  isCustomerReturn,
+  closureKind,
+  has,
+}: {
+  status: string;
+  isCustomerReturn: boolean;
+  closureKind?: FollowupClosureKind | null;
+  has: (code: PermissionCode) => boolean;
+}): OrderStatus[] => {
+  const readCode = orderStatusReadCodeOf(status);
+  if (readCode === null || !has(PERMISSION_CODES.ORDERS_UPDATE) || !has(readCode)) return [];
+  const parcelReturning = closureKind === 'REFUSE' || closureKind === 'CANCEL';
+  return shippingMoveTargetsOf(status, isCustomerReturn)
+    .filter((target) => !parcelReturning || target === OrderStatus.RETURNED_DELIVERED)
+    .filter((target) => {
+      const setCode = orderStatusSetCodeOf(target);
+      return setCode !== null && has(setCode);
+    });
+};
+
 const SAME_TARGET_ALLOWED = new Set<string>([OrderStatus.ATTEMPTED, OrderStatus.EDIT_REJECTED]);
 
 const RETURN_REFUND_STATUSES = new Set<string>(DELIVERED_STATUSES);
@@ -108,6 +160,7 @@ const NO_ACTIONS: OrderActionAvailability = {
   waitingPayment: false,
   cancel: false,
   stopBar: false,
+  shippingMove: false,
   returnRefund: false,
   orderFieldsEditable: false,
   shippingEditable: false,
@@ -147,6 +200,7 @@ const normalOrderAvailability = (
     ),
     cancel: actionAvailable('cancel', isPre || isTransit),
     stopBar: actionAvailable('stopBar', isProcessing),
+    shippingMove: isTransit,
     returnRefund,
     orderFieldsEditable: isPreOrCancelled || isProcessing || isTransit,
     shippingEditable: isPreOrCancelled || isProcessing || isTransit,
@@ -160,6 +214,7 @@ const customerReturnAvailability = (status: string, returnRefund: boolean): Orde
     ...NO_ACTIONS,
     confirm: isNewOrder,
     cancel: CUSTOMER_RETURN_CANCEL_STATUSES.has(status),
+    shippingMove: CUSTOMER_RETURN_SHIPPING_MOVE_TARGETS.has(status),
     returnRefund,
     orderFieldsEditable: isNewOrder,
     shippingEditable: isNewOrder,
