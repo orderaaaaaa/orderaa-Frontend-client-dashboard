@@ -17,7 +17,7 @@ export type CarrierChatConnectionState = 'connected' | 'reconnecting' | 'offline
 type AuthSession = Pick<ReturnType<typeof useAuthStore.getState>, 'token' | 'user'>;
 
 const CARRIER_CHAT_NAMESPACE = '/carrier-chat';
-const CARRIER_CHAT_SOCKET_PATH = '/socket.io';
+const CARRIER_CHAT_SOCKET_PATH = '/ws';
 const DISCONNECT_BY_SERVER = 'io server disconnect';
 
 let socket: CarrierChatSocket | null = null;
