@@ -22,6 +22,11 @@ export const STOCKTAKE_ERROR_MESSAGES: Record<string, string> = {
 
 export const STOCKTAKE_FORBIDDEN_MESSAGE = 'ليس لديك صلاحية لتنفيذ هذا الإجراء';
 
+export function getStocktakeErrorCode(err: unknown): string | undefined {
+  const code = (err as { response?: { data?: { code?: unknown } } })?.response?.data?.code;
+  return typeof code === 'string' ? code : undefined;
+}
+
 export function getStocktakeErrorMessage(err: unknown, fallback: string): string {
   if (getApiErrorStatus(err) === 403) return STOCKTAKE_FORBIDDEN_MESSAGE;
   const code = (err as { response?: { data?: { code?: unknown } } })?.response?.data?.code;

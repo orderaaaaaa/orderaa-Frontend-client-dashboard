@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { ErrorState } from '@/components/ui/state-panels';
-import { StocktakeSheetContent } from '../../components/stocktake/StocktakeSheetContent';
+import { StocktakeSessionContent } from '../../components/stocktake/StocktakeSessionContent';
 
 interface StocktakeSheetPageProps {
   params: { stocktakeId: string };
@@ -22,7 +22,7 @@ export default function StocktakeSheetPage({ params }: StocktakeSheetPageProps) 
       {stocktakeId === null ? (
         <ErrorState error={null} fallback="رقم جلسة الجرد غير صحيح" />
       ) : (
-        <StocktakeSheetContent key={stocktakeId} stocktakeId={stocktakeId} />
+        <StocktakeSessionContent key={stocktakeId} stocktakeId={stocktakeId} />
       )}
     </div>
   );
