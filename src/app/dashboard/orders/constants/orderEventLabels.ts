@@ -9,6 +9,7 @@ export const ORDER_EVENT_LABELS = {
   PARTIAL_RETURN_SPLIT: 'تقسيم تسليم جزئي',
   PARTIAL_RETURN_SPLIT_IN_TRANSIT: 'تقسيم تسليم جزئي أثناء الشحن',
   PARTIAL_RETURN_SPLIT_UNDONE: 'تراجع عن التقسيم',
+  DUPLICATE_LINKED: 'طلب مكرر مرتبط',
   [CARRIER_SHIPPING_NOTE_EVENT]: 'ملاحظة شركة الشحن',
 } as const;
 

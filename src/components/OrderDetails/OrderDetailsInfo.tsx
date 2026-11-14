@@ -28,6 +28,7 @@ import { OrderActionModals } from './modals/OrderActionModals';
 import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 import { PartialReturnLinks } from './PartialReturnLinks';
+import { DuplicateOrderLinks } from './DuplicateOrderLinks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 import {
   PARTIAL_DELIVERY_CODES,
@@ -441,6 +442,7 @@ function OrderDetailsInfoComponent({
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl md:mb-24 w-full max-w-full">
         <PartialReturnLinks order={order} />
+        <DuplicateOrderLinks order={order} />
 
         <CustomerDataSection
           order={order}
