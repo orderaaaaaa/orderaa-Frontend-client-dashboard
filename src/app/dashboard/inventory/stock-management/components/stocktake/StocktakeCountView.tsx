@@ -1,8 +1,7 @@
 'use client';
 
-import { Ban, ListChecks, PencilLine, Search, Sigma } from 'lucide-react';
+import { ListChecks, PencilLine, Search, Sigma } from 'lucide-react';
 import { LiaArrowRightSolid } from 'react-icons/lia';
-import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { CountSheetTable } from '@/components/stock/CountSheetTable';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
@@ -28,6 +27,7 @@ import {
   STOCKTAKE_TYPE_LABELS,
   stocktakeTargetLabel,
 } from '../../utils/stocktakeTypes';
+import { StocktakeCancelButton, StocktakeCancelModal } from './StocktakeCancelControls';
 import { StocktakeStatusChip } from './StocktakeStatusChip';
 import { stocktakeSessionBreadcrumbs } from './stocktakeRoutes';
 
@@ -94,14 +94,10 @@ export function StocktakeCountView({ stocktakeId, fullScreen, onBack }: Stocktak
   };
 
   const cancelButton = isEditable && (
-    <Button
-      variant="outline"
+    <StocktakeCancelButton
       onClick={() => setCancelOpen(true)}
       disabled={cancelStocktake.isPending}
-    >
-      <Ban className="size-4" aria-hidden="true" />
-      إلغاء الجلسة
-    </Button>
+    />
   );
 
   const kpiRow = (
@@ -292,19 +288,11 @@ export function StocktakeCountView({ stocktakeId, fullScreen, onBack }: Stocktak
       )}
 
       {cancelOpen && (
-        <BaseModal
-          isOpen
+        <StocktakeCancelModal
           onClose={() => setCancelOpen(false)}
-          title="إلغاء جلسة الجرد"
           onConfirm={onCancel}
-          confirmText="إلغاء الجلسة"
-          isLoading={cancelStocktake.isPending}
-          maxWidth="md:max-w-[440px]"
-        >
-          <p className="text-sm text-muted-foreground">
-            سيتم إلغاء هذه الجلسة دون أي تعديل على المخزون. لا يمكن التراجع عن الإلغاء.
-          </p>
-        </BaseModal>
+          isPending={cancelStocktake.isPending}
+        />
       )}
     </>
   );

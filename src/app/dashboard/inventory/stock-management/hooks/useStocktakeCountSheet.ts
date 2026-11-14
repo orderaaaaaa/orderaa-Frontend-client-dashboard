@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { useStocktakeCancel } from './useStocktakeCancel';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
-  useCancelStocktakeMutation,
   useLoadChangedStocktakeLines,
   usePostStocktakeMutation,
   useStocktakeLinesQuery,
@@ -60,7 +60,6 @@ export function useStocktakeCountSheet(stocktakeId: number) {
   const draftsRef = useRef<Drafts>(drafts);
   const [review, setReview] = useState<StocktakeReviewState | null>(null);
   const [refused, setRefused] = useState<StocktakeRefusedLine[]>([]);
-  const [cancelOpen, setCancelOpen] = useState(false);
 
   const summaryQuery = useStocktakeQuery(stocktakeId, canRead);
   const linesQuery = useStocktakeLinesQuery(
@@ -76,7 +75,7 @@ export function useStocktakeCountSheet(stocktakeId: number) {
   const selectionQuery = useStocktakeSelectionQuery(stocktakeId, canRead);
   const updateLines = useUpdateStocktakeLinesMutation();
   const postStocktake = usePostStocktakeMutation();
-  const cancelStocktake = useCancelStocktakeMutation();
+  const { cancelOpen, setCancelOpen, onCancel, cancelStocktake } = useStocktakeCancel(stocktakeId);
   const loadChangedLines = useLoadChangedStocktakeLines();
   const { mutateAsync: saveLines } = updateLines;
   const { refetch: refetchSelection } = selectionQuery;
@@ -244,19 +243,6 @@ export function useStocktakeCountSheet(stocktakeId: number) {
         },
       },
     );
-  };
-
-  const onCancel = () => {
-    cancelStocktake.mutate(stocktakeId, {
-      onSuccess: () => {
-        toast.success('تم إلغاء جلسة الجرد');
-        setCancelOpen(false);
-      },
-      onError: (err: unknown) => {
-        toast.error(getStocktakeErrorMessage(err, 'تعذر إلغاء الجلسة'));
-        setCancelOpen(false);
-      },
-    });
   };
 
   return {
