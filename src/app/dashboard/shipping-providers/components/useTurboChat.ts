@@ -12,10 +12,16 @@ import {
   CARRIER_CHAT_ERROR_CODES,
   CARRIER_CHAT_SOCKET_STATE,
   type CarrierChatMessage,
+  type CarrierChatSendBlockReason,
   type CarrierChatSocketState,
   type CarrierChatThread,
 } from '@/types/carrierChat';
-import { CHAT_POLL_INTERVAL_MS, CHAT_SEEN_DEBOUNCE_MS } from './followupNotesConstants';
+import {
+  CHAT_POLL_INTERVAL_MS,
+  CHAT_SEEN_DEBOUNCE_MS,
+  CHAT_SEND_BLOCK_REASON_LABELS,
+  CHAT_SEND_BLOCKED_LABEL,
+} from './followupNotesConstants';
 
 export interface PendingChatSend {
   localId: number;
@@ -43,6 +49,8 @@ export interface TurboChatView {
   lastSyncedAt: string | null;
   pending: PendingChatSend[];
   canCompose: boolean;
+  sendBlocked: boolean;
+  sendBlockedText: string | null;
   canRetry: boolean;
   sendText: (text: string, retryOfLogId?: number) => Promise<boolean>;
   retry: (message: CarrierChatMessage) => void;
@@ -60,6 +68,11 @@ const newestCarrierKeyOf = (thread: CarrierChatThread | undefined): string | nul
     if (message.origin === 'CARRIER') return message.key;
   }
   return null;
+};
+
+const sendBlockedTextOf = (reason: CarrierChatSendBlockReason | null | undefined): string => {
+  const reasonLabel = reason ? CHAT_SEND_BLOCK_REASON_LABELS[reason] : undefined;
+  return reasonLabel ? `${CHAT_SEND_BLOCKED_LABEL} — ${reasonLabel}` : CHAT_SEND_BLOCKED_LABEL;
 };
 
 const subscribeCoarsePointer = (listener: () => void): (() => void) => {
@@ -180,6 +193,7 @@ export function useTurboChat({
   const errorCode = carrierChatErrorCodeOf(query.error);
   const authFailed =
     socket.carrierStatus === CARRIER_CHAT_SOCKET_STATE.AUTH_FAILED || errorCode === CARRIER_CHAT_ERROR_CODES.AUTH_FAILED;
+  const sendBlocked = canManage && thread !== undefined && !thread.carrierCanSend && !authFailed;
 
   return {
     thread,
@@ -195,7 +209,9 @@ export function useTurboChat({
     lastSyncedAt: socket.lastSyncedAt ?? syncedAt ?? null,
     pending,
     canCompose: canManage && thread !== undefined && thread.carrierCanSend && !authFailed,
-    canRetry: canManage,
+    sendBlocked,
+    sendBlockedText: sendBlocked ? sendBlockedTextOf(thread?.carrierSendBlockReason) : null,
+    canRetry: canManage && !sendBlocked,
     sendText,
     retry,
   };

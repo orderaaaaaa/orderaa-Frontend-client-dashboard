@@ -1,5 +1,5 @@
 import type { FollowupActionEventSource, FollowupCarrierText, FollowupNotePartyValue } from '@/lib/api/followup';
-import type { CarrierChatSendError } from '@/types/carrierChat';
+import type { CarrierChatSendBlockReason, CarrierChatSendError } from '@/types/carrierChat';
 
 export const FOLLOWUP_NOTE_MAX_LENGTH = 2000;
 
@@ -105,6 +105,12 @@ export const CHAT_SEND_ERROR_LABELS: Record<CarrierChatSendError, string> = {
   REJECTED: 'رفضت تيربو الرسالة',
   UNREACHABLE: 'تعذر الاتصال بتيربو',
   UNCONFIRMED: 'لم تؤكد تيربو وصول الرسالة',
+};
+export const CHAT_SEND_BLOCKED_LABEL = 'لا يمكن إرسال رسائل لهذه الشحنة الآن';
+export const CHAT_SEND_BLOCK_REASON_LABELS: Record<CarrierChatSendBlockReason, string> = {
+  ORDER_CANCELLED: 'الطلب ملغى',
+  AWAITING_CARRIER_ACCEPTANCE: 'الطلب في انتظار قبول شركة الشحن',
+  PAST_WINDOW: 'مرّ أكثر من 24 ساعة على التنفيذ',
 };
 export const CHAT_MESSAGE_MAX_LENGTH = 2000;
 export const CHAT_POLL_INTERVAL_MS = 15_000;

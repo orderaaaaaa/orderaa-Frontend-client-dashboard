@@ -58,6 +58,7 @@ export interface CarrierChatRoomThread {
   orderId: number;
   shippingCode: string;
   carrierCanSend: boolean;
+  carrierSendBlockReason: CarrierChatSendBlockReason | null;
   messages: CarrierChatMessage[];
   syncedAt: string;
 }
@@ -90,6 +91,14 @@ export const CARRIER_CHAT_ERROR_CODES = {
 } as const;
 
 export type CarrierChatErrorCode = (typeof CARRIER_CHAT_ERROR_CODES)[keyof typeof CARRIER_CHAT_ERROR_CODES];
+
+export const CARRIER_CHAT_SEND_BLOCK_REASON = {
+  ORDER_CANCELLED: 'ORDER_CANCELLED',
+  AWAITING_CARRIER_ACCEPTANCE: 'AWAITING_CARRIER_ACCEPTANCE',
+  PAST_WINDOW: 'PAST_WINDOW',
+} as const;
+
+export type CarrierChatSendBlockReason = (typeof CARRIER_CHAT_SEND_BLOCK_REASON)[keyof typeof CARRIER_CHAT_SEND_BLOCK_REASON];
 
 export const CARRIER_CHAT_ACCESS_CODES = {
   UNAUTHORIZED: 'UNAUTHORIZED',

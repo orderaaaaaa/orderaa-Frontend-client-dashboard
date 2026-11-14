@@ -15,9 +15,20 @@ interface ChatComposerProps {
   placeholder: string;
   maxLength: number;
   enterToSend: boolean;
+  disabled?: boolean;
+  describedById?: string;
 }
 
-export function ChatComposer({ value, onChange, onSend, placeholder, maxLength, enterToSend }: ChatComposerProps) {
+export function ChatComposer({
+  value,
+  onChange,
+  onSend,
+  placeholder,
+  maxLength,
+  enterToSend,
+  disabled = false,
+  describedById,
+}: ChatComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const canSend = value.trim().length > 0;
 
@@ -29,7 +40,7 @@ export function ChatComposer({ value, onChange, onSend, placeholder, maxLength, 
   }, [value]);
 
   const send = () => {
-    if (canSend) onSend();
+    if (canSend && !disabled) onSend();
   };
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
@@ -48,22 +59,24 @@ export function ChatComposer({ value, onChange, onSend, placeholder, maxLength, 
           maxLength={maxLength}
           placeholder={placeholder}
           aria-label={placeholder}
+          aria-describedby={describedById}
+          disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={onKeyDown}
-          className="max-h-[7.25rem] min-h-10 flex-1 resize-none overflow-y-auto rounded-xl border border-input bg-background px-3 py-2 text-base leading-5 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 md:text-sm"
+          className="max-h-[7.25rem] min-h-10 flex-1 resize-none overflow-y-auto rounded-xl border border-input bg-background px-3 py-2 text-base leading-5 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
         />
         <Button
           type="button"
           size="icon"
           aria-label={CHAT_SEND_LABEL}
-          disabled={!canSend}
+          disabled={disabled || !canSend}
           onClick={send}
           className="max-sm:size-10 shrink-0"
         >
           <SendHorizontal className="rtl:-scale-x-100" aria-hidden="true" />
         </Button>
       </div>
-      {enterToSend && <p className="text-xs text-muted-foreground">{CHAT_ENTER_HINT}</p>}
+      {enterToSend && !disabled && <p className="text-xs text-muted-foreground">{CHAT_ENTER_HINT}</p>}
     </div>
   );
 }

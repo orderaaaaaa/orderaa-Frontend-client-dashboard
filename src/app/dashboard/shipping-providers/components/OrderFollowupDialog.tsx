@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import BaseModal from '@/components/ui/base-modal';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -54,6 +54,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
   const [chatDraft, setChatDraft] = useState('');
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [addedToken, setAddedToken] = useState(0);
+  const sendBlockedTextId = useId();
   const canAddNote = useCanAddFollowupNote(target.orderId, visited.has(FOLLOWUP_PANELS.NOTES));
   const showChat = carrierIsTurbo && target.shippingCode !== null && hasPermission(PERMISSIONS.FOLLOWUP_READ);
   const chat = useTurboChat({
@@ -123,8 +124,13 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
   };
 
   const chatFooter =
-    showChat && panel === FOLLOWUP_PANELS.CHAT && chat.canCompose ? (
+    showChat && panel === FOLLOWUP_PANELS.CHAT && (chat.canCompose || chat.sendBlocked) ? (
       <div dir="rtl" className="max-sm:pb-[env(safe-area-inset-bottom)]">
+        {chat.sendBlocked && (
+          <p id={sendBlockedTextId} className="text-xs text-muted-foreground">
+            {chat.sendBlockedText}
+          </p>
+        )}
         <ChatComposer
           value={chatDraft}
           onChange={setChatDraft}
@@ -132,6 +138,8 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
           placeholder={CHAT_COMPOSER_PLACEHOLDER}
           maxLength={CHAT_MESSAGE_MAX_LENGTH}
           enterToSend={!coarsePointer}
+          disabled={chat.sendBlocked}
+          describedById={chat.sendBlocked ? sendBlockedTextId : undefined}
         />
       </div>
     ) : undefined;
