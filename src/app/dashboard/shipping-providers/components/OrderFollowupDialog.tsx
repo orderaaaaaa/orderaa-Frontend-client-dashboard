@@ -127,7 +127,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
     showChat && panel === FOLLOWUP_PANELS.CHAT && (chat.canCompose || chat.sendBlocked) ? (
       <div dir="rtl" className="max-sm:pb-[env(safe-area-inset-bottom)]">
         {chat.sendBlocked && (
-          <p id={sendBlockedTextId} className="text-xs text-muted-foreground">
+          <p id={sendBlockedTextId} className="mb-1 text-xs text-muted-foreground">
             {chat.sendBlockedText}
           </p>
         )}
