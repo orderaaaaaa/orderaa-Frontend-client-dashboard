@@ -32,7 +32,6 @@ import type {
 } from '@/types/customer-return';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
-  CARRIER_SEND_NOT_SENT_WARNING,
   carrierSendNeedsAttention,
   carrierSendWarningOf,
 } from '@/utils/manualOrder/carrierSend';
@@ -170,6 +169,7 @@ function CustomerReturnForm({
   const [attention, setAttention] = useState<{
     orderId: number;
     code: string;
+    carrierText: string | null;
   } | null>(null);
   const candidatesQuery = useCustomerReturnCandidates(customerId);
   const {
@@ -475,7 +475,11 @@ function CustomerReturnForm({
           );
           const carrierSend = created.carrierSend;
           if (carrierSend && carrierSendNeedsAttention(carrierSend)) {
-            setAttention({ orderId: created.id, code: created.code });
+            setAttention({
+              orderId: created.id,
+              code: created.code,
+              carrierText: carrierSend.carrierText,
+            });
             toast.warning(carrierSendWarningOf(carrierSend), {
               className: TOAST_WARNING_CLASS,
             });
@@ -656,7 +660,7 @@ function CustomerReturnForm({
             <p className="font-semibold">
               {t('customerReturn.submit.created', { code: attention.code })}
             </p>
-            <p className="text-sm">{CARRIER_SEND_NOT_SENT_WARNING}</p>
+            <p className="text-sm">{carrierSendWarningOf(attention)}</p>
             <Link
               href={`/dashboard/orders/${attention.orderId}`}
               className="mt-1 w-fit rounded-sm text-sm font-semibold underline underline-offset-4 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"

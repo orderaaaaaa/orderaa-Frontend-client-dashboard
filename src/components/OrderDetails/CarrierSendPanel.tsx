@@ -36,7 +36,7 @@ import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { DateWithRelative } from '@/components/ui/date-with-relative';
-import { carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
+import { carrierSendWarningOf } from '@/utils/manualOrder/carrierSend';
 import { OrderSystemFailureItem } from './SystemFailures/OrderSystemFailureItem';
 import { narrowFailureDetails } from './SystemFailures/details/guards';
 
@@ -82,7 +82,7 @@ const notifySettlement = (settlement: CarrierSendSettlement, successText: string
     toast.success(successText);
     return;
   }
-  toast.warning(carrierSendNotSentWarningAfter('تم حفظ الطلب', settlement.carrierText));
+  toast.warning(carrierSendWarningOf(settlement));
 };
 
 function CloseCarrierSendForm({

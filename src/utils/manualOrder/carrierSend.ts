@@ -6,10 +6,10 @@ export const CARRIER_SEND_NOT_SENT_WARNING = `تم حفظ الطلب، ${CARRIER
 
 const withCarrierText = (warning: string, carrierText?: string | null): string => {
   const text = carrierText?.trim();
-  return text ? `${warning}: ${text}` : warning;
+  return text ? `${warning}، رد شركة الشحن: ${text}` : warning;
 };
 
-export const carrierSendWarningOf = (carrierSend: CarrierSendBlock): string =>
+export const carrierSendWarningOf = (carrierSend: Pick<CarrierSendBlock, 'carrierText'>): string =>
   withCarrierText(CARRIER_SEND_NOT_SENT_WARNING, carrierSend.carrierText);
 
 export const carrierSendNotSentWarningAfter = (lead: string, carrierText?: string | null): string =>
