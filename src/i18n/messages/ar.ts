@@ -493,6 +493,7 @@ const ar = {
   'inProcess.sheet.exchangeHint': 'عرض الطلبات المؤهلة فقط',
   'inProcess.sheet.pickAction': 'اختر الإجراء المطلوب لهذا الطلب',
   'inProcess.sheet.copyCode': 'نسخ كود الطلب',
+  'inProcess.sheet.shippingCode': 'كود الشحن',
   'inProcess.sheet.desc.notes': 'عرض وإضافة ملاحظات المتابعة',
   'inProcess.sheet.desc.chat': 'محادثة مباشرة مع تيربو بخصوص هذه الشحنة',
   'inProcess.sheet.desc.log': 'كل الإجراءات التي تمت على الطلب',

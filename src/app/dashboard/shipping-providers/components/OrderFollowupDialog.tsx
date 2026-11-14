@@ -152,6 +152,7 @@ export function OrderFollowupDialog({ target, carrierName, carrierIsTurbo, opene
         headerContent={
           <OrderFollowupHeader
             orderCode={target.orderCode}
+            shippingCode={target.shippingCode}
             customerName={target.customerName}
             carrierName={carrierName}
             governorate={target.governorate}

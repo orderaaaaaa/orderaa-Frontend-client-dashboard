@@ -479,6 +479,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.sheet.exchangeHint': 'Shows eligible orders only',
   'inProcess.sheet.pickAction': 'Choose the action for this order',
   'inProcess.sheet.copyCode': 'Copy order code',
+  'inProcess.sheet.shippingCode': 'Shipping code',
   'inProcess.sheet.desc.notes': 'View and add follow-up notes',
   'inProcess.sheet.desc.chat': 'Live chat with Turbo about this shipment',
   'inProcess.sheet.desc.log': 'Every action taken on this order',

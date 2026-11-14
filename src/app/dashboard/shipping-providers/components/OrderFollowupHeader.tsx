@@ -10,6 +10,7 @@ import type { FollowupTarget } from './followupPanels';
 
 interface OrderFollowupHeaderProps {
   orderCode: string;
+  shippingCode: string | null;
   customerName: string | null;
   carrierName: string;
   governorate: string | null;
@@ -19,6 +20,7 @@ interface OrderFollowupHeaderProps {
 
 export function OrderFollowupHeader({
   orderCode,
+  shippingCode,
   customerName,
   carrierName,
   governorate,
@@ -35,11 +37,23 @@ export function OrderFollowupHeader({
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="text-xs text-muted-foreground">{FOLLOWUP_DIALOG_TITLE}</span>
-        <CopyableCode value={orderCode} label={t('inProcess.sheet.copyCode')}>
-          <span dir="ltr" className="font-mono text-base font-semibold text-foreground">
-            {orderCode}
-          </span>
-        </CopyableCode>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <CopyableCode value={orderCode} label={t('inProcess.sheet.copyCode')}>
+            <span dir="ltr" className="font-mono text-base font-semibold text-foreground">
+              {orderCode}
+            </span>
+          </CopyableCode>
+          {shippingCode && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">{t('inProcess.sheet.shippingCode')}</span>
+              <CopyableCode value={shippingCode} label={t('inProcess.table.copyShippingCode')}>
+                <span dir="ltr" className="font-mono text-sm text-muted-foreground">
+                  {shippingCode}
+                </span>
+              </CopyableCode>
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <ShipmentStatusBadge status={status} />
           {lateness && <LatenessChip model={latenessChipOf(lateness, t)} />}
