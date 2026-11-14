@@ -16,7 +16,6 @@ import {
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate } from '@/utils/format';
 import { StockActionsMenu, type StockActionItem } from './StockActionsMenu';
-import { TransferStockLink } from './TransferStockLink';
 import {
   formatCountAmount,
   formatStockNumber,
@@ -53,7 +52,7 @@ export function StockModeSection() {
   } = useGoLiveSummaryQuery(dialogOpen && canRead);
   const goLive = useGoLiveMutation();
 
-  if (!canRead || (!mode && modeQuery.isError)) return <TransferStockLink standalone />;
+  if (!canRead) return null;
 
   if (!mode) return null;
 
@@ -123,7 +122,6 @@ export function StockModeSection() {
               بدء التشغيل الفعلي للمخزون
             </Button>
           )}
-          <TransferStockLink />
           <StockActionsMenu items={menuItems} />
         </div>
       </div>

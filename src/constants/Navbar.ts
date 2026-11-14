@@ -29,6 +29,7 @@ import {
   LiaUserPlusSolid,
   LiaIndustrySolid,
   LiaSearchSolid,
+  LiaExchangeAltSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -55,6 +56,7 @@ import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { PERMISSION_CODES, type PermissionCode } from '@/lib/permissions';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 import { STOCKTAKE_LIST_HREF } from '@/app/dashboard/inventory/stock-management/components/stocktake/stocktakeRoutes';
+import { STOCK_TRANSFER_HREF } from '@/app/dashboard/inventory/stock-management/constants';
 
 export type NavigationItem = {
   name: string;
@@ -354,6 +356,12 @@ export const navigation: NavigationItem[] = [
         href: STOCKTAKE_LIST_HREF,
         icon: LiaClipboardCheckSolid,
         permission: PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ,
+      },
+      {
+        name: 'نقل المخزون',
+        href: STOCK_TRANSFER_HREF,
+        icon: LiaExchangeAltSolid,
+        permission: PERMISSION_CODES.STOCK_MOVEMENTS_TRANSFER,
       },
       {
         name: 'إدارة الاستلامات',
