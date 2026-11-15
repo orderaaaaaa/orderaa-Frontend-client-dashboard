@@ -249,7 +249,7 @@ export default function EditShippingModal({
     city: t('canonical.shipping.cityLabel'),
     phone: t('canonical.shipping.phoneLabel'),
   };
-  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen && (companyEnabled || locationEnabled));
+  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen && (companyEnabled || locationEnabled || returnCostEnabled));
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
 
   const selectedShippingCompanyId = formData.shippingCompanyId ?? null;
@@ -266,8 +266,9 @@ export default function EditShippingModal({
   const loadingGovernorates = governoratesQuery.isLoading;
   const loadingCities = citiesQuery.isLoading;
   const noGovernorateList = governoratesQuery.data?.sourceHasRows === false;
-  const selectedCompanyCode =
-    shippingCompanies.find((company) => company.id === selectedShippingCompanyId)?.code ?? null;
+  const selectedCompany = shippingCompanies.find((company) => company.id === selectedShippingCompanyId);
+  const selectedCompanyCode = selectedCompany?.code ?? null;
+  const isBostaSelected = selectedCompany?.implementation === 'BOSTA';
   const syncRetry = useLocationSyncRetry(selectedCompanyCode);
 
   const shippingCompanyOptions = useMemo(
@@ -726,9 +727,11 @@ export default function EditShippingModal({
           {costLocked && (
             <p className="text-sm text-destructive">{CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE}</p>
           )}
-          <p className="text-xs text-amber-600">
-            مع بوستا: يجب أن تكون 0 أو 15 جنيهًا على الأقل مع تفعيل «فتح الشحنة»، وإلا تُرفض الشحنة.
-          </p>
+          {isBostaSelected && (
+            <p className="text-xs text-amber-600">
+              مع بوستا: يجب أن تكون 0 أو 15 جنيهًا على الأقل مع تفعيل «فتح الشحنة»، وإلا تُرفض الشحنة.
+            </p>
+          )}
         </div>
         )}
 
